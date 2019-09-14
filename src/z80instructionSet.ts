@@ -54,6 +54,7 @@ export class Z80InstructionSet {
     }
 }
 
+// @see http://map.grauw.nl/resources/z80instr.php
 export const z80InstructionSetRawData = [
     // Instruction, Timing Z80, Timing Z80+M1, Timing R800, Timing R800 + wait, Opcode, Size
     [ "NOP", "4", "5", "1", "1", "00", "1" ],

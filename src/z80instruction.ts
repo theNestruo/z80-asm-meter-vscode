@@ -18,6 +18,13 @@ export class Z80Instruction {
     }
 
     /**
+     * @returns The raw instruction
+     */
+    public getInstruction(): string {
+        return this.instruction;
+    }
+
+    /**
      * @returns The Z80 timing, in time (T) cycles
      */
     public getZ80Timing(): number[] {
@@ -129,7 +136,8 @@ export class Z80Instruction {
 
         // Must the candidate operand match verbatim the operand of the instruction?
         if (this.isVerbatimOperand(expectedOperand)) {
-            return candidateOperand == expectedOperand ? 1 : 0;
+            return ((candidateOperand == expectedOperand.toUpperCase())
+                    || (candidateOperand == "IXU" && expectedOperand == "IXh")) ? 1 : 0;
         }
 
         // Must the candidate operand be an indirection?
@@ -169,7 +177,7 @@ export class Z80Instruction {
      * @returns true if the candidate operand must match verbatim the operand of the instruction
      */
     private isVerbatimOperand(operand: string): boolean {
-        return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I(X|Y)(h|l)?|R|SP|N?Z|P(O|E)?|M)$/);
+        return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY][hl]?|R|SP|N?Z|M|P[OE]?)$/);
     }
 
     /**
@@ -224,7 +232,7 @@ export class Z80Instruction {
      * @returns true if the operand is the high or low part of the IX index register
      */
     private isIX8bit(operand: string): boolean {
-        return !!operand.match(/^IX[HL]$/);
+        return !!operand.match(/^(IX[HLU]|X[HL]|[HL]X)$/);
     }
 
     /**
@@ -232,7 +240,7 @@ export class Z80Instruction {
      * @returns true if the operand is the high or low part of the IY index register
      */
     private isIY8bit(operand: string): boolean {
-        return !!operand.match(/^IY[HL]$/);
+        return !!operand.match(/^(IY[HLU]|Y[HL]|[HL]Y)$/);
     }
 
     /**
@@ -240,7 +248,7 @@ export class Z80Instruction {
      * @returns true if the operand is a register where H and L have been replaced by IXh and IXl
      */
     private is8bitRegisterReplacingHLByIX8bit(operand: string): boolean {
-        return !!operand.match(/^(A|B|C|D|E|IX[HL]])$/);
+        return !!operand.match(/^[ABCDE]$/) || this.isIX8bit(operand);
     }
 
     /**
@@ -248,6 +256,6 @@ export class Z80Instruction {
      * @returns true if the operand is a register where H and L have been replaced by IYh and IYl
      */
     private is8bitRegisterReplacingHLByIY8bit(operand: string): boolean {
-        return !!operand.match(/^(A|B|C|D|E|IY[HL]])$/);
+        return !!operand.match(/^[ABCDE]$/) || this.isIY8bit(operand);
     }
 }
