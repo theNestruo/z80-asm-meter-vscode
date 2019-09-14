@@ -45,6 +45,6 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 
 ## Release Notes
 
-### 0.1.0 [Unrelesed]
+### 0.1.0 2019-09-14
 
 - Initial release
