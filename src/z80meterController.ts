@@ -41,7 +41,7 @@ export class Z80MeterController {
         }
         const editorSelection = editor.selection;
         if (editorSelection.isEmpty) {
-            return undefined
+            return undefined;
         }
 
         // Get selected source code only if it is a Z80 assembly file
