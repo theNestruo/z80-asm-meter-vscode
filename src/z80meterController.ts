@@ -213,7 +213,7 @@ class Results {
                 : configuration === "both" ? sizeText + " (" + locText + ")"
                 : undefined,
             "tooltip":
-                sizeText + " in " + this.loc + " selected " + (this.loc == 1 ? "line" : "lines") + " of code (LoC)",
+                sizeText + " in " + this.loc + " selected " + (this.loc === 1 ? "line" : "lines") + " of code (LoC)",
         };
     }
 

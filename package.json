@@ -22,9 +22,9 @@
 	"bugs": {
 		"url": "https://github.com/theNestruo/z80-asm-meter-vscode/issues"
 	},
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/theNestruo/z80-asm-meter-vscode.git"
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/theNestruo/z80-asm-meter-vscode.git"
 	},
 	"license": "LGPL-3.0",
 	"activationEvents": [
