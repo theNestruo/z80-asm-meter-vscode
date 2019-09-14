@@ -1,0 +1,253 @@
+import { parseTimings, extractMnemonicOf, extractOperandsOf } from './z80utils';
+
+export class Z80Instruction {
+
+    private instruction: string;
+    private z80Timing: number[];
+    private z80M1Timing: number[];
+    private size: number;
+    private mnemonic: string | undefined;
+    private operands: string[] | undefined;
+    private implicitAccumulatorSyntaxAllowed: boolean | undefined;
+
+    constructor(instruction: string, z80Timing: string, z80M1Timing: string, size: string) {
+        this.instruction = instruction;
+        this.z80Timing = parseTimings(z80Timing);
+        this.z80M1Timing = parseTimings(z80M1Timing);
+        this.size = parseInt(size);
+    }
+
+    /**
+     * @returns The Z80 timing, in time (T) cycles
+     */
+    public getZ80Timing(): number[] {
+        return this.z80Timing;
+    }
+
+    /**
+     * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
+     */
+    public getZ80M1Timing(): number[] {
+        return this.z80M1Timing;
+    }
+
+    /**
+     * @returns The size in bytes
+     */
+    public getSize(): number {
+        return this.size;
+    }
+
+    /**
+     * @returns the mnemonic
+     */
+    public getMnemonic(): string {
+        if (this.mnemonic != undefined) {
+            return this.mnemonic;
+        }
+        return this.mnemonic = extractMnemonicOf(this.instruction);
+    }
+
+    /**
+     * @returns the operands
+     */
+    public getOperands(): string[] {
+        if (this.operands != undefined) {
+            return this.operands;
+        }
+        return this.operands = extractOperandsOf(this.instruction);
+    }
+
+    /**
+     * @returns true if this operation allows implicit accumulator syntax
+     * (it's mnemonic is not LD, there are two operands, and the first one is A)
+     */
+    private isImplicitAccumulatorSyntaxAllowed(): boolean {
+
+        if (this.implicitAccumulatorSyntaxAllowed != undefined) {
+            return this.implicitAccumulatorSyntaxAllowed;
+        }
+
+        if (this.getMnemonic() == "LD") {
+            return this.implicitAccumulatorSyntaxAllowed = false;
+        }
+        const operands = this.getOperands();
+        return this.implicitAccumulatorSyntaxAllowed = operands.length == 2 && operands[0] == "A";
+    }
+
+    /**
+     * @param candidateInstruction the cleaned-up line to match against the instruction
+     * @returns number between 0 and 1 with the score of the match,
+     * where 0 means the line is not this instruction,
+     * 1 means the line is this instruction,
+     * and intermediate values mean the line may be this instruction
+     */
+    public match(candidateInstruction: string): number {
+
+        // Compares mnemonic
+        if (extractMnemonicOf(candidateInstruction) != this.mnemonic) {
+            return 0;
+        }
+
+        // Compares operand count
+        const expectedOperands = this.getOperands();
+        const expectedOperandsLength = expectedOperands.length;
+        const candidateOperands = extractOperandsOf(candidateInstruction);
+        let implicitAccumulatorSyntax = false;
+        if (candidateOperands.length != expectedOperandsLength) {
+            if (candidateOperands.length != expectedOperandsLength - 1) {
+                return 0;
+            }
+            // Checks implicit accumulator syntax
+            implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
+            if (!implicitAccumulatorSyntax) {
+                return 0;
+            }
+        }
+
+        // Compares oprands
+        let score = 1;
+        for (var i = implicitAccumulatorSyntax ? 1 : 0, j = 0; i < expectedOperandsLength; i++, j++) {
+            score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
+            if (score == 0) {
+                return 0;
+            }
+        }
+        return score;
+    }
+
+    /**
+     * @param expectedOperand the operand of the instruction
+     * @param candidateOperand the operand from the cleaned-up line
+     * @param indirectionAllowed true to allow indirection
+     * @returns number between 0 and 1 with the score of the match,
+     * where 0 means the candidate operand is not valid,
+     * 1 means the candidate operand is a perfect match,
+     * and intermediate values mean the operand is accepted
+     */
+    private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
+
+        // Must the candidate operand match verbatim the operand of the instruction?
+        if (this.isVerbatimOperand(expectedOperand)) {
+            return candidateOperand == expectedOperand ? 1 : 0;
+        }
+
+        // Must the candidate operand be an indirection?
+        if (indirectionAllowed && this.isIndirectionOperand(expectedOperand, true)) {
+            if (!this.isIndirectionOperand(candidateOperand, false)) {
+                return 0;
+            }
+            // Compares the expression inside the indirection
+            return this.operandScore(this.extractIndirection(expectedOperand), this.extractIndirection(candidateOperand), false);
+        }
+
+        // Depending on the
+        switch (expectedOperand) {
+            case "r":
+                return this.is8bitRegister(candidateOperand) ? 1 : 0;
+            case "IX+o":
+                return this.isIXWithOffset(candidateOperand) ? 1 : 0;
+            case "IY+o":
+                return this.isIYWithOffset(candidateOperand) ? 1 : 0;
+            case "IXp":
+                return this.isIX8bit(candidateOperand) ? 1 : 0;
+            case "IYq":
+                return this.isIY8bit(candidateOperand) ? 1 : 0;
+            case "p":
+                return this.is8bitRegisterReplacingHLByIX8bit(candidateOperand) ? 1 : 0;
+            case "q":
+                return this.is8bitRegisterReplacingHLByIY8bit(candidateOperand) ? 1 : 0;
+            default:
+                // (due possibility of using constants, labels, and expressions in the source code,
+                // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H)
+                return 0.75;
+            }
+    }
+
+    /**
+     * @param operand the operand of the instruction
+     * @returns true if the candidate operand must match verbatim the operand of the instruction
+     */
+    private isVerbatimOperand(operand: string): boolean {
+        return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I(X|Y)(h|l)?|R|SP|N?Z|P(O|E)?|M)$/);
+    }
+
+    /**
+     * @param operand the operand of the instruction or the candidate operand
+     * @param strict true to only accept parenthesis, false to also accept brackets
+     */
+    private isIndirectionOperand(operand: string, strict: boolean): boolean {
+
+        if (operand.startsWith("(") && operand.endsWith(")")) {
+            return true;
+        }
+        if (strict) {
+            return false;
+        }
+        return (operand.startsWith("[") && operand.endsWith("]"));
+    }
+
+    /**
+     * @param operand the operand of the instruction or the candidate operand
+     * @returns the expression inside the indirection
+     */
+    private extractIndirection(operand: string): string {
+        return operand.substring(1, operand.length - 1);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is one of the 8 bit general purpose registers
+     */
+    private is8bitRegister(operand: string): boolean {
+        return !!operand.match(/^[ABCDEHL]$/);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is the IX index register with an optional offset
+     */
+    private isIXWithOffset(operand: string): boolean {
+        return !!operand.match(/^IX\W/);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is the IY index register with an optional offset
+     */
+    private isIYWithOffset(operand: string): boolean {
+        return !!operand.match(/^IY\W/);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is the high or low part of the IX index register
+     */
+    private isIX8bit(operand: string): boolean {
+        return !!operand.match(/^IX[HL]$/);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is the high or low part of the IY index register
+     */
+    private isIY8bit(operand: string): boolean {
+        return !!operand.match(/^IY[HL]$/);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is a register where H and L have been replaced by IXh and IXl
+     */
+    private is8bitRegisterReplacingHLByIX8bit(operand: string): boolean {
+        return !!operand.match(/^(A|B|C|D|E|IX[HL]])$/);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is a register where H and L have been replaced by IYh and IYl
+     */
+    private is8bitRegisterReplacingHLByIY8bit(operand: string): boolean {
+        return !!operand.match(/^(A|B|C|D|E|IY[HL]])$/);
+    }
+}

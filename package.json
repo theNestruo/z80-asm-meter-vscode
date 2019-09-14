@@ -1,0 +1,110 @@
+{
+	"publisher": "TEMPORARY-theNestruo-TEMPORARY",
+	"name": "z80-asm-meter",
+	"displayName": "Z80 Assembly meter",
+	"description": "Z80 Assembly clock cycles and bytecode size meter",
+	"version": "0.1.0",
+	"engines": {
+		"vscode": "^1.38.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"keywords": [
+		"asm",
+		"assembler",
+		"assembly",
+		"MSX",
+		"Z80",
+		"Zilog"
+	],
+	"activationEvents": [
+		"onLanguage:z80-asm-meter",
+		"onLanguage:z80-macroasm",
+		"onLanguage:z80-asm",
+		"onLanguage:pasmo"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"languages": [
+			{
+				"id": "z80-asm-meter",
+				"aliases": [
+					"Z80 Assembly"
+				]
+			}
+		],
+		"configuration": {
+			"properties": {
+				"z80-asm-meter.maxLines": {
+					"type": [
+						"integer",
+						"null"
+					],
+					"description": "Disables metering when the line count of the selection exceeds this value",
+					"default": null
+				},
+				"z80-asm-meter.maxLoC": {
+					"type": [
+						"integer",
+						"null"
+					],
+					"description": "Stops metering when the lines of code (LoC) count exceeds this value",
+					"default": null
+				},
+				"z80-asm-meter.timing": {
+					"type": "string",
+					"description": "Controls the visibility of the timing information in the status bar",
+					"enum": [
+						"disabled",
+						"z80",
+						"msx",
+						"both"
+					],
+					"enumDescriptions": [
+						"Timing information is not shown",
+						"Only Z80 timing information is shown",
+						"Only Z80+M1 timing information (MSX standard) is shown",
+						"Both Z80 and Z80+M1 timing information are shown"
+					],
+					"default": "both"
+				},
+				"z80-asm-meter.size": {
+					"type": "string",
+					"description": "Controls the visibility of the size information in the status bar",
+					"enum": [
+						"disabled",
+						"bytecode",
+						"loc",
+						"both"
+					],
+					"enumDescriptions": [
+						"Size information is not shown",
+						"Only bytecode size information is shown",
+						"Only processed lines of code (LOC) count is shown",
+						"Both bytecode size and LOC count are shown"
+					],
+					"default": "bytecode"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^5.2.6",
+		"@types/node": "^10.12.21",
+		"@types/vscode": "^1.38.0",
+		"glob": "^7.1.4",
+		"mocha": "^6.1.4",
+		"typescript": "^3.3.1",
+		"tslint": "^5.12.1",
+		"vscode-test": "^1.0.2"
+	}
+}
