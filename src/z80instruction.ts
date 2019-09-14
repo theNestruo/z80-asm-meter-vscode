@@ -49,20 +49,18 @@ export class Z80Instruction {
      * @returns the mnemonic
      */
     public getMnemonic(): string {
-        if (this.mnemonic != undefined) {
-            return this.mnemonic;
-        }
-        return this.mnemonic = extractMnemonicOf(this.instruction);
+        return this.mnemonic
+                ? this.mnemonic
+                : this.mnemonic = extractMnemonicOf(this.instruction);
     }
 
     /**
      * @returns the operands
      */
     public getOperands(): string[] {
-        if (this.operands != undefined) {
-            return this.operands;
-        }
-        return this.operands = extractOperandsOf(this.instruction);
+        return this.operands
+                ? this.operands
+                : this.operands = extractOperandsOf(this.instruction);
     }
 
     /**
@@ -71,15 +69,15 @@ export class Z80Instruction {
      */
     private isImplicitAccumulatorSyntaxAllowed(): boolean {
 
-        if (this.implicitAccumulatorSyntaxAllowed != undefined) {
+        if (this.implicitAccumulatorSyntaxAllowed) {
             return this.implicitAccumulatorSyntaxAllowed;
         }
 
-        if (this.getMnemonic() == "LD") {
+        if (this.getMnemonic() === "LD") {
             return this.implicitAccumulatorSyntaxAllowed = false;
         }
         const operands = this.getOperands();
-        return this.implicitAccumulatorSyntaxAllowed = operands.length == 2 && operands[0] == "A";
+        return this.implicitAccumulatorSyntaxAllowed = operands.length === 2 && operands[0] === "A";
     }
 
     /**
@@ -92,7 +90,7 @@ export class Z80Instruction {
     public match(candidateInstruction: string): number {
 
         // Compares mnemonic
-        if (extractMnemonicOf(candidateInstruction) != this.mnemonic) {
+        if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {
             return 0;
         }
 
@@ -101,8 +99,8 @@ export class Z80Instruction {
         const expectedOperandsLength = expectedOperands.length;
         const candidateOperands = extractOperandsOf(candidateInstruction);
         let implicitAccumulatorSyntax = false;
-        if (candidateOperands.length != expectedOperandsLength) {
-            if (candidateOperands.length != expectedOperandsLength - 1) {
+        if (candidateOperands.length !== expectedOperandsLength) {
+            if (candidateOperands.length !== expectedOperandsLength - 1) {
                 return 0;
             }
             // Checks implicit accumulator syntax
@@ -116,7 +114,7 @@ export class Z80Instruction {
         let score = 1;
         for (var i = implicitAccumulatorSyntax ? 1 : 0, j = 0; i < expectedOperandsLength; i++, j++) {
             score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
-            if (score == 0) {
+            if (score === 0) {
                 return 0;
             }
         }
@@ -136,40 +134,35 @@ export class Z80Instruction {
 
         // Must the candidate operand match verbatim the operand of the instruction?
         if (this.isVerbatimOperand(expectedOperand)) {
-            return ((candidateOperand == expectedOperand.toUpperCase())
-                    || (candidateOperand == "IXU" && expectedOperand == "IXh")) ? 1 : 0;
+            return this.verbatimOperandScore(expectedOperand, candidateOperand);
         }
 
         // Must the candidate operand be an indirection?
         if (indirectionAllowed && this.isIndirectionOperand(expectedOperand, true)) {
-            if (!this.isIndirectionOperand(candidateOperand, false)) {
-                return 0;
-            }
-            // Compares the expression inside the indirection
-            return this.operandScore(this.extractIndirection(expectedOperand), this.extractIndirection(candidateOperand), false);
+            return this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
         // Depending on the
         switch (expectedOperand) {
-            case "r":
-                return this.is8bitRegister(candidateOperand) ? 1 : 0;
-            case "IX+o":
-                return this.isIXWithOffset(candidateOperand) ? 1 : 0;
-            case "IY+o":
-                return this.isIYWithOffset(candidateOperand) ? 1 : 0;
-            case "IXp":
-                return this.isIX8bit(candidateOperand) ? 1 : 0;
-            case "IYq":
-                return this.isIY8bit(candidateOperand) ? 1 : 0;
-            case "p":
-                return this.is8bitRegisterReplacingHLByIX8bit(candidateOperand) ? 1 : 0;
-            case "q":
-                return this.is8bitRegisterReplacingHLByIY8bit(candidateOperand) ? 1 : 0;
-            default:
-                // (due possibility of using constants, labels, and expressions in the source code,
-                // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H)
-                return 0.75;
-            }
+        case "r":
+            return this.is8bitRegisterScore(candidateOperand);
+        case "IX+o":
+            return this.isIXWithOffsetScore(candidateOperand);
+        case "IY+o":
+            return this.isIYWithOffsetScore(candidateOperand);
+        case "IXp":
+            return this.isIX8bitScore(candidateOperand);
+        case "IYq":
+            return this.isIY8bitScore(candidateOperand);
+        case "p":
+            return this.is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
+        case "q":
+            return this.is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
+        default:
+            // (due possibility of using constants, labels, and expressions in the source code,
+            // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H)
+            return 0.75;
+        }
     }
 
     /**
@@ -178,6 +171,18 @@ export class Z80Instruction {
      */
     private isVerbatimOperand(operand: string): boolean {
         return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY][hl]?|R|SP|N?Z|M|P[OE]?)$/);
+    }
+
+    /**
+     * @param expectedOperand the operand of the instruction
+     * @param candidateOperand the operand from the cleaned-up line
+     * @returns 1 if the candidate operand is a perfect match,
+     * 0 if the candidate operand is not valid
+     */
+    private verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
+
+        return ((candidateOperand === expectedOperand.toUpperCase())
+                || (candidateOperand === "IXU" && expectedOperand === "IXh")) ? 1 : 0;
     }
 
     /**
@@ -196,6 +201,20 @@ export class Z80Instruction {
     }
 
     /**
+     * @param expectedOperand the operand of the instruction
+     * @param candidateOperand the operand from the cleaned-up line
+     * @returns number between 0 and 1 with the score of the match,
+     * or 0 if the candidate operand is not valid
+     */
+    private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
+
+        // Compares the expression inside the indirection
+        return this.isIndirectionOperand(candidateOperand, false)
+                ? this.operandScore(this.extractIndirection(expectedOperand), this.extractIndirection(candidateOperand), false)
+                : 0;
+    }
+
+    /**
      * @param operand the operand of the instruction or the candidate operand
      * @returns the expression inside the indirection
      */
@@ -205,57 +224,57 @@ export class Z80Instruction {
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is one of the 8 bit general purpose registers
+     * @returns 1 if the operand is one of the 8 bit general purpose registers, 0 otherwise
      */
-    private is8bitRegister(operand: string): boolean {
-        return !!operand.match(/^[ABCDEHL]$/);
+    private is8bitRegisterScore(operand: string): number {
+        return operand.match(/^[ABCDEHL]$/) ? 1 : 0;
     }
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is the IX index register with an optional offset
+     * @returns 1 if the operand is the IX index register with an optional offset, 0 otherwise
      */
-    private isIXWithOffset(operand: string): boolean {
-        return !!operand.match(/^IX\W/);
+    private isIXWithOffsetScore(operand: string): number {
+        return operand.match(/^IX\W/) ? 1 : 0;
     }
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is the IY index register with an optional offset
+     * @returns 1 if the operand is the IY index register with an optional offset, 0 otherwise
      */
-    private isIYWithOffset(operand: string): boolean {
-        return !!operand.match(/^IY\W/);
+    private isIYWithOffsetScore(operand: string): number {
+        return operand.match(/^IY\W/) ? 1 : 0;
     }
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is the high or low part of the IX index register
+     * @returns 1 if the operand is the high or low part of the IX index register, 0 otherwise
      */
-    private isIX8bit(operand: string): boolean {
-        return !!operand.match(/^(IX[HLU]|X[HL]|[HL]X)$/);
+    private isIX8bitScore(operand: string): number {
+        return operand.match(/^(IX[HLU]|X[HL]|[HL]X)$/) ? 1 : 0;
     }
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is the high or low part of the IY index register
+     * @returns 1 if the operand is the high or low part of the IY index register, 0 otherwise
      */
-    private isIY8bit(operand: string): boolean {
-        return !!operand.match(/^(IY[HLU]|Y[HL]|[HL]Y)$/);
+    private isIY8bitScore(operand: string): number {
+        return operand.match(/^(IY[HLU]|Y[HL]|[HL]Y)$/) ? 1 : 0;
     }
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is a register where H and L have been replaced by IXh and IXl
+     * @returns 1 if the operand is a register where H and L have been replaced by IXh and IXl, 0 otherwise
      */
-    private is8bitRegisterReplacingHLByIX8bit(operand: string): boolean {
-        return !!operand.match(/^[ABCDE]$/) || this.isIX8bit(operand);
+    private is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
+        return operand.match(/^[ABCDE]$/) ? 1 : this.isIX8bitScore(operand);
     }
 
     /**
      * @param operand the candidate operand
-     * @returns true if the operand is a register where H and L have been replaced by IYh and IYl
+     * @returns 1 if the operand is a register where H and L have been replaced by IYh and IYl, 0 otherwise
      */
-    private is8bitRegisterReplacingHLByIY8bit(operand: string): boolean {
-        return !!operand.match(/^[ABCDE]$/) || this.isIY8bit(operand);
+    private is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
+        return operand.match(/^[ABCDE]$/) ? 1 : this.isIY8bitScore(operand);
     }
 }

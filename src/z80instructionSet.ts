@@ -19,7 +19,7 @@ export class Z80InstructionSet {
             const mnemonic = instruction.getMnemonic();
 
             // Prepares a map by mnemonic for performance reasons
-            if (this.instructionByMnemonic[mnemonic] == undefined) {
+            if (!this.instructionByMnemonic[mnemonic]) {
                 this.instructionByMnemonic[mnemonic] = [];
             }
             this.instructionByMnemonic[mnemonic].push(instruction);
@@ -31,7 +31,7 @@ export class Z80InstructionSet {
         // Locates candidate instructions
         const mnemonic = extractMnemonicOf(line);
         const candidates = this.instructionByMnemonic[mnemonic];
-        if (candidates == undefined) {
+        if (!candidates) {
             return undefined;
         }
 
@@ -41,7 +41,7 @@ export class Z80InstructionSet {
         for (let i = 0, n = candidates.length; i < n; i++) {
             const candidate = candidates[i];
             const score = candidate.match(line);
-            if (score == 1) {
+            if (score === 1) {
                 // Exact match
                 return candidate;
             }
@@ -50,7 +50,7 @@ export class Z80InstructionSet {
                 bestScore = score;
             }
         }
-        return (bestCandidate == undefined) || (bestScore == 0) ? undefined : bestCandidate;
+        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
     }
 }
 

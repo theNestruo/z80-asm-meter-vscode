@@ -51,7 +51,7 @@ export class Z80MeterController {
                 "z80-macroasm",
                 "z80-asm",
                 "pasmo"
-                ].indexOf(editorDocument.languageId) == -1) {
+                ].indexOf(editorDocument.languageId) === -1) {
             return undefined;
         }
         return editorDocument.getText(editorSelection);
@@ -62,10 +62,10 @@ export class Z80MeterController {
         const results = new Results();
 
         const lines = sourceCode.split(/[\r\n]+/);
-        if (lines.length == 0) {
+        if (lines.length === 0) {
             return results;
         }
-        if (lines[lines.length - 1].trim() == "") {
+        if (lines[lines.length - 1].trim() === "") {
             // (removes possible spurious empty line at the end of the selection)
             lines.pop();
         }
@@ -87,11 +87,11 @@ export class Z80MeterController {
 
             // Extracts the instruction
             const rawInstruction = extractInstructionFrom(rawLine);
-            if (rawInstruction == undefined) {
+            if (!rawInstruction) {
                 return;
             }
             const instruction = this.z80InstructionSet.parseInstruction(rawInstruction);
-            if (instruction == undefined) {
+            if (!instruction) {
                 return;
             }
 
@@ -168,13 +168,13 @@ class Results {
     public getTimingInformation(): Record<string, string | undefined> | undefined {
 
         // (empty)
-        if (this.loc == 0) {
+        if (this.loc === 0) {
             return undefined;
         }
 
         // (disabled)
         const configuration: string = workspace.getConfiguration("z80-asm-meter").get("timing", "disabled");
-        if (configuration == "disabled") {
+        if (configuration === "disabled") {
             return undefined;
         }
 
@@ -182,9 +182,9 @@ class Results {
         const z80M1Text = formatTiming(this.z80M1Timing);
         return {
             "text":
-                configuration == "z80" ? z80text
-                : configuration == "msx" ? z80M1Text
-                : configuration == "both" ? z80text + " (" + z80M1Text + ")"
+                configuration === "z80" ? z80text
+                : configuration === "msx" ? z80M1Text
+                : configuration === "both" ? z80text + " (" + z80M1Text + ")"
                 : undefined,
             "tooltip":
                 "Timing Z80: " + z80text + " clock cycles\nTiming Z80+M1: " + z80M1Text + " clock cycles"
@@ -194,23 +194,23 @@ class Results {
     public getSizeInformation(): Record<string, string | undefined> | undefined {
 
         // (empty)
-        if (this.loc == 0) {
+        if (this.loc === 0) {
             return undefined;
         }
 
         // (disabled)
         const configuration: string = workspace.getConfiguration("z80-asm-meter").get("size", "disabled");
-        if (configuration == "disabled") {
+        if (configuration === "disabled") {
             return undefined;
         }
 
-        const sizeText = this.size + (this.size == 1 ? " byte" : " bytes");
+        const sizeText = this.size + (this.size === 1 ? " byte" : " bytes");
         const locText = this.loc + " LoC";
         return {
             "text":
-                configuration == "bytecode" ? sizeText
-                : configuration == "loc" ? locText
-                : configuration == "both" ? sizeText + " (" + locText + ")"
+                configuration === "bytecode" ? sizeText
+                : configuration === "loc" ? locText
+                : configuration === "both" ? sizeText + " (" + locText + ")"
                 : undefined,
             "tooltip":
                 sizeText + " in " + this.loc + " selected " + (this.loc == 1 ? "line" : "lines") + " of code (LoC)",

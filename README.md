@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/master)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/master)
+
 # Z80 Assembly meter in Visual Studio Code
 
 The **Z80 Assembly meter** extension for Visual Studio Code meters clock cycles and bytecode size from Z80 assembly source code.
@@ -44,6 +46,10 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 * Z80 Instruction Set from Grauw [MSX Assembly Page](http://map.grauw.nl/resources/z80instr.php).
 
 ## Release Notes
+
+### 0.1.1
+
+- Code clean-up
 
 ### 0.1.0 2019-09-14
 
