@@ -6,7 +6,7 @@ The **Z80 Assembly meter** extension for Visual Studio Code meters clock cycles 
 
 Select Z80 assembly source code to view clock cycles and bytecode size in the status bar.
 
-\!\[Z80 Assembly meter\]\(images/screenshot.png\)
+![Z80 Assembly meter](images/screenshot.png)
 
 ## Recommendations
 
