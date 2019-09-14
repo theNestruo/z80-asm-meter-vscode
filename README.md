@@ -1,8 +1,13 @@
+[![Travis-CI](https://travis-ci.org/theNestruo/z80-asm-meter-vscode.svg?branch=master)](https://travis-ci.org/theNestruo/z80-asm-meter-vscode)
 [![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/master)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/master)
 
 # Z80 Assembly meter in Visual Studio Code
 
 The **Z80 Assembly meter** extension for Visual Studio Code meters clock cycles and bytecode size from Z80 assembly source code.
+
+This extension meters timing in Z80 clock periods, referred to as T (time) cycles.
+
+As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
 ## Features
 
@@ -43,13 +48,15 @@ This extension contributes the following settings:
 
 Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https://twitter.com/NestorSancho)).
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
-* Z80 Instruction Set from Grauw [MSX Assembly Page](http://map.grauw.nl/resources/z80instr.php).
+* [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
 ## Release Notes
 
 ### 0.1.1
 
 - Code clean-up
+- CodeFactor integration
+- Travis-CI integration
 
 ### 0.1.0 2019-09-14
 
