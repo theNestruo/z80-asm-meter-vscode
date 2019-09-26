@@ -5,15 +5,18 @@ export class Z80Instruction {
     private instruction: string;
     private z80Timing: number[];
     private z80M1Timing: number[];
+    private cpcTiming: number[];
     private size: number;
     private mnemonic: string | undefined;
     private operands: string[] | undefined;
     private implicitAccumulatorSyntaxAllowed: boolean | undefined;
 
-    constructor(instruction: string, z80Timing: string, z80M1Timing: string, size: string) {
+    constructor(instruction: string, z80Timing: string, z80M1Timing: string, cpcTiming: string, size: string) {
+
         this.instruction = instruction;
         this.z80Timing = parseTimings(z80Timing);
         this.z80M1Timing = parseTimings(z80M1Timing);
+        this.cpcTiming = parseTimings(cpcTiming);
         this.size = parseInt(size);
     }
 
@@ -36,6 +39,13 @@ export class Z80Instruction {
      */
     public getZ80M1Timing(): number[] {
         return this.z80M1Timing;
+    }
+
+    /**
+     * @returns The CPC timing, in NOPS
+     */
+    public getCPCTiming(): number[] {
+        return this.cpcTiming;
     }
 
     /**

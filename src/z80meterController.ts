@@ -149,6 +149,8 @@ export class Z80MeterController {
 class Results {
     public z80Timing: number[] = [0, 0];
     public z80M1Timing: number[] = [0, 0];
+    public cpcTiming: number[] = [0, 0];
+
     public size: number = 0;
     public loc: number = 0;
 
@@ -160,6 +162,10 @@ class Results {
         const instructionZ80M1Timing = instruction.getZ80M1Timing();
         this.z80M1Timing[0] += instructionZ80M1Timing[0];
         this.z80M1Timing[1] += instructionZ80M1Timing[1];
+
+        const instructionCPCTiming = instruction.getCPCTiming();
+        this.cpcTiming[0] += instructionCPCTiming[0];
+        this.cpcTiming[1] += instructionCPCTiming[1];
 
         this.size += instruction.getSize();
         this.loc++;
@@ -180,14 +186,18 @@ class Results {
 
         const z80text = formatTiming(this.z80Timing);
         const z80M1Text = formatTiming(this.z80M1Timing);
+        const cpcText = formatTiming(this.cpcTiming);
         return {
             "text":
                 configuration === "z80" ? z80text
                 : configuration === "msx" ? z80M1Text
                 : configuration === "both" ? z80text + " (" + z80M1Text + ")"
+                : configuration === 'cpc' ? cpcText
                 : undefined,
             "tooltip":
-                "Timing Z80: " + z80text + " clock cycles\nTiming Z80+M1: " + z80M1Text + " clock cycles"
+                `Timing Z80: ${z80text} clock cycles
+                Timing Z80+M1: ${z80M1Text} clock cycles
+                Timing CPC: ${cpcText} nops`
         };
     }
 
