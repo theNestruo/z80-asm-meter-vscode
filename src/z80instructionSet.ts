@@ -1,12 +1,14 @@
-import { Z80Instruction } from './z80instruction';
-import { extractMnemonicOf } from './z80utils';
+import { Z80Instruction } from './z80Instruction';
+import { extractMnemonicOf } from './z80Utils';
 import { z80InstructionSetRawData } from './z80InstructionSetRawData';
 
 export class Z80InstructionSet {
 
+    public static instance = new Z80InstructionSet();
+
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
 
-    constructor() {
+    private constructor() {
 
         this.instructionByMnemonic = {};
         z80InstructionSetRawData.forEach(rawData => {
@@ -16,10 +18,10 @@ export class Z80InstructionSet {
             const rawZ80Timing = rawData[1];
             const rawZ80M1Timing = rawData[2];
             const rawCPCTiming = rawData[5];
-           
+
             const rawSize = rawData[7];
             const instruction = new Z80Instruction(rawInstruction, rawZ80Timing, rawZ80M1Timing, rawCPCTiming, rawSize);
-           
+
             const mnemonic = instruction.getMnemonic();
 
             // Prepares a map by mnemonic for performance reasons
@@ -30,10 +32,14 @@ export class Z80InstructionSet {
         });
     }
 
-    public parseInstruction(line: string): Z80Instruction | undefined {
+    public parseInstruction(instruction: string | undefined): Z80Instruction | undefined {
+
+        if (!instruction) {
+            return undefined;
+        }
 
         // Locates candidate instructions
-        const mnemonic = extractMnemonicOf(line);
+        const mnemonic = extractMnemonicOf(instruction);
         const candidates = this.instructionByMnemonic[mnemonic];
         if (!candidates) {
             return undefined;
@@ -44,7 +50,7 @@ export class Z80InstructionSet {
         let bestScore = 0;
         for (let i = 0, n = candidates.length; i < n; i++) {
             const candidate = candidates[i];
-            const score = candidate.match(line);
+            const score = candidate.match(instruction);
             if (score === 1) {
                 // Exact match
                 return candidate;

@@ -36,22 +36,30 @@ This extension contributes the following settings:
 * `z80-asm-meter.maxLoC`: Stops metering when the parsed lines of code (LoC) count exceeds a certain threshold. Unlimited by default.
 * `z80-asm-meter.timing`: Controls the visibility of the timing information in the status bar:
     * `disabled`: Timing information is not shown.
-    * `z80`: Only Z80 timing information is shown.
-    * `msx`: Only Z80 + M1 timing information is shown. Useful for Z80 timing calculations on MSX, as the MSX standard requires so-called M1 wait cycles.
-    * `both` (default): Both Z80 and Z80+M1 timing information are shown.
+    * `z80` (default): Z80 timing information is shown.
+    * `msx`: Z80 + M1 timing information is shown. Useful for Z80 timing calculations on MSX, as the MSX standard requires so-called M1 wait cycles.
+    * `cpc`: Amstrad CPC timing information (in NOPs) is shown.
+    * `z80+msx`: Both Z80 and Z80+M1 timing information are shown.
+    * `z80+cpc`: Both Z80 and Amstrad CPC timing information are shown.
 * `z80-asm-meter.size`: Controls the visibility of the size information in the status bar:
     * `disabled`: Size information is not shown.
-    * `bytecode` (default): Only bytecode size information is shown.
-    * `loc`: Only processed lines of code (LOC) count is shown.
-    * `both`: Both bytecode size and LOC count are shown.
+    * `bytecode` (default): Bytecode size information is shown.
+    * `loc`: Processed lines of code (LOC) count is shown.
+    * `bytecode+loc`: Both bytecode size and LOC count are shown.
 
 ## Credits
 
 Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https://twitter.com/NestorSancho)).
+* Contributors: [**IIIvan37**](https://github.com/IIIvan37).
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
 * [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
 ## Release Notes
+
+### 0.2.0
+
+- Amstrad CPC timing in NOPs added by contributor: **IIIvan37**
+- Code refactor (for future improvements)
 
 ### 0.1.1
 

@@ -1,4 +1,4 @@
-import { parseTimings, extractMnemonicOf, extractOperandsOf } from './z80utils';
+import { parseTimings, extractMnemonicOf, extractOperandsOf } from './z80Utils';
 
 export class Z80Instruction {
 
