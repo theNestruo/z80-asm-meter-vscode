@@ -68,15 +68,17 @@
 						"disabled",
 						"z80",
 						"msx",
-						"both"
+						"both",
+						"cpc"
 					],
 					"enumDescriptions": [
 						"Timing information is not shown",
 						"Only Z80 timing information is shown",
 						"Only Z80+M1 timing information (MSX standard) is shown",
-						"Both Z80 and Z80+M1 timing information are shown"
+						"Both Z80 and Z80+M1 timing information are shown",
+						"Only CPC timing information is shown"
 					],
-					"default": "both"
+					"default": "cpc"
 				},
 				"z80-asm-meter.size": {
 					"type": "string",
@@ -112,8 +114,8 @@
 		"@types/vscode": "^1.38.0",
 		"glob": "^7.1.4",
 		"mocha": "^6.1.4",
+		"tslint": "^5.20.0",
 		"typescript": "^3.3.1",
-		"tslint": "^5.12.1",
 		"vscode-test": "^1.0.2"
 	}
 }
