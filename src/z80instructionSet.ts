@@ -1,6 +1,6 @@
 import { Z80Instruction } from './z80instruction';
 import { extractMnemonicOf } from './z80utils';
-import { z80InstructionSetRawData } from './z80InstructionSetRawData'
+import { z80InstructionSetRawData } from './z80InstructionSetRawData';
 
 export class Z80InstructionSet {
 
