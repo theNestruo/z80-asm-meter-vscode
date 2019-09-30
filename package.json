@@ -3,7 +3,7 @@
 	"name": "z80-asm-meter",
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -79,8 +79,8 @@
 						"Timing information is not shown",
 						"Z80 timing information is shown",
 						"Z80+M1 timing information (MSX standard) is shown",
-						"Amstrad CPC timing information (in NOPs) is shown",
-						"Both Z80 and Z80+M1 timing information are shown",
+						"Amstrad CPC timing information (in number of NOPs) is shown",
+						"Both Z80 and MSX (Z80+M1) timing information are shown",
 						"Both Z80 and Amstrad CPC timing information are shown"
 					],
 					"default": "z80"
