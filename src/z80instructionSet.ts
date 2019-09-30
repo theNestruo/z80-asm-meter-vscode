@@ -1,6 +1,6 @@
 import { Z80Instruction } from './z80Instruction';
-import { extractMnemonicOf } from './z80Utils';
 import { z80InstructionSetRawData } from './z80InstructionSetRawData';
+import { extractMnemonicOf } from './z80Utils';
 
 export class Z80InstructionSet {
 
@@ -17,9 +17,9 @@ export class Z80InstructionSet {
             const rawInstruction = rawData[0];
             const rawZ80Timing = rawData[1];
             const rawZ80M1Timing = rawData[2];
-            const rawCPCTiming = rawData[5];
+            const rawCPCTiming = rawData[3];
 
-            const rawSize = rawData[7];
+            const rawSize = rawData[5];
             const instruction = new Z80Instruction(rawInstruction, rawZ80Timing, rawZ80M1Timing, rawCPCTiming, rawSize);
 
             const mnemonic = instruction.getMnemonic();

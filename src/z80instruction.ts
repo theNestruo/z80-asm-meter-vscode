@@ -168,6 +168,13 @@ export class Z80Instruction {
             return this.is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
         case "q":
             return this.is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
+        case "0": // IM 0, RST 0, and OUT (C), 0
+        case "1": // IM 1
+        case "2": // IM 2
+            if (candidateOperand === expectedOperand) {
+                return 1; // (exact match for better OUT (C),0 detection)
+            }
+            // falls-through
         default:
             // (due possibility of using constants, labels, and expressions in the source code,
             // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H)
