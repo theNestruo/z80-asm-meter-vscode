@@ -10,11 +10,13 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 
 As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
+In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1\u00B5s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
+
 ## Features
 
 Select Z80 assembly source code to view clock cycles and bytecode size in the status bar.
 
-![Z80 Assembly meter](images/screenshot.png)
+![Z80 Assembly meter](doc/images/screenshot.png)
 
 ## Recommendations
 
@@ -38,8 +40,8 @@ This extension contributes the following settings:
     * `disabled`: Timing information is not shown.
     * `z80` (default): Z80 timing information is shown.
     * `msx`: Z80 + M1 timing information is shown. Useful for Z80 timing calculations on MSX, as the MSX standard requires so-called M1 wait cycles.
-    * `cpc`: Amstrad CPC timing information (in NOPs) is shown.
-    * `z80+msx`: Both Z80 and Z80+M1 timing information are shown.
+    * `cpc`: Amstrad CPC timing information (in number of NOPs) is shown.
+    * `z80+msx`: Both Z80 and MSX (Z80+M1) timing information are shown.
     * `z80+cpc`: Both Z80 and Amstrad CPC timing information are shown.
 * `z80-asm-meter.size`: Controls the visibility of the size information in the status bar:
     * `disabled`: Size information is not shown.
@@ -53,8 +55,15 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 * Contributors: [**IIIvan37**](https://github.com/IIIvan37).
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
 * [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
+* Amstrad CPC timing information from [Rasm Z80 assembler](http://www.cpcwiki.eu/forum/programming/rasm-z80-assembler-in-beta/) documentation.
 
 ## Release Notes
+
+### 0.2.1
+
+- Amstrad CPC timing explained in the readme file
+- Added missing undocumented instructions: `OUT (C),0`, `SL1`/`SLL`
+- Added alternative syntax: `JP HL`, `IN (C)`
 
 ### 0.2.0
 
@@ -67,6 +76,6 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 - CodeFactor integration
 - Travis-CI integration
 
-### 0.1.0 2019-09-14
+### 0.1.0
 
 - Initial release
