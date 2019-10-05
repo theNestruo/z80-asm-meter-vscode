@@ -38,7 +38,7 @@ export class Z80MeterController {
     private isEnabledFor(languageId: string): boolean {
 
         // Enabled if it is a Z80 assembly file
-        if (languageId == "z80-asm-meter") {
+        if (languageId === "z80-asm-meter") {
             return true;
         }
         const languageIds: string[] = workspace.getConfiguration("z80-asm-meter").get("languageIds", []);
