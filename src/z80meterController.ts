@@ -1,4 +1,4 @@
-import { Disposable, StatusBarItem, window } from 'vscode';
+import { Disposable, StatusBarItem, TextEditor, window, workspace } from 'vscode';
 import { Z80Block } from './z80Block';
 
 export class Z80MeterController {
@@ -21,43 +21,35 @@ export class Z80MeterController {
 
     private _onEvent() {
 
-        const sourceCode = this.getSelectedSourceCode();
+        const editor = window.activeTextEditor;
+        if ((!editor)
+                || editor.selection.isEmpty
+                || (!this.isEnabledFor(editor.document.languageId))) {
+            this.hideSizeStatusBarItem();
+            this.hideTimingStatusBarItem();
+            return;
+        }
+
+        const sourceCode = editor.document.getText(editor.selection);
         const z80Block = new Z80Block(sourceCode);
         this.updateStatusBar(z80Block);
     }
 
-    private getSelectedSourceCode(): string | undefined {
+    private isEnabledFor(languageId: string): boolean {
 
-        // Get the current text editor and selection
-        const editor = window.activeTextEditor;
-        if (!editor) {
-            return undefined;
+        // Enabled if it is a Z80 assembly file
+        if (languageId == "z80-asm-meter") {
+            return true;
         }
-        const editorSelection = editor.selection;
-        if (editorSelection.isEmpty) {
-            return undefined;
-        }
-
-        // Get selected source code only if it is a Z80 assembly file
-        const editorDocument = editor.document;
-        if ([
-                "z80-asm-meter",
-                "z80-macroasm",
-                "z80-asm",
-                "pasmo"
-                ].indexOf(editorDocument.languageId) === -1) {
-            return undefined;
-        }
-        return editorDocument.getText(editorSelection);
+        const languageIds: string[] = workspace.getConfiguration("z80-asm-meter").get("languageIds", []);
+        return languageIds.indexOf(languageId) !== -1;
     }
 
     private updateStatusBar(z80Block: Z80Block) {
 
         const size = z80Block.getSizeInformation();
         if (!size) {
-            if (this._sizeStatusBarItem) {
-                this._sizeStatusBarItem.hide();
-            }
+            this.hideSizeStatusBarItem();
 
         } else {
             if (!this._sizeStatusBarItem) {
@@ -70,9 +62,7 @@ export class Z80MeterController {
 
         const timing = z80Block.getTimingInformation();
         if (!timing) {
-            if (this._timingStatusBarItem) {
-                this._timingStatusBarItem.hide();
-            }
+            this.hideTimingStatusBarItem();
 
         } else {
             if (!this._timingStatusBarItem) {
@@ -81,6 +71,18 @@ export class Z80MeterController {
             this._timingStatusBarItem.text = "$(watch) " + timing["text"];
             this._timingStatusBarItem.tooltip = timing["tooltip"];
             this._timingStatusBarItem.show();
+        }
+    }
+
+    private hideSizeStatusBarItem() {
+        if (this._sizeStatusBarItem) {
+            this._sizeStatusBarItem.hide();
+        }
+    }
+
+    private hideTimingStatusBarItem() {
+        if (this._timingStatusBarItem) {
+            this._timingStatusBarItem.hide();
         }
     }
 

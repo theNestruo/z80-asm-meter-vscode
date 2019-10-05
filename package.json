@@ -3,7 +3,7 @@
 	"name": "z80-asm-meter",
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -31,10 +31,7 @@
 	},
 	"license": "LGPL-3.0",
 	"activationEvents": [
-		"onLanguage:z80-asm-meter",
-		"onLanguage:z80-macroasm",
-		"onLanguage:z80-asm",
-		"onLanguage:pasmo"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -48,6 +45,18 @@
 		],
 		"configuration": {
 			"properties": {
+				"z80-asm-meter.languageIds": {
+					"type": [
+						"array",
+						"null"
+					],
+					"description": "Additional language IDs for which the extension is enabled (such as \"c\" for in-lined assembly)",
+					"default": [
+						"z80-macroasm",
+						"z80-asm",
+						"pasmo"
+					]
+				},
 				"z80-asm-meter.maxLines": {
 					"type": [
 						"integer",
