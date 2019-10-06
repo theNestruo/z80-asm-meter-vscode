@@ -18,6 +18,7 @@ export class Z80Instruction {
         this.z80M1Timing = parseTimings(z80M1Timing);
         this.cpcTiming = parseTimings(cpcTiming);
         this.size = parseInt(size);
+        this.opcode = opcode;
     }
 
     /**
@@ -53,6 +54,13 @@ export class Z80Instruction {
      */
     public getSize(): number {
         return this.size;
+    }
+
+    /**
+     * @returns The opcode
+     */
+    public getOpcode(): string {
+        return this.opcode;
     }
 
     /**

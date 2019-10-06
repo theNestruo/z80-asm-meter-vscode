@@ -14,9 +14,13 @@ export class Z80Block {
     public size: number = 0;
     public loc: number = 0;
 
+    // Opcodes information
+    public opcodes: string = "";
+
     // Display configuration
     private timingConfiguration: string | undefined = undefined;
     private sizeConfiguration: string | undefined = undefined;
+    private opcodesConfiguration: string | undefined = undefined;
 
     constructor(sourceCode: string | undefined) {
 
@@ -56,6 +60,7 @@ export class Z80Block {
         // Saves display configuration
         this.timingConfiguration = configuration.get("timing", "disabled");
         this.sizeConfiguration = configuration.get("size", "disabled");
+        this.opcodesConfiguration = configuration.get("opcodes", "disabled");
     }
 
     public addInstruction(instruction: Z80Instruction | undefined) {
@@ -78,6 +83,8 @@ export class Z80Block {
 
         this.size += instruction.getSize();
         this.loc++;
+
+        this.opcodes += instruction.getOpcode() + `\n`;
     }
 
     public getTimingInformation(): Record<string, string | undefined> | undefined {
@@ -122,6 +129,23 @@ export class Z80Block {
                 : undefined,
             "tooltip":
                 sizeText + " in " + this.loc + " selected " + (this.loc === 1 ? "line" : "lines") + " of code (LoC)",
+        };
+    }
+
+    public getOpcodesInformation(): Record<string, string | undefined> | undefined {
+
+        // (empty or disabled)
+        if ((this.loc === 0) || (this.opcodesConfiguration === "disabled")) {
+            return undefined;
+        }
+
+        const opcodesText = this.opcodes;
+        return {
+            "text":
+                this.opcodesConfiguration === "enabled" ? opcodesText
+                : undefined,
+            "tooltip":
+                opcodesText,
         };
     }
 
