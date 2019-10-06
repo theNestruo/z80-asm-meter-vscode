@@ -111,6 +111,19 @@
 						"Both bytecode size and LOC count are shown"
 					],
 					"default": "bytecode"
+				},
+				"z80-asm-meter.opcodes": {
+					"type": "string",
+					"description": "Controls the visibility of the opcodes information in the status bar",
+					"enum": [
+						"disabled",
+						"enabled"
+					],
+					"enumDescriptions": [
+						"Opcodes information is not shown",
+						"Opcodes information is shown as an indication"
+					],
+					"default": "disabled"
 				}
 			}
 		}

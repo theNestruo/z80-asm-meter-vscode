@@ -18,9 +18,9 @@ export class Z80InstructionSet {
             const rawZ80Timing = rawData[1];
             const rawZ80M1Timing = rawData[2];
             const rawCPCTiming = rawData[3];
-
+            const rawOpcode = rawData[4];
             const rawSize = rawData[5];
-            const instruction = new Z80Instruction(rawInstruction, rawZ80Timing, rawZ80M1Timing, rawCPCTiming, rawSize);
+            const instruction = new Z80Instruction(rawInstruction, rawZ80Timing, rawZ80M1Timing, rawCPCTiming, rawSize, rawOpcode);
 
             const mnemonic = instruction.getMnemonic();
 

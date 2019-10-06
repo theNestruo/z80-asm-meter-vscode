@@ -5,6 +5,7 @@ export class Z80MeterController {
 
     private _timingStatusBarItem: StatusBarItem | undefined;
     private _sizeStatusBarItem: StatusBarItem | undefined;
+    private _opcodesStatusBarItem: StatusBarItem | undefined;
     private _disposable: Disposable;
 
 	constructor() {
@@ -74,6 +75,19 @@ export class Z80MeterController {
             this._timingStatusBarItem.tooltip = timing["tooltip"];
             this._timingStatusBarItem.show();
         }
+
+        const opcodes = z80Block.getOpcodesInformation();
+        if (!opcodes) {
+            this.hideOpcodesStatusBarItem();
+
+        } else {
+            if (!this._opcodesStatusBarItem) {
+                this._opcodesStatusBarItem = window.createStatusBarItem();
+            }
+            this._opcodesStatusBarItem.text = "$(file-binary) " + opcodes["text"];
+            this._opcodesStatusBarItem.tooltip = opcodes["tooltip"];
+            this._opcodesStatusBarItem.show();
+        }
     }
 
     private hideSizeStatusBarItem() {
@@ -88,6 +102,12 @@ export class Z80MeterController {
         }
     }
 
+    private hideOpcodesStatusBarItem() {
+        if (this._opcodesStatusBarItem) {
+            this._opcodesStatusBarItem.hide();
+        }
+    }
+
 	dispose() {
 		this._disposable.dispose();
         if (this._timingStatusBarItem) {
@@ -97,6 +117,10 @@ export class Z80MeterController {
         if (this._sizeStatusBarItem) {
             this._sizeStatusBarItem.dispose();
             this._sizeStatusBarItem = undefined;
+        }
+        if (this._opcodesStatusBarItem) {
+            this._opcodesStatusBarItem.dispose();
+            this._opcodesStatusBarItem = undefined;
         }
 	}
 }
