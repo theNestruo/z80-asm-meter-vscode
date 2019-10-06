@@ -5,7 +5,7 @@ export class Z80MeterController {
 
     private _timingStatusBarItem: StatusBarItem | undefined;
     private _sizeStatusBarItem: StatusBarItem | undefined;
-    private _opcodesStatusBarItem: StatusBarItem | undefined;
+    private _instructionStatusBarItem: StatusBarItem | undefined;
     private _disposable: Disposable;
 
 	constructor() {
@@ -76,17 +76,17 @@ export class Z80MeterController {
             this._timingStatusBarItem.show();
         }
 
-        const opcodes = z80Block.getOpcodesInformation();
-        if (!opcodes) {
-            this.hideOpcodesStatusBarItem();
+        const instruction = z80Block.getInstructionAndOpcode();
+        if (!instruction) {
+            this.hideInstructionStatusBarItem();
 
         } else {
-            if (!this._opcodesStatusBarItem) {
-                this._opcodesStatusBarItem = window.createStatusBarItem();
+            if (!this._instructionStatusBarItem) {
+                this._instructionStatusBarItem = window.createStatusBarItem();
             }
-            this._opcodesStatusBarItem.text = "$(file-binary) " + opcodes["text"];
-            this._opcodesStatusBarItem.tooltip = opcodes["tooltip"];
-            this._opcodesStatusBarItem.show();
+            this._instructionStatusBarItem.text = "$(file-binary) " + instruction["text"];
+            this._instructionStatusBarItem.tooltip = instruction["tooltip"];
+            this._instructionStatusBarItem.show();
         }
     }
 
@@ -102,9 +102,9 @@ export class Z80MeterController {
         }
     }
 
-    private hideOpcodesStatusBarItem() {
-        if (this._opcodesStatusBarItem) {
-            this._opcodesStatusBarItem.hide();
+    private hideInstructionStatusBarItem() {
+        if (this._instructionStatusBarItem) {
+            this._instructionStatusBarItem.hide();
         }
     }
 
@@ -118,9 +118,9 @@ export class Z80MeterController {
             this._sizeStatusBarItem.dispose();
             this._sizeStatusBarItem = undefined;
         }
-        if (this._opcodesStatusBarItem) {
-            this._opcodesStatusBarItem.dispose();
-            this._opcodesStatusBarItem = undefined;
+        if (this._instructionStatusBarItem) {
+            this._instructionStatusBarItem.dispose();
+            this._instructionStatusBarItem = undefined;
         }
 	}
 }

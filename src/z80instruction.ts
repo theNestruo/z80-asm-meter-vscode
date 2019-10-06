@@ -2,23 +2,30 @@ import { parseTimings, extractMnemonicOf, extractOperandsOf } from './z80Utils';
 
 export class Z80Instruction {
 
+    // Information
     private instruction: string;
     private z80Timing: number[];
     private z80M1Timing: number[];
     private cpcTiming: number[];
+    private opcode: string;
     private size: number;
+
+    // Derived information (will be cached for performance reasons)
     private mnemonic: string | undefined;
     private operands: string[] | undefined;
     private implicitAccumulatorSyntaxAllowed: boolean | undefined;
 
-    constructor(instruction: string, z80Timing: string, z80M1Timing: string, cpcTiming: string, size: string) {
+    constructor(
+            instruction: string,
+            z80Timing: string, z80M1Timing: string, cpcTiming: string,
+            opcode: string, size: string) {
 
         this.instruction = instruction;
         this.z80Timing = parseTimings(z80Timing);
         this.z80M1Timing = parseTimings(z80M1Timing);
         this.cpcTiming = parseTimings(cpcTiming);
-        this.size = parseInt(size);
         this.opcode = opcode;
+        this.size = parseInt(size);
     }
 
     /**
@@ -50,17 +57,17 @@ export class Z80Instruction {
     }
 
     /**
+     * @returns The opcode of the instruction
+     */
+    public getOpcode(): string {
+        return this.opcode;
+    }
+
+    /**
      * @returns The size in bytes
      */
     public getSize(): number {
         return this.size;
-    }
-
-    /**
-     * @returns The opcode
-     */
-    public getOpcode(): string {
-        return this.opcode;
     }
 
     /**

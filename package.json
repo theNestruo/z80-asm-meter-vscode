@@ -3,7 +3,7 @@
 	"name": "z80-asm-meter",
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -112,18 +112,30 @@
 					],
 					"default": "bytecode"
 				},
-				"z80-asm-meter.opcodes": {
+				"z80-asm-meter.opcode": {
 					"type": "string",
-					"description": "Controls the visibility of the opcodes information in the status bar",
+					"description": "Controls the visibility of the instruction and its opcode in the status bar",
 					"enum": [
 						"disabled",
-						"enabled"
+						"instruction",
+						"opcode",
+						"both"
 					],
 					"enumDescriptions": [
-						"Opcodes information is not shown",
-						"Opcodes information is shown as an indication"
+						"Neither instruction nor its opcode are shown",
+						"The instruction is shown",
+						"The opcode of the instruction is shown",
+						"Both instruction and its opcode are shown"
 					],
-					"default": "disabled"
+					"default": "both"
+				},
+				"z80-asm-meter.maxOpcodes": {
+					"type": [
+						"integer",
+						"null"
+					],
+					"description": "Stops instruction and opcode block visualization (tooltip) when the instruction count exceeds this value",
+					"default": 16
 				}
 			}
 		}

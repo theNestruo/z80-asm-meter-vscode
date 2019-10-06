@@ -14,17 +14,16 @@ export class Z80InstructionSet {
         z80InstructionSetRawData.forEach(rawData => {
 
             // Parses the raw instruction
-            const rawInstruction = rawData[0];
-            const rawZ80Timing = rawData[1];
-            const rawZ80M1Timing = rawData[2];
-            const rawCPCTiming = rawData[3];
-            const rawOpcode = rawData[4];
-            const rawSize = rawData[5];
-            const instruction = new Z80Instruction(rawInstruction, rawZ80Timing, rawZ80M1Timing, rawCPCTiming, rawSize, rawOpcode);
-
-            const mnemonic = instruction.getMnemonic();
+            const instruction = new Z80Instruction(
+                    rawData[0], // rawInstruction
+                    rawData[1], // z80Timing
+                    rawData[2], // z80M1Timing
+                    rawData[3], // cpcTiming
+                    rawData[4], // opcode
+                    rawData[5]); // size
 
             // Prepares a map by mnemonic for performance reasons
+            const mnemonic = instruction.getMnemonic();
             if (!this.instructionByMnemonic[mnemonic]) {
                 this.instructionByMnemonic[mnemonic] = [];
             }

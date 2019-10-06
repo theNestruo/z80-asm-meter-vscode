@@ -14,13 +14,15 @@ export class Z80Block {
     public size: number = 0;
     public loc: number = 0;
 
-    // Opcodes information
-    public opcodes: string = "";
+    // Instruction and opcode information
+    public instructions: string[] = [];
+    public opcodes: string[] = [];
 
     // Display configuration
     private timingConfiguration: string | undefined = undefined;
     private sizeConfiguration: string | undefined = undefined;
-    private opcodesConfiguration: string | undefined = undefined;
+    private opcodeConfiguration: string | undefined = undefined;
+    private maxOpcodesConfiguration: number | undefined = undefined;
 
     constructor(sourceCode: string | undefined) {
 
@@ -60,7 +62,8 @@ export class Z80Block {
         // Saves display configuration
         this.timingConfiguration = configuration.get("timing", "disabled");
         this.sizeConfiguration = configuration.get("size", "disabled");
-        this.opcodesConfiguration = configuration.get("opcodes", "disabled");
+        this.opcodeConfiguration = configuration.get("opcode", "disabled");
+        this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
     }
 
     public addInstruction(instruction: Z80Instruction | undefined) {
@@ -81,10 +84,11 @@ export class Z80Block {
         this.cpcTiming[0] += instructionCPCTiming[0];
         this.cpcTiming[1] += instructionCPCTiming[1];
 
+        this.instructions.push(instruction.getInstruction());
+        this.opcodes.push(instruction.getOpcode());
+
         this.size += instruction.getSize();
         this.loc++;
-
-        this.opcodes += instruction.getOpcode() + `\n`;
     }
 
     public getTimingInformation(): Record<string, string | undefined> | undefined {
@@ -132,20 +136,38 @@ export class Z80Block {
         };
     }
 
-    public getOpcodesInformation(): Record<string, string | undefined> | undefined {
+    public getInstructionAndOpcode(): Record<string, string | undefined> | undefined {
 
         // (empty or disabled)
-        if ((this.loc === 0) || (this.opcodesConfiguration === "disabled")) {
+        if ((this.loc === 0) || (this.opcodeConfiguration === "disabled")) {
             return undefined;
         }
 
-        const opcodesText = this.opcodes;
+        // text: only the first instruction
+        const firstInstruction = this.instructions[0];
+        const firstOpcode = this.opcodes[0];
+        const text =
+                this.opcodeConfiguration === "instruction" ? firstInstruction
+                : this.opcodeConfiguration === "opcode" ? firstOpcode
+                : this.opcodeConfiguration === "both" ? `${firstOpcode} ; ${firstInstruction}`
+                : undefined;
+
+        // tooltip: up to maxOpcodes instructions
+        const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
+        var tooltip = "Opcodes:";
+        for (var i = 0; i < n; i++) {
+            const opcode = this.opcodes[i];
+            const instruction = this.instructions[i];
+            tooltip += `\n    ${opcode}    ; ${instruction}`;
+        }
+        if (this.maxOpcodesConfiguration && this.maxOpcodesConfiguration < this.loc) {
+            const etc = this.loc - this.maxOpcodesConfiguration;
+            tooltip += "\n    (and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
+        }
+
         return {
-            "text":
-                this.opcodesConfiguration === "enabled" ? opcodesText
-                : undefined,
-            "tooltip":
-                opcodesText,
+            "text": text,
+            "tooltip": tooltip
         };
     }
 
