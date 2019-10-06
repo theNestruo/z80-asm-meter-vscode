@@ -127,7 +127,7 @@
 						"The opcode of the instruction is shown",
 						"Both instruction and its opcode are shown"
 					],
-					"default": "both"
+					"default": "disabled"
 				},
 				"z80-asm-meter.maxOpcodes": {
 					"type": [
