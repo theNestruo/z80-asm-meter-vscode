@@ -54,16 +54,17 @@ This extension contributes the following settings:
 ## Credits
 
 Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https://twitter.com/NestorSancho)).
-* Contributors: [**IIIvan37**](https://github.com/IIIvan37).
+* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide)
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
 * [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 * Amstrad CPC timing information from [Rasm Z80 assembler](http://www.cpcwiki.eu/forum/programming/rasm-z80-assembler-in-beta/) documentation.
 
 ## Release Notes
 
-### 0.3.1 (unreleased)
+### 0.4.0
 
 - Added `"z80"` (MSX Z80 by Yeoungman Seo) to the default additional language IDs
+- Metering of the current line if there is no selection, by contributor: **hlide**
 
 ### 0.3.0
 
