@@ -22,15 +22,17 @@ export class Z80MeterController {
     private _onEvent() {
 
         const editor = window.activeTextEditor;
+
         if ((!editor)
-                || editor.selection.isEmpty
                 || (!this.isEnabledFor(editor.document.languageId))) {
             this.hideSizeStatusBarItem();
             this.hideTimingStatusBarItem();
             return;
         }
 
-        const sourceCode = editor.document.getText(editor.selection);
+        const sourceCode = editor.selection.isEmpty
+            ? editor.document.lineAt(editor.selection.active.line).text
+            : editor.document.getText(editor.selection);
         const z80Block = new Z80Block(sourceCode);
         this.updateStatusBar(z80Block);
     }
