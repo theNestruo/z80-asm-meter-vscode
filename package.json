@@ -3,7 +3,7 @@
 	"name": "z80-asm-meter",
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -54,6 +54,7 @@
 					"default": [
 						"z80-macroasm",
 						"z80-asm",
+						"z80",
 						"pasmo"
 					]
 				},

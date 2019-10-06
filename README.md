@@ -25,15 +25,16 @@ This extension can be installed standalone, but does not contribute any problem 
 Therefore, this extension can be installed alongside other Z80-related extensions such as:
 
 * [Z80 Macro-Assembler](https://marketplace.visualstudio.com/items?itemName=mborik.z80-macroasm) by mborik
-* [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) by BouKiChi
 * [Z80 Assembly](https://marketplace.visualstudio.com/items?itemName=Imanolea.z80-asm) by Imanolea
+* [MSX Z80](https://marketplace.visualstudio.com/items?itemName=sharksym.asm-msx) by Yeoungman Seo
+* [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) by BouKiChi
 * (and probably others)
 
 ## Extension Settings
 
 This extension contributes the following settings:
 
-* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `"z80-macroasm", "z80-asm", "pasmo"`.
+* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `"z80-macroasm", "z80-asm", "z80", "pasmo"`.
 
 * `z80-asm-meter.maxLines`: When working with huge files, metering can be disabled when the line count of the selection exceeds a certain threshold. Unlimited by default.
 * `z80-asm-meter.maxLoC`: Stops metering when the parsed lines of code (LoC) count exceeds a certain threshold. Unlimited by default.
@@ -59,6 +60,10 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 * Amstrad CPC timing information from [Rasm Z80 assembler](http://www.cpcwiki.eu/forum/programming/rasm-z80-assembler-in-beta/) documentation.
 
 ## Release Notes
+
+### 0.3.1 (unreleased)
+
+- Added `"z80"` (MSX Z80 by Yeoungman Seo) to the default additional language IDs
 
 ### 0.3.0
 
