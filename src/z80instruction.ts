@@ -119,10 +119,17 @@ export class Z80Instruction {
             return 0;
         }
 
+        // Extracts the candidate operands
+        const candidateOperands = extractOperandsOf(candidateInstruction);
+        for (var i = 0, n = candidateOperands.length; i < n; i++) {
+            if (candidateOperands[i] === "") {
+                return 0; // (incomplete candidate instruction, such as "LD A,")
+            }
+        }
+
         // Compares operand count
         const expectedOperands = this.getOperands();
         const expectedOperandsLength = expectedOperands.length;
-        const candidateOperands = extractOperandsOf(candidateInstruction);
         let implicitAccumulatorSyntax = false;
         if (candidateOperands.length !== expectedOperandsLength) {
             if (candidateOperands.length !== expectedOperandsLength - 1) {
@@ -135,7 +142,7 @@ export class Z80Instruction {
             }
         }
 
-        // Compares oprands
+        // Compares operands
         let score = 1;
         for (var i = implicitAccumulatorSyntax ? 1 : 0, j = 0; i < expectedOperandsLength; i++, j++) {
             score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
@@ -192,8 +199,14 @@ export class Z80Instruction {
             // falls-through
         default:
             // (due possibility of using constants, labels, and expressions in the source code,
-            // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H)
-            return 0.75;
+            // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
+            // but uses a "best effort" to discard registers)
+            return this.isAnyRegister(
+                    this.isIndirectionOperand(candidateOperand, false)
+                        ? this.extractIndirection(candidateOperand)
+                        : candidateOperand)
+                    ? 0
+                    : 0.75;
         }
     }
 
@@ -308,5 +321,15 @@ export class Z80Instruction {
      */
     private is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
         return operand.match(/^[ABCDE]$/) ? 1 : this.isIY8bitScore(operand);
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns true if the operand is any 8 or 16 bit register,
+     * including the IX and IY index registers with an optional offset,
+     * false otherwise
+     */
+    private isAnyRegister(operand: string): boolean {
+        return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
     }
 }
