@@ -74,6 +74,10 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 
 ## Release Notes
 
+### 0.5.1
+
+- Fixes instruction status bar item not being hidden
+
 ### 0.5.0
 
 - New option to display opcodes, by contributor: **hlide**

@@ -28,6 +28,7 @@ export class Z80MeterController {
                 || (!this.isEnabledFor(editor.document.languageId))) {
             this.hideSizeStatusBarItem();
             this.hideTimingStatusBarItem();
+            this.hideInstructionStatusBarItem();
             return;
         }
 
