@@ -76,8 +76,10 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 
 ### 0.5.0
 
-- New option to disaply opcodes, by constributor: **hlide**
+- New option to display opcodes, by contributor: **hlide**
 - Visibility configuration for instruction and its opcode
+- Fixed issues:
+    - Some invalid instructions are falsely counted as valid. #6
 
 ### 0.4.0
 

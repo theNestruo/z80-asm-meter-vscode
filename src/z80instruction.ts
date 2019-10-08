@@ -121,7 +121,7 @@ export class Z80Instruction {
 
         // Extracts the candidate operands
         const candidateOperands = extractOperandsOf(candidateInstruction);
-        for (var i = 0, n = candidateOperands.length; i < n; i++) {
+        for (let i = 0, n = candidateOperands.length; i < n; i++) {
             if (candidateOperands[i] === "") {
                 return 0; // (incomplete candidate instruction, such as "LD A,")
             }
@@ -144,7 +144,7 @@ export class Z80Instruction {
 
         // Compares operands
         let score = 1;
-        for (var i = implicitAccumulatorSyntax ? 1 : 0, j = 0; i < expectedOperandsLength; i++, j++) {
+        for (let i = implicitAccumulatorSyntax ? 1 : 0, j = 0; i < expectedOperandsLength; i++, j++) {
             score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
             if (score === 0) {
                 return 0;

@@ -154,8 +154,8 @@ export class Z80Block {
 
         // tooltip: up to maxOpcodes instructions
         const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
-        var tooltip = "Opcodes:";
-        for (var i = 0; i < n; i++) {
+        let tooltip = "Opcodes:";
+        for (let i = 0; i < n; i++) {
             const opcode = this.opcodes[i];
             const instruction = this.instructions[i];
             tooltip += `\n    ${opcode}    ; ${instruction}`;
