@@ -10,7 +10,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 
 As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
-In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1\u00B5s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
+In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&#00B5;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
 
 ## Features
 
