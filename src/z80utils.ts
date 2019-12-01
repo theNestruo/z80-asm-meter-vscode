@@ -11,7 +11,7 @@ export function formatTiming(t: number[]): string {
 
 export function extractInstructionFrom(rawLine: string): string | undefined {
     // Removes surrounding label, whitespace and/or comments
-    const line = rawLine.replace(/(^\s*\S+:)|(;.*$)/, "").trim();
+    const line = rawLine.replace(/(^\s*\S+:)|((;|\/\/).*$)/, "").trim();
     // Simplifies whitespace and converts to uppercase
     return line.length === 0 ? undefined : line.replace(/\s+/, " ").toUpperCase();
 }
