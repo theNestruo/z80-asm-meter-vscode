@@ -19,11 +19,19 @@
 		{
 			"type": "typescript",
 			"tsconfig": "tsconfig.json",
-			"problemMatcher": ["$tsc"],
+			"problemMatcher": [
+				"$tsc"
+			],
 			"group": {
-			  "kind": "build",
-			  "isDefault": true
+				"kind": "build",
+				"isDefault": true
 			}
-		  }
+		},
+		{
+			"type": "npm",
+			"script": "compile",
+			"group": "build",
+			"problemMatcher": []
+		}
 	]
 }

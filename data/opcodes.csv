@@ -175,7 +175,7 @@ LD B,IXp;8;10;2;2;2;DD 40+p;2
 LD B,IYq;8;10;2;2;2;FD 40+q;2
 LD B,n;7;8;2;2;2;06 n;2
 LD B,r;4;5;1;1;1;40+r;1
-LD BC,(nn);20;22;6;8;4;ED 4B nn nn;4
+LD BC,(nn);20;22;6;8;6;ED 4B nn nn;4
 LD BC,nn;10;11;3;3;3;01 nn nn;3
 LD C,(HL);7;8;2;4;2;4E;1
 LD C,(IX+o);19;21;5;7;5;DD 4E o;3
