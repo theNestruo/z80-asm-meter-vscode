@@ -48,10 +48,14 @@ export class Z80Block {
         // For every line...
         const maxLoc: number | undefined = configuration.get("maxLoC");
         lines.forEach(rawLine => {
-            // Extracts the instruction
-            const rawInstruction = extractInstructionFrom(rawLine);
-            const instruction = Z80InstructionSet.instance.parseInstruction(rawInstruction);
-            this.addInstruction(instruction);
+            const parts = rawLine.split(":");
+            // For every part separated with : in line...
+            parts.forEach(linePart => {
+                // Extracts the instruction
+                const rawInstruction = extractInstructionFrom(linePart);
+                const instruction = Z80InstructionSet.instance.parseInstruction(rawInstruction);
+                this.addInstruction(instruction);
+            });
 
             // (stops after maximum loc count)
             if ((!!maxLoc) && (this.loc >= maxLoc)) {
