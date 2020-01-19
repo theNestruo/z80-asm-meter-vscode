@@ -1,4 +1,9 @@
 
+## 0.6.0
+
+- Support for line with multiple instructions, by contributor: **IIIvan37**
+- Correction nop timing for INC HL, by contributor: **IIIvan37**
+
 ## 0.5.3
 
 - Fixed issues:
