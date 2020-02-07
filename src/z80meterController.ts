@@ -59,7 +59,7 @@ export class Z80MeterController {
             if (!this._sizeStatusBarItem) {
                 this._sizeStatusBarItem = window.createStatusBarItem();
             }
-            this._sizeStatusBarItem.text = "$(code) " + size["text"];
+            this._sizeStatusBarItem.text = "$(file-code) " + size["text"];
             this._sizeStatusBarItem.tooltip = size["tooltip"];
             this._sizeStatusBarItem.show();
         }
