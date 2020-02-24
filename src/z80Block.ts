@@ -1,7 +1,7 @@
 import { workspace } from 'vscode';
 import { Z80Instruction } from "./z80Instruction";
 import { Z80InstructionSet } from './z80InstructionSet';
-import { formatTiming, extractInstructionFrom } from './z80Utils';
+import { formatTiming, extractInstructionsFrom } from './z80Utils';
 
 export class Z80Block {
 
@@ -29,30 +29,31 @@ export class Z80Block {
         if (!sourceCode) {
             return;
         }
-        const lines = sourceCode.split(/[\r\n]+/);
-        if (lines.length === 0) {
+        const rawLines = sourceCode.split(/[\r\n]+/);
+        if (rawLines.length === 0) {
             return;
         }
-        if (lines[lines.length - 1].trim() === "") {
-            lines.pop(); // (removes possible spurious empty line at the end of the selection)
+        if (rawLines[rawLines.length - 1].trim() === "") {
+            rawLines.pop(); // (removes possible spurious empty line at the end of the selection)
         }
 
         const configuration = workspace.getConfiguration("z80-asm-meter");
 
         // (disables if maximum lines exceeded)
         const maxLines: number | undefined = configuration.get("maxLines");
-        if ((!!maxLines) && (lines.length > maxLines)) {
+        if ((!!maxLines) && (rawLines.length > maxLines)) {
             return;
         }
 
         // For every line...
         const maxLoc: number | undefined = configuration.get("maxLoC");
-        lines.forEach(rawLine => {
-            const parts = rawLine.split(":");
-            // For every part separated with : in line...
-            parts.forEach(linePart => {
-                // Extracts the instruction
-                const rawInstruction = extractInstructionFrom(linePart);
+        rawLines.forEach(rawLine => {
+            // Extracts the instructions
+            const rawInstructions = extractInstructionsFrom(rawLine);
+            if (!rawInstructions) {
+                return;
+            }
+            rawInstructions.forEach((rawInstruction: string | undefined) => {
                 const instruction = Z80InstructionSet.instance.parseInstruction(rawInstruction);
                 this.addInstruction(instruction);
             });
