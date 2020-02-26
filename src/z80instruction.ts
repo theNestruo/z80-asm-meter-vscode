@@ -280,7 +280,7 @@ export class Z80Instruction {
      * @returns 1 if the operand is the IX index register with an optional offset, 0 otherwise
      */
     private isIXWithOffsetScore(operand: string): number {
-        return operand.match(/^IX\W/) ? 1 : 0;
+        return operand.match(/^IX(\W|$)/) ? 1 : 0;
     }
 
     /**
@@ -288,7 +288,7 @@ export class Z80Instruction {
      * @returns 1 if the operand is the IY index register with an optional offset, 0 otherwise
      */
     private isIYWithOffsetScore(operand: string): number {
-        return operand.match(/^IY\W/) ? 1 : 0;
+        return operand.match(/^IY(\W|$)/) ? 1 : 0;
     }
 
     /**
