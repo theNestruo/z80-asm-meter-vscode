@@ -1,4 +1,9 @@
 
+## 0.6.1
+
+- Correct IX/IY optional offset support, by contributor: **IIIvan37**
+- Removed some `console.log`
+
 ## 0.6.0
 
 - Support for line with multiple instructions, by contributor: **IIIvan37**
