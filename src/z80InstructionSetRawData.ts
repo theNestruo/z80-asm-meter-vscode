@@ -383,7 +383,7 @@ export const z80InstructionSetRawData = [
 	["ADD HL,A", "8", "", "", "ED 31", "2"],
 	["ADD DE,A", "8", "", "", "ED 32", "2"],
 	["ADD BC,A", "8", "", "", "ED 33", "2"],
-	["ADD HL,nn", "6", "", "", "ED 34 nn nn", "4"],
+	["ADD HL,nn", "16", "", "", "ED 34 nn nn", "4"],
 	["ADD DE,nn", "16", "", "", "ED 35 nn nn", "4"],
 	["ADD BC,nn", "16", "", "", "ED 36 nn nn", "4"],
 	["SWAPNIB", "8", "", "", "ED 23", "2"],
