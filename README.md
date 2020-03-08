@@ -62,11 +62,11 @@ This extension contributes the following settings:
 
 Deprecated settings:
 
-* `z80-asm-meter.timing`: Use `z80-asm-meter.platform` setting instead.
+* ~~`z80-asm-meter.timing`~~: Use `z80-asm-meter.platform` setting instead.
 
-* `z80-asm-meter.size`: Use `z80-asm-meter.viewBytecodeSize` and `z80-asm-meter.viewLoC` settings instead.
+* ~~`z80-asm-meter.size`~~: Use `z80-asm-meter.viewBytecodeSize` and `z80-asm-meter.viewLoC` settings instead.
 
-* `z80-asm-meter.opcode`: Use `z80-asm-meter.viewInstruction` and `z80-asm-meter.viewOpcode` settings instead.
+* ~~`z80-asm-meter.opcode`~~: Use `z80-asm-meter.viewInstruction` and `z80-asm-meter.viewOpcode` settings instead.
 
 ## Credits
 
