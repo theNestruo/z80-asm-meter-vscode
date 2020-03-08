@@ -1,4 +1,11 @@
 
+## 1.0.0
+
+- Simplified configuration settings.
+- Support for Z80N (ZX Spectrum Next Extended Z80 instruction set), by contributor: **Kris Borowinski**
+- Fixed issues:
+    - Halves of index registers not always recognized. #17
+
 ## 0.6.1
 
 - Correct IX/IY optional offset support, by contributor: **IIIvan37**

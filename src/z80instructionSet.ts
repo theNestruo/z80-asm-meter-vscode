@@ -15,12 +15,13 @@ export class Z80InstructionSet {
 
             // Parses the raw instruction
             const instruction = new Z80Instruction(
-                    rawData[0], // rawInstruction
-                    rawData[1], // z80Timing
-                    rawData[2], // z80M1Timing
-                    rawData[3], // cpcTiming
-                    rawData[4], // opcode
-                    rawData[5]); // size
+                    rawData[0], // instructionSet
+                    rawData[1], // raw instruction
+                    rawData[2], // z80Timing
+                    rawData[3], // msxTiming
+                    rawData[4], // cpcTiming
+                    rawData[5], // opcode
+                    rawData[6]); // size
 
             // Prepares a map by mnemonic for performance reasons
             const mnemonic = instruction.getMnemonic();
@@ -31,7 +32,7 @@ export class Z80InstructionSet {
         });
     }
 
-    public parseInstruction(instruction: string | undefined): Z80Instruction | undefined {
+    public parseInstruction(instruction: string | undefined, instructionSets: string[]): Z80Instruction | undefined {
 
         if (!instruction) {
             return undefined;
@@ -49,6 +50,10 @@ export class Z80InstructionSet {
         let bestScore = 0;
         for (let i = 0, n = candidates.length; i < n; i++) {
             const candidate = candidates[i];
+            if (instructionSets.indexOf(candidate.getInstructionSet()) == -1) {
+                // Invalid instruction set
+                continue;
+            }
             const score = candidate.match(instruction);
             if (score === 1) {
                 // Exact match

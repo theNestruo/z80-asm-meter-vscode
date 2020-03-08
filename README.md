@@ -12,6 +12,8 @@ As the MSX standard requires so-called M1 wait cycles, this extension also meter
 
 In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&#00B5;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
 
+ZX Spectrum Next Extended Z80 Instruction Set is supported.
+
 ## Features
 
 Select Z80 assembly source code to view clock cycles and bytecode size in the status bar.
@@ -42,32 +44,35 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.maxLoC`: Stops metering when the parsed lines of code (LoC) count exceeds a certain threshold. Unlimited by default.
 
-* `z80-asm-meter.timing`: Controls the visibility of the timing information in the status bar:
-    * `disabled`: Timing information is not shown.
-    * `z80` (default): Z80 timing information is shown.
-    * `msx`: Z80 + M1 timing information is shown. Useful for Z80 timing calculations on MSX, as the MSX standard requires so-called M1 wait cycles.
-    * `cpc`: Amstrad CPC timing information (in number of NOPs) is shown.
-    * `z80+msx`: Both Z80 and MSX (Z80+M1) timing information are shown.
-    * `z80+cpc`: Both Z80 and Amstrad CPC timing information are shown.
-
-* `z80-asm-meter.size`: Controls the visibility of the size information in the status bar:
-    * `disabled`: Size information is not shown.
-    * `bytecode` (default): Bytecode size information is shown.
-    * `loc`: Processed lines of code (LOC) count is shown.
-    * `bytecode+loc`: Both bytecode size and LOC count are shown.
-
-* `z80-asm-meter.opcode`: Controls the visibility of the instruction and its opcode in the status bar:
-    * `disabled` (default): Neither instruction nor its opcode are shown.
-    * `instruction`: The instruction is shown. Can be used to check if the extension is mistaking instructions.
-    * `opcode`: The opcode of the instruction is shown.
-    * `both`: Both instruction and its opcode are shown.
-
 * `z80-asm-meter.maxOpcodes`: Stops instruction and opcode block visualization (in the tooltip) when the instruction count exceeds this value. Defaults to 16.
+
+* `z80-asm-meter.platform`: Controls the instruction set to use and the timing information to display:
+    * `z80` (default): Uses the default Z80 instruction set and shows default timing information.
+    * `msx`: For MSX developers. Uses the default Z80 instruction set and shows Z80+M1 timing information (MSX standard).
+    * `cpc`: For Amstrad CPC developers. Uses the default Z80 instruction set and shows timing measured in number of NOPs.
+    * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
+
+* `z80-asm-meter.viewBytecodeSize`: Enables the bytecode size information in the status bar. Enabled by default.
+
+* `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Disabled by default.
+
+* `z80-asm-meter.viewLoC`: Enables the processed lines of code (LOC) count in the status bar. Disabled by default.
+
+* `z80-asm-meter.viewOpcode`: Enables the opcode in the status bar. Disabled by default.
+
+Deprecated settings:
+
+* `z80-asm-meter.timing`: Use `z80-asm-meter.platform` setting instead.
+
+* `z80-asm-meter.size`: Use `z80-asm-meter.viewBytecodeSize` and `z80-asm-meter.viewLoC` settings instead.
+
+* `z80-asm-meter.opcode`: Use `z80-asm-meter.viewInstruction` and `z80-asm-meter.viewOpcode` settings instead.
 
 ## Credits
 
 Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https://twitter.com/NestorSancho)).
-* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide)
+* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide), [**Kris Borowinski**](https://github.com/kborowinski)
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
 * [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 * Amstrad CPC timing information from [Rasm Z80 assembler](http://www.cpcwiki.eu/forum/programming/rasm-z80-assembler-in-beta/) documentation.
+* ZX Spectrum Next [Extended Z80 Instruction Set](https://wiki.specnext.dev/Extended_Z80_instruction_set) from [Sinclair ZX Spectrum Next Official Developer Wiki](https://wiki.specnext.dev)
