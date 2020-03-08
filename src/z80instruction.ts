@@ -183,7 +183,7 @@ export class Z80Instruction {
             return this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
-        // Depending on the
+        // Depending on the expected operand...
         switch (expectedOperand) {
         case "r":
             return this.is8bitRegisterScore(candidateOperand);

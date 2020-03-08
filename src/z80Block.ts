@@ -45,7 +45,7 @@ export class Z80Block {
             return;
         }
 
-        // Saves instruction set and display configuration
+        // Saves configuration
         this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
         this.platformConfiguration = configuration.get("platform", "z80");
         this.viewBytecodeSizeConfiguration = configuration.get("viewBytecodeSize") || false;
@@ -53,10 +53,12 @@ export class Z80Block {
         this.viewLoCConfiguration = configuration.get("viewLoC") || false;
         this.viewOpcodeConfiguration = configuration.get("viewOpcode") || false;
 
-        // For every line...
+        // Determines instruction sets
         const instructionSets =
-                this.platformConfiguration == "z80n" ? [ "S", "N" ]
+                this.platformConfiguration === "z80n" ? [ "S", "N" ]
                 : [ "S" ];
+
+        // For every line...
         const maxLoc: number | undefined = configuration.get("maxLoC");
         rawLines.forEach(rawLine => {
             // Extracts the instructions

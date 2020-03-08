@@ -50,7 +50,7 @@ export class Z80InstructionSet {
         let bestScore = 0;
         for (let i = 0, n = candidates.length; i < n; i++) {
             const candidate = candidates[i];
-            if (instructionSets.indexOf(candidate.getInstructionSet()) == -1) {
+            if (instructionSets.indexOf(candidate.getInstructionSet()) === -1) {
                 // Invalid instruction set
                 continue;
             }
