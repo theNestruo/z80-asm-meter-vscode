@@ -116,7 +116,7 @@ export class Z80Block {
                 "tooltip":
                     `MSX (Z80+M1): ${msxText} clock cycles\n`
                     + `Z80: ${z80text} clock cycles`
-            }
+            };
         }
         if (this.platformConfiguration === "cpc") {
             const cpcText = formatTiming(this.cpcTiming);
@@ -125,12 +125,12 @@ export class Z80Block {
                 "tooltip":
                     `Amstrad CPC: ${cpcText} NOPs\n`
                     + `Z80: ${z80text} clock cycles`
-            }
+            };
         }
         return {
             "text": z80text,
             "tooltip": `Z80: ${z80text} clock cycles`
-        }
+        };
     }
 
     public getInstructionInformation(): Record<string, string | undefined> | undefined {
