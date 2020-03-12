@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -48,6 +48,7 @@
 			}
 		],
 		"configuration": {
+			"title": "Z80 Assembly meter settings",
 			"properties": {
 				"z80-asm-meter.languageIds": {
 					"type": [
@@ -64,7 +65,7 @@
 				},
 				"z80-asm-meter.maxLines": {
 					"type": [
-						"integer",
+						"number",
 						"null"
 					],
 					"description": "Disables metering when the line count of the selection exceeds this value",
@@ -72,7 +73,7 @@
 				},
 				"z80-asm-meter.maxLoC": {
 					"type": [
-						"integer",
+						"number",
 						"null"
 					],
 					"description": "Stops metering when the lines of code (LoC) count exceeds this value",
@@ -80,7 +81,7 @@
 				},
 				"z80-asm-meter.maxOpcodes": {
 					"type": [
-						"integer",
+						"number",
 						"null"
 					],
 					"description": "Stops instruction and opcode block visualization (tooltip) when the instruction count exceeds this value",
@@ -104,34 +105,22 @@
 					"default": "z80"
 				},
 				"z80-asm-meter.viewBytecodeSize": {
-					"type": [
-						"boolean",
-						"null"
-					],
+					"type": "boolean",
 					"description": "Enables the bytecode size information in the status bar",
 					"default": true
 				},
 				"z80-asm-meter.viewInstruction": {
-					"type": [
-						"boolean",
-						"null"
-					],
+					"type": "boolean",
 					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
 					"default": false
 				},
 				"z80-asm-meter.viewLoC": {
-					"type": [
-						"boolean",
-						"null"
-					],
+					"type": "boolean",
 					"description": "Enables the processed lines of code (LOC) count in the status bar",
 					"default": false
 				},
 				"z80-asm-meter.viewOpcode": {
-					"type": [
-						"boolean",
-						"null"
-					],
+					"type": "boolean",
 					"description": "Enables the opcode in the status bar",
 					"default": false
 				},
