@@ -1,8 +1,25 @@
 
+## 1.0.1
+
+- Correct size for `DEC L`, `LD HL,(NN)`, and `IN F,(C)`, thanks to [**Grauw**](http://map.grauw.nl)
+- Fixes configuration settings types
+
+## 1.0.0
+
+- Simplified configuration settings
+- Support for Z80N (ZX Spectrum Next Extended Z80 instruction set), by contributor: **Kris Borowinski**
+- Fixed issues:
+    - Halves of index registers not always recognized. #17
+
+## 0.6.1
+
+- Correct IX/IY optional offset support, by contributor: **IIIvan37**
+- Removed some `console.log`
+
 ## 0.6.0
 
 - Support for line with multiple instructions, by contributor: **IIIvan37**
-- Correction nop timing for INC HL, by contributor: **IIIvan37**
+- Correction nop timing for `INC HL`, by contributor: **IIIvan37**
 
 ## 0.5.3
 

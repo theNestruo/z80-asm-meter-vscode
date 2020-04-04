@@ -5,24 +5,24 @@ import { formatTiming, extractInstructionsFrom } from './z80Utils';
 
 export class Z80Block {
 
+    // Configuration
+    private maxOpcodesConfiguration: number | undefined = undefined;
+    private platformConfiguration: string | undefined = undefined;
+    private viewBytecodeSizeConfiguration: boolean | undefined = undefined;
+    private viewInstructionConfiguration: boolean | undefined = undefined;
+    private viewLoCConfiguration: boolean | undefined = undefined;
+    private viewOpcodeConfiguration: boolean | undefined = undefined;
+
     // Timing information
     public z80Timing: number[] = [0, 0];
-    public z80M1Timing: number[] = [0, 0];
+    public msxTiming: number[] = [0, 0];
     public cpcTiming: number[] = [0, 0];
 
     // Size information
     public size: number = 0;
     public loc: number = 0;
-
-    // Instruction and opcode information
     public instructions: string[] = [];
     public opcodes: string[] = [];
-
-    // Display configuration
-    private timingConfiguration: string | undefined = undefined;
-    private sizeConfiguration: string | undefined = undefined;
-    private opcodeConfiguration: string | undefined = undefined;
-    private maxOpcodesConfiguration: number | undefined = undefined;
 
     constructor(sourceCode: string | undefined) {
 
@@ -45,6 +45,19 @@ export class Z80Block {
             return;
         }
 
+        // Saves configuration
+        this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
+        this.platformConfiguration = configuration.get("platform", "z80");
+        this.viewBytecodeSizeConfiguration = configuration.get("viewBytecodeSize") || false;
+        this.viewInstructionConfiguration = configuration.get("viewInstruction") || false;
+        this.viewLoCConfiguration = configuration.get("viewLoC") || false;
+        this.viewOpcodeConfiguration = configuration.get("viewOpcode") || false;
+
+        // Determines instruction sets
+        const instructionSets =
+                this.platformConfiguration === "z80n" ? [ "S", "N" ]
+                : [ "S" ];
+
         // For every line...
         const maxLoc: number | undefined = configuration.get("maxLoC");
         rawLines.forEach(rawLine => {
@@ -54,7 +67,7 @@ export class Z80Block {
                 return;
             }
             rawInstructions.forEach((rawInstruction: string | undefined) => {
-                const instruction = Z80InstructionSet.instance.parseInstruction(rawInstruction);
+                const instruction = Z80InstructionSet.instance.parseInstruction(rawInstruction, instructionSets);
                 this.addInstruction(instruction);
             });
 
@@ -63,12 +76,6 @@ export class Z80Block {
                 return;
             }
         });
-
-        // Saves display configuration
-        this.timingConfiguration = configuration.get("timing", "disabled");
-        this.sizeConfiguration = configuration.get("size", "disabled");
-        this.opcodeConfiguration = configuration.get("opcode", "disabled");
-        this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
     }
 
     public addInstruction(instruction: Z80Instruction | undefined) {
@@ -81,13 +88,13 @@ export class Z80Block {
         this.z80Timing[0] += instructionZ80Timing[0];
         this.z80Timing[1] += instructionZ80Timing[1];
 
-        const instructionZ80M1Timing = instruction.getZ80M1Timing();
-        this.z80M1Timing[0] += instructionZ80M1Timing[0];
-        this.z80M1Timing[1] += instructionZ80M1Timing[1];
+        const instructionMsxTiming = instruction.getMsxTiming();
+        this.msxTiming[0] += instructionMsxTiming[0];
+        this.msxTiming[1] += instructionMsxTiming[1];
 
-        const instructionCPCTiming = instruction.getCPCTiming();
-        this.cpcTiming[0] += instructionCPCTiming[0];
-        this.cpcTiming[1] += instructionCPCTiming[1];
+        const instructionCpcTiming = instruction.getCpcTiming();
+        this.cpcTiming[0] += instructionCpcTiming[0];
+        this.cpcTiming[1] += instructionCpcTiming[1];
 
         this.instructions.push(instruction.getInstruction());
         this.opcodes.push(instruction.getOpcode());
@@ -99,65 +106,105 @@ export class Z80Block {
     public getTimingInformation(): Record<string, string | undefined> | undefined {
 
         // (empty or disabled)
-        if ((this.loc === 0) || (this.timingConfiguration === "disabled")) {
+        if (this.loc === 0) {
             return undefined;
         }
 
         const z80text = formatTiming(this.z80Timing);
-        const z80M1Text = formatTiming(this.z80M1Timing);
-        const cpcText = formatTiming(this.cpcTiming);
+        if (this.platformConfiguration === "msx") {
+            const msxText = formatTiming(this.msxTiming);
+            return {
+                "text": msxText,
+                "tooltip":
+                    `MSX (Z80+M1): ${msxText} clock cycles\n`
+                    + `Z80: ${z80text} clock cycles`
+            };
+        }
+        if (this.platformConfiguration === "cpc") {
+            const cpcText = formatTiming(this.cpcTiming);
+            return {
+                "text": cpcText,
+                "tooltip":
+                    `Amstrad CPC: ${cpcText} NOPs\n`
+                    + `Z80: ${z80text} clock cycles`
+            };
+        }
         return {
-            "text":
-                this.timingConfiguration === "z80" ? z80text
-                : this.timingConfiguration === "msx" ? z80M1Text
-                : this.timingConfiguration === 'cpc' ? cpcText
-                : this.timingConfiguration === "z80+msx" ? `${z80text} (${z80M1Text})`
-                : this.timingConfiguration === "z80+cpc" ? `${z80text} (${cpcText})`
-                : undefined,
-            "tooltip":
-                `Z80: ${z80text} clock cycles\n`
-                + `Z80+M1 (MSX): ${z80M1Text} clock cycles\n`
-                + `Amstrad CPC: ${cpcText} NOPs`
+            "text": z80text,
+            "tooltip": `Z80: ${z80text} clock cycles`
         };
     }
 
-    public getSizeInformation(): Record<string, string | undefined> | undefined {
+    public getInstructionInformation(): Record<string, string | undefined> | undefined {
 
         // (empty or disabled)
-        if ((this.loc === 0) || (this.sizeConfiguration === "disabled")) {
+        if ((this.loc === 0)
+                || (!this.viewInstructionConfiguration
+                    && !this.viewLoCConfiguration)) {
             return undefined;
         }
 
-        const sizeText = this.size + (this.size === 1 ? " byte" : " bytes");
+        // text: first instruction and LoC
         const locText = this.loc + " LoC";
-        return {
-            "text":
-                this.sizeConfiguration === "bytecode" ? sizeText
-                : this.sizeConfiguration === "loc" ? locText
-                : this.sizeConfiguration === "bytecode+loc" ? `${sizeText} (${locText})`
-                : undefined,
-            "tooltip":
-                sizeText + " in " + this.loc + " selected " + (this.loc === 1 ? "line" : "lines") + " of code (LoC)",
-        };
-    }
-
-    public getInstructionAndOpcode(): Record<string, string | undefined> | undefined {
-
-        // (empty or disabled)
-        if ((this.loc === 0) || (this.opcodeConfiguration === "disabled")) {
-            return undefined;
+        let text = "";
+        if (this.viewInstructionConfiguration) {
+            // text: only the first instruction
+            text = this.instructions[0];
+            if (this.loc > 1) {
+                text += " ...";
+            }
+            if (this.viewLoCConfiguration && (this.loc > 1)) {
+                text += ` (${locText})`;
+            }
+        } else {
+            text = locText;
         }
-
-        // text: only the first instruction
-        const firstInstruction = this.instructions[0];
-        const firstOpcode = this.opcodes[0];
-        const text =
-                this.opcodeConfiguration === "instruction" ? firstInstruction
-                : this.opcodeConfiguration === "opcode" ? firstOpcode
-                : this.opcodeConfiguration === "both" ? `${firstOpcode} ; ${firstInstruction}`
-                : undefined;
 
         // tooltip: up to maxOpcodes instructions
+        const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
+        let tooltip = this.loc + " selected " + (this.loc === 1 ? "line" : "lines") + " of code (LoC):";
+        for (let i = 0; i < n; i++) {
+            const opcode = this.opcodes[i];
+            const instruction = this.instructions[i];
+            tooltip += "\n    " + instruction;
+        }
+        if (this.maxOpcodesConfiguration && this.maxOpcodesConfiguration < this.loc) {
+            const etc = this.loc - this.maxOpcodesConfiguration;
+            tooltip += "\n(and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
+        }
+
+        return {
+            "text": text,
+            "tooltip": tooltip
+        };
+    }
+
+    public getOpcodeAndSizeInformation(): Record<string, string | undefined> | undefined {
+
+        // (empty or disabled)
+        if ((this.loc === 0)
+                || (!this.viewBytecodeSizeConfiguration
+                    && !this.viewOpcodeConfiguration)) {
+            return undefined;
+        }
+
+        // text: first opcode and bytesize
+        const sizeText = this.size + (this.size === 1 ? " byte" : " bytes");
+        let text = "";
+        if (this.viewOpcodeConfiguration) {
+            // text: only the first opcode
+            text = this.opcodes[0];
+            if (this.loc > 1) {
+                text += " ...";
+            }
+            if (this.viewBytecodeSizeConfiguration) {
+                text += ` (${sizeText})`;
+            }
+        } else {
+            text = sizeText;
+        }
+
+        // tooltip: up to maxOpcodes opcodes
         const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
         let tooltip = "Opcodes:";
         for (let i = 0; i < n; i++) {
@@ -167,16 +214,12 @@ export class Z80Block {
         }
         if (this.maxOpcodesConfiguration && this.maxOpcodesConfiguration < this.loc) {
             const etc = this.loc - this.maxOpcodesConfiguration;
-            tooltip += "\n    (and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
+            tooltip += "\n(and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
         }
 
         return {
             "text": text,
             "tooltip": tooltip
         };
-    }
-
-    public getLoc(): number {
-        return this.loc;
     }
 }

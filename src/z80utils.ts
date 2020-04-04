@@ -24,7 +24,6 @@ export function extractInstructionsFrom(rawLine: string): string[] | undefined {
             rawInstructions.push(rawInstruction);
         }
     });
-    console.log("line", line, "rawInstructions", rawInstructions);
     return rawInstructions.length === 0 ? undefined : rawInstructions;
 }
 

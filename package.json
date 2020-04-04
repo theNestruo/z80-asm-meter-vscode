@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "0.6.0",
+	"version": "1.0.1",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -18,9 +18,12 @@
 		"Zilog",
 		"Z80",
 		"Z80A",
+		"ZX Spectrum",
 		"MSX",
 		"CPC",
-		"Amstrad CPC"
+		"Amstrad CPC",
+		"Z80N",
+		"ZX Spectrum Next"
 	],
 	"homepage": "https://github.com/theNestruo/z80-asm-meter-vscode",
 	"bugs": {
@@ -45,6 +48,7 @@
 			}
 		],
 		"configuration": {
+			"title": "Z80 Assembly meter settings",
 			"properties": {
 				"z80-asm-meter.languageIds": {
 					"type": [
@@ -61,7 +65,7 @@
 				},
 				"z80-asm-meter.maxLines": {
 					"type": [
-						"integer",
+						"number",
 						"null"
 					],
 					"description": "Disables metering when the line count of the selection exceeds this value",
@@ -69,15 +73,61 @@
 				},
 				"z80-asm-meter.maxLoC": {
 					"type": [
-						"integer",
+						"number",
 						"null"
 					],
 					"description": "Stops metering when the lines of code (LoC) count exceeds this value",
 					"default": null
 				},
+				"z80-asm-meter.maxOpcodes": {
+					"type": [
+						"number",
+						"null"
+					],
+					"description": "Stops instruction and opcode block visualization (tooltip) when the instruction count exceeds this value",
+					"default": 16
+				},
+				"z80-asm-meter.platform": {
+					"type": "string",
+					"description": "Controls the instruction set and the timing information",
+					"enum": [
+						"z80",
+						"msx",
+						"cpc",
+						"z80n"
+					],
+					"enumDescriptions": [
+						"Default Z80 instruction set and default timing information",
+						"MSX: default Z80 instruction set and Z80+M1 timing information (MSX standard)",
+						"Amstrad CPC: default Z80 instruction set and timing measured in number of NOPs",
+						"ZX Spectrum Next Extended Z80 instruction set and default timing information"
+					],
+					"default": "z80"
+				},
+				"z80-asm-meter.viewBytecodeSize": {
+					"type": "boolean",
+					"description": "Enables the bytecode size information in the status bar",
+					"default": true
+				},
+				"z80-asm-meter.viewInstruction": {
+					"type": "boolean",
+					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
+					"default": false
+				},
+				"z80-asm-meter.viewLoC": {
+					"type": "boolean",
+					"description": "Enables the processed lines of code (LOC) count in the status bar",
+					"default": false
+				},
+				"z80-asm-meter.viewOpcode": {
+					"type": "boolean",
+					"description": "Enables the opcode in the status bar",
+					"default": false
+				},
 				"z80-asm-meter.timing": {
 					"type": "string",
 					"description": "Controls the visibility of the timing information in the status bar",
+					"deprecationMessage": "Use z80-asm-meter.platform setting instead",
 					"enum": [
 						"disabled",
 						"z80",
@@ -86,57 +136,31 @@
 						"z80+msx",
 						"z80+cpc"
 					],
-					"enumDescriptions": [
-						"Timing information is not shown",
-						"Z80 timing information is shown",
-						"Z80+M1 timing information (MSX standard) is shown",
-						"Amstrad CPC timing information (in number of NOPs) is shown",
-						"Both Z80 and MSX (Z80+M1) timing information are shown",
-						"Both Z80 and Amstrad CPC timing information are shown"
-					],
-					"default": "z80"
+					"default": "disabled"
 				},
 				"z80-asm-meter.size": {
 					"type": "string",
 					"description": "Controls the visibility of the size information in the status bar",
+					"deprecationMessage": "Use z80-asm-meter.viewBytecodeSize and viewLoC settings instead",
 					"enum": [
 						"disabled",
 						"bytecode",
 						"loc",
 						"bytecode+loc"
 					],
-					"enumDescriptions": [
-						"Size information is not shown",
-						"Bytecode size information is shown",
-						"Processed lines of code (LOC) count is shown",
-						"Both bytecode size and LOC count are shown"
-					],
 					"default": "bytecode"
 				},
 				"z80-asm-meter.opcode": {
 					"type": "string",
 					"description": "Controls the visibility of the instruction and its opcode in the status bar",
+					"deprecationMessage": "Use z80-asm-meter.viewInstruction and viewOpcode settings instead",
 					"enum": [
 						"disabled",
 						"instruction",
 						"opcode",
 						"both"
 					],
-					"enumDescriptions": [
-						"Neither instruction nor its opcode are shown",
-						"The instruction is shown",
-						"The opcode of the instruction is shown",
-						"Both instruction and its opcode are shown"
-					],
 					"default": "disabled"
-				},
-				"z80-asm-meter.maxOpcodes": {
-					"type": [
-						"integer",
-						"null"
-					],
-					"description": "Stops instruction and opcode block visualization (tooltip) when the instruction count exceeds this value",
-					"default": 16
 				}
 			}
 		}

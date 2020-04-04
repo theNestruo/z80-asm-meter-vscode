@@ -3,9 +3,10 @@ import { parseTimings, extractMnemonicOf, extractOperandsOf } from './z80Utils';
 export class Z80Instruction {
 
     // Information
+    private instructionSet: string;
     private instruction: string;
     private z80Timing: number[];
-    private z80M1Timing: number[];
+    private msxTiming: number[];
     private cpcTiming: number[];
     private opcode: string;
     private size: number;
@@ -16,16 +17,24 @@ export class Z80Instruction {
     private implicitAccumulatorSyntaxAllowed: boolean | undefined;
 
     constructor(
-            instruction: string,
-            z80Timing: string, z80M1Timing: string, cpcTiming: string,
+            instructionSet: string, instruction: string,
+            z80Timing: string, msxTiming: string, cpcTiming: string,
             opcode: string, size: string) {
 
+        this.instructionSet = instructionSet;
         this.instruction = instruction;
         this.z80Timing = parseTimings(z80Timing);
-        this.z80M1Timing = parseTimings(z80M1Timing);
+        this.msxTiming = parseTimings(msxTiming);
         this.cpcTiming = parseTimings(cpcTiming);
         this.opcode = opcode;
         this.size = parseInt(size);
+    }
+
+    /**
+     * @returns The instruction set
+     */
+    public getInstructionSet(): string {
+        return this.instructionSet;
     }
 
     /**
@@ -45,14 +54,14 @@ export class Z80Instruction {
     /**
      * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
      */
-    public getZ80M1Timing(): number[] {
-        return this.z80M1Timing;
+    public getMsxTiming(): number[] {
+        return this.msxTiming;
     }
 
     /**
      * @returns The CPC timing, in NOPS
      */
-    public getCPCTiming(): number[] {
+    public getCpcTiming(): number[] {
         return this.cpcTiming;
     }
 
@@ -174,7 +183,7 @@ export class Z80Instruction {
             return this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
-        // Depending on the
+        // Depending on the expected operand...
         switch (expectedOperand) {
         case "r":
             return this.is8bitRegisterScore(candidateOperand);
@@ -182,8 +191,16 @@ export class Z80Instruction {
             return this.isIXWithOffsetScore(candidateOperand);
         case "IY+o":
             return this.isIYWithOffsetScore(candidateOperand);
+        case "IXh":
+            return this.isIXhScore(candidateOperand);
+        case "IXl":
+            return this.isIXlScore(candidateOperand);
         case "IXp":
             return this.isIX8bitScore(candidateOperand);
+        case "IYh":
+            return this.isIYhScore(candidateOperand);
+        case "IYl":
+            return this.isIYlScore(candidateOperand);
         case "IYq":
             return this.isIY8bitScore(candidateOperand);
         case "p":
@@ -215,7 +232,7 @@ export class Z80Instruction {
      * @returns true if the candidate operand must match verbatim the operand of the instruction
      */
     private isVerbatimOperand(operand: string): boolean {
-        return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY][hl]?|R|SP|N?Z|M|P[OE]?)$/);
+        return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY]|R|SP|N?Z|M|P[OE]?)$/);
     }
 
     /**
@@ -226,8 +243,7 @@ export class Z80Instruction {
      */
     private verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
 
-        return ((candidateOperand === expectedOperand.toUpperCase())
-                || (candidateOperand === "IXU" && expectedOperand === "IXh")) ? 1 : 0;
+        return (candidateOperand === expectedOperand.toUpperCase()) ? 1 : 0;
     }
 
     /**
@@ -293,10 +309,42 @@ export class Z80Instruction {
 
     /**
      * @param operand the candidate operand
+     * @returns 1 if the operand is the high part of the IX index register, 0 otherwise
+     */
+    private isIXhScore(operand: string): number {
+        return operand.match(/^(IX[HU]|XH|HX)$/) ? 1 : 0;
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns 1 if the operand is the low part of the IX index register, 0 otherwise
+     */
+    private isIXlScore(operand: string): number {
+        return operand.match(/^(IXL|XL|LX)$/) ? 1 : 0;
+    }
+
+    /**
+     * @param operand the candidate operand
      * @returns 1 if the operand is the high or low part of the IX index register, 0 otherwise
      */
     private isIX8bitScore(operand: string): number {
         return operand.match(/^(IX[HLU]|X[HL]|[HL]X)$/) ? 1 : 0;
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns 1 if the operand is the high part of the IY index register, 0 otherwise
+     */
+    private isIYhScore(operand: string): number {
+        return operand.match(/^(IY[HU]|YH|HY)$/) ? 1 : 0;
+    }
+
+    /**
+     * @param operand the candidate operand
+     * @returns 1 if the operand is the low part of the IY index register, 0 otherwise
+     */
+    private isIYlScore(operand: string): number {
+        return operand.match(/^(IYL|YL|LY)$/) ? 1 : 0;
     }
 
     /**
