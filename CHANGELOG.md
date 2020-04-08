@@ -1,4 +1,8 @@
 
+## 1.0.2
+
+- Correct CPC timing for several instructions, thanks to **IIIvan37**
+
 ## 1.0.1
 
 - Correct size for `DEC L`, `LD HL,(NN)`, and `IN F,(C)`, thanks to [**Grauw**](http://map.grauw.nl)
