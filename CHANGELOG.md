@@ -1,4 +1,8 @@
 
+## 1.0.3 (unreleased)
+
+- _DeZog - Z80 Debugger_ compatibility added to the default configuration. #11, #20
+
 ## 1.0.2
 
 - Correct CPC timing for several instructions, thanks to **IIIvan37**

@@ -18,11 +18,11 @@
 		"Zilog",
 		"Z80",
 		"Z80A",
-		"ZX Spectrum",
-		"MSX",
-		"CPC",
-		"Amstrad CPC",
 		"Z80N",
+		"Amstrad CPC",
+		"CPC",
+		"MSX",
+		"ZX Spectrum",
 		"ZX Spectrum Next"
 	],
 	"homepage": "https://github.com/theNestruo/z80-asm-meter-vscode",
@@ -57,10 +57,12 @@
 					],
 					"description": "Additional language IDs for which the extension is enabled (such as \"c\" for in-lined assembly)",
 					"default": [
-						"z80-macroasm",
-						"z80-asm",
+						"asm-collection",
+						"pasmo",
 						"z80",
-						"pasmo"
+						"z80-asm",
+						"z80-macroasm",
+						"zeus-asm"
 					]
 				},
 				"z80-asm-meter.maxLines": {

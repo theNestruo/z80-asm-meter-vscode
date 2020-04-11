@@ -16,9 +16,9 @@ ZX Spectrum Next Extended Z80 Instruction Set is supported.
 
 ## Features
 
-Select Z80 assembly source code to view clock cycles and bytecode size in the status bar.
+Select Z80 assembly source code to view clock cycles, mnemonic of the instruction, and/or bytecode size in the status bar.
 
-![Z80 Assembly meter](doc/images/screenshot.png)
+![Z80 Assembly meter](doc/images/screenshot.1.0.2.png)
 
 If there is no selection, the current line will be used.
 
@@ -32,13 +32,14 @@ Therefore, this extension can be installed alongside other Z80-related extension
 * [Z80 Assembly](https://marketplace.visualstudio.com/items?itemName=Imanolea.z80-asm) by Imanolea
 * [MSX Z80](https://marketplace.visualstudio.com/items?itemName=sharksym.asm-msx) by Yeoungman Seo
 * [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) by BouKiChi
-* (and probably others)
+* [DeZog - Z80 Debugger](https://marketplace.visualstudio.com/items?itemName=maziac.dezog) by Maziac
+* (and probably others; please check the `z80-asm-meter.languageIds` setting)
 
 ## Extension Settings
 
 This extension contributes the following settings:
 
-* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `"z80-macroasm", "z80-asm", "z80", "pasmo"`.
+* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `"asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"`.
 
 * `z80-asm-meter.maxLines`: When working with huge files, metering can be disabled when the line count of the selection exceeds a certain threshold. Unlimited by default.
 
