@@ -4,9 +4,9 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"engines": {
-		"vscode": "^1.38.0"
+		"vscode": "^1.44.0"
 	},
 	"categories": [
 		"Programming Languages"
@@ -170,19 +170,10 @@
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile",
-		"test": "node ./out/test/runTest.js"
+		"watch": "tsc -watch -p ./"
 	},
 	"devDependencies": {
-		"@types/glob": "^7.1.1",
-		"@types/mocha": "^5.2.6",
-		"@types/node": "^10.12.21",
-		"@types/vscode": "^1.38.0",
-		"glob": "^7.1.4",
-		"mocha": "^6.1.4",
-		"tslint": "^5.20.0",
-		"typescript": "^3.3.1",
-		"vscode-test": "^1.0.2"
+		"@types/vscode": "^1.44.0",
+		"typescript": "^3.8.3"
 	}
 }
