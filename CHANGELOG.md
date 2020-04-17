@@ -1,7 +1,8 @@
 
-## 1.0.3 (unreleased)
+## 1.1.0
 
 - _DeZog - Z80 Debugger_ compatibility added to the default configuration. #11, #20
+- Support for Pasmo and SjASMPlus assembler syntax (labels without trailing colon), thanks to contributor: **alexanderk23**
 
 ## 1.0.2
 

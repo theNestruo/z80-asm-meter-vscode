@@ -8,6 +8,7 @@ export class Z80Block {
     // Configuration
     private maxOpcodesConfiguration: number | undefined = undefined;
     private platformConfiguration: string | undefined = undefined;
+    private syntaxLabelConfiguration: string | undefined = undefined;
     private viewBytecodeSizeConfiguration: boolean | undefined = undefined;
     private viewInstructionConfiguration: boolean | undefined = undefined;
     private viewLoCConfiguration: boolean | undefined = undefined;
@@ -48,6 +49,7 @@ export class Z80Block {
         // Saves configuration
         this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
         this.platformConfiguration = configuration.get("platform", "z80");
+        this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.viewBytecodeSizeConfiguration = configuration.get("viewBytecodeSize") || false;
         this.viewInstructionConfiguration = configuration.get("viewInstruction") || false;
         this.viewLoCConfiguration = configuration.get("viewLoC") || false;
@@ -58,11 +60,17 @@ export class Z80Block {
                 this.platformConfiguration === "z80n" ? [ "S", "N" ]
                 : [ "S" ];
 
+        // Determines syntax
+        const labelRegExp = this.syntaxLabelConfiguration === "default"
+                ? /(^\s*[^\s:]+:)/
+                : /(^[^\s:]+([\s:]|$))/;
+        const commentRegExp = /((;|\/\/).*$)/;
+
         // For every line...
         const maxLoc: number | undefined = configuration.get("maxLoC");
         rawLines.forEach(rawLine => {
             // Extracts the instructions
-            const rawInstructions = extractInstructionsFrom(rawLine);
+            const rawInstructions = extractInstructionsFrom(rawLine, labelRegExp, commentRegExp);
             if (!rawInstructions) {
                 return;
             }

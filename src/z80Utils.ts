@@ -9,9 +9,9 @@ export function formatTiming(t: number[]): string {
     return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
 }
 
-export function extractInstructionsFrom(rawLine: string): string[] | undefined {
+export function extractInstructionsFrom(rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp): string[] | undefined {
     // Removes surrounding label, whitespace and/or comments
-    const line = rawLine.replace(/(^\s*\S+:)|((;|\/\/).*$)/, "").trim();
+    const line = rawLine.replace(labelRegExp, "").replace(commentRegExp, "").trim();
     if (line.length === 0) {
         return undefined;
     }

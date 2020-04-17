@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
@@ -105,6 +105,19 @@
 						"ZX Spectrum Next Extended Z80 instruction set and default timing information"
 					],
 					"default": "z80"
+				},
+				"z80-asm-meter.syntax.label": {
+					"type": "string",
+					"description": "Adjusts the label detection to match the syntax of the assembler",
+					"enum": [
+						"default",
+						"colonOptional"
+					],
+					"enumDescriptions": [
+						"The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles",
+						"The trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as Pasmo and SjASMPlus"
+					],
+					"default": "default"
 				},
 				"z80-asm-meter.viewBytecodeSize": {
 					"type": "boolean",
