@@ -1,4 +1,4 @@
-[![Travis-CI](https://travis-ci.org/theNestruo/z80-asm-meter-vscode.svg?branch=master)](https://travis-ci.org/theNestruo/z80-asm-meter-vscode)
+[![NPM CI](https://github.com/theNestruo/z80-asm-meter-vscode/workflows/NPM%20CI/badge.svg)](https://github.com/theNestruo/z80-asm-meter-vscode/actions)
 [![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/master)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/master)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version-short/theNestruo.z80-asm-meter.svg)](https://marketplace.visualstudio.com/items?itemName=theNestruo.z80-asm-meter)
 
