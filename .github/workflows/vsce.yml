@@ -1,0 +1,18 @@
+name: VSCE CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: clean install dependencies
+      run: npm ci
+    - name: compile and create vsix
+      run: npm run package
+    - name: upload vsix as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: z80-asm-meter-1.1.1.vsix
+        path: ${{github.workspace}}/z80-asm-meter-1.1.1.vsix
