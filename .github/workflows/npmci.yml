@@ -13,7 +13,9 @@ jobs:
     - run: npm install
     - run: npm install -g vsce
     - run: vsce package
+    - uses: martinbeentjes/npm-get-version-action@master
+      id: package-version
     - uses: actions/upload-artifact@v1
       with:
-        name: z80-asm-meter-nightly
-        path: z80-asm-meter-*.vsix
+        name: z80-asm-meter-${{ steps.package-version.outputs.current-version}}-nightly
+        path: z80-asm-meter-${{ steps.package-version.outputs.current-version}}.vsix
