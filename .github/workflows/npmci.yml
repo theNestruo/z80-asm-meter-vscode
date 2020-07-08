@@ -12,7 +12,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
+    - name: Build
+      run: npm install
     - name: Install VSCE
       run: npm install -g vsce
-    - name: package VSIX
+    - name: Package VSIX
       run: vsce package
