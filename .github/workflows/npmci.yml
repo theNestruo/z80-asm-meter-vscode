@@ -4,18 +4,15 @@ on: [push]
 
 jobs:
   build:
-    name: Windows build
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v2.1.0
-    - name: clean install dependencies
-      run: npm ci
-    - name: compile and create vsix
-      run: npm run package
-    - name: upload vsix as artifact
-      uses: actions/upload-artifact@v1
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install Node.js
+      uses: actions/setup-node@v1
       with:
-        name: z80-asm-meter-1.1.1.vsix
-        path: ${{github.workspace}}/z80-asm-meter-1.1.1.vsix
+        node-version: 10.x
+    - run: npm install
