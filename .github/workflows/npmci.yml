@@ -15,5 +15,5 @@ jobs:
     - run: vsce package
     - uses: actions/upload-artifact@v1
       with:
-        name: z80-asm-meter-vscode-nightly
-        path: z80-asm-meter-vscode-*.vsix
+        name: z80-asm-meter-nightly
+        path: z80-asm-meter-*.vsix
