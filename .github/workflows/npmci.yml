@@ -1,4 +1,4 @@
-name: VSCE CI
+name: NPM CI
 
 on: [push]
 
@@ -8,6 +8,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2.1.0
     - name: clean install dependencies
       run: npm ci
     - name: compile and create vsix
