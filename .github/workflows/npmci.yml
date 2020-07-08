@@ -6,15 +6,14 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Install Node.js
-      uses: actions/setup-node@v1
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - name: Build
-      run: npm install
-    - name: Install VSCE
-      run: npm install -g vsce
-    - name: Package VSIX
-      run: vsce package
+    - run: npm install
+    - run: npm install -g vsce
+    - run: vsce package
+    - uses: actions/upload-artifact@v1
+      with:
+        name: z80-asm-meter-vscode-nightly
+        path: z80-asm-meter-vscode-*.vsix
