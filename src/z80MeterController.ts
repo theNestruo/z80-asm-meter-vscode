@@ -43,6 +43,7 @@ export class Z80MeterController {
         const editor = window.activeTextEditor;
         if ((!editor)
                 || (!this.isEnabledFor(editor.document.languageId))) {
+            // (should never happen)
             return;
         }
 
@@ -50,11 +51,18 @@ export class Z80MeterController {
         const timing = z80Block.getTimingInformation();
         const opcode = z80Block.getOpcodeAndSizeInformation();
         if ((!timing) || (!opcode)) {
+            // (should never happen)
             return;
         }
 
+        // copies to clipboard and notifies the user
         const text = `${timing.textDetail}, ${opcode.textDetail}`;
         env.clipboard.writeText(text);
+        window.showInformationMessage(`"${text}" copied to clipboard`);
+
+        // returns the focus to the editor
+        window.showTextDocument(editor.document);
+
         return;
     }
 
