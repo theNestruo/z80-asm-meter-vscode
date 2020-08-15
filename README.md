@@ -16,7 +16,7 @@ ZX Spectrum Next Extended Z80 Instruction Set is supported.
 
 ## Features
 
-Select Z80 assembly source code to view clock cycles, mnemonic of the instruction, and/or bytecode size in the status bar.
+Select Z80 assembly source code to view clock cycles, mnemonic of the instruction, and/or bytecode size in the status bar. Click on either to copy the clock cycles and the bytecode size information to the clipboard.
 
 ![Z80 Assembly meter](doc/images/screenshot.png)
 

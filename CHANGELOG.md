@@ -1,4 +1,8 @@
 
+## 1.2.0
+
+- Abiliy to copy the clock cycles and the bytecode size information to the clipboard
+
 ## 1.1.0
 
 - _DeZog - Z80 Debugger_ compatibility added to the default configuration. #11, #20
