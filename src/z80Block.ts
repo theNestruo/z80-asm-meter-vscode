@@ -111,38 +111,6 @@ export class Z80Block {
         this.loc++;
     }
 
-    public getTimingInformation(): Record<string, string | undefined> | undefined {
-
-        // (empty or disabled)
-        if (this.loc === 0) {
-            return undefined;
-        }
-
-        const z80text = formatTiming(this.z80Timing);
-        if (this.platformConfiguration === "msx") {
-            const msxText = formatTiming(this.msxTiming);
-            return {
-                "text": msxText,
-                "tooltip":
-                    `MSX (Z80+M1): ${msxText} clock cycles\n`
-                    + `Z80: ${z80text} clock cycles`
-            };
-        }
-        if (this.platformConfiguration === "cpc") {
-            const cpcText = formatTiming(this.cpcTiming);
-            return {
-                "text": cpcText,
-                "tooltip":
-                    `Amstrad CPC: ${cpcText} NOPs\n`
-                    + `Z80: ${z80text} clock cycles`
-            };
-        }
-        return {
-            "text": z80text,
-            "tooltip": `Z80: ${z80text} clock cycles`
-        };
-    }
-
     public getInstructionInformation(): Record<string, string | undefined> | undefined {
 
         // (empty or disabled)
@@ -187,6 +155,41 @@ export class Z80Block {
         };
     }
 
+    public getTimingInformation(): Record<string, string | undefined> | undefined {
+
+        // (empty or disabled)
+        if (this.loc === 0) {
+            return undefined;
+        }
+
+        const z80text = formatTiming(this.z80Timing);
+        if (this.platformConfiguration === "msx") {
+            const msxText = formatTiming(this.msxTiming);
+            return {
+                "text": msxText,
+                "textDetail": `${msxText} clock cycles`,
+                "tooltip":
+                    `MSX (Z80+M1): ${msxText} clock cycles\n`
+                    + `Z80: ${z80text} clock cycles`
+            };
+        }
+        if (this.platformConfiguration === "cpc") {
+            const cpcText = formatTiming(this.cpcTiming);
+            return {
+                "text": cpcText,
+                "textDetail": `${cpcText} NOPs`,
+                "tooltip":
+                    `Amstrad CPC: ${cpcText} NOPs\n`
+                    + `Z80: ${z80text} clock cycles`
+            };
+        }
+        return {
+            "text": z80text,
+            "textDetail": `${z80text} clock cycles`,
+            "tooltip": `Z80: ${z80text} clock cycles`
+        };
+    }
+
     public getOpcodeAndSizeInformation(): Record<string, string | undefined> | undefined {
 
         // (empty or disabled)
@@ -227,6 +230,7 @@ export class Z80Block {
 
         return {
             "text": text,
+            "textDetail": sizeText,
             "tooltip": tooltip
         };
     }

@@ -1,14 +1,16 @@
-import { Disposable, StatusBarItem, TextEditor, window, workspace } from 'vscode';
+import { commands, Disposable, env, StatusBarItem, TextEditor, window, workspace } from 'vscode';
 import { Z80Block } from './z80Block';
 
 export class Z80MeterController {
 
-    private _timingStatusBarItem: StatusBarItem | undefined;
+    private static commandId = "z80AsmMeter.copyToClipboard";
+
     private _instructionStatusBarItem: StatusBarItem | undefined;
+    private _timingStatusBarItem: StatusBarItem | undefined;
     private _opcodeStatusBarItem: StatusBarItem | undefined;
     private _disposable: Disposable;
 
-	constructor() {
+    constructor() {
         this._onEvent();
 
         // subscribe to selection change and editor activation events
@@ -16,27 +18,52 @@ export class Z80MeterController {
         window.onDidChangeTextEditorSelection(this._onEvent, this, subscriptions);
         window.onDidChangeActiveTextEditor(this._onEvent, this, subscriptions);
 
+        // create a command to copy timing and size to clipboard
+        let command = commands.registerCommand(Z80MeterController.commandId, this._onCommand, this);
+
         // create a combined disposable from both event subscriptions
-        this._disposable = Disposable.from(...subscriptions);
+        this._disposable = Disposable.from(...subscriptions, command);
     }
 
     private _onEvent() {
 
         const editor = window.activeTextEditor;
-
         if ((!editor)
                 || (!this.isEnabledFor(editor.document.languageId))) {
-            this.hideTimingStatusBarItem();
-            this.hideInstructionStatusBarItem();
-            this.hideOpcodeStatusBarItem();
+            this.hideStatusBar();
             return;
         }
+
+        const z80Block = this.getSelectedZ80Block(editor);
+        this.updateStatusBar(z80Block);
+    }
+
+    private _onCommand() {
+
+        const editor = window.activeTextEditor;
+        if ((!editor)
+                || (!this.isEnabledFor(editor.document.languageId))) {
+            return;
+        }
+
+        const z80Block = this.getSelectedZ80Block(editor);
+        const timing = z80Block.getTimingInformation();
+        const opcode = z80Block.getOpcodeAndSizeInformation();
+        if ((!timing) || (!opcode)) {
+            return;
+        }
+
+        const text = `${timing.textDetail}, ${opcode.textDetail}`;
+        env.clipboard.writeText(text);
+        return;
+    }
+
+    private getSelectedZ80Block(editor: TextEditor): Z80Block {
 
         const sourceCode = editor.selection.isEmpty
             ? editor.document.lineAt(editor.selection.active.line).text
             : editor.document.getText(editor.selection);
-        const z80Block = new Z80Block(sourceCode);
-        this.updateStatusBar(z80Block);
+        return new Z80Block(sourceCode);
     }
 
     private isEnabledFor(languageId: string): boolean {
@@ -51,19 +78,6 @@ export class Z80MeterController {
 
     private updateStatusBar(z80Block: Z80Block) {
 
-        const timing = z80Block.getTimingInformation();
-        if (!timing) {
-            this.hideTimingStatusBarItem();
-
-        } else {
-            if (!this._timingStatusBarItem) {
-                this._timingStatusBarItem = window.createStatusBarItem();
-            }
-            this._timingStatusBarItem.text = "$(watch) " + timing["text"];
-            this._timingStatusBarItem.tooltip = timing["tooltip"];
-            this._timingStatusBarItem.show();
-        }
-
         const instruction = z80Block.getInstructionInformation();
         if (!instruction) {
             this.hideInstructionStatusBarItem();
@@ -77,6 +91,20 @@ export class Z80MeterController {
             this._instructionStatusBarItem.show();
         }
 
+        const timing = z80Block.getTimingInformation();
+        if (!timing) {
+            this.hideTimingStatusBarItem();
+
+        } else {
+            if (!this._timingStatusBarItem) {
+                this._timingStatusBarItem = window.createStatusBarItem();
+            }
+            this._timingStatusBarItem.text = "$(watch) " + timing["text"];
+            this._timingStatusBarItem.tooltip = timing["tooltip"];
+            this._timingStatusBarItem.command = Z80MeterController.commandId;
+            this._timingStatusBarItem.show();
+        }
+
         const opcode = z80Block.getOpcodeAndSizeInformation();
         if (!opcode) {
             this.hideOpcodeStatusBarItem();
@@ -87,7 +115,20 @@ export class Z80MeterController {
             }
             this._opcodeStatusBarItem.text = "$(file-binary) " + opcode["text"];
             this._opcodeStatusBarItem.tooltip = opcode["tooltip"];
+            this._opcodeStatusBarItem.command = Z80MeterController.commandId;
             this._opcodeStatusBarItem.show();
+        }
+    }
+
+    private hideStatusBar() {
+        this.hideInstructionStatusBarItem();
+        this.hideTimingStatusBarItem();
+        this.hideOpcodeStatusBarItem();
+    }
+
+    private hideInstructionStatusBarItem() {
+        if (this._instructionStatusBarItem) {
+            this._instructionStatusBarItem.hide();
         }
     }
 
@@ -97,31 +138,25 @@ export class Z80MeterController {
         }
     }
 
-    private hideInstructionStatusBarItem() {
-        if (this._instructionStatusBarItem) {
-            this._instructionStatusBarItem.hide();
-        }
-    }
-
     private hideOpcodeStatusBarItem() {
         if (this._opcodeStatusBarItem) {
             this._opcodeStatusBarItem.hide();
         }
     }
 
-	dispose() {
-		this._disposable.dispose();
-        if (this._timingStatusBarItem) {
-            this._timingStatusBarItem.dispose();
-            this._timingStatusBarItem = undefined;
-        }
+    dispose() {
         if (this._instructionStatusBarItem) {
             this._instructionStatusBarItem.dispose();
             this._instructionStatusBarItem = undefined;
+        }
+        if (this._timingStatusBarItem) {
+            this._timingStatusBarItem.dispose();
+            this._timingStatusBarItem = undefined;
         }
         if (this._opcodeStatusBarItem) {
             this._opcodeStatusBarItem.dispose();
             this._opcodeStatusBarItem = undefined;
         }
-	}
+        this._disposable.dispose();
+    }
 }
