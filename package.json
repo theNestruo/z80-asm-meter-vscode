@@ -119,26 +119,26 @@
 					],
 					"default": "default"
 				},
+				"z80-asm-meter.viewInstruction": {
+					"type": "boolean",
+					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
+					"default": true
+				},
+				"z80-asm-meter.viewOpcode": {
+					"type": "boolean",
+					"description": "Enables the opcode in the status bar",
+					"default": false
+				},
 				"z80-asm-meter.viewBytecodeSize": {
 					"type": "boolean",
 					"description": "Enables the bytecode size information in the status bar",
 					"deprecationMessage": "Bytecode size information will always be enabled",
 					"default": true
 				},
-				"z80-asm-meter.viewInstruction": {
-					"type": "boolean",
-					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
-					"default": true
-				},
 				"z80-asm-meter.viewLoC": {
 					"type": "boolean",
 					"description": "Enables the processed lines of code (LOC) count in the status bar",
 					"deprecationMessage": "Processed lines of code (LOC) count will always be disabled in the status bar and enabled in the tooltip",
-					"default": false
-				},
-				"z80-asm-meter.viewOpcode": {
-					"type": "boolean",
-					"description": "Enables the opcode in the status bar",
 					"default": false
 				}
 			}

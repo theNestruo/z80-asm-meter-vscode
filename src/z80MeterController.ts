@@ -27,14 +27,8 @@ export class Z80MeterController {
     private _onEvent() {
 
         // Reads the Z80 block
-        const editor = window.activeTextEditor;
-        if ((!editor)
-                || (!this.isEnabledFor(editor.document.languageId))) {
-            this.hideStatusBar();
-            return;
-        }
-        const z80Block = this.getSelectedZ80Block(editor);
-        if (z80Block.loc === 0) {
+        const z80Block = this.readZ80BlockFromSelection();
+        if (!z80Block) {
             this.hideStatusBar();
             return;
         }
@@ -45,22 +39,23 @@ export class Z80MeterController {
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
         // Builds the text
-        const timing = z80Block.getTimingInformation();
-        const size = z80Block.getSizeInformation();
-        let text = `$(watch) ${timing} $(file-binary) ${size}`;
-        if (viewOpcodeConfiguration) {
-            const opcode = z80Block.getOpcodeInformation();
-            text += ` (${opcode})`;
-        }
+        const timing = z80Block.getTiming();
+        const size = z80Block.getSizeString();
+        let text = "";
         if (viewInstructionConfiguration) {
-            const instruction = z80Block.getInstructionInformation();
-            text += ` $(code) ${instruction}`;
+            const instruction = z80Block.getInstructionString();
+            text += `$(code) ${instruction} `;
+        }
+        text += `$(watch) ${timing} $(file-binary) ${size}`;
+        if (viewOpcodeConfiguration) {
+            const opcode = z80Block.getOpcodeString();
+            text += ` (${opcode})`;
         }
 
         // Builds the tooltip
-        const detailedTiming = z80Block.getDetailedTimingInformation();
-        const detailedInstructionAndOpcode = z80Block.getDetailedInstructionAndOpcodeInformation();
-        let tooltip = `${detailedTiming}\n${size}:\n${detailedInstructionAndOpcode}`;
+        const timingDetails = z80Block.getTimingDetailedString();
+        const instructionAndOpcodeDetails = z80Block.getInstructionAndOpcodeDetailedString();
+        let tooltip = `${timingDetails}\nSize: ${size}\nOpcodes:\n${instructionAndOpcodeDetails}`;
 
         // Builds the status bar item
         if (!this._statusBarItem) {
@@ -74,34 +69,47 @@ export class Z80MeterController {
 
     private _onCommand() {
 
-        const editor = window.activeTextEditor;
-        if ((!editor)
-                || (!this.isEnabledFor(editor.document.languageId))) {
+        const z80Block = this.readZ80BlockFromSelection();
+        if (!z80Block) {
             // (should never happen)
             return;
         }
 
-        const z80Block = this.getSelectedZ80Block(editor);
-        const timing = z80Block.getLongTimingInformation();
-        const size = z80Block.getSizeInformation();
-        const text = `${timing}, ${size}`;
+        // Builds the text to copy to clipbaord
+        const timingString = z80Block.getTimingString();
+        const sizeString = z80Block.getSizeString();
+        const text = `${timingString}, ${sizeString}`;
 
-        // copies to clipboard and notifies the user
+        // Copies to clipboard and notifies the user
         env.clipboard.writeText(text);
         window.showInformationMessage(`"${text}" copied to clipboard`);
 
-        // returns the focus to the editor
-        window.showTextDocument(editor.document);
+        // Returns the focus to the editor
+        const editor = window.activeTextEditor;
+        if (editor) {
+            window.showTextDocument(editor.document);
+        }
 
         return;
     }
 
-    private getSelectedZ80Block(editor: TextEditor): Z80Block {
+    private readZ80BlockFromSelection(): Z80Block | undefined{
 
+        // Reads the Z80 block
+        const editor = window.activeTextEditor;
+        if ((!editor)
+                || (!this.isEnabledFor(editor.document.languageId))) {
+            return undefined;
+        }
         const sourceCode = editor.selection.isEmpty
             ? editor.document.lineAt(editor.selection.active.line).text
             : editor.document.getText(editor.selection);
-        return new Z80Block(sourceCode);
+        const z80Block = new Z80Block(sourceCode);
+        if (z80Block.loc === 0) {
+            return undefined;
+        }
+
+        return z80Block;
     }
 
     private isEnabledFor(languageId: string): boolean {

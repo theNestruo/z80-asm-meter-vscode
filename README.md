@@ -1,3 +1,4 @@
+
 [![NPM CI](https://github.com/theNestruo/z80-asm-meter-vscode/workflows/NPM%20CI/badge.svg)](https://github.com/theNestruo/z80-asm-meter-vscode/actions)
 [![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/master)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/master)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version-short/theNestruo.z80-asm-meter.svg)](https://marketplace.visualstudio.com/items?itemName=theNestruo.z80-asm-meter)
@@ -57,16 +58,21 @@ This extension contributes the following settings:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
     * `colonOptional`: The trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as [Pasmo](http://pasmo.speccy.org/) and [SjASMPlus](https://github.com/sjasmplus/sjasmplus).
 
-
-* `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Disabled by default.
+* `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Enabled by default.
 
 * `z80-asm-meter.viewOpcode`: Enables the opcode in the status bar. Disabled by default.
 
 Deprecated settings:
 
-* ~~`z80-asm-meter.viewBytecodeSize`~~: Bytecode size information will always be enabled.
+* ~~`z80-asm-meter.viewBytecodeSize`~~: Bytecode size information in the status bar will always be enabled.
 
 * ~~`z80-asm-meter.viewLoC`~~: Processed lines of code (LOC) count will always be disabled in the status bar and enabled in the tooltip.
+
+## F.A.Q.
+
+### The lower status bar does not display any information. I don't get clock cycles and bytecode size!
+
+Double check the `z80-asm-meter.languageIds` setting.
 
 ## Credits
 

@@ -1,4 +1,8 @@
 
+## 1.3.0
+
+- Single status bar item and simplified configuration settings
+
 ## 1.2.0
 
 - Abiliy to copy the clock cycles and the bytecode size information to the clipboard

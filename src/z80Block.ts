@@ -18,6 +18,8 @@ export class Z80Block {
     // Size information
     public size: number = 0;
     public loc: number = 0;
+
+    // Intructions and opcodes
     public instructions: string[] = [];
     public opcodes: string[] = [];
 
@@ -103,7 +105,7 @@ export class Z80Block {
         this.loc++;
     }
 
-    public getTimingInformation(): string | undefined {
+    public getTiming(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
@@ -120,7 +122,7 @@ export class Z80Block {
         }
     }
 
-    public getLongTimingInformation(): string | undefined {
+    public getTimingString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
@@ -137,7 +139,7 @@ export class Z80Block {
         }
     }
 
-    public getDetailedTimingInformation(): string | undefined {
+    public getTimingDetailedString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
@@ -158,7 +160,7 @@ export class Z80Block {
         return `Z80: ${z80text} clock cycles`;
     }
 
-    public getSizeInformation(): string | undefined {
+    public getSizeString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
@@ -168,7 +170,7 @@ export class Z80Block {
         return this.size + (this.size === 1 ? " byte" : " bytes");
     }
 
-    public getInstructionInformation(): string | undefined {
+    public getInstructionString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
@@ -182,7 +184,7 @@ export class Z80Block {
         return text;
     }
 
-    public getOpcodeInformation(): string | undefined {
+    public getOpcodeString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
@@ -196,7 +198,7 @@ export class Z80Block {
         return text;
     }
 
-    public getDetailedInstructionAndOpcodeInformation(): string | undefined {
+    public getInstructionAndOpcodeDetailedString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
