@@ -1,7 +1,7 @@
 import { workspace } from 'vscode';
 import { Z80Instruction } from "./z80Instruction";
 import { Z80InstructionSet } from './z80InstructionSet';
-import { formatTiming, extractInstructionsFrom } from './z80Utils';
+import { extractInstructionsFrom, formatTiming } from './z80Utils';
 
 export class Z80Block {
 
@@ -9,10 +9,6 @@ export class Z80Block {
     private maxOpcodesConfiguration: number | undefined = undefined;
     private platformConfiguration: string | undefined = undefined;
     private syntaxLabelConfiguration: string | undefined = undefined;
-    private viewBytecodeSizeConfiguration: boolean | undefined = undefined;
-    private viewInstructionConfiguration: boolean | undefined = undefined;
-    private viewLoCConfiguration: boolean | undefined = undefined;
-    private viewOpcodeConfiguration: boolean | undefined = undefined;
 
     // Timing information
     public z80Timing: number[] = [0, 0];
@@ -50,10 +46,6 @@ export class Z80Block {
         this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
-        this.viewBytecodeSizeConfiguration = configuration.get("viewBytecodeSize") || false;
-        this.viewInstructionConfiguration = configuration.get("viewInstruction") || false;
-        this.viewLoCConfiguration = configuration.get("viewLoC") || false;
-        this.viewOpcodeConfiguration = configuration.get("viewOpcode") || false;
 
         // Determines instruction sets
         const instructionSets =
@@ -111,53 +103,43 @@ export class Z80Block {
         this.loc++;
     }
 
-    public getInstructionInformation(): Record<string, string | undefined> | undefined {
+    public getTimingInformation(): string | undefined {
 
-        // (empty or disabled)
-        if ((this.loc === 0)
-                || (!this.viewInstructionConfiguration
-                    && !this.viewLoCConfiguration)) {
+        // (empty)
+        if (this.loc === 0) {
             return undefined;
         }
 
-        // text: first instruction and LoC
-        const locText = this.loc + " LoC";
-        let text = "";
-        if (this.viewInstructionConfiguration) {
-            // text: only the first instruction
-            text = this.instructions[0];
-            if (this.loc > 1) {
-                text += " ...";
-            }
-            if (this.viewLoCConfiguration && (this.loc > 1)) {
-                text += ` (${locText})`;
-            }
-        } else {
-            text = locText;
+        switch (this.platformConfiguration) {
+            case "msx":
+                return formatTiming(this.msxTiming);
+            case "cpc":
+                return formatTiming(this.cpcTiming);
+            default:
+                return formatTiming(this.z80Timing);
         }
-
-        // tooltip: up to maxOpcodes instructions
-        const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
-        let tooltip = this.loc + " selected " + (this.loc === 1 ? "line" : "lines") + " of code (LoC):";
-        for (let i = 0; i < n; i++) {
-            const opcode = this.opcodes[i];
-            const instruction = this.instructions[i];
-            tooltip += "\n    " + instruction;
-        }
-        if (this.maxOpcodesConfiguration && this.maxOpcodesConfiguration < this.loc) {
-            const etc = this.loc - this.maxOpcodesConfiguration;
-            tooltip += "\n(and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
-        }
-
-        return {
-            "text": text,
-            "tooltip": tooltip
-        };
     }
 
-    public getTimingInformation(): Record<string, string | undefined> | undefined {
+    public getLongTimingInformation(): string | undefined {
 
-        // (empty or disabled)
+        // (empty)
+        if (this.loc === 0) {
+            return undefined;
+        }
+
+        switch (this.platformConfiguration) {
+            case "msx":
+                return formatTiming(this.msxTiming) + " clock cycles";
+            case "cpc":
+                return formatTiming(this.cpcTiming) + " NOPs";
+            default:
+                return formatTiming(this.z80Timing) + " clock cycles";
+        }
+    }
+
+    public getDetailedTimingInformation(): string | undefined {
+
+        // (empty)
         if (this.loc === 0) {
             return undefined;
         }
@@ -165,73 +147,78 @@ export class Z80Block {
         const z80text = formatTiming(this.z80Timing);
         if (this.platformConfiguration === "msx") {
             const msxText = formatTiming(this.msxTiming);
-            return {
-                "text": msxText,
-                "textDetail": `${msxText} clock cycles`,
-                "tooltip":
-                    `MSX (Z80+M1): ${msxText} clock cycles\n`
-                    + `Z80: ${z80text} clock cycles`
-            };
+            return `MSX (Z80+M1): ${msxText} clock cycles\n`
+                    + `Z80: ${z80text} clock cycles`;
         }
         if (this.platformConfiguration === "cpc") {
             const cpcText = formatTiming(this.cpcTiming);
-            return {
-                "text": cpcText,
-                "textDetail": `${cpcText} NOPs`,
-                "tooltip":
-                    `Amstrad CPC: ${cpcText} NOPs\n`
-                    + `Z80: ${z80text} clock cycles`
-            };
+            return `Amstrad CPC: ${cpcText} NOPs\n`
+                    + `Z80: ${z80text} clock cycles`;
         }
-        return {
-            "text": z80text,
-            "textDetail": `${z80text} clock cycles`,
-            "tooltip": `Z80: ${z80text} clock cycles`
-        };
+        return `Z80: ${z80text} clock cycles`;
     }
 
-    public getOpcodeAndSizeInformation(): Record<string, string | undefined> | undefined {
+    public getSizeInformation(): string | undefined {
 
-        // (empty or disabled)
-        if ((this.loc === 0)
-                || (!this.viewBytecodeSizeConfiguration
-                    && !this.viewOpcodeConfiguration)) {
+        // (empty)
+        if (this.loc === 0) {
             return undefined;
         }
 
-        // text: first opcode and bytesize
-        const sizeText = this.size + (this.size === 1 ? " byte" : " bytes");
-        let text = "";
-        if (this.viewOpcodeConfiguration) {
-            // text: only the first opcode
-            text = this.opcodes[0];
-            if (this.loc > 1) {
-                text += " ...";
-            }
-            if (this.viewBytecodeSizeConfiguration) {
-                text += ` (${sizeText})`;
-            }
-        } else {
-            text = sizeText;
+        return this.size + (this.size === 1 ? " byte" : " bytes");
+    }
+
+    public getInstructionInformation(): string | undefined {
+
+        // (empty)
+        if (this.loc === 0) {
+            return undefined;
+        }
+
+        let text = this.instructions[0];
+        if (this.loc > 1) {
+            text += " ...";
+        }
+        return text;
+    }
+
+    public getOpcodeInformation(): string | undefined {
+
+        // (empty)
+        if (this.loc === 0) {
+            return undefined;
+        }
+
+        let text = this.opcodes[0];
+        if (this.loc > 1) {
+            text += " ...";
+        }
+        return text;
+    }
+
+    public getDetailedInstructionAndOpcodeInformation(): string | undefined {
+
+        // (empty)
+        if (this.loc === 0) {
+            return undefined;
         }
 
         // tooltip: up to maxOpcodes opcodes
         const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
-        let tooltip = "Opcodes:";
+        let text = "";
         for (let i = 0; i < n; i++) {
             const opcode = this.opcodes[i];
             const instruction = this.instructions[i];
-            tooltip += `\n    ${opcode}    ; ${instruction}`;
+            if (i != 0) {
+                text += '\n';
+            }
+            text += `  ${opcode}    ; ${instruction}`;
         }
         if (this.maxOpcodesConfiguration && this.maxOpcodesConfiguration < this.loc) {
             const etc = this.loc - this.maxOpcodesConfiguration;
-            tooltip += "\n(and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
+            text += "\n  (and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
         }
 
-        return {
-            "text": text,
-            "textDetail": sizeText,
-            "tooltip": tooltip
-        };
+        return text;
     }
 }

@@ -57,21 +57,16 @@ This extension contributes the following settings:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
     * `colonOptional`: The trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as [Pasmo](http://pasmo.speccy.org/) and [SjASMPlus](https://github.com/sjasmplus/sjasmplus).
 
-* `z80-asm-meter.viewBytecodeSize`: Enables the bytecode size information in the status bar. Enabled by default.
 
 * `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Disabled by default.
-
-* `z80-asm-meter.viewLoC`: Enables the processed lines of code (LOC) count in the status bar. Disabled by default.
 
 * `z80-asm-meter.viewOpcode`: Enables the opcode in the status bar. Disabled by default.
 
 Deprecated settings:
 
-* ~~`z80-asm-meter.timing`~~: Use `z80-asm-meter.platform` setting instead.
+* ~~`z80-asm-meter.viewBytecodeSize`~~: Bytecode size information will always be enabled.
 
-* ~~`z80-asm-meter.size`~~: Use `z80-asm-meter.viewBytecodeSize` and `z80-asm-meter.viewLoC` settings instead.
-
-* ~~`z80-asm-meter.opcode`~~: Use `z80-asm-meter.viewInstruction` and `z80-asm-meter.viewOpcode` settings instead.
+* ~~`z80-asm-meter.viewLoC`~~: Processed lines of code (LOC) count will always be disabled in the status bar and enabled in the tooltip.
 
 ## Credits
 

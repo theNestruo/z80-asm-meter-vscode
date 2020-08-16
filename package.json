@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"engines": {
 		"vscode": "^1.47.0"
 	},
@@ -122,60 +122,24 @@
 				"z80-asm-meter.viewBytecodeSize": {
 					"type": "boolean",
 					"description": "Enables the bytecode size information in the status bar",
+					"deprecationMessage": "Bytecode size information will always be enabled",
 					"default": true
 				},
 				"z80-asm-meter.viewInstruction": {
 					"type": "boolean",
 					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
-					"default": false
+					"default": true
 				},
 				"z80-asm-meter.viewLoC": {
 					"type": "boolean",
 					"description": "Enables the processed lines of code (LOC) count in the status bar",
+					"deprecationMessage": "Processed lines of code (LOC) count will always be disabled in the status bar and enabled in the tooltip",
 					"default": false
 				},
 				"z80-asm-meter.viewOpcode": {
 					"type": "boolean",
 					"description": "Enables the opcode in the status bar",
 					"default": false
-				},
-				"z80-asm-meter.timing": {
-					"type": "string",
-					"description": "Controls the visibility of the timing information in the status bar",
-					"deprecationMessage": "Use z80-asm-meter.platform setting instead",
-					"enum": [
-						"disabled",
-						"z80",
-						"msx",
-						"cpc",
-						"z80+msx",
-						"z80+cpc"
-					],
-					"default": "disabled"
-				},
-				"z80-asm-meter.size": {
-					"type": "string",
-					"description": "Controls the visibility of the size information in the status bar",
-					"deprecationMessage": "Use z80-asm-meter.viewBytecodeSize and viewLoC settings instead",
-					"enum": [
-						"disabled",
-						"bytecode",
-						"loc",
-						"bytecode+loc"
-					],
-					"default": "bytecode"
-				},
-				"z80-asm-meter.opcode": {
-					"type": "string",
-					"description": "Controls the visibility of the instruction and its opcode in the status bar",
-					"deprecationMessage": "Use z80-asm-meter.viewInstruction and viewOpcode settings instead",
-					"enum": [
-						"disabled",
-						"instruction",
-						"opcode",
-						"both"
-					],
-					"default": "disabled"
 				}
 			}
 		}
