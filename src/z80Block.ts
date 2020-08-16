@@ -209,7 +209,7 @@ export class Z80Block {
         for (let i = 0; i < n; i++) {
             const opcode = this.opcodes[i];
             const instruction = this.instructions[i];
-            if (i != 0) {
+            if (i !== 0) {
                 text += '\n';
             }
             text += `  ${opcode}    ; ${instruction}`;

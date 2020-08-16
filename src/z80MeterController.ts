@@ -60,7 +60,7 @@ export class Z80MeterController {
         // Builds the tooltip
         const detailedTiming = z80Block.getDetailedTimingInformation();
         const detailedInstructionAndOpcode = z80Block.getDetailedInstructionAndOpcodeInformation();
-        let tooltip = `${detailedTiming}\n${size}:\n${detailedInstructionAndOpcode}`
+        let tooltip = `${detailedTiming}\n${size}:\n${detailedInstructionAndOpcode}`;
 
         // Builds the status bar item
         if (!this._statusBarItem) {
