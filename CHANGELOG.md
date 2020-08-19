@@ -1,4 +1,8 @@
 
+## 1.3.1 (unreleased)
+
+- Fixes representation of some opcodes (such as `NOP`, that was showing `0` instead of `00`)
+
 ## 1.3.0
 
 - Single status bar item and simplified configuration settings
