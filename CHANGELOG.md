@@ -1,5 +1,5 @@
 
-## 1.3.1 (unreleased)
+## 1.3.1
 
 - Fixes representation of some opcodes (such as `NOP`, that was showing `0` instead of `00`)
 
