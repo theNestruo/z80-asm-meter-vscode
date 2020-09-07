@@ -122,7 +122,7 @@ export class Z80Instruction {
 
     /**
      * @returns true if this operation allows SDCC explicit accumulator syntax
-     * (it's mnemonic is AND, CP, SUB, OR, or XOR, there is one operand, and it is n or r)
+     * (it's mnemonic is not IN, LD, nor OUT, there is one operand, and it is n or r)
      */
     private isExplicitAccumulatorSyntaxAllowed(): boolean {
 
@@ -130,7 +130,7 @@ export class Z80Instruction {
             return this.explicitAccumulatorSyntaxAllowed;
         }
 
-        if (!this.getMnemonic().match(/^(AND|CP|SUB|OR|XOR)$/)) {
+        if (this.getMnemonic().match(/^(IN|LD|OUT)$/)) {
             return this.explicitAccumulatorSyntaxAllowed = false;
         }
         const operands = this.getOperands();
@@ -165,19 +165,23 @@ export class Z80Instruction {
         let implicitAccumulatorSyntax = false;
         let explicitAccumulatorSyntax = false;
         if (candidateOperands.length !== expectedOperandsLength) {
+
             // Checks implicit accumulator syntax
             if (candidateOperands.length === expectedOperandsLength - 1) {
-                implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
-                if (!implicitAccumulatorSyntax) {
+                if (!(implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed())) {
                     return 0;
                 }
+
             // Checks explicit accumulator syntax
             } else if (candidateOperands.length === expectedOperandsLength + 1) {
-                explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed();
-                if ((!explicitAccumulatorSyntax)
+                if ((!(explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed()))
                         || (this.verbatimOperandScore("A", candidateOperands[0]) !== 1)) {
                     return 0;
                 }
+
+            // Operand count mismatch
+            } else {
+                return 0;
             }
         }
 
@@ -212,6 +216,11 @@ export class Z80Instruction {
 
         // Must the candidate operand be an indirection?
         if (indirectionAllowed && this.isIndirectionOperand(expectedOperand, true)) {
+            // Checks for SDCC index register syntax
+            const sdccIndexRegisterIndirectionScore = this.sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand);
+            if (sdccIndexRegisterIndirectionScore !== undefined) {
+                return sdccIndexRegisterIndirectionScore;
+            }
             return this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
@@ -305,6 +314,25 @@ export class Z80Instruction {
         return this.isIndirectionOperand(candidateOperand, false)
                 ? this.operandScore(this.extractIndirection(expectedOperand), this.extractIndirection(candidateOperand), false)
                 : 0;
+    }
+
+    /**
+     * @param expectedOperand the operand of the instruction
+     * @param candidateOperand the operand from the cleaned-up line
+     * @returns number between 0 and 1 with the score of the match,
+     * or undefined if SDCC index register indirection syntax is not allowed or not found
+     */
+    private sdccIndexRegisterIndirectionScore(expectedOperand: string, candidateOperand: string): number | undefined {
+
+        // Depending on the expected indirection...
+        switch (this.extractIndirection(expectedOperand)) {
+            case "IX+o":
+                return candidateOperand.match(/\(IX\)$/) ? 1 : undefined;
+            case "IY+o":
+                return candidateOperand.match(/\(IY\)$/) ? 1 : undefined;
+            default:
+                return undefined;
+        }
     }
 
     /**
