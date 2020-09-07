@@ -15,6 +15,7 @@ export class Z80Instruction {
     private mnemonic: string | undefined;
     private operands: string[] | undefined;
     private implicitAccumulatorSyntaxAllowed: boolean | undefined;
+    private explicitAccumulatorSyntaxAllowed: boolean | undefined;
 
     constructor(
             instructionSet: string, instruction: string,
@@ -28,6 +29,11 @@ export class Z80Instruction {
         this.cpcTiming = parseTimings(cpcTiming);
         this.opcode = opcode;
         this.size = parseInt(size);
+
+        this.mnemonic = undefined;
+        this.operands = undefined;
+        this.implicitAccumulatorSyntaxAllowed = undefined;
+        this.explicitAccumulatorSyntaxAllowed = undefined;
     }
 
     /**
@@ -103,7 +109,7 @@ export class Z80Instruction {
      */
     private isImplicitAccumulatorSyntaxAllowed(): boolean {
 
-        if (this.implicitAccumulatorSyntaxAllowed) {
+        if (this.implicitAccumulatorSyntaxAllowed !== undefined) {
             return this.implicitAccumulatorSyntaxAllowed;
         }
 
@@ -112,6 +118,23 @@ export class Z80Instruction {
         }
         const operands = this.getOperands();
         return this.implicitAccumulatorSyntaxAllowed = operands.length === 2 && operands[0] === "A";
+    }
+
+    /**
+     * @returns true if this operation allows SDCC explicit accumulator syntax
+     * (it's mnemonic is AND, CP, SUB, OR, or XOR, there is one operand, and it is n or r)
+     */
+    private isExplicitAccumulatorSyntaxAllowed(): boolean {
+
+        if (this.explicitAccumulatorSyntaxAllowed !== undefined) {
+            return this.explicitAccumulatorSyntaxAllowed;
+        }
+
+        if (!this.getMnemonic().match(/^(AND|CP|SUB|OR|XOR)$/)) {
+            return this.explicitAccumulatorSyntaxAllowed = false;
+        }
+        const operands = this.getOperands();
+        return this.explicitAccumulatorSyntaxAllowed = operands.length === 1 && !!operands[0].match(/^[nr]$/);
     }
 
     /**
@@ -140,20 +163,29 @@ export class Z80Instruction {
         const expectedOperands = this.getOperands();
         const expectedOperandsLength = expectedOperands.length;
         let implicitAccumulatorSyntax = false;
+        let explicitAccumulatorSyntax = false;
         if (candidateOperands.length !== expectedOperandsLength) {
-            if (candidateOperands.length !== expectedOperandsLength - 1) {
-                return 0;
-            }
             // Checks implicit accumulator syntax
-            implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
-            if (!implicitAccumulatorSyntax) {
-                return 0;
+            if (candidateOperands.length === expectedOperandsLength - 1) {
+                implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
+                if (!implicitAccumulatorSyntax) {
+                    return 0;
+                }
+            // Checks explicit accumulator syntax
+            } else if (candidateOperands.length === expectedOperandsLength + 1) {
+                explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed();
+                if ((!explicitAccumulatorSyntax)
+                        || (this.verbatimOperandScore("A", candidateOperands[0]) !== 1)) {
+                    return 0;
+                }
             }
         }
 
         // Compares operands
         let score = 1;
-        for (let i = implicitAccumulatorSyntax ? 1 : 0, j = 0; i < expectedOperandsLength; i++, j++) {
+        for (let i = implicitAccumulatorSyntax ? 1 : 0, j = explicitAccumulatorSyntax ? 1 : 0;
+                i < expectedOperandsLength;
+                i++, j++) {
             score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
             if (score === 0) {
                 return 0;

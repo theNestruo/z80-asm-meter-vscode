@@ -1,4 +1,9 @@
 
+## 1.4.0 (unreleased)
+
+- Fixed issues:
+    - Need support for SDCC syntax on index-registers and explicit accumulator. #33
+
 ## 1.3.1
 
 - Fixes representation of some opcodes (such as `NOP`, that was showing `0` instead of `00`)

@@ -62,12 +62,6 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.viewOpcode`: Enables the opcode in the status bar. Disabled by default.
 
-Deprecated settings:
-
-* ~~`z80-asm-meter.viewBytecodeSize`~~: Bytecode size information in the status bar will always be enabled.
-
-* ~~`z80-asm-meter.viewLoC`~~: Processed lines of code (LOC) count will always be disabled in the status bar and enabled in the tooltip.
-
 ## F.A.Q.
 
 ### The lower status bar does not display any information. I don't get clock cycles and bytecode size!
