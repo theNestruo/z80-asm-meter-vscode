@@ -327,9 +327,9 @@ export class Z80Instruction {
         // Depending on the expected indirection...
         switch (this.extractIndirection(expectedOperand)) {
             case "IX+o":
-                return candidateOperand.match(/\(IX\)$/) ? 1 : undefined;
+                return candidateOperand.match(/(\(\s*IX\s*\)|\[\s*IX\s*\])$/) ? 1 : undefined;
             case "IY+o":
-                return candidateOperand.match(/\(IY\)$/) ? 1 : undefined;
+                return candidateOperand.match(/(\(\s*IY\s*\)|\[\s*IY\s*\])$/) ? 1 : undefined;
             default:
                 return undefined;
         }
