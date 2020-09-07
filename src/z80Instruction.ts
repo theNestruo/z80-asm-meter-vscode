@@ -122,7 +122,7 @@ export class Z80Instruction {
 
     /**
      * @returns true if this operation allows SDCC explicit accumulator syntax
-     * (it's mnemonic is not IN, LD, nor OUT, there is one operand, and it is n or r)
+     * (it's mnemonic is not DEC, IN, INC, LD, nor OUT, there is one operand, and it is n or r)
      */
     private isExplicitAccumulatorSyntaxAllowed(): boolean {
 
@@ -130,7 +130,7 @@ export class Z80Instruction {
             return this.explicitAccumulatorSyntaxAllowed;
         }
 
-        if (this.getMnemonic().match(/^(IN|LD|OUT)$/)) {
+        if (this.getMnemonic().match(/^(DEC|IN|INC|LD|OUT)$/)) {
             return this.explicitAccumulatorSyntaxAllowed = false;
         }
         const operands = this.getOperands();
