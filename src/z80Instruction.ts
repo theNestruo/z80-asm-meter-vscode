@@ -122,7 +122,8 @@ export class Z80Instruction {
 
     /**
      * @returns true if this operation allows SDCC explicit accumulator syntax
-     * (it's mnemonic is not DEC, IN, INC, LD, nor OUT, there is one operand, and it is n or r)
+     * (it's mnemonic is ADC, ADD, AND, CP, DEC, INC, OR, RL, RLC, RR, RRC, SBC, SLA, SRA, SRL, SUB, or XOR,
+     * and  there is one single operand)
      */
     private isExplicitAccumulatorSyntaxAllowed(): boolean {
 
@@ -130,11 +131,11 @@ export class Z80Instruction {
             return this.explicitAccumulatorSyntaxAllowed;
         }
 
-        if (this.getMnemonic().match(/^(DEC|IN|INC|LD|OUT)$/)) {
+        if (!this.getMnemonic().match(/^(ADC|ADD|AND|CP|DEC|INC|OR|RL|RLC|RR|RRC|SBC|SLA|SRA|SRL|SUB|XOR)$/)) {
             return this.explicitAccumulatorSyntaxAllowed = false;
         }
         const operands = this.getOperands();
-        return this.explicitAccumulatorSyntaxAllowed = operands.length === 1 && !!operands[0].match(/^[nr]$/);
+        return this.explicitAccumulatorSyntaxAllowed = operands.length === 1;
     }
 
     /**
@@ -159,23 +160,25 @@ export class Z80Instruction {
             }
         }
 
-        // Compares operand count
+        const candidateOperandsLength = candidateOperands.length;
         const expectedOperands = this.getOperands();
         const expectedOperandsLength = expectedOperands.length;
+
+        // Compares operand count
         let implicitAccumulatorSyntax = false;
         let explicitAccumulatorSyntax = false;
-        if (candidateOperands.length !== expectedOperandsLength) {
+        if (candidateOperandsLength !== expectedOperandsLength) {
 
             // Checks implicit accumulator syntax
-            if (candidateOperands.length === expectedOperandsLength - 1) {
+            if (candidateOperands.length === expectedOperands.length - 1) {
                 if (!(implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed())) {
                     return 0;
                 }
 
             // Checks explicit accumulator syntax
-            } else if (candidateOperands.length === expectedOperandsLength + 1) {
+            } else if (candidateOperands.length === expectedOperands.length + 1) {
                 if ((!(explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed()))
-                        || (this.verbatimOperandScore("A", candidateOperands[0]) !== 1)) {
+                        || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
 
@@ -188,7 +191,7 @@ export class Z80Instruction {
         // Compares operands
         let score = 1;
         for (let i = implicitAccumulatorSyntax ? 1 : 0, j = explicitAccumulatorSyntax ? 1 : 0;
-                i < expectedOperandsLength;
+                i < expectedOperands.length;
                 i++, j++) {
             score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
             if (score === 0) {
@@ -284,7 +287,7 @@ export class Z80Instruction {
      */
     private verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
 
-        return (candidateOperand === expectedOperand.toUpperCase()) ? 1 : 0;
+        return (candidateOperand === expectedOperand) ? 1 : 0;
     }
 
     /**
@@ -340,7 +343,7 @@ export class Z80Instruction {
      * @returns the expression inside the indirection
      */
     private extractIndirection(operand: string): string {
-        return operand.substring(1, operand.length - 1);
+        return operand.substring(1, operand.length - 1).trim();
     }
 
     /**
