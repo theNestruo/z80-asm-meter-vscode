@@ -1,5 +1,5 @@
 
-## 1.4.0 (unreleased)
+## 1.4.0
 
 - Fixed issues:
     - Need support for SDCC syntax on index-registers and explicit accumulator. #33
