@@ -1,6 +1,6 @@
 import { Z80Instruction } from './z80Instruction';
 import { z80InstructionSetRawData } from './z80InstructionSetRawData';
-import { extractMnemonicOf } from './z80Utils';
+import { extractMnemonicOf, extractOperandsOf } from './z80Utils';
 
 export class Z80InstructionSet {
 
@@ -8,9 +8,12 @@ export class Z80InstructionSet {
 
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
 
+    private instructionByOpcode: Record<string, Z80Instruction>;
+
     private constructor() {
 
         this.instructionByMnemonic = {};
+        this.instructionByOpcode = {};
         z80InstructionSetRawData.forEach(rawData => {
 
             // Parses the raw instruction
@@ -29,10 +32,16 @@ export class Z80InstructionSet {
                 this.instructionByMnemonic[mnemonic] = [];
             }
             this.instructionByMnemonic[mnemonic].push(instruction);
+
+            // Prepares a map by opcode for single byte instructions
+            if (instruction.getSize() == 1) {
+                const opcode = instruction.getOpcode();
+                this.instructionByOpcode[opcode] = instruction;
+            }
         });
     }
 
-    public parseInstruction(instruction: string | undefined, instructionSets: string[]): Z80Instruction | undefined {
+    public parseInstructions(instruction: string | undefined, instructionSets: string[]): Z80Instruction[] | undefined {
 
         if (!instruction) {
             return undefined;
@@ -41,9 +50,21 @@ export class Z80InstructionSet {
         // Locates candidate instructions
         const mnemonic = extractMnemonicOf(instruction);
         const candidates = this.instructionByMnemonic[mnemonic];
-        if (!candidates) {
-            return undefined;
+        if (candidates) {
+            const parsedInstruction = this.findBestCandidate(instruction, candidates, instructionSets);
+            return parsedInstruction ? [parsedInstruction] : undefined;
         }
+
+        // Locates DEFS directive
+        if (mnemonic.match(/^(DEFS|DS)$/)) {
+            return this.parseDefsDirective(instruction);
+        }
+
+        // (unknown mnemonic/directive)
+        return undefined;
+    }
+
+    private findBestCandidate(instruction: string, candidates: Z80Instruction[], instructionSets: string[]): Z80Instruction | undefined {
 
         // Locates instruction
         let bestCandidate = undefined;
@@ -65,5 +86,28 @@ export class Z80InstructionSet {
             }
         }
         return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
+    }
+
+    private parseDefsDirective(pInstruction: string): Z80Instruction[] | undefined {
+
+        const operands = extractOperandsOf(pInstruction);
+        if ((operands.length < 1) ||(operands.length > 2)) {
+            return undefined;
+        }
+
+        // Extracts count and opcode
+        const count = parseInt(operands[0]);
+        if (isNaN(count)) {
+            return undefined;
+        }
+        const opcode = operands.length == 2 ? operands[1] : "00";
+
+        // Determines instruction
+        const instruction = this.instructionByOpcode[opcode];
+        if (!instruction) {
+            return undefined;
+        }
+
+        return new Array(count).fill(instruction);
     }
 }

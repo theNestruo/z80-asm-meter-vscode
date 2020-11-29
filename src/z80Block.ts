@@ -69,8 +69,8 @@ export class Z80Block {
                 return;
             }
             rawInstructions.forEach((rawInstruction: string | undefined) => {
-                const instruction = Z80InstructionSet.instance.parseInstruction(rawInstruction, instructionSets);
-                this.addInstruction(instruction);
+                const lInstructions = Z80InstructionSet.instance.parseInstructions(rawInstruction, instructionSets);
+                this.addInstructions(lInstructions);
             });
 
             // (stops after maximum loc count)
@@ -80,11 +80,18 @@ export class Z80Block {
         });
     }
 
-    public addInstruction(instruction: Z80Instruction | undefined) {
+    private addInstructions(pInstructions: Z80Instruction[] | undefined) {
 
-        if (!instruction) {
+        if (!pInstructions) {
             return;
         }
+
+        pInstructions.forEach((instruction : Z80Instruction) => {
+            this.addInstruction(instruction);
+        });
+    }
+
+    private addInstruction(instruction: Z80Instruction) {
 
         const instructionZ80Timing = instruction.getZ80Timing();
         this.z80Timing[0] += instructionZ80Timing[0];
