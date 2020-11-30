@@ -1,3 +1,4 @@
+import { NumericParser } from './numericParser';
 import { Z80Instruction } from './z80Instruction';
 import { z80InstructionSetRawData } from './z80InstructionSetRawData';
 import { extractMnemonicOf, extractOperandsOf } from './z80Utils';
@@ -5,6 +6,16 @@ import { extractMnemonicOf, extractOperandsOf } from './z80Utils';
 export class Z80InstructionSet {
 
     public static instance = new Z80InstructionSet();
+
+    private static numericParsers = [
+        new NumericParser(/^0x([0-9a-f]+)$/i, 16),
+        new NumericParser(/^\$([0-9a-f]+)$/i, 16),
+        new NumericParser(/^([0-9a-f]+)h$/i, 16),
+        new NumericParser(/^([0-7]+)o$/i, 8),
+        new NumericParser(/^0([0-7]+)$/, 8),
+        new NumericParser(/^([0-1]+)b$/i, 2),
+        new NumericParser(/^(\d+)$/, 10)
+    ];
 
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
 
@@ -96,8 +107,8 @@ export class Z80InstructionSet {
         }
 
         // Extracts count and opcode
-        const count = parseInt(operands[0]);
-        if (isNaN(count)) {
+        const count = this.parseNumericExpression(operands[0]);
+        if ((count === undefined) || isNaN(count)) {
             return undefined;
         }
         const opcode = operands.length == 2 ? operands[1] : "00";
@@ -109,5 +120,17 @@ export class Z80InstructionSet {
         }
 
         return new Array(count).fill(instruction);
+    }
+
+    private parseNumericExpression(s: string): number | undefined {
+
+        for (let numericParser of Z80InstructionSet.numericParsers) {
+            const value = numericParser.parse(s);
+            if ((value !== undefined) && (!isNaN(value))) {
+                return value;
+            }
+        }
+
+        return undefined;
     }
 }
