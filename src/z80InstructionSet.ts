@@ -102,7 +102,7 @@ export class Z80InstructionSet {
     private parseDefsDirective(pInstruction: string): Z80Instruction[] | undefined {
 
         const operands = extractOperandsOf(pInstruction);
-        if ((operands.length < 1) ||(operands.length > 2)) {
+        if ((operands.length < 1) || (operands.length > 2)) {
             return undefined;
         }
 
@@ -111,7 +111,9 @@ export class Z80InstructionSet {
         if ((count === undefined) || isNaN(count)) {
             return undefined;
         }
-        const value = operands.length == 2 ? this.parseNumericExpression(operands[1]) : 0;
+        const value = operands.length === 2
+                ? this.parseNumericExpression(operands[1])
+                : 0x00; // (defaults to NOP)
         if ((value === undefined) || isNaN(value) || (value < 0x00) || (value > 0xff)) {
             return undefined;
         }
