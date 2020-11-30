@@ -1,4 +1,4 @@
-import { parseTimings, extractMnemonicOf, extractOperandsOf } from './z80Utils';
+import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, parseTimings } from './z80Utils';
 
 export class Z80Instruction {
 
@@ -101,6 +101,52 @@ export class Z80Instruction {
         return this.operands
                 ? this.operands
                 : this.operands = extractOperandsOf(this.instruction);
+    }
+
+    /**
+     * @returns true if this operation can be expanded
+     */
+    public isExpandable(): boolean {
+
+        // (for the moment, we only need to expand single byte operations with an 8 bit register operand)
+        return this.size === 1
+                && !!this.opcode.match(/^[0-9A-F]{2}\+r$/);
+    }
+
+    /**
+     * @returns an array of Z80Instruction, expanded from the actual instruction
+     */
+    public expand(): Z80Instruction[] {
+
+        if (!this.isExpandable()) {
+            return [this];
+        }
+
+        // Expands the 8 bit register operand
+        return [
+                this.expand8bitRegister('A', 7),
+                this.expand8bitRegister('B', 0),
+                this.expand8bitRegister('C', 1),
+                this.expand8bitRegister('D', 2),
+                this.expand8bitRegister('E', 3),
+                this.expand8bitRegister('H', 4),
+                this.expand8bitRegister('L', 5)
+            ];
+    }
+
+    private expand8bitRegister(register: string, addend: number): Z80Instruction {
+
+        const expandedInstruction = this.instruction.replace(/r/, register);
+        const expandedOpcode = parseInt(this.opcode.substring(0, 2), 16) + addend;
+
+        return new Z80Instruction(
+                this.instructionSet,
+                expandedInstruction,
+                formatTiming(this.z80Timing),
+                formatTiming(this.msxTiming),
+                formatTiming(this.cpcTiming),
+                formatHexadecimalByte(expandedOpcode),
+                this.size.toString());
     }
 
     /**

@@ -1,4 +1,10 @@
 
+## 1.5.0
+
+- Single byte instructions with an 8 bit register operand (such as `AND r`) are now recognized as separate instructions (`AND A`. `AND B`, ...)
+- Fixed issues:
+    - Use of `ds`/`defs` directives for `NOP`s. #40
+
 ## 1.4.0
 
 - Fixed issues:

@@ -1,7 +1,7 @@
 import { NumericParser } from './numericParser';
 import { Z80Instruction } from './z80Instruction';
 import { z80InstructionSetRawData } from './z80InstructionSetRawData';
-import { extractMnemonicOf, extractOperandsOf } from './z80Utils';
+import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte } from './z80Utils';
 
 export class Z80InstructionSet {
 
@@ -28,7 +28,7 @@ export class Z80InstructionSet {
         z80InstructionSetRawData.forEach(rawData => {
 
             // Parses the raw instruction
-            const instruction = new Z80Instruction(
+            const originalInstruction = new Z80Instruction(
                     rawData[0], // instructionSet
                     rawData[1], // raw instruction
                     rawData[2], // z80Timing
@@ -37,18 +37,18 @@ export class Z80InstructionSet {
                     rawData[5], // opcode
                     rawData[6]); // size
 
-            // Prepares a map by mnemonic for performance reasons
-            const mnemonic = instruction.getMnemonic();
-            if (!this.instructionByMnemonic[mnemonic]) {
-                this.instructionByMnemonic[mnemonic] = [];
-            }
-            this.instructionByMnemonic[mnemonic].push(instruction);
+            originalInstruction.expand().forEach(instruction => {
+                // Prepares a map by mnemonic for performance reasons
+                const mnemonic = instruction.getMnemonic();
+                if (!this.instructionByMnemonic[mnemonic]) {
+                    this.instructionByMnemonic[mnemonic] = [];
+                }
+                this.instructionByMnemonic[mnemonic].push(instruction);
 
-            // Prepares a map by opcode for single byte instructions
-            if (instruction.getSize() == 1) {
+                // Prepares a map by opcode for single byte instructions
                 const opcode = instruction.getOpcode();
                 this.instructionByOpcode[opcode] = instruction;
-            }
+            });
         });
     }
 
@@ -111,10 +111,13 @@ export class Z80InstructionSet {
         if ((count === undefined) || isNaN(count)) {
             return undefined;
         }
-        const opcode = operands.length == 2 ? operands[1] : "00";
+        const value = operands.length == 2 ? this.parseNumericExpression(operands[1]) : 0;
+        if ((value === undefined) || isNaN(value) || (value < 0x00) || (value > 0xff)) {
+            return undefined;
+        }
 
         // Determines instruction
-        const instruction = this.instructionByOpcode[opcode];
+        const instruction = this.instructionByOpcode[formatHexadecimalByte(value)];
         if (!instruction) {
             return undefined;
         }
