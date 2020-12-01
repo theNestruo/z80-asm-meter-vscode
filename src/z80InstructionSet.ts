@@ -9,10 +9,11 @@ export class Z80InstructionSet {
 
     private static numericParsers = [
         new NumericParser(/^0x([0-9a-f]+)$/i, 16),
-        new NumericParser(/^\$([0-9a-f]+)$/i, 16),
+        new NumericParser(/^[#$&]([0-9a-f]+)$/i, 16),
         new NumericParser(/^([0-9a-f]+)h$/i, 16),
+        new NumericParser(/^[0@]([0-7]+)$/, 8),
         new NumericParser(/^([0-7]+)o$/i, 8),
-        new NumericParser(/^0([0-7]+)$/, 8),
+        new NumericParser(/^%([0-1]+)$/i, 2),
         new NumericParser(/^([0-1]+)b$/i, 2),
         new NumericParser(/^(\d+)$/, 10)
     ];
