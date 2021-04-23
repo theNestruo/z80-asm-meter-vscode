@@ -1,8 +1,3 @@
-import { workspace } from 'vscode';
-import { Z80Instruction } from "./z80Instruction";
-import { Z80InstructionSet } from './z80InstructionSet';
-import { extractInstructionsFrom, formatTiming } from './z80Utils';
-
 export class NumericParser {
 
     private regex: RegExp;
