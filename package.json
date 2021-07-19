@@ -6,7 +6,7 @@
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
 	"version": "1.6.0",
 	"engines": {
-		"vscode": "^1.58.0"
+		"vscode": "^1.58.1"
 	},
 	"categories": [
 		"Programming Languages"
