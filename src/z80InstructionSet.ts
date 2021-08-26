@@ -1,12 +1,17 @@
-import { NumericParser } from './numericParser';
-import { Z80Instruction } from './z80Instruction';
-import { z80InstructionSetRawData } from './z80InstructionSetRawData';
-import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte } from './z80Utils';
+import { workspace } from "vscode";
+import { NumericParser } from "./numericParser";
+import { Z80AbstractInstruction } from "./z80AbstractInstruction";
+import { Z80Directive } from "./z80Directive";
+import { Z80Instruction } from "./z80Instruction";
+import { z80InstructionSetRawData } from "./z80InstructionSetRawData";
+import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./z80Utils";
 
 export class Z80InstructionSet {
 
+    // Singleton
     public static instance = new Z80InstructionSet();
 
+    // Numeric parsers
     private static numericParsers = [
         new NumericParser(/^0x([0-9a-f]+)$/i, 16),
         new NumericParser(/^[#$&]([0-9a-f]+)$/i, 16),
@@ -18,12 +23,20 @@ export class Z80InstructionSet {
         new NumericParser(/^(\d+)$/, 10)
     ];
 
-    private instructionByMnemonic: Record<string, Z80Instruction[]>;
+    // Configuration
+    private directivesAsInstructions: string | undefined = undefined;
 
+    // Instruction maps
+    private instructionByMnemonic: Record<string, Z80Instruction[]>;
     private instructionByOpcode: Record<string, Z80Instruction>;
 
     private constructor() {
 
+        // Saves configuration
+        const configuration = workspace.getConfiguration("z80-asm-meter");
+        this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
+
+        // Initializes instruction maps
         this.instructionByMnemonic = {};
         this.instructionByOpcode = {};
         z80InstructionSetRawData.forEach(rawData => {
@@ -53,7 +66,7 @@ export class Z80InstructionSet {
         });
     }
 
-    public parseInstructions(instruction: string | undefined, instructionSets: string[]): Z80Instruction[] | undefined {
+    public parseInstructions(instruction: string | undefined, instructionSets: string[]): Z80AbstractInstruction[] | undefined {
 
         if (!instruction) {
             return undefined;
@@ -67,8 +80,12 @@ export class Z80InstructionSet {
             return parsedInstruction ? [parsedInstruction] : undefined;
         }
 
-        // Locates DEFS directive
-        if (mnemonic.match(/^(DEFS|DS)$/)) {
+        // Locates defb/defw/defs directives
+        if (mnemonic.match(/^(DEFB|DB)$/)) {
+            return this.parseDefbDirective(instruction);
+        } else if (mnemonic.match(/^(DEFW|DW)$/)) {
+            return this.parseDefwDirective(instruction);
+        } else if (mnemonic.match(/^(DEFS|DS)$/)) {
             return this.parseDefsDirective(instruction);
         }
 
@@ -100,32 +117,93 @@ export class Z80InstructionSet {
         return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
     }
 
-    private parseDefsDirective(pInstruction: string): Z80Instruction[] | undefined {
+    private parseDefbDirective(pInstruction: string): Z80Directive[] | undefined {
+
+        const operands = extractOperandsOfQuotesAware(pInstruction);
+        if (operands.length < 1) {
+            return undefined;
+        }
+
+        // Extracts bytes
+        const bytes: string[] = [];
+        operands.forEach(operand => {
+            if (operand.match(/^\".*\"$/)) {
+                // String
+                operand.substring(1, operand.length - 1).split(/""/).forEach(substring => {
+                    for (var i = 0; i < substring.length; i++) {
+                        bytes.push(formatHexadecimalByte(substring.charCodeAt(i)));
+                    }
+                })
+            } else {
+                // Raw values
+                const value = this.parseNumericExpression(operand);
+                bytes.push(value !== undefined ? formatHexadecimalByte(value) : "n");
+            }
+        });
+
+        if (bytes.length == 0) {
+            return undefined;
+        }
+
+        // Returns as directive
+        return [new Z80Directive("DEFB", bytes.join(" "), bytes.length)];
+    }
+
+    private parseDefwDirective(pInstruction: string): Z80Directive[] | undefined {
+
+        const operands = extractOperandsOfQuotesAware(pInstruction);
+        if (operands.length < 1) {
+            return undefined;
+        }
+
+        // Extracts bytes
+        const bytes: string[] = [];
+        operands.forEach(operand => {
+            const value = this.parseNumericExpression(operand);
+            if (value !== undefined) {
+                bytes.push(formatHexadecimalByte(value & 0xff), formatHexadecimalByte((value & 0xff00) >> 8));
+            } else {
+                bytes.push("nn", "nn")
+            }
+        });
+
+        if (bytes.length == 0) {
+            return undefined;
+        }
+
+        // Returns as directive
+        return [new Z80Directive("DEFW", bytes.join(" "), bytes.length)];
+    }
+
+    private parseDefsDirective(pInstruction: string): Z80AbstractInstruction[] | undefined {
 
         const operands = extractOperandsOf(pInstruction);
         if ((operands.length < 1) || (operands.length > 2)) {
             return undefined;
         }
 
-        // Extracts count and opcode
+        // Extracts count and byte
         const count = this.parseNumericExpression(operands[0]);
-        if ((count === undefined) || isNaN(count)) {
+        if ((count === undefined) || (count < 0)) {
             return undefined;
         }
-        const value = operands.length === 2
+        let value = operands.length === 2
                 ? this.parseNumericExpression(operands[1])
-                : 0x00; // (defaults to NOP)
-        if ((value === undefined) || isNaN(value) || (value < 0x00) || (value > 0xff)) {
-            return undefined;
-        }
+                : undefined;
 
         // Determines instruction
-        const instruction = this.instructionByOpcode[formatHexadecimalByte(value)];
-        if (!instruction) {
-            return undefined;
+        if (this.directivesAsInstructions === "defs") {
+            const opcode = value !== undefined ? value : 0x00; // (defaults to NOP)
+            const instruction = this.instructionByOpcode[formatHexadecimalByte(opcode)];
+            if (instruction) {
+                return new Array(count).fill(instruction);
+            }
         }
 
-        return new Array(count).fill(instruction);
+        // Returns as directive
+        const byte = value !== undefined ? formatHexadecimalByte(value) : "nn";
+        const bytes = new Array(count).fill(byte);
+        return [new Z80Directive("DEFS", bytes.join(" "), count)];
     }
 
     private parseNumericExpression(s: string): number | undefined {

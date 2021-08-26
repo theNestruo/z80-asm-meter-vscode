@@ -1,5 +1,5 @@
-import { commands, Disposable, env, StatusBarItem, TextEditor, window, workspace } from 'vscode';
-import { Z80Block } from './z80Block';
+import { commands, Disposable, env, MarkdownString, StatusBarItem, TextEditor, window, workspace } from "vscode";
+import { Z80Block } from "./z80Block";
 
 export class Z80MeterController {
 
@@ -35,27 +35,25 @@ export class Z80MeterController {
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
-        const viewOpcodeConfiguration = configuration.get("viewOpcode") || false;
+        const viewBytesConfiguration = configuration.get("viewBytes") || configuration.get("viewOpcode") || false;
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
         // Builds the text
-        const timing = z80Block.getTiming();
-        const size = z80Block.getSizeString();
         let text = "";
         if (viewInstructionConfiguration) {
-            const instruction = z80Block.getInstructionString();
+            const instruction = z80Block.getInstructionText();
             text += `$(code) ${instruction} `;
         }
+        const timing = z80Block.getTimingText(false);
+        const size = z80Block.getSizeText();
         text += `$(watch) ${timing} $(file-binary) ${size}`;
-        if (viewOpcodeConfiguration) {
-            const opcode = z80Block.getOpcodeString();
-            text += ` (${opcode})`;
+        if (viewBytesConfiguration) {
+            const bytes = z80Block.getBytesText();
+            text += ` (${bytes})`;
         }
 
         // Builds the tooltip
-        const timingDetails = z80Block.getTimingDetailedString();
-        const instructionAndOpcodeDetails = z80Block.getInstructionAndOpcodeDetailedString();
-        let tooltip = `${timingDetails}\nSize: ${size}\nOpcodes:\n${instructionAndOpcodeDetails}`;
+        const tooltip = z80Block.getDetailedMarkdownString();
 
         // Builds the status bar item
         if (!this._statusBarItem) {
@@ -76,9 +74,9 @@ export class Z80MeterController {
         }
 
         // Builds the text to copy to clipbaord
-        const timingString = z80Block.getTimingString();
-        const sizeString = z80Block.getSizeString();
-        const text = `${timingString}, ${sizeString}`;
+        const timingText = z80Block.getTimingText(true);
+        const sizeText = z80Block.getSizeText();
+        const text = `${timingText}, ${sizeText}`;
 
         // Copies to clipboard and notifies the user
         env.clipboard.writeText(text);
@@ -89,8 +87,6 @@ export class Z80MeterController {
         if (editor) {
             window.showTextDocument(editor.document);
         }
-
-        return;
     }
 
     private readZ80BlockFromSelection(): Z80Block | undefined{
