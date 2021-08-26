@@ -9,7 +9,7 @@ export function formatTiming(t: number[]): string {
     return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
 }
 
-export function extractInstructionsFrom(rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp): string[] | undefined {
+export function extractRawInstructionsFrom(rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp): string[] | undefined {
     // Removes surrounding label, whitespace and/or comments
     const line = rawLine.replace(labelRegExp, "").replace(commentRegExp, "").trim();
     if (line.length === 0) {
@@ -37,8 +37,13 @@ export function extractOperandsOf(s: string): string[] {
     return i === -1 ? [] : s.substr(i + 1).split(/\s*,\s*/);
 }
 
+export function extractOperandsOfQuotesAware(s: string): string[] {
+    const i = s.indexOf(" ");
+    return i === -1 ? [] : s.substr(i + 1).split(/\s*,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\s*/);
+}
+
 export function formatHexadecimalByte(n: number): string {
 
-    const s = '00' + (n.toString(16).toUpperCase());
+    const s = '00' + ((n & 0xff).toString(16).toUpperCase());
     return s.substring(s.length - 2);
 }

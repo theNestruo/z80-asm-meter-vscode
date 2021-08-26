@@ -50,6 +50,19 @@
 		"configuration": {
 			"title": "Z80 Assembly meter settings",
 			"properties": {
+				"z80-asm-meter.directivesAsInstructions": {
+					"type": "string",
+					"description": "Controls which directives should try to be parsed as single byte instructions",
+					"enum": [
+						"none",
+						"defs"
+					],
+					"enumDescriptions": [
+						"None; directives will be parsed as bytes",
+						"Tries to parse DEFS directive bytes as single byte instructions"
+					],
+					"default": "defs"
+				},
 				"z80-asm-meter.languageIds": {
 					"type": [
 						"array",
@@ -64,6 +77,14 @@
 						"z80-macroasm",
 						"zeus-asm"
 					]
+				},
+				"z80-asm-meter.maxBytes": {
+					"type": [
+						"number",
+						"null"
+					],
+					"description": "Stops instruction and bytes (opcode) block visualization (tooltip) when the instruction count exceeds this value",
+					"default": 16
 				},
 				"z80-asm-meter.maxLines": {
 					"type": [
@@ -86,8 +107,9 @@
 						"number",
 						"null"
 					],
-					"description": "Stops instruction and opcode block visualization (tooltip) when the instruction count exceeds this value",
-					"default": 16
+					"description": "Stops instruction and bytes (opcode) block visualization (tooltip) when the instruction count exceeds this value",
+					"default": 16,
+					"deprecationMessage": "Use maxBytes instead"
 				},
 				"z80-asm-meter.platform": {
 					"type": "string",
@@ -119,6 +141,11 @@
 					],
 					"default": "default"
 				},
+				"z80-asm-meter.viewBytes": {
+					"type": "boolean",
+					"description": "Enables the bytes (opcode) in the status bar",
+					"default": false
+				},
 				"z80-asm-meter.viewInstruction": {
 					"type": "boolean",
 					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
@@ -126,8 +153,9 @@
 				},
 				"z80-asm-meter.viewOpcode": {
 					"type": "boolean",
-					"description": "Enables the opcode in the status bar",
-					"default": false
+					"description": "Enables the bytes (opcode) in the status bar",
+					"default": false,
+					"deprecationMessage": "Use viewBytes instead"
 				}
 			}
 		}

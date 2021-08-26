@@ -1,6 +1,7 @@
+import { Z80AbstractInstruction } from './z80AbstractInstruction';
 import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, parseTimings } from './z80Utils';
 
-export class Z80Instruction {
+export class Z80Instruction extends Z80AbstractInstruction {
 
     // Information
     private instructionSet: string;
@@ -21,6 +22,7 @@ export class Z80Instruction {
             instructionSet: string, instruction: string,
             z80Timing: string, msxTiming: string, cpcTiming: string,
             opcode: string, size: string) {
+        super();
 
         this.instructionSet = instructionSet;
         this.instruction = instruction;
@@ -72,9 +74,16 @@ export class Z80Instruction {
     }
 
     /**
+     * @returns The bytes of the instruction
+     */
+    public getBytes(): string {
+        return this.getOpcode();
+    }
+
+    /**
      * @returns The opcode of the instruction
      */
-    public getOpcode(): string {
+     public getOpcode(): string {
         return this.opcode;
     }
 

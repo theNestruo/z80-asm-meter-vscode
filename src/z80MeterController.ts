@@ -35,7 +35,7 @@ export class Z80MeterController {
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
-        const viewOpcodeConfiguration = configuration.get("viewOpcode") || false;
+        const viewBytesConfiguration = configuration.get("viewBytes") || configuration.get("viewOpcode") || false;
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
         // Builds the text
@@ -47,15 +47,15 @@ export class Z80MeterController {
             text += `$(code) ${instruction} `;
         }
         text += `$(watch) ${timing} $(file-binary) ${size}`;
-        if (viewOpcodeConfiguration) {
-            const opcode = z80Block.getOpcodeString();
-            text += ` (${opcode})`;
+        if (viewBytesConfiguration) {
+            const bytes = z80Block.getBytesString();
+            text += ` (${bytes})`;
         }
 
         // Builds the tooltip
         const timingDetails = z80Block.getTimingDetailedString();
-        const instructionAndOpcodeDetails = z80Block.getInstructionAndOpcodeDetailedString();
-        let tooltip = `${timingDetails}\nSize: ${size}\nOpcodes:\n${instructionAndOpcodeDetails}`;
+        const instructionAndBytesDetails = z80Block.getInstructionAndBytesDetailedString();
+        let tooltip = `${timingDetails}\nSize: ${size}\nBytes:\n${instructionAndBytesDetails}`;
 
         // Builds the status bar item
         if (!this._statusBarItem) {

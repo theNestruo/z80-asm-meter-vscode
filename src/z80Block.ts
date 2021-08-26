@@ -1,12 +1,12 @@
 import { workspace } from 'vscode';
-import { Z80Instruction } from "./z80Instruction";
+import { Z80AbstractInstruction } from './z80AbstractInstruction';
 import { Z80InstructionSet } from './z80InstructionSet';
-import { extractInstructionsFrom, formatTiming } from './z80Utils';
+import { extractRawInstructionsFrom, formatTiming } from './z80Utils';
 
 export class Z80Block {
 
     // Configuration
-    private maxOpcodesConfiguration: number | undefined = undefined;
+    private maxBytesConfiguration: number | undefined = undefined;
     private platformConfiguration: string | undefined = undefined;
     private syntaxLabelConfiguration: string | undefined = undefined;
 
@@ -19,9 +19,9 @@ export class Z80Block {
     public size: number = 0;
     public loc: number = 0;
 
-    // Intructions and opcodes
+    // Intructions and bytes
     public instructions: string[] = [];
-    public opcodes: string[] = [];
+    public bytes: string[] = [];
 
     constructor(sourceCode: string | undefined) {
 
@@ -45,7 +45,7 @@ export class Z80Block {
         }
 
         // Saves configuration
-        this.maxOpcodesConfiguration = parseInt(configuration.get("maxOpcodes") || "");
+        this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || configuration.get("maxOpcodes") || "");
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
 
@@ -64,7 +64,7 @@ export class Z80Block {
         const maxLoc: number | undefined = configuration.get("maxLoC");
         rawLines.forEach(rawLine => {
             // Extracts the instructions
-            const rawInstructions = extractInstructionsFrom(rawLine, labelRegExp, commentRegExp);
+            const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp);
             if (!rawInstructions) {
                 return;
             }
@@ -80,18 +80,18 @@ export class Z80Block {
         });
     }
 
-    private addInstructions(pInstructions: Z80Instruction[] | undefined) {
+    private addInstructions(pInstructions: Z80AbstractInstruction[] | undefined) {
 
         if (!pInstructions) {
             return;
         }
 
-        pInstructions.forEach((instruction : Z80Instruction) => {
+        pInstructions.forEach((instruction : Z80AbstractInstruction) => {
             this.addInstruction(instruction);
         });
     }
 
-    private addInstruction(instruction: Z80Instruction) {
+    private addInstruction(instruction: Z80AbstractInstruction) {
 
         const instructionZ80Timing = instruction.getZ80Timing();
         this.z80Timing[0] += instructionZ80Timing[0];
@@ -106,7 +106,7 @@ export class Z80Block {
         this.cpcTiming[1] += instructionCpcTiming[1];
 
         this.instructions.push(instruction.getInstruction());
-        this.opcodes.push(instruction.getOpcode());
+        this.bytes.push(instruction.getBytes());
 
         this.size += instruction.getSize();
         this.loc++;
@@ -191,40 +191,40 @@ export class Z80Block {
         return text;
     }
 
-    public getOpcodeString(): string | undefined {
+    public getBytesString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
             return undefined;
         }
 
-        let text = this.opcodes[0];
+        let text = this.bytes[0];
         if (this.loc > 1) {
             text += " ...";
         }
         return text;
     }
 
-    public getInstructionAndOpcodeDetailedString(): string | undefined {
+    public getInstructionAndBytesDetailedString(): string | undefined {
 
         // (empty)
         if (this.loc === 0) {
             return undefined;
         }
 
-        // tooltip: up to maxOpcodes opcodes
-        const n = this.maxOpcodesConfiguration ? Math.min(this.loc, this.maxOpcodesConfiguration) : this.loc;
+        // tooltip: up to maxBytes bytes
+        const n = this.maxBytesConfiguration ? Math.min(this.loc, this.maxBytesConfiguration) : this.loc;
         let text = "";
         for (let i = 0; i < n; i++) {
-            const opcode = this.opcodes[i];
+            const bytes = this.bytes[i];
             const instruction = this.instructions[i];
             if (i !== 0) {
                 text += '\n';
             }
-            text += `  ${opcode}    ; ${instruction}`;
+            text += `  ${bytes}    ; ${instruction}`;
         }
-        if (this.maxOpcodesConfiguration && this.maxOpcodesConfiguration < this.loc) {
-            const etc = this.loc - this.maxOpcodesConfiguration;
+        if (this.maxBytesConfiguration && this.maxBytesConfiguration < this.loc) {
+            const etc = this.loc - this.maxBytesConfiguration;
             text += "\n  (and " + etc + " more " + (etc === 1 ? "instruction" : "instructions") + ")";
         }
 
