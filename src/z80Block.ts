@@ -220,7 +220,7 @@ export class Z80Block {
             tooltip.appendMarkdown(`|**Amstrad CPC**|${cpcText} NOPs|\n`);
         }
         const z80text = formatTiming(this.z80Timing);
-        const sizeText = this.size + (this.size === 1 ? " byte" : " bytes")
+        const sizeText = this.size + (this.size === 1 ? " byte" : " bytes");
         tooltip.appendMarkdown(`|**Z80**|${z80text} clock cycles|\n`)
                 .appendMarkdown(`|**Size**|${sizeText}|\n\n`)
                 .appendMarkdown("---\n\n");

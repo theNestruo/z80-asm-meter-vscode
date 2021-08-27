@@ -1,4 +1,8 @@
 
+## 1.6.1
+
+- Code clean-up
+
 ## 1.6.0
 
 - Support for `db`/`defb`/`dw`/`defw` directives

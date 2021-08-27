@@ -133,7 +133,7 @@ export class Z80InstructionSet {
                     for (var i = 0; i < substring.length; i++) {
                         bytes.push(formatHexadecimalByte(substring.charCodeAt(i)));
                     }
-                })
+                });
             } else {
                 // Raw values
                 const value = this.parseNumericExpression(operand);
@@ -141,7 +141,7 @@ export class Z80InstructionSet {
             }
         });
 
-        if (bytes.length == 0) {
+        if (bytes.length === 0) {
             return undefined;
         }
 
@@ -163,11 +163,11 @@ export class Z80InstructionSet {
             if (value !== undefined) {
                 bytes.push(formatHexadecimalByte(value & 0xff), formatHexadecimalByte((value & 0xff00) >> 8));
             } else {
-                bytes.push("nn", "nn")
+                bytes.push("nn", "nn");
             }
         });
 
-        if (bytes.length == 0) {
+        if (bytes.length === 0) {
             return undefined;
         }
 
