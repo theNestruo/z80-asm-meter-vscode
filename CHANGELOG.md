@@ -1,4 +1,13 @@
 
+## 1.6.0
+
+- Support for `db`/`defb`/`dw`/`defw` directives
+- Improved support for `ds`/`defs` directives: single byte instruction detection can be disabled
+- Support for negative values
+- Support for multiple instructions on one line with line separators (such as colon `:` or pipe `|`)
+- Improved tooltip format
+- Configuration properties ~~`maxOpcodes`~~ and ~~`viewOpcode`~~ renamed to `maxBytes` and `viewBytes`
+
 ## 1.5.0
 
 - Single byte instructions with an 8 bit register operand (such as `AND r`) are now recognized as separate instructions (`AND A`. `AND B`, ...)
