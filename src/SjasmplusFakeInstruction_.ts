@@ -1,5 +1,5 @@
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import { Z80InstructionParser } from "./Z80InstructionParser_";
 import { Z80Instruction } from "./Z80Instruction_";
 
 /**

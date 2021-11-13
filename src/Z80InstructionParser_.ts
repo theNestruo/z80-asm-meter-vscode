@@ -1,9 +1,7 @@
 import { workspace } from "vscode";
-import { AbstractInstruction } from "./abstractInstruction";
-import { AssemblyDirective } from "./AssemblyDirective";
+import { z80InstructionSet } from "./data/Z80InstructionSet_";
+import { extractMnemonicOf, formatHexadecimalByte } from "./utils";
 import { Z80Instruction } from "./Z80Instruction_";
-import { z80InstructionSet } from "./data/Z80InstructionSet";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./utils";
 
 export class Z80InstructionParser {
 

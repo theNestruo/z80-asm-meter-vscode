@@ -1,5 +1,5 @@
-import { commands, Disposable, env, MarkdownString, StatusBarItem, TextEditor, window, workspace } from "vscode";
-import { Parser } from "./Parser";
+import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
+import { Parser } from "./Parser_";
 import { Z80Block } from "./Z80Block_";
 
 export class Z80MeterController {
@@ -36,7 +36,7 @@ export class Z80MeterController {
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
-        const viewBytesConfiguration = configuration.get("viewBytes") || configuration.get("viewOpcode") || false;
+        const viewBytesConfiguration = configuration.get("viewBytes") || false;
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
         // Builds the text

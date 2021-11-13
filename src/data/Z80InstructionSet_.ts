@@ -3,7 +3,7 @@
 // @see https://wiki.specnext.dev/Extended_Z80_instruction_set#Z80N_instructions_opcodes
 
 // [ Inst. Set,	Instruction,	Timing Z80,	Z80+M1,		CPC,	Opcode,				Size ]
-export const z80InstructionSet = [
+export const z80InstructionSet: string[][] = [
 	// Z80 Instruction set
 	[ "S",	"ADC A,(HL)",		"7",		"8",		"2",	"8E",				"1" ],
 	[ "S",	"ADC A,(IX+o)",		"19",		"21",		"5",	"DD 8E o",			"3" ],

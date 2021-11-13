@@ -1,6 +1,6 @@
 import { MarkdownString, workspace } from 'vscode';
-import { AbstractInstruction } from './abstractInstruction';
-import { Z80InstructionParser } from './Z80InstructionParser';
+import { AbstractInstruction } from './AbstractInstruction_';
+import { Z80InstructionParser } from './Z80InstructionParser_';
 import { extractRawInstructionsFrom, formatTiming } from './utils';
 
 export class Z80Block {
@@ -28,7 +28,7 @@ export class Z80Block {
         const configuration = workspace.getConfiguration("z80-asm-meter");
 
         // Saves configuration
-        this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || configuration.get("maxOpcodes") || "");
+        this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || "");
         this.platformConfiguration = configuration.get("platform", "z80");
         this.maxLoc = configuration.get("maxLoC");
     }
@@ -55,7 +55,7 @@ export class Z80Block {
     //     }
 
     //     // Saves configuration
-    //     this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || configuration.get("maxOpcodes") || "");
+    //     this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || "");
     //     this.platformConfiguration = configuration.get("platform", "z80");
     //     this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
     //     this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");

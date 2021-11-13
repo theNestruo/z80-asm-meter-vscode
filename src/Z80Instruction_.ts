@@ -1,4 +1,4 @@
-import { AbstractInstruction } from './abstractInstruction';
+import { AbstractInstruction } from './AbstractInstruction_';
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIX8bitScore, isIXhScore, isIXlScore, isIXWithOffsetScore, isIY8bitScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
 
 /**

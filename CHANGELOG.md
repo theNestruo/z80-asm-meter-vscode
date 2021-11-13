@@ -1,4 +1,9 @@
 
+## 2.0.0
+
+- Code refactor
+- Support for sjasmplus fake instructions
+
 ## 1.6.1
 
 - Code clean-up

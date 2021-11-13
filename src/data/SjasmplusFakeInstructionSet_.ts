@@ -1,7 +1,7 @@
 // @see https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions
 
 // [ Inst. Set,	Fake instruction,	Real instructions]
-export const sjasmplusFakeInstructionSet = [
+export const sjasmplusFakeInstructionSet: string[][] = [
 	// Z80 Instruction set
 	[ "S",	"RL BC",			"RL C", "RL B" ],
 	[ "S",	"RL DE",			"RL E", "RL D" ],

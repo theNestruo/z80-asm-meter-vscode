@@ -1,9 +1,9 @@
 import { workspace } from 'vscode';
-import { Z80InstructionParser } from './Z80InstructionParser';
+import { Z80InstructionParser } from './Z80InstructionParser_';
 import { extractRawInstructionsFrom, formatTiming } from './utils';
 import { Z80Block } from './Z80Block_';
-import { AssemblyDirectiveParser } from './AssemblyDirectiveParser';
-import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
+import { AssemblyDirectiveParser } from './AssemblyDirectiveParser_';
+import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser_';
 
 export class Parser {
 
