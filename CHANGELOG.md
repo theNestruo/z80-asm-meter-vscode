@@ -3,6 +3,7 @@
 
 - Code refactor
 - Support for parsing SjASMPlus fake instructions. #65
+- Added `SLI` as alternative syntax for `SL1`/`SLL`
 
 ## 1.6.1
 
