@@ -1,6 +1,6 @@
-import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser_";
-import { Z80Instruction } from "./Z80Instruction_";
+import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "./utils";
+import { Z80Instruction } from "./Z80Instruction";
+import { Z80InstructionParser } from "./Z80InstructionParser";
 
 /**
  * A sjasmplus fake instruction
@@ -61,9 +61,8 @@ export class SjasmplusFakeInstruction {
                 const rawInstruction = extractRawInstructionFrom(rawPart);
                 var lInstruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, [this.instructionSet]);
                 if (lInstruction) {
+                    // (should never be undefined)
                     lInstructions.push(lInstruction);
-                } else {
-                    lInstructions = lInstructions;
                 }
             });
             this.instructions = lInstructions;

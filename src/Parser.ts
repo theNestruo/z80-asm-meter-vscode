@@ -1,9 +1,9 @@
 import { workspace } from 'vscode';
-import { Z80InstructionParser } from './Z80InstructionParser_';
-import { extractRawInstructionsFrom, formatTiming } from './utils';
-import { Z80Block } from './Z80Block_';
-import { AssemblyDirectiveParser } from './AssemblyDirectiveParser_';
-import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser_';
+import { AssemblyDirectiveParser } from './AssemblyDirectiveParser';
+import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
+import { extractRawInstructionsFrom } from './utils';
+import { Z80Block } from './Z80Block';
+import { Z80InstructionParser } from './Z80InstructionParser';
 
 export class Parser {
 
@@ -12,6 +12,7 @@ export class Parser {
     private platformConfiguration: string | undefined = undefined;
     private syntaxLabelConfiguration: string | undefined = undefined;
     private syntaxLineSeparatorConfiguration: string | undefined = undefined;
+    private sjasmFakeInstructionsConfiguration: boolean = false;
 
     constructor() {
 
@@ -22,6 +23,7 @@ export class Parser {
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
+        this.sjasmFakeInstructionsConfiguration = configuration.get("sjasmplusFakeInstructions") || false;
     }
 
     parse(sourceCode: string | undefined): Z80Block {
@@ -67,19 +69,24 @@ export class Parser {
                 return;
             }
             rawInstructions.forEach((rawInstruction: string | undefined) => {
+                // Tries to parse Z80 instructions
                 const lInstruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
                 if (!!lInstruction) {
                     block.addInstructions([lInstruction]);
                     return;
                 }
+                // Tries to parse sjasmplus fake instructions
+                if (this.sjasmFakeInstructionsConfiguration) {
+                    const lInstructions = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
+                    if (!!lInstructions) {
+                        block.addInstructions(lInstructions);
+                        return;
+                    }
+                }
+                // Tries to parse assembly directives
                 const lDirective = AssemblyDirectiveParser.instance.parse(rawInstruction);
                 if (!!lDirective) {
                     block.addInstructions(lDirective);
-                    return;
-                }
-                const lInstructions = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
-                if (!!lInstructions) {
-                    block.addInstructions(lInstructions);
                     return;
                 }
             });

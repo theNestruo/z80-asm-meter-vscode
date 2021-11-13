@@ -119,6 +119,11 @@
 					],
 					"default": "z80"
 				},
+				"z80-asm-meter.sjasmplusFakeInstructions": {
+					"type": "boolean",
+					"description": "Enables support for parsing SjASMPlus fake instructions",
+					"default": false
+				},
 				"z80-asm-meter.syntax.label": {
 					"type": "string",
 					"description": "Adjusts the label detection to match the syntax of the assembler",

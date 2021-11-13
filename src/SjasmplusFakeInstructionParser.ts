@@ -1,12 +1,8 @@
 import { workspace } from "vscode";
-import { AbstractInstruction } from "./AbstractInstruction_";
-import { AssemblyDirective } from "./AssemblyDirective_";
-import { Z80Instruction } from "./Z80Instruction_";
-import { z80InstructionSet } from "./data/Z80InstructionSet_";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./utils";
-import { sjasmplusFakeInstructionSet } from "./data/SjasmplusFakeInstructionSet_";
-import { SjasmplusFakeInstruction } from "./SjasmplusFakeInstruction_";
-import { Z80InstructionParser } from "./Z80InstructionParser_";
+import { sjasmplusFakeInstructionSet } from "./data/SjasmplusFakeInstructionSet";
+import { SjasmplusFakeInstruction } from "./SjasmplusFakeInstruction";
+import { extractMnemonicOf } from "./utils";
+import { Z80Instruction } from "./Z80Instruction";
 
 export class SjasmplusFakeInstructionParser {
 

@@ -1,7 +1,6 @@
 import { MarkdownString, workspace } from 'vscode';
-import { AbstractInstruction } from './AbstractInstruction_';
-import { Z80InstructionParser } from './Z80InstructionParser_';
-import { extractRawInstructionsFrom, formatTiming } from './utils';
+import { AbstractInstruction } from './AbstractInstruction';
+import { formatTiming } from './utils';
 
 export class Z80Block {
 
@@ -32,69 +31,6 @@ export class Z80Block {
         this.platformConfiguration = configuration.get("platform", "z80");
         this.maxLoc = configuration.get("maxLoC");
     }
-
-    // constructor(sourceCode: string | undefined) {
-
-    //     if (!sourceCode) {
-    //         return;
-    //     }
-    //     const rawLines = sourceCode.split(/[\r\n]+/);
-    //     if (rawLines.length === 0) {
-    //         return;
-    //     }
-    //     if (rawLines[rawLines.length - 1].trim() === "") {
-    //         rawLines.pop(); // (removes possible spurious empty line at the end of the selection)
-    //     }
-
-    //     const configuration = workspace.getConfiguration("z80-asm-meter");
-
-    //     // (disables if maximum lines exceeded)
-    //     const maxLines: number | undefined = configuration.get("maxLines");
-    //     if ((!!maxLines) && (rawLines.length > maxLines)) {
-    //         return;
-    //     }
-
-    //     // Saves configuration
-    //     this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || "");
-    //     this.platformConfiguration = configuration.get("platform", "z80");
-    //     this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
-    //     this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
-
-    //     // Determines instruction sets
-    //     const instructionSets =
-    //             this.platformConfiguration === "z80n" ? [ "S", "N" ]
-    //             : [ "S" ];
-
-    //     // Determines syntax
-    //     const labelRegExp = this.syntaxLabelConfiguration === "default"
-    //             ? /(^\s*[^\s:]+:)/
-    //             : /(^[^\s:]+([\s:]|$))/;
-    //     const commentRegExp = /((;|\/\/).*$)/;
-    //     const lineSepartorRegExp =
-    //             this.syntaxLineSeparatorConfiguration === "colon" ? /\s*:\s*/
-    //             : this.syntaxLineSeparatorConfiguration === "pipe" ? /\s*\|\s*/
-    //             : undefined;
-
-    //     // For every line...
-    //     const maxLoc: number | undefined = configuration.get("maxLoC");
-    //     rawLines.forEach(rawLine => {
-    //         // Extracts the instructions
-    //         const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSepartorRegExp);
-    //         if (!rawInstructions) {
-    //             return;
-    //         }
-    //         rawInstructions.forEach((rawInstruction: string | undefined) => {
-    //             const lInstructions =
-    //                     Z80InstructionParser.instance.parse(rawInstruction, instructionSets);
-    //             this.addInstructions(lInstructions);
-    //         });
-
-    //         // (stops after maximum loc count)
-    //         if ((!!maxLoc) && (this.loc >= maxLoc)) {
-    //             return;
-    //         }
-    //     });
-    // }
 
     public addInstructions(instructions: AbstractInstruction[] | undefined) {
 

@@ -1,6 +1,6 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
-import { Parser } from "./Parser_";
-import { Z80Block } from "./Z80Block_";
+import { Parser } from "./Parser";
+import { Z80Block } from "./Z80Block";
 
 export class Z80MeterController {
 

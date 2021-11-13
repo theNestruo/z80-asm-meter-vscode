@@ -1,4 +1,4 @@
-import { AbstractInstruction } from './AbstractInstruction_';
+import { AbstractInstruction } from './AbstractInstruction';
 
 /**
  * An assembly directive, such as `db`, `dw` or `ds`

@@ -1,8 +1,8 @@
 import { workspace } from "vscode";
-import { AbstractInstruction } from "./AbstractInstruction_";
-import { AssemblyDirective } from "./AssemblyDirective_";
+import { AbstractInstruction } from "./AbstractInstruction";
+import { AssemblyDirective } from "./AssemblyDirective";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser_";
+import { Z80InstructionParser } from "./Z80InstructionParser";
 
 class NumericParser {
 

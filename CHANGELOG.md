@@ -2,7 +2,7 @@
 ## 2.0.0
 
 - Code refactor
-- Support for sjasmplus fake instructions
+- Support for parsing SjASMPlus fake instructions. #65
 
 ## 1.6.1
 
