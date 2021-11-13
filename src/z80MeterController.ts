@@ -1,5 +1,6 @@
 import { commands, Disposable, env, MarkdownString, StatusBarItem, TextEditor, window, workspace } from "vscode";
-import { Z80Block } from "./z80Block";
+import { Parser } from "./Parser";
+import { Z80Block } from "./Z80Block_";
 
 export class Z80MeterController {
 
@@ -100,7 +101,7 @@ export class Z80MeterController {
         const sourceCode = editor.selection.isEmpty
             ? editor.document.lineAt(editor.selection.active.line).text
             : editor.document.getText(editor.selection);
-        const z80Block = new Z80Block(sourceCode);
+        const z80Block = new Parser().parse(sourceCode);
         if (z80Block.loc === 0) {
             return undefined;
         }

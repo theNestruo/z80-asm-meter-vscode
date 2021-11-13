@@ -1,6 +1,7 @@
-import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, parseTimings } from './z80Utils';
-
-export abstract class Z80AbstractInstruction {
+/**
+ * Anything that can be meters: Z80 Instructions, ASM directives, sjasmplus fake instructions...
+ */
+export abstract class AbstractInstruction {
 
     /**
      * @returns The raw instruction

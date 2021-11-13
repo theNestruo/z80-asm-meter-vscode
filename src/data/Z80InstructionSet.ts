@@ -3,7 +3,7 @@
 // @see https://wiki.specnext.dev/Extended_Z80_instruction_set#Z80N_instructions_opcodes
 
 // [ Inst. Set,	Instruction,	Timing Z80,	Z80+M1,		CPC,	Opcode,				Size ]
-export const z80InstructionSetRawData = [
+export const z80InstructionSet = [
 	// Z80 Instruction set
 	[ "S",	"ADC A,(HL)",		"7",		"8",		"2",	"8E",				"1" ],
 	[ "S",	"ADC A,(IX+o)",		"19",		"21",		"5",	"DD 8E o",			"3" ],
@@ -339,18 +339,22 @@ export const z80InstructionSetRawData = [
 	[ "S",	"SET b,(IX+o)",		"23",		"25",		"7",	"DD CB o C6+8*b",	"4" ],
 	[ "S",	"SET b,(IY+o)",		"23",		"25",		"7",	"FD CB o C6+8*b",	"4" ],
 	[ "S",	"SET b,r",			"8",		"10",		"2",	"CB C0+8*b+r",		"2" ],
-	[ "S",	"SL1 (HL)",			"15",		"17",		"4",	"CB 36",			"2" ],	// alt. SLL (HL)
-	[ "S",	"SL1 (IX+o)",		"23",		"25",		"7",	"DD CB o 36",		"4" ],	// alt. SLL (IX+o)
-	[ "S",	"SL1 (IY+o)",		"23",		"25",		"7",	"FD CB o 36",		"4" ],	// alt. SLL (IY+o)
-	[ "S",	"SL1 r",			"8",		"10",		"2",	"CB 30+r",			"2" ],	// alt. SLL r
+	[ "S",	"SL1 (HL)",			"15",		"17",		"4",	"CB 36",			"2" ],	// alt. SLI/SLL (HL)
+	[ "S",	"SL1 (IX+o)",		"23",		"25",		"7",	"DD CB o 36",		"4" ],	// alt. SLI/SLL (IX+o)
+	[ "S",	"SL1 (IY+o)",		"23",		"25",		"7",	"FD CB o 36",		"4" ],	// alt. SLI/SLL (IY+o)
+	[ "S",	"SL1 r",			"8",		"10",		"2",	"CB 30+r",			"2" ],	// alt. SLI/SLL r
 	[ "S",	"SLA (HL)",			"15",		"17",		"4",	"CB 26",			"2" ],
 	[ "S",	"SLA (IX+o)",		"23",		"25",		"7",	"DD CB o 26",		"4" ],
 	[ "S",	"SLA (IY+o)",		"23",		"25",		"7",	"FD CB o 26",		"4" ],
 	[ "S",	"SLA r",			"8",		"10",		"2",	"CB 20+r",			"2" ],
-	[ "S",	"SLL (HL)",			"15",		"17",		"4",	"CB 36",			"2" ],	// alt. SL1 (HL)
-	[ "S",	"SLL (IX+o)",		"23",		"25",		"7",	"DD CB o 36",		"4" ],	// alt. SL1 (IX+o)
-	[ "S",	"SLL (IY+o)",		"23",		"25",		"7",	"FD CB o 36",		"4" ],	// alt. SL1 (IY+o)
-	[ "S",	"SLL r",			"8",		"10",		"2",	"CB 30+r",			"2" ],	// alt. SL1 r
+	[ "S",	"SLI (HL)",			"15",		"17",		"4",	"CB 36",			"2" ],	// alt. SL1/SLL (HL)
+	[ "S",	"SLI (IX+o)",		"23",		"25",		"7",	"DD CB o 36",		"4" ],	// alt. SL1/SLL (IX+o)
+	[ "S",	"SLI (IY+o)",		"23",		"25",		"7",	"FD CB o 36",		"4" ],	// alt. SL1/SLL (IY+o)
+	[ "S",	"SLI r",			"8",		"10",		"2",	"CB 30+r",			"2" ],	// alt. SL1/SLL r
+	[ "S",	"SLL (HL)",			"15",		"17",		"4",	"CB 36",			"2" ],	// alt. SL1/SLI (HL)
+	[ "S",	"SLL (IX+o)",		"23",		"25",		"7",	"DD CB o 36",		"4" ],	// alt. SL1/SLI (IX+o)
+	[ "S",	"SLL (IY+o)",		"23",		"25",		"7",	"FD CB o 36",		"4" ],	// alt. SL1/SLI (IY+o)
+	[ "S",	"SLL r",			"8",		"10",		"2",	"CB 30+r",			"2" ],	// alt. SL1/SLI r
 	[ "S",	"SRA (HL)",			"15",		"17",		"4",	"CB 2E",			"2" ],
 	[ "S",	"SRA (IX+o)",		"23",		"25",		"7",	"DD CB o 2E",		"4" ],
 	[ "S",	"SRA (IY+o)",		"23",		"25",		"7",	"FD CB o 2E",		"4" ],

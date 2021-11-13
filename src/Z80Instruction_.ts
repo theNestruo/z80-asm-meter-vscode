@@ -1,7 +1,10 @@
-import { Z80AbstractInstruction } from './z80AbstractInstruction';
-import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, parseTimings } from './z80Utils';
+import { AbstractInstruction } from './abstractInstruction';
+import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIX8bitScore, isIXhScore, isIXlScore, isIXWithOffsetScore, isIY8bitScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
 
-export class Z80Instruction extends Z80AbstractInstruction {
+/**
+ * A Z80 instruction
+ */
+export class Z80Instruction extends AbstractInstruction {
 
     // Information
     private instructionSet: string;
@@ -268,16 +271,16 @@ export class Z80Instruction extends Z80AbstractInstruction {
     private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
 
         // Must the candidate operand match verbatim the operand of the instruction?
-        if (this.isVerbatimOperand(expectedOperand)) {
-            return this.verbatimOperandScore(expectedOperand, candidateOperand);
+        if (isVerbatimOperand(expectedOperand)) {
+            return verbatimOperandScore(expectedOperand, candidateOperand);
         }
 
         // Must the candidate operand be an indirection?
-        if (indirectionAllowed && this.isIndirectionOperand(expectedOperand, true)) {
+        if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
             // Checks for SDCC index register syntax
-            const sdccIndexRegisterIndirectionScore = this.sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand);
-            if (sdccIndexRegisterIndirectionScore !== undefined) {
-                return sdccIndexRegisterIndirectionScore;
+            const score = sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand);
+            if (score !== undefined) {
+                return score;
             }
             return this.indirectOperandScore(expectedOperand, candidateOperand);
         }
@@ -285,27 +288,27 @@ export class Z80Instruction extends Z80AbstractInstruction {
         // Depending on the expected operand...
         switch (expectedOperand) {
         case "r":
-            return this.is8bitRegisterScore(candidateOperand);
+            return is8bitRegisterScore(candidateOperand);
         case "IX+o":
-            return this.isIXWithOffsetScore(candidateOperand);
+            return isIXWithOffsetScore(candidateOperand);
         case "IY+o":
-            return this.isIYWithOffsetScore(candidateOperand);
+            return isIYWithOffsetScore(candidateOperand);
         case "IXh":
-            return this.isIXhScore(candidateOperand);
+            return isIXhScore(candidateOperand);
         case "IXl":
-            return this.isIXlScore(candidateOperand);
+            return isIXlScore(candidateOperand);
         case "IXp":
-            return this.isIX8bitScore(candidateOperand);
+            return isIX8bitScore(candidateOperand);
         case "IYh":
-            return this.isIYhScore(candidateOperand);
+            return isIYhScore(candidateOperand);
         case "IYl":
-            return this.isIYlScore(candidateOperand);
+            return isIYlScore(candidateOperand);
         case "IYq":
-            return this.isIY8bitScore(candidateOperand);
+            return isIY8bitScore(candidateOperand);
         case "p":
-            return this.is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
+            return is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
         case "q":
-            return this.is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
+            return is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
         case "0": // IM 0, RST 0, and OUT (C), 0
         case "1": // IM 1
         case "2": // IM 2
@@ -317,47 +320,13 @@ export class Z80Instruction extends Z80AbstractInstruction {
             // (due possibility of using constants, labels, and expressions in the source code,
             // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
             // but uses a "best effort" to discard registers)
-            return this.isAnyRegister(
-                    this.isIndirectionOperand(candidateOperand, false)
-                        ? this.extractIndirection(candidateOperand)
+            return isAnyRegister(
+                    isIndirectionOperand(candidateOperand, false)
+                        ? extractIndirection(candidateOperand)
                         : candidateOperand)
                     ? 0
                     : 0.75;
         }
-    }
-
-    /**
-     * @param operand the operand of the instruction
-     * @returns true if the candidate operand must match verbatim the operand of the instruction
-     */
-    private isVerbatimOperand(operand: string): boolean {
-        return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY]|R|SP|N?Z|M|P[OE]?)$/);
-    }
-
-    /**
-     * @param expectedOperand the operand of the instruction
-     * @param candidateOperand the operand from the cleaned-up line
-     * @returns 1 if the candidate operand is a perfect match,
-     * 0 if the candidate operand is not valid
-     */
-    private verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
-
-        return (candidateOperand === expectedOperand) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the operand of the instruction or the candidate operand
-     * @param strict true to only accept parenthesis, false to also accept brackets
-     */
-    private isIndirectionOperand(operand: string, strict: boolean): boolean {
-
-        if (operand.startsWith("(") && operand.endsWith(")")) {
-            return true;
-        }
-        if (strict) {
-            return false;
-        }
-        return (operand.startsWith("[") && operand.endsWith("]"));
     }
 
     /**
@@ -369,133 +338,8 @@ export class Z80Instruction extends Z80AbstractInstruction {
     private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
 
         // Compares the expression inside the indirection
-        return this.isIndirectionOperand(candidateOperand, false)
-                ? this.operandScore(this.extractIndirection(expectedOperand), this.extractIndirection(candidateOperand), false)
+        return isIndirectionOperand(candidateOperand, false)
+                ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
                 : 0;
-    }
-
-    /**
-     * @param expectedOperand the operand of the instruction
-     * @param candidateOperand the operand from the cleaned-up line
-     * @returns number between 0 and 1 with the score of the match,
-     * or undefined if SDCC index register indirection syntax is not allowed or not found
-     */
-    private sdccIndexRegisterIndirectionScore(expectedOperand: string, candidateOperand: string): number | undefined {
-
-        // Depending on the expected indirection...
-        switch (this.extractIndirection(expectedOperand)) {
-            case "IX+o":
-                return candidateOperand.match(/(\(\s*IX\s*\)|\[\s*IX\s*\])$/) ? 1 : undefined;
-            case "IY+o":
-                return candidateOperand.match(/(\(\s*IY\s*\)|\[\s*IY\s*\])$/) ? 1 : undefined;
-            default:
-                return undefined;
-        }
-    }
-
-    /**
-     * @param operand the operand of the instruction or the candidate operand
-     * @returns the expression inside the indirection
-     */
-    private extractIndirection(operand: string): string {
-        return operand.substring(1, operand.length - 1).trim();
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is one of the 8 bit general purpose registers, 0 otherwise
-     */
-    private is8bitRegisterScore(operand: string): number {
-        return operand.match(/^[ABCDEHL]$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the IX index register with an optional offset, 0 otherwise
-     */
-    private isIXWithOffsetScore(operand: string): number {
-        return operand.match(/^IX(\W|$)/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the IY index register with an optional offset, 0 otherwise
-     */
-    private isIYWithOffsetScore(operand: string): number {
-        return operand.match(/^IY(\W|$)/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the high part of the IX index register, 0 otherwise
-     */
-    private isIXhScore(operand: string): number {
-        return operand.match(/^(IX[HU]|XH|HX)$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the low part of the IX index register, 0 otherwise
-     */
-    private isIXlScore(operand: string): number {
-        return operand.match(/^(IXL|XL|LX)$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the high or low part of the IX index register, 0 otherwise
-     */
-    private isIX8bitScore(operand: string): number {
-        return operand.match(/^(IX[HLU]|X[HL]|[HL]X)$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the high part of the IY index register, 0 otherwise
-     */
-    private isIYhScore(operand: string): number {
-        return operand.match(/^(IY[HU]|YH|HY)$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the low part of the IY index register, 0 otherwise
-     */
-    private isIYlScore(operand: string): number {
-        return operand.match(/^(IYL|YL|LY)$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is the high or low part of the IY index register, 0 otherwise
-     */
-    private isIY8bitScore(operand: string): number {
-        return operand.match(/^(IY[HLU]|Y[HL]|[HL]Y)$/) ? 1 : 0;
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is a register where H and L have been replaced by IXh and IXl, 0 otherwise
-     */
-    private is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
-        return operand.match(/^[ABCDE]$/) ? 1 : this.isIX8bitScore(operand);
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns 1 if the operand is a register where H and L have been replaced by IYh and IYl, 0 otherwise
-     */
-    private is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
-        return operand.match(/^[ABCDE]$/) ? 1 : this.isIY8bitScore(operand);
-    }
-
-    /**
-     * @param operand the candidate operand
-     * @returns true if the operand is any 8 or 16 bit register,
-     * including the IX and IY index registers with an optional offset,
-     * false otherwise
-     */
-    private isAnyRegister(operand: string): boolean {
-        return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
     }
 }

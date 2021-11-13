@@ -1,15 +1,14 @@
 import { MarkdownString, workspace } from 'vscode';
-import { Z80AbstractInstruction } from './z80AbstractInstruction';
-import { Z80InstructionSet } from './z80InstructionSet';
-import { extractRawInstructionsFrom, formatTiming } from './z80Utils';
+import { AbstractInstruction } from './abstractInstruction';
+import { Z80InstructionParser } from './Z80InstructionParser';
+import { extractRawInstructionsFrom, formatTiming } from './utils';
 
 export class Z80Block {
 
     // Configuration
     private maxBytesConfiguration: number | undefined = undefined;
     private platformConfiguration: string | undefined = undefined;
-    private syntaxLabelConfiguration: string | undefined = undefined;
-    private syntaxLineSeparatorConfiguration: string | undefined = undefined;
+    private maxLoc: number | undefined = undefined;
 
     // Timing information
     public z80Timing: number[] = [0, 0];
@@ -24,80 +23,96 @@ export class Z80Block {
     public instructions: string[] = [];
     public bytes: string[] = [];
 
-    constructor(sourceCode: string | undefined) {
-
-        if (!sourceCode) {
-            return;
-        }
-        const rawLines = sourceCode.split(/[\r\n]+/);
-        if (rawLines.length === 0) {
-            return;
-        }
-        if (rawLines[rawLines.length - 1].trim() === "") {
-            rawLines.pop(); // (removes possible spurious empty line at the end of the selection)
-        }
+    constructor() {
 
         const configuration = workspace.getConfiguration("z80-asm-meter");
-
-        // (disables if maximum lines exceeded)
-        const maxLines: number | undefined = configuration.get("maxLines");
-        if ((!!maxLines) && (rawLines.length > maxLines)) {
-            return;
-        }
 
         // Saves configuration
         this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || configuration.get("maxOpcodes") || "");
         this.platformConfiguration = configuration.get("platform", "z80");
-        this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
-        this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
-
-        // Determines instruction sets
-        const instructionSets =
-                this.platformConfiguration === "z80n" ? [ "S", "N" ]
-                : [ "S" ];
-
-        // Determines syntax
-        const labelRegExp = this.syntaxLabelConfiguration === "default"
-                ? /(^\s*[^\s:]+:)/
-                : /(^[^\s:]+([\s:]|$))/;
-        const commentRegExp = /((;|\/\/).*$)/;
-        const lineSepartorRegExp =
-                this.syntaxLineSeparatorConfiguration === "colon" ? /\s*:\s*/
-                : this.syntaxLineSeparatorConfiguration === "pipe" ? /\s*\|\s*/
-                : undefined;
-
-        // For every line...
-        const maxLoc: number | undefined = configuration.get("maxLoC");
-        rawLines.forEach(rawLine => {
-            // Extracts the instructions
-            const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSepartorRegExp);
-            if (!rawInstructions) {
-                return;
-            }
-            rawInstructions.forEach((rawInstruction: string | undefined) => {
-                const lInstructions = Z80InstructionSet.instance.parseInstructions(rawInstruction, instructionSets);
-                this.addInstructions(lInstructions);
-            });
-
-            // (stops after maximum loc count)
-            if ((!!maxLoc) && (this.loc >= maxLoc)) {
-                return;
-            }
-        });
+        this.maxLoc = configuration.get("maxLoC");
     }
 
-    private addInstructions(instructions: Z80AbstractInstruction[] | undefined) {
+    // constructor(sourceCode: string | undefined) {
+
+    //     if (!sourceCode) {
+    //         return;
+    //     }
+    //     const rawLines = sourceCode.split(/[\r\n]+/);
+    //     if (rawLines.length === 0) {
+    //         return;
+    //     }
+    //     if (rawLines[rawLines.length - 1].trim() === "") {
+    //         rawLines.pop(); // (removes possible spurious empty line at the end of the selection)
+    //     }
+
+    //     const configuration = workspace.getConfiguration("z80-asm-meter");
+
+    //     // (disables if maximum lines exceeded)
+    //     const maxLines: number | undefined = configuration.get("maxLines");
+    //     if ((!!maxLines) && (rawLines.length > maxLines)) {
+    //         return;
+    //     }
+
+    //     // Saves configuration
+    //     this.maxBytesConfiguration = parseInt(configuration.get("maxBytes") || configuration.get("maxOpcodes") || "");
+    //     this.platformConfiguration = configuration.get("platform", "z80");
+    //     this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
+    //     this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
+
+    //     // Determines instruction sets
+    //     const instructionSets =
+    //             this.platformConfiguration === "z80n" ? [ "S", "N" ]
+    //             : [ "S" ];
+
+    //     // Determines syntax
+    //     const labelRegExp = this.syntaxLabelConfiguration === "default"
+    //             ? /(^\s*[^\s:]+:)/
+    //             : /(^[^\s:]+([\s:]|$))/;
+    //     const commentRegExp = /((;|\/\/).*$)/;
+    //     const lineSepartorRegExp =
+    //             this.syntaxLineSeparatorConfiguration === "colon" ? /\s*:\s*/
+    //             : this.syntaxLineSeparatorConfiguration === "pipe" ? /\s*\|\s*/
+    //             : undefined;
+
+    //     // For every line...
+    //     const maxLoc: number | undefined = configuration.get("maxLoC");
+    //     rawLines.forEach(rawLine => {
+    //         // Extracts the instructions
+    //         const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSepartorRegExp);
+    //         if (!rawInstructions) {
+    //             return;
+    //         }
+    //         rawInstructions.forEach((rawInstruction: string | undefined) => {
+    //             const lInstructions =
+    //                     Z80InstructionParser.instance.parse(rawInstruction, instructionSets);
+    //             this.addInstructions(lInstructions);
+    //         });
+
+    //         // (stops after maximum loc count)
+    //         if ((!!maxLoc) && (this.loc >= maxLoc)) {
+    //             return;
+    //         }
+    //     });
+    // }
+
+    public addInstructions(instructions: AbstractInstruction[] | undefined) {
 
         if (!instructions) {
             return;
         }
 
-        instructions.forEach((instruction : Z80AbstractInstruction) => {
+        instructions.forEach((instruction : AbstractInstruction) => {
             this.addInstruction(instruction);
         });
     }
 
-    private addInstruction(instruction: Z80AbstractInstruction) {
+    private addInstruction(instruction: AbstractInstruction) {
+
+        // (stops accepting instructions after maximum loc count)
+        if ((!!this.maxLoc) && (this.loc >= this.maxLoc)) {
+            return;
+        }
 
         const instructionZ80Timing = instruction.getZ80Timing();
         this.z80Timing[0] += instructionZ80Timing[0];

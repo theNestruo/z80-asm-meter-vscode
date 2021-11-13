@@ -1,7 +1,9 @@
-import { Z80AbstractInstruction } from './z80AbstractInstruction';
-import { extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, parseTimings } from './z80Utils';
+import { AbstractInstruction } from './abstractInstruction';
 
-export class Z80Directive extends Z80AbstractInstruction {
+/**
+ * An assembly directive, such as `db`, `dw` or `ds`
+ */
+ export class AssemblyDirective extends AbstractInstruction {
 
     // Information
     private directive: string;
