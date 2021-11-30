@@ -4,18 +4,19 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest # (martinbeentjes/npm-get-version-action@master is only supported on Linux)
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v2
       with:
-        node-version: 14.x
+        node-version: 16
     - run: npm install
     - run: npm install -g vsce
     - run: vsce package
-    - uses: martinbeentjes/npm-get-version-action@master
+    - name: get-npm-version
       id: package-version
-    - uses: actions/upload-artifact@v1
+      uses: martinbeentjes/npm-get-version-action@master
+    - uses: actions/upload-artifact@v2
       with:
         name: z80-asm-meter-${{ steps.package-version.outputs.current-version}}-nightly
         path: z80-asm-meter-${{ steps.package-version.outputs.current-version}}.vsix
