@@ -1,4 +1,9 @@
 
+## 2.1.0
+
+- Improved support for SjASMPlus alternate syntax (such as `EXA`)
+- Configuration property ~~`sjasmplusFakeInstructions`~~ renamed to `sjasmplus`
+
 ## 2.0.0
 
 - Code refactor

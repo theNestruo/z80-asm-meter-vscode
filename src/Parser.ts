@@ -12,7 +12,7 @@ export class Parser {
     private platformConfiguration: string | undefined = undefined;
     private syntaxLabelConfiguration: string | undefined = undefined;
     private syntaxLineSeparatorConfiguration: string | undefined = undefined;
-    private sjasmFakeInstructionsConfiguration: boolean = false;
+    private sjasmplus: boolean = false;
 
     constructor() {
 
@@ -23,7 +23,9 @@ export class Parser {
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
-        this.sjasmFakeInstructionsConfiguration = configuration.get("sjasmplusFakeInstructions") || false;
+        this.sjasmplus = configuration.get("sjasmplus")
+                || configuration.get("sjasmplusFakeInstructions") // (deprecated)
+                || false;
     }
 
     parse(sourceCode: string | undefined): Z80Block {
@@ -75,8 +77,8 @@ export class Parser {
                     block.addInstructions([lInstruction]);
                     return;
                 }
-                // Tries to parse sjasmplus fake instructions
-                if (this.sjasmFakeInstructionsConfiguration) {
+                // Tries to parse sjasmplus alternative syntax and fake instructions
+                if (this.sjasmplus) {
                     const lInstructions = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
                     if (!!lInstructions) {
                         block.addInstructions(lInstructions);

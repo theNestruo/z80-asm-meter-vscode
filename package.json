@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"engines": {
 		"vscode": "^1.62.0"
 	},
@@ -119,10 +119,16 @@
 					],
 					"default": "z80"
 				},
+				"z80-asm-meter.sjasmplus": {
+					"type": "boolean",
+					"description": "Enables support for parsing SjASMPlus alternative syntax and fake instructions",
+					"default": false
+				},
 				"z80-asm-meter.sjasmplusFakeInstructions": {
 					"type": "boolean",
 					"description": "Enables support for parsing SjASMPlus fake instructions",
-					"default": false
+					"default": false,
+					"deprecationMessage": "Will be replaced by z80-asm-meter.sjasmplus in future versions"
 				},
 				"z80-asm-meter.syntax.label": {
 					"type": "string",

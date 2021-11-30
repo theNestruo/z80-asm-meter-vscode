@@ -54,7 +54,9 @@ d
     * `cpc`: For Amstrad CPC developers. Uses the default Z80 instruction set and shows timing measured in number of NOPs.
     * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
 
-* `z80-asm-meter.sjasmplusFakeInstructions`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions). Disabled by default.
+* `z80-asm-meter.sjasmplus`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [alternative syntax](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) and [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions). Disabled by default.
+
+* ~~`z80-asm-meter.sjasmplusFakeInstructions`~~: Will be replaced by `z80-asm-meter.sjasmplus` in future versions. ~~Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions). Disabled by default.~~
 
 * `z80-asm-meter.syntax.label`: Adjusts the label detection to match the syntax of the assembler:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.

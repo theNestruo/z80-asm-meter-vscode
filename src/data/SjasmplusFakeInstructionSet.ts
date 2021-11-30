@@ -2,7 +2,16 @@
 
 // [ Inst. Set,	Fake instruction,	Real instructions]
 export const sjasmplusFakeInstructionSet: string[][] = [
-	// Z80 Instruction set
+	// Z80 Instruction set: alternative syntax
+	[ "S",	"EX AF",			"EX AF, AF'" ],
+	[ "S",	"EX AF,AF",			"EX AF, AF'" ],
+	[ "S",	"EXA",				"EX AF, AF'" ],
+	[ "S",	"EXD",				"EX DE, HL" ],
+	[ "S",	"JP HL",			"JP (HL)" ],
+	[ "S",	"JP IX",			"JP (IX)" ],
+	[ "S",	"JP IY",			"JP (IY)" ],
+
+	// Z80 Instruction set: fake instructions
 	[ "S",	"RL BC",			"RL C", "RL B" ],
 	[ "S",	"RL DE",			"RL E", "RL D" ],
 	[ "S",	"RL HL",			"RL L", "RL H" ],
