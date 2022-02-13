@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"engines": {
 		"vscode": "^1.64.0"
 	},
@@ -78,6 +78,70 @@
 						"zeus-asm"
 					]
 				},
+				"z80-asm-meter.macros": {
+					"type": [
+						"array",
+						"null"
+					],
+					"description": "An array of user-defined macros",
+					"default": [],
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"description": "The name of the macro"
+							},
+							"z80": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides Z80 default macro timing for the",
+								"default": null
+							},
+							"msx": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides Z80+M1 macro timing information (MSX standard)",
+								"default": null
+							},
+							"cpc": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides macro timing measured in number of NOPs",
+								"default": null
+							},
+							"size": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides macro byte count",
+								"default": null
+							},
+							"instructions": {
+								"type": [
+									"array",
+									"null"
+								],
+								"description": "The macro definition, as instructions",
+								"default": null,
+								"items": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
 				"z80-asm-meter.maxBytes": {
 					"type": [
 						"number",
@@ -123,12 +187,6 @@
 					"type": "boolean",
 					"description": "Enables support for parsing SjASMPlus alternative syntax and fake instructions",
 					"default": false
-				},
-				"z80-asm-meter.sjasmplusFakeInstructions": {
-					"type": "boolean",
-					"description": "Enables support for parsing SjASMPlus fake instructions",
-					"default": false,
-					"deprecationMessage": "Will be replaced by z80-asm-meter.sjasmplus in future versions"
 				},
 				"z80-asm-meter.syntax.label": {
 					"type": "string",

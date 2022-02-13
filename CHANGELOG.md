@@ -1,4 +1,8 @@
 
+## 2.2.0 (unreleased)
+
+- Support for user-defined macros
+
 ## 2.1.0
 
 - Improved support for SjASMPlus alternate syntax (such as `EXA`)

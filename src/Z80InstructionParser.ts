@@ -14,9 +14,6 @@ export class Z80InstructionParser {
 
     private constructor() {
 
-        // Saves configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-
         // Initializes instruction maps
         this.instructionByMnemonic = {};
         this.instructionByOpcode = {};

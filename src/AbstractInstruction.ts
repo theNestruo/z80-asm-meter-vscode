@@ -1,12 +1,12 @@
 /**
- * Anything that can be meters: Z80 Instructions, ASM directives, sjasmplus fake instructions...
+ * Anything that can be metered: Z80 Instructions, ASM directives, sjasmplus fake instructions...
  */
 export abstract class AbstractInstruction {
 
     /**
      * @returns The raw instruction
      */
-     public abstract getInstruction(): string;
+    public abstract getInstruction(): string;
 
     /**
      * @returns The Z80 timing, in time (T) cycles

@@ -30,12 +30,12 @@ export function extractMnemonicOf(s: string): string {
 
 export function extractOperandsOf(s: string): string[] {
     const i = s.indexOf(" ");
-    return i === -1 ? [] : s.substr(i + 1).split(/\s*,\s*/);
+    return i === -1 ? [] : s.substring(i + 1).split(/\s*,\s*/);
 }
 
 export function extractOperandsOfQuotesAware(s: string): string[] {
     const i = s.indexOf(" ");
-    return i === -1 ? [] : s.substr(i + 1).split(/\s*,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\s*/);
+    return i === -1 ? [] : s.substring(i + 1).split(/\s*,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\s*/);
 }
 
 /**
@@ -195,6 +195,16 @@ export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number 
  */
 export function isAnyRegister(operand: string): boolean {
     return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
+}
+
+export function parseTimingsLenient(o: any): number[] | undefined {
+    if (typeof o == "string") {
+        return parseTimings(o);
+    }
+    if (typeof o == "number") {
+        return [o, o];
+    }
+    return undefined;
 }
 
 export function parseTimings(s: string): number[] {

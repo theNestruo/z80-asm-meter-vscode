@@ -42,10 +42,18 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `"asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"`.
 
+* `z80-asm-meter.macros`: An array of user-defined macros:
+    * `name`: The name of the macro.
+    * `instructions`: The macro definition, as instructions for the macro. Optional.
+    * `z80`: Declares or overrides Z80 default macro timing. Optional.
+    * `msx`: Declares or overrides Z80+M1 macro timing information (MSX standard). Optional.
+    * `cpc`: Declares or overrides macro timing measured in number of NOPs. Optional.
+    * `size`: Declares or overrides macro byte count. Optional.
+
 * `z80-asm-meter.maxBytes`: Stops instruction and opcode block visualization (in the tooltip) when the instruction count exceeds this value. Defaults to 16.
 
 * `z80-asm-meter.maxLines`: When working with huge files, metering can be disabled when the line count of the selection exceeds a certain threshold. Unlimited by default.
-d
+
 * `z80-asm-meter.maxLoC`: Stops metering when the parsed lines of code (LoC) count exceeds a certain threshold. Unlimited by default.
 
 * `z80-asm-meter.platform`: Controls the instruction set to use and the timing information to display:
@@ -55,8 +63,6 @@ d
     * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
 
 * `z80-asm-meter.sjasmplus`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [alternative syntax](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) and [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions). Disabled by default.
-
-* ~~`z80-asm-meter.sjasmplusFakeInstructions`~~: Will be replaced by `z80-asm-meter.sjasmplus` in future versions. ~~Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions). Disabled by default.~~
 
 * `z80-asm-meter.syntax.label`: Adjusts the label detection to match the syntax of the assembler:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.

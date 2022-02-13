@@ -157,7 +157,7 @@ export class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        const byte = value !== undefined ? formatHexadecimalByte(value) : "nn";
+        const byte = value !== undefined ? formatHexadecimalByte(value) : "n";
         const bytes = new Array(count).fill(byte);
         return [new AssemblyDirective("DEFS", bytes.join(" "), count)];
     }

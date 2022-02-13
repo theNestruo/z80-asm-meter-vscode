@@ -1,5 +1,6 @@
 import { workspace } from 'vscode';
 import { AssemblyDirectiveParser } from './AssemblyDirectiveParser';
+import { MacrosParser } from './MacrosParser';
 import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
 import { extractRawInstructionsFrom } from './utils';
 import { Z80Block } from './Z80Block';
@@ -23,9 +24,7 @@ export class Parser {
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
-        this.sjasmplus = configuration.get("sjasmplus")
-                || configuration.get("sjasmplusFakeInstructions") // (deprecated)
-                || false;
+        this.sjasmplus = configuration.get("sjasmplus", false);
     }
 
     parse(sourceCode: string | undefined): Z80Block {
@@ -71,12 +70,14 @@ export class Parser {
                 return;
             }
             rawInstructions.forEach((rawInstruction: string | undefined) => {
+
                 // Tries to parse Z80 instructions
                 const lInstruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
                 if (!!lInstruction) {
                     block.addInstructions([lInstruction]);
                     return;
                 }
+
                 // Tries to parse sjasmplus alternative syntax and fake instructions
                 if (this.sjasmplus) {
                     const lInstructions = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
@@ -85,6 +86,15 @@ export class Parser {
                         return;
                     }
                 }
+
+                // Tries to parse macro
+                const lMacro = MacrosParser.instance.parse(rawInstruction, instructionSets);
+                if (!!lMacro) {
+                    // const lInstructions = lMacro.getInstructions();
+                    block.addInstructions([lMacro]);
+                    return;
+                }
+
                 // Tries to parse assembly directives
                 const lDirective = AssemblyDirectiveParser.instance.parse(rawInstruction);
                 if (!!lDirective) {
