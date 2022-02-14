@@ -1,5 +1,6 @@
 import { AbstractInstruction } from "./AbstractInstruction";
-import { extractRawInstructionFrom, parseTimingsLenient } from "./utils";
+import { RawMacro } from "./RawMacro";
+import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient } from "./utils";
 import { Z80Instruction } from "./Z80Instruction";
 import { Z80InstructionParser } from "./Z80InstructionParser";
 
@@ -20,14 +21,14 @@ export class Macro extends AbstractInstruction {
 	private instructions: Z80Instruction[] | undefined;
     public bytes: string | undefined;
 
-	public constructor(source: any, instructionSets: string[]) {
+	public constructor(source: RawMacro, instructionSets: string[]) {
 		super();
 
 		this.name = source.name;
 		this.z80Timing = parseTimingsLenient(source.z80);
 		this.msxTiming = parseTimingsLenient(source.msx);
 		this.cpcTiming = parseTimingsLenient(source.cpc);
-		this.size = parseInt(source.size);
+		this.size = parteIntLenient(source.size);
 		this.rawInstructions = source.instructions;
 
 		this.instructionSets = instructionSets;

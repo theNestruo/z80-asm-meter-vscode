@@ -197,14 +197,10 @@ export function isAnyRegister(operand: string): boolean {
     return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
 }
 
-export function parseTimingsLenient(o: any): number[] | undefined {
-    if (typeof o == "string") {
-        return parseTimings(o);
-    }
-    if (typeof o == "number") {
-        return [o, o];
-    }
-    return undefined;
+export function parseTimingsLenient(o: unknown): number[] | undefined {
+    return (typeof o == "number") ? [o, o]
+            : (typeof o == "string") ? parseTimings(o)
+            : undefined;
 }
 
 export function parseTimings(s: string): number[] {
@@ -215,6 +211,12 @@ export function parseTimings(s: string): number[] {
 
 export function formatTiming(t: number[]): string {
     return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
+}
+
+export function parteIntLenient(o: unknown): number {
+    return (typeof o == "number") ? o
+            : (typeof o == "string") ? parseInt(o)
+            : NaN;
 }
 
 export function formatHexadecimalByte(n: number): string {
