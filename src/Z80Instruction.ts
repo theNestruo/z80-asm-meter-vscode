@@ -1,18 +1,19 @@
-import { AbstractInstruction } from './AbstractInstruction';
+import { Meterable } from './Meterable';
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIX8bitScore, isIXhScore, isIXlScore, isIXWithOffsetScore, isIY8bitScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
 
 /**
  * A Z80 instruction
  */
-export class Z80Instruction extends AbstractInstruction {
+export class Z80Instruction implements Meterable {
+
+    private instructionSet: string;
 
     // Information
-    private instructionSet: string;
     private instruction: string;
     private z80Timing: number[];
     private msxTiming: number[];
     private cpcTiming: number[];
-    private opcode: string;
+    private opcodes: string;
     private size: number;
 
     // Derived information (will be cached for performance reasons)
@@ -22,34 +23,29 @@ export class Z80Instruction extends AbstractInstruction {
     private explicitAccumulatorSyntaxAllowed: boolean | undefined;
 
     constructor(
-            instructionSet: string, instruction: string,
-            z80Timing: string, msxTiming: string, cpcTiming: string,
-            opcode: string, size: string) {
-        super();
+        instructionSet: string, instruction: string,
+        z80Timing: string, msxTiming: string, cpcTiming: string,
+        opcodes: string, size: string) {
 
         this.instructionSet = instructionSet;
+
         this.instruction = instruction;
         this.z80Timing = parseTimings(z80Timing);
         this.msxTiming = parseTimings(msxTiming);
         this.cpcTiming = parseTimings(cpcTiming);
-        this.opcode = opcode;
+        this.opcodes = opcodes;
         this.size = parseInt(size);
-
-        this.mnemonic = undefined;
-        this.operands = undefined;
-        this.implicitAccumulatorSyntaxAllowed = undefined;
-        this.explicitAccumulatorSyntaxAllowed = undefined;
     }
 
     /**
-     * @returns The instruction set
+     * @returns The instruction set this instruction belongs to
      */
     public getInstructionSet(): string {
         return this.instructionSet;
     }
 
     /**
-     * @returns The raw instruction
+     * @returns The normalized Z80 instruction
      */
     public getInstruction(): string {
         return this.instruction;
@@ -77,17 +73,10 @@ export class Z80Instruction extends AbstractInstruction {
     }
 
     /**
-     * @returns The bytes of the instruction
+     * @returns The opcodes of the instruction (bytes)
      */
-    public getBytes(): string {
-        return this.getOpcode();
-    }
-
-    /**
-     * @returns The opcode of the instruction
-     */
-     public getOpcode(): string {
-        return this.opcode;
+    public getBytes(): string[] {
+        return [this.opcodes];
     }
 
     /**
@@ -102,8 +91,8 @@ export class Z80Instruction extends AbstractInstruction {
      */
     public getMnemonic(): string {
         return this.mnemonic
-                ? this.mnemonic
-                : this.mnemonic = extractMnemonicOf(this.instruction);
+            ? this.mnemonic
+            : this.mnemonic = extractMnemonicOf(this.instruction);
     }
 
     /**
@@ -111,8 +100,8 @@ export class Z80Instruction extends AbstractInstruction {
      */
     public getOperands(): string[] {
         return this.operands
-                ? this.operands
-                : this.operands = extractOperandsOf(this.instruction);
+            ? this.operands
+            : this.operands = extractOperandsOf(this.instruction);
     }
 
     /**
@@ -122,7 +111,7 @@ export class Z80Instruction extends AbstractInstruction {
 
         // (for the moment, we only need to expand single byte operations with an 8 bit register operand)
         return this.size === 1
-                && !!this.opcode.match(/^[0-9A-F]{2}\+r$/);
+            && !!this.opcodes[0].match(/^[0-9A-F]{2}\+r$/);
     }
 
     /**
@@ -136,29 +125,29 @@ export class Z80Instruction extends AbstractInstruction {
 
         // Expands the 8 bit register operand
         return [
-                this.expand8bitRegister('A', 7),
-                this.expand8bitRegister('B', 0),
-                this.expand8bitRegister('C', 1),
-                this.expand8bitRegister('D', 2),
-                this.expand8bitRegister('E', 3),
-                this.expand8bitRegister('H', 4),
-                this.expand8bitRegister('L', 5)
-            ];
+            this.expand8bitRegister('A', 7),
+            this.expand8bitRegister('B', 0),
+            this.expand8bitRegister('C', 1),
+            this.expand8bitRegister('D', 2),
+            this.expand8bitRegister('E', 3),
+            this.expand8bitRegister('H', 4),
+            this.expand8bitRegister('L', 5)
+        ];
     }
 
     private expand8bitRegister(register: string, addend: number): Z80Instruction {
 
         const expandedInstruction = this.instruction.replace(/r/, register);
-        const expandedOpcode = parseInt(this.opcode.substring(0, 2), 16) + addend;
+        const expandedOpcode = parseInt(this.opcodes[0].substring(0, 2), 16) + addend;
 
         return new Z80Instruction(
-                this.instructionSet,
-                expandedInstruction,
-                formatTiming(this.z80Timing),
-                formatTiming(this.msxTiming),
-                formatTiming(this.cpcTiming),
-                formatHexadecimalByte(expandedOpcode),
-                this.size.toString());
+            this.instructionSet,
+            expandedInstruction,
+            formatTiming(this.z80Timing),
+            formatTiming(this.msxTiming),
+            formatTiming(this.cpcTiming),
+            formatHexadecimalByte(expandedOpcode),
+            this.size.toString());
     }
 
     /**
@@ -233,14 +222,14 @@ export class Z80Instruction extends AbstractInstruction {
                     return 0;
                 }
 
-            // Checks explicit accumulator syntax
+                // Checks explicit accumulator syntax
             } else if (candidateOperands.length === expectedOperands.length + 1) {
                 if ((!(explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed()))
-                        || (candidateOperands[0] !== "A")) {
+                    || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
 
-            // Operand count mismatch
+                // Operand count mismatch
             } else {
                 return 0;
             }
@@ -249,8 +238,8 @@ export class Z80Instruction extends AbstractInstruction {
         // Compares operands
         let score = 1;
         for (let i = implicitAccumulatorSyntax ? 1 : 0, j = explicitAccumulatorSyntax ? 1 : 0;
-                i < expectedOperands.length;
-                i++, j++) {
+            i < expectedOperands.length;
+            i++, j++) {
             score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
             if (score === 0) {
                 return 0;
@@ -287,40 +276,40 @@ export class Z80Instruction extends AbstractInstruction {
 
         // Depending on the expected operand...
         switch (expectedOperand) {
-        case "r":
-            return is8bitRegisterScore(candidateOperand);
-        case "IX+o":
-            return isIXWithOffsetScore(candidateOperand);
-        case "IY+o":
-            return isIYWithOffsetScore(candidateOperand);
-        case "IXh":
-            return isIXhScore(candidateOperand);
-        case "IXl":
-            return isIXlScore(candidateOperand);
-        case "IXp":
-            return isIX8bitScore(candidateOperand);
-        case "IYh":
-            return isIYhScore(candidateOperand);
-        case "IYl":
-            return isIYlScore(candidateOperand);
-        case "IYq":
-            return isIY8bitScore(candidateOperand);
-        case "p":
-            return is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
-        case "q":
-            return is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
-        case "0": // IM 0, RST 0, and OUT (C), 0
-        case "1": // IM 1
-        case "2": // IM 2
-            if (candidateOperand === expectedOperand) {
-                return 1; // (exact match for better OUT (C),0 detection)
-            }
+            case "r":
+                return is8bitRegisterScore(candidateOperand);
+            case "IX+o":
+                return isIXWithOffsetScore(candidateOperand);
+            case "IY+o":
+                return isIYWithOffsetScore(candidateOperand);
+            case "IXh":
+                return isIXhScore(candidateOperand);
+            case "IXl":
+                return isIXlScore(candidateOperand);
+            case "IXp":
+                return isIX8bitScore(candidateOperand);
+            case "IYh":
+                return isIYhScore(candidateOperand);
+            case "IYl":
+                return isIYlScore(candidateOperand);
+            case "IYq":
+                return isIY8bitScore(candidateOperand);
+            case "p":
+                return is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
+            case "q":
+                return is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
+            case "0": // IM 0, RST 0, and OUT (C), 0
+            case "1": // IM 1
+            case "2": // IM 2
+                if (candidateOperand === expectedOperand) {
+                    return 1; // (exact match for better OUT (C),0 detection)
+                }
             // falls-through
-        default:
-            // (due possibility of using constants, labels, and expressions in the source code,
-            // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
-            // but uses a "best effort" to discard registers)
-            return isAnyRegister(
+            default:
+                // (due possibility of using constants, labels, and expressions in the source code,
+                // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
+                // but uses a "best effort" to discard registers)
+                return isAnyRegister(
                     isIndirectionOperand(candidateOperand, false)
                         ? extractIndirection(candidateOperand)
                         : candidateOperand)
@@ -339,7 +328,7 @@ export class Z80Instruction extends AbstractInstruction {
 
         // Compares the expression inside the indirection
         return isIndirectionOperand(candidateOperand, false)
-                ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
-                : 0;
+            ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
+            : 0;
     }
 }

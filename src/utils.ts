@@ -1,9 +1,12 @@
-export function extractRawInstructionsFrom(rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparatorRegExp: RegExp | undefined): string[] | undefined {
+export function extractRawInstructionsFrom(
+        rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparatorRegExp: RegExp | undefined): string[] | undefined {
+
     // Removes surrounding label, whitespace and/or comments
     const line = rawLine.replace(labelRegExp, "").replace(commentRegExp, "").trim();
     if (line.length === 0) {
         return undefined;
     }
+
     // For every part separated with : ...
     const rawInstructions: string[] = [];
     const rawParts = lineSeparatorRegExp ? line.split(lineSeparatorRegExp) : [line];
@@ -14,26 +17,31 @@ export function extractRawInstructionsFrom(rawLine: string, labelRegExp: RegExp,
             rawInstructions.push(rawInstruction);
         }
     });
+
     return rawInstructions.length === 0 ? undefined : rawInstructions;
 }
 
 export function extractRawInstructionFrom(rawPart: string): string | undefined {
+
     // Simplifies whitespace and converts to uppercase
     const rawInstruction = rawPart.replace(/\s+/, " ").toUpperCase();
     return (rawInstruction.length !== 0) ? rawInstruction : undefined;
 }
 
 export function extractMnemonicOf(s: string): string {
+
     const i = s.indexOf(" ");
     return i === -1 ? s : s.substring(0, i);
 }
 
 export function extractOperandsOf(s: string): string[] {
+
     const i = s.indexOf(" ");
     return i === -1 ? [] : s.substring(i + 1).split(/\s*,\s*/);
 }
 
 export function extractOperandsOfQuotesAware(s: string): string[] {
+
     const i = s.indexOf(" ");
     return i === -1 ? [] : s.substring(i + 1).split(/\s*,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\s*/);
 }
@@ -42,7 +50,8 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
  * @param operand the operand of the instruction
  * @returns true if the candidate operand must match verbatim the operand of the instruction
  */
- export function isVerbatimOperand(operand: string): boolean {
+export function isVerbatimOperand(operand: string): boolean {
+
     return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY]|R|SP|N?Z|M|P[OE]?)$/);
 }
 
@@ -53,7 +62,6 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
  * 0 if the candidate operand is not valid
  */
 export function verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
-
     return (candidateOperand === expectedOperand) ? 1 : 0;
 }
 
@@ -198,12 +206,14 @@ export function isAnyRegister(operand: string): boolean {
 }
 
 export function parseTimingsLenient(o: unknown): number[] | undefined {
+
     return (typeof o == "number") ? [o, o]
             : (typeof o == "string") ? parseTimings(o)
             : undefined;
 }
 
 export function parseTimings(s: string): number[] {
+
     const ss = s.split("/");
     const t0 = parseInt(ss[0]);
     return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1])];
@@ -214,12 +224,19 @@ export function formatTiming(t: number[]): string {
 }
 
 export function parteIntLenient(o: unknown): number {
+
     return (typeof o == "number") ? o
             : (typeof o == "string") ? parseInt(o)
             : NaN;
 }
 
+export function undefinedIfNaN(n: number): number | undefined {
+
+    return isNaN(n) ? undefined : n;
+}
+
 export function formatHexadecimalByte(n: number): string {
+
     const s = "00" + ((n & 0xff).toString(16).toUpperCase());
     return s.substring(s.length - 2);
 }

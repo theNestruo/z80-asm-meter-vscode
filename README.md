@@ -11,7 +11,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 
 As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
-In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&#00B5;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
+In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&micro;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
 
 ZX Spectrum Next Extended Z80 Instruction Set is supported.
 
@@ -49,12 +49,6 @@ This extension contributes the following settings:
     * `msx`: Declares or overrides Z80+M1 macro timing information (MSX standard). Optional.
     * `cpc`: Declares or overrides macro timing measured in number of NOPs. Optional.
     * `size`: Declares or overrides macro byte count. Optional.
-
-* `z80-asm-meter.maxBytes`: Stops instruction and opcode block visualization (in the tooltip) when the instruction count exceeds this value. Defaults to 16.
-
-* `z80-asm-meter.maxLines`: When working with huge files, metering can be disabled when the line count of the selection exceeds a certain threshold. Unlimited by default.
-
-* `z80-asm-meter.maxLoC`: Stops metering when the parsed lines of code (LoC) count exceeds a certain threshold. Unlimited by default.
 
 * `z80-asm-meter.platform`: Controls the instruction set to use and the timing information to display:
     * `z80` (default): Uses the default Z80 instruction set and shows default timing information.

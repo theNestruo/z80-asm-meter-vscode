@@ -1,5 +1,5 @@
 import { workspace } from "vscode";
-import { z80InstructionSet } from "./data/Z80InstructionSet";
+import { z80InstructionSet } from "./Z80InstructionSet";
 import { extractMnemonicOf, formatHexadecimalByte } from "./utils";
 import { Z80Instruction } from "./Z80Instruction";
 
@@ -38,8 +38,10 @@ export class Z80InstructionParser {
                 this.instructionByMnemonic[mnemonic].push(instruction);
 
                 // Prepares a map by opcode for single byte instructions
-                const opcode = instruction.getOpcode();
-                this.instructionByOpcode[opcode] = instruction;
+                if (instruction.getSize() === 1) {
+                    const opcode = instruction.getBytes()[0];
+                    this.instructionByOpcode[opcode] = instruction;
+                }
             });
         });
     }

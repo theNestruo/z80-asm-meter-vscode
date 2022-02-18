@@ -1,27 +1,27 @@
-import { AbstractInstruction } from './AbstractInstruction';
+import { Meterable } from './Meterable';
 
 /**
  * An assembly directive, such as `db`, `dw` or `ds`
  */
- export class AssemblyDirective extends AbstractInstruction {
+ export class AssemblyDirective implements Meterable {
 
     // Information
     private directive: string;
-    private bytes: string;
+    private bytes: string[];
     private size: number;
 
     constructor(
-            directive: string, bytes: string, size: number) {
-        super();
+            directive: string, bytes: string[], size: number) {
 
         this.directive = directive;
         this.bytes = bytes;
         this.size = size;
     }
+
     /**
-     * @returns The raw instruction
+     * @returns The directive
      */
-    public getInstruction(): string {
+     public getInstruction(): string {
         return this.directive;
     }
 
@@ -47,9 +47,9 @@ import { AbstractInstruction } from './AbstractInstruction';
     }
 
     /**
-     * @returns The bytes of the instruction
+     * @returns The bytes, logically grouped
      */
-    public getBytes(): string {
+    public getBytes(): string[] {
         return this.bytes;
     }
 

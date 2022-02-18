@@ -1,176 +1,114 @@
-import { AbstractInstruction } from "./AbstractInstruction";
-import { RawMacro } from "./RawMacro";
-import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient } from "./utils";
-import { Z80Instruction } from "./Z80Instruction";
+import { MacroDefinition } from "./MacroDefinition";
+import { MeterableCollection } from "./MeterableCollection";
+import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "./utils";
 import { Z80InstructionParser } from "./Z80InstructionParser";
 
-export class Macro extends AbstractInstruction {
+export class Macro extends MeterableCollection {
 
 	// User-provided information
-	private name: string;
-	private z80Timing: number[] | undefined;
-	private msxTiming: number[] | undefined;
-	private cpcTiming: number[] | undefined;
-	private size: number | undefined;
-	private rawInstructions: string[] | undefined;
-
-	// Information
-    private instructionSets: string[];
+	private instructionSets: string[];
+	private providedName: string;
+	private providedInstructions: string[] | undefined;
+	private providedZ80Timing: number[] | undefined;
+	private providedMsxTiming: number[] | undefined;
+	private providedCpcTiming: number[] | undefined;
+	private providedSize: number | undefined;
 
 	// Derived information (will be cached for performance reasons)
-	private instructions: Z80Instruction[] | undefined;
-    public bytes: string | undefined;
+	private ready: boolean = false;
 
-	public constructor(source: RawMacro, instructionSets: string[]) {
+	public constructor(source: MacroDefinition, instructionSets: string[]) {
 		super();
 
-		this.name = source.name;
-		this.z80Timing = parseTimingsLenient(source.z80);
-		this.msxTiming = parseTimingsLenient(source.msx);
-		this.cpcTiming = parseTimingsLenient(source.cpc);
-		this.size = parteIntLenient(source.size);
-		this.rawInstructions = source.instructions;
+		this.providedName = source.name;
+		this.providedInstructions = source.instructions;
+		this.providedZ80Timing = parseTimingsLenient(source.z80);
+		this.providedMsxTiming = parseTimingsLenient(source.msx);
+		this.providedCpcTiming = parseTimingsLenient(source.cpc);
+		this.providedSize = undefinedIfNaN(parteIntLenient(source.size));
 
 		this.instructionSets = instructionSets;
+
+		this.init();
 	}
 
+	/**
+	 * @returns The name of the macro
+	 */
 	public getInstruction(): string {
 
-		return this.name;
+		return this.providedName;
 	}
 
-    public getInstructions(): Z80Instruction[] | undefined {
-
-		if (this.rawInstructions === undefined) {
-			return undefined;
-		}
-		if (this.rawInstructions.length == 0) {
-			return [];
-		}
-
-		// Cached
-		if (this.instructions !== undefined) {
-			return this.instructions;
-		}
-
-		// Computed, then cached
-		var lInstructions: Z80Instruction[] = [];
-		this.rawInstructions.forEach(rawPart => {
-			const rawInstruction = extractRawInstructionFrom(rawPart);
-			var lInstruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
-			if (lInstruction) {
-				// (should never be undefined)
-				lInstructions.push(lInstruction);
-			}
-		});
-		return this.instructions = lInstructions;
-    }
-
-    /**
-     * @returns The Z80 timing, in time (T) cycles
-     */
+	/**
+	 * @returns The Z80 timing, in time (T) cycles
+	 */
 	public getZ80Timing(): number[] {
-
-		// User-provided (or cached)
-		if (this.z80Timing !== undefined) {
-			return this.z80Timing;
+		if (this.providedZ80Timing !== undefined) {
+			return this.providedZ80Timing;
 		}
+        this.init();
+		return super.getZ80Timing();
+	}
 
-		// Computed, then cached
-		var lZ80Timing = [0, 0];
-		const lInstructions = this.getInstructions() || [];
-		lInstructions.forEach(instruction => {
-			const instructionZ80Timing = instruction.getZ80Timing();
-			lZ80Timing[0] += instructionZ80Timing[0];
-			lZ80Timing[1] += instructionZ80Timing[1];
-		});
-		return this.z80Timing = lZ80Timing;
-	 }
-
-	 /**
-	  * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
-	  */
-	 public getMsxTiming(): number[] {
-
-		// User-provided (or cached)
-		if (this.msxTiming !== undefined) {
-			return this.msxTiming;
+	/**
+	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
+	 */
+	public getMsxTiming(): number[] {
+		if (this.providedMsxTiming !== undefined) {
+			return this.providedMsxTiming;
 		}
+		this.init();
+		return super.getMsxTiming();
+	}
 
-		// Computed, then cached
-		var lMsxTiming = [0, 0];
-		const lInstructions = this.getInstructions() || [];
-		lInstructions.forEach(instruction => {
-			const instructionMsxTiming = instruction.getMsxTiming();
-			lMsxTiming[0] += instructionMsxTiming[0];
-			lMsxTiming[1] += instructionMsxTiming[1];
-		});
-		return this.msxTiming = lMsxTiming;
-	 }
-
-	 /**
-	  * @returns The CPC timing, in NOPS
-	  */
-	 public getCpcTiming(): number[] {
-
-		// User-provided (or cached)
-		if (this.cpcTiming !== undefined) {
-			return this.cpcTiming;
+	/**
+	 * @returns The CPC timing, in NOPS
+	 */
+	public getCpcTiming(): number[] {
+		if (this.providedCpcTiming !== undefined) {
+			return this.providedCpcTiming;
 		}
+		this.init();
+		return super.getCpcTiming();
+	}
 
-		// Computed, then cached
-		var lCpcTiming = [0, 0];
-		const lInstructions = this.getInstructions() || [];
-		lInstructions.forEach(instruction => {
-			const instructionCpcTiming = instruction.getCpcTiming();
-			lCpcTiming[0] += instructionCpcTiming[0];
-			lCpcTiming[1] += instructionCpcTiming[1];
-		});
-		return this.cpcTiming = lCpcTiming;
-	 }
-
-	 /**
-	  * @returns The bytes of the instruction
-	  */
-	 public getBytes(): string {
-
-		// User-provided (or cached)
-		if (this.bytes !== undefined) {
-			return this.bytes;
+	/**
+	 * @returns The bytes
+	 */
+	public getBytes(): string[] {
+		this.init();
+		const bytes = super.getBytes();
+		if (bytes.length) {
+			return bytes;
 		}
+		const size = this.getSize();
+		return !!size
+				? new Array(size).fill("n")
+				: [];
+	}
 
-		// Computed (from size), then cached
-		const lInstructions = this.getInstructions();
-		if (lInstructions === undefined) {
-			const lSize = this.getSize();
-			return this.bytes = new Array(lSize).fill("n").join(" ");
+	/**
+	 * @returns The size in bytes
+	 */
+	public getSize(): number {
+		if (this.providedSize !== undefined) {
+			return this.providedSize;
 		}
+		return super.getSize();
+	}
 
-		// Computed (from instructions), then cached
-		var lBytes: string[] = [];
-		lInstructions.forEach(instruction => {
-			lBytes.push(instruction.getBytes());
-		});
-		return this.bytes = lBytes.join(" ");
-	 }
+	private init(): void {
 
-	 /**
-	  * @returns The size in bytes
-	  */
-	 public getSize(): number {
-
-		// User-provided (or cached)
-		if ((this.size !== undefined) && (!isNaN(this.size))) {
-			return this.size;
+		if (!this.ready) {
+			if (this.providedInstructions !== undefined) {
+				this.providedInstructions.forEach(rawPart => {
+					const rawInstruction = extractRawInstructionFrom(rawPart);
+					var instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
+					this.add(instruction);
+				});
+			}
+            this.ready = true;
 		}
-
-		// Computed, then cached
-		var lSize = 0;
-		const lInstructions = this.getInstructions() || [];
-		lInstructions.forEach(instruction => {
-			const instructionSize = instruction.getSize();
-			lSize += instructionSize;
-		});
-		return this.size = lSize;
-	 }
- }
+	}
+}

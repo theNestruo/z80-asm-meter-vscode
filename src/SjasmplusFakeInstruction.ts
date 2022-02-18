@@ -1,48 +1,53 @@
+import { MeterableCollection } from "./MeterableCollection";
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "./utils";
-import { Z80Instruction } from "./Z80Instruction";
 import { Z80InstructionParser } from "./Z80InstructionParser";
 
 /**
  * A sjasmplus fake instruction
  */
-export class SjasmplusFakeInstruction {
+export class SjasmplusFakeInstruction extends MeterableCollection {
 
-	// Information
+    // Information
     private instructionSet: string;
-	private fakeInstruction: string;
-	private rawInstructions: string[];
+    private fakeInstruction: string;
+    private rawInstructions: string[];
 
-	// Derived information (will be cached for performance reasons)
-	private mnemonic: string | undefined;
-	private operands: string[] | undefined;
-	private instructions: Z80Instruction[] | undefined;
+    // Derived information (will be cached for performance reasons)
+    private mnemonic: string | undefined;
+    private operands: string[] | undefined;
+    private ready: boolean = false;
 
-	constructor(
-			instructionSet: string, fakeInstruction: string,
-			rawInstructions: string[]) {
+    constructor(
+        instructionSet: string, fakeInstruction: string,
+        rawInstructions: string[]) {
+        super();
 
-		this.instructionSet = instructionSet;
-		this.fakeInstruction = fakeInstruction;
-		this.rawInstructions = rawInstructions;
-
-		this.mnemonic = undefined;
-		this.operands = undefined;
-	}
+        this.instructionSet = instructionSet;
+        this.fakeInstruction = fakeInstruction;
+        this.rawInstructions = rawInstructions;
+    }
 
     /**
-     * @returns The instruction set
+     * @returns The instruction set this instruction belongs to
      */
-     public getInstructionSet(): string {
+    public getInstructionSet(): string {
         return this.instructionSet;
+    }
+
+    /**
+     * @returns The normalized sjasmplus fake instruction
+     */
+    public getInstruction(): string {
+        return this.fakeInstruction;
     }
 
     /**
      * @returns the mnemonic
      */
-	 public getMnemonic(): string {
+    public getMnemonic(): string {
         return this.mnemonic
-                ? this.mnemonic
-                : this.mnemonic = extractMnemonicOf(this.fakeInstruction);
+            ? this.mnemonic
+            : this.mnemonic = extractMnemonicOf(this.fakeInstruction);
     }
 
     /**
@@ -50,24 +55,60 @@ export class SjasmplusFakeInstruction {
      */
     public getOperands(): string[] {
         return this.operands
-                ? this.operands
-                : this.operands = extractOperandsOf(this.fakeInstruction);
+            ? this.operands
+            : this.operands = extractOperandsOf(this.fakeInstruction);
     }
 
-    public getInstructions(): Z80Instruction[] {
-        if (!this.instructions) {
-            var lInstructions: Z80Instruction[] = [];
+    /**
+     * @returns The Z80 timing, in time (T) cycles
+     */
+    public getZ80Timing(): number[] {
+        this.init();
+        return super.getZ80Timing();
+    }
+
+    /**
+     * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
+     */
+    public getMsxTiming(): number[] {
+        this.init();
+        return super.getMsxTiming();
+    }
+
+    /**
+     * @returns The CPC timing, in NOPS
+     */
+    public getCpcTiming(): number[] {
+        this.init();
+        return super.getCpcTiming();
+    }
+
+    /**
+     * @returns The bytes
+     */
+    public getBytes(): string[] {
+        this.init();
+        return super.getBytes();
+    }
+
+    /**
+     * @returns The size in bytes
+     */
+    public getSize(): number {
+        this.init();
+        return super.getSize();
+    }
+
+    private init(): void {
+
+        if (!this.ready) {
             this.rawInstructions.forEach(rawPart => {
                 const rawInstruction = extractRawInstructionFrom(rawPart);
-                var lInstruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, [this.instructionSet]);
-                if (lInstruction) {
-                    // (should never be undefined)
-                    lInstructions.push(lInstruction);
-                }
+                var instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, [this.instructionSet]);
+                this.add(instruction);
             });
-            this.instructions = lInstructions;
+            this.ready = true;
         }
-        return this.instructions;
     }
 
     /**
@@ -77,7 +118,7 @@ export class SjasmplusFakeInstruction {
      * 1 means the line is this instruction,
      * and intermediate values mean the line may be this instruction
      */
-	 public match(candidateInstruction: string): number {
+    public match(candidateInstruction: string): number {
 
         // Compares mnemonic
         if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {
@@ -98,7 +139,7 @@ export class SjasmplusFakeInstruction {
 
         // Compares operand count
         if (candidateOperandsLength !== expectedOperandsLength) {
-			return 0;
+            return 0;
         }
 
         // Compares operands
@@ -121,7 +162,7 @@ export class SjasmplusFakeInstruction {
      * 1 means the candidate operand is a perfect match,
      * and intermediate values mean the operand is accepted
      */
-	 private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
+    private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
 
         // Must the candidate operand match verbatim the operand of the instruction?
         if (isVerbatimOperand(expectedOperand)) {
@@ -135,23 +176,23 @@ export class SjasmplusFakeInstruction {
 
         // Depending on the expected operand...
         switch (expectedOperand) {
-        case "IX+o":
-            return isIXWithOffsetScore(candidateOperand);
-        case "IY+o":
-            return isIYWithOffsetScore(candidateOperand);
-        case "IXh":
-            return isIXhScore(candidateOperand);
-        case "IXl":
-            return isIXlScore(candidateOperand);
-        case "IYh":
-            return isIYhScore(candidateOperand);
-        case "IYl":
-            return isIYlScore(candidateOperand);
-        default:
-            // (due possibility of using constants, labels, and expressions in the source code,
-            // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
-            // but uses a "best effort" to discard registers)
-            return isAnyRegister(
+            case "IX+o":
+                return isIXWithOffsetScore(candidateOperand);
+            case "IY+o":
+                return isIYWithOffsetScore(candidateOperand);
+            case "IXh":
+                return isIXhScore(candidateOperand);
+            case "IXl":
+                return isIXlScore(candidateOperand);
+            case "IYh":
+                return isIYhScore(candidateOperand);
+            case "IYl":
+                return isIYlScore(candidateOperand);
+            default:
+                // (due possibility of using constants, labels, and expressions in the source code,
+                // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
+                // but uses a "best effort" to discard registers)
+                return isAnyRegister(
                     isIndirectionOperand(candidateOperand, false)
                         ? extractIndirection(candidateOperand)
                         : candidateOperand)
@@ -166,11 +207,11 @@ export class SjasmplusFakeInstruction {
      * @returns number between 0 and 1 with the score of the match,
      * or 0 if the candidate operand is not valid
      */
-     private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
+    private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
 
         // Compares the expression inside the indirection
         return isIndirectionOperand(candidateOperand, false)
-                ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
-                : 0;
+            ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
+            : 0;
     }
 }

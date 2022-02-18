@@ -1,8 +1,6 @@
-import { workspace } from "vscode";
-import { sjasmplusFakeInstructionSet } from "./data/SjasmplusFakeInstructionSet";
-import { SjasmplusFakeInstruction } from "./SjasmplusFakeInstruction";
 import { extractMnemonicOf } from "./utils";
-import { Z80Instruction } from "./Z80Instruction";
+import { SjasmplusFakeInstruction } from "./SjasmplusFakeInstruction";
+import { sjasmplusFakeInstructionSet } from "./SjasmplusFakeInstructionSet";
 
 export class SjasmplusFakeInstructionParser {
 
@@ -20,9 +18,9 @@ export class SjasmplusFakeInstructionParser {
 
             // Parses the raw instruction
             const instruction = new SjasmplusFakeInstruction(
-                    rawData[0], // instructionSet
-                    rawData[1], // fake instruction
-                    rawData.slice(2)); // actual instructions
+                rawData[0], // instructionSet
+                rawData[1], // fake instruction
+                rawData.slice(2)); // actual instructions
 
             // Prepares a map by mnemonic for performance reasons
             const mnemonic = instruction.getMnemonic();
@@ -33,7 +31,7 @@ export class SjasmplusFakeInstructionParser {
         });
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): Z80Instruction[] | undefined {
+    public parse(instruction: string | undefined, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         if (!instruction) {
             return undefined;
@@ -50,7 +48,7 @@ export class SjasmplusFakeInstructionParser {
         return undefined;
     }
 
-    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[], instructionSets: string[]): Z80Instruction[] | undefined {
+    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         // Locates instruction
         let bestCandidate = undefined;
@@ -64,13 +62,13 @@ export class SjasmplusFakeInstructionParser {
             const score = candidate.match(instruction);
             if (score === 1) {
                 // Exact match
-                return candidate.getInstructions();
+                return candidate;
             }
             if (score > bestScore) {
                 bestCandidate = candidate;
                 bestScore = score;
             }
         }
-        return (bestCandidate && (bestScore !== 0)) ? bestCandidate.getInstructions() : undefined;
+        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
     }
 }

@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "2.2.0",
+	"version": "3.0.0",
 	"engines": {
 		"vscode": "^1.64.0"
 	},
@@ -141,30 +141,6 @@
 							}
 						}
 					}
-				},
-				"z80-asm-meter.maxBytes": {
-					"type": [
-						"number",
-						"null"
-					],
-					"description": "Stops instruction and bytes (opcode) block visualization (tooltip) when the instruction count exceeds this value",
-					"default": 16
-				},
-				"z80-asm-meter.maxLines": {
-					"type": [
-						"number",
-						"null"
-					],
-					"description": "Disables metering when the line count of the selection exceeds this value",
-					"default": null
-				},
-				"z80-asm-meter.maxLoC": {
-					"type": [
-						"number",
-						"null"
-					],
-					"description": "Stops metering when the lines of code (LoC) count exceeds this value",
-					"default": null
 				},
 				"z80-asm-meter.platform": {
 					"type": "string",

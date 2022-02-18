@@ -1,48 +1,17 @@
 import { workspace } from "vscode";
-import { AbstractInstruction } from "./AbstractInstruction";
 import { AssemblyDirective } from "./AssemblyDirective";
+import { Meterable } from "./Meterable";
+import { NumericExpressionParser } from "./NumericExpressionParser";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./utils";
 import { Z80InstructionParser } from "./Z80InstructionParser";
-
-class NumericParser {
-
-    private regex: RegExp;
-    private radix: number;
-
-    constructor(regex: RegExp, radix: number) {
-        this.regex = regex;
-        this.radix = radix;
-    }
-
-    public parse(s: string): number | undefined {
-        const negative = s.startsWith("-");
-        const us = negative ? s.substr(1) : s;
-        const matches = this.regex.exec(us);
-        return matches && matches.length >= 1
-                ? (negative ? -1 : 1) * parseInt(matches[1], this.radix)
-                : undefined;
-    }
-}
 
 export class AssemblyDirectiveParser {
 
     // Singleton
     public static instance = new AssemblyDirectiveParser();
 
-    // Numeric parsers
-    private static numericParsers = [
-        new NumericParser(/^0x([0-9a-f]+)$/i, 16),
-        new NumericParser(/^[#$&]([0-9a-f]+)$/i, 16),
-        new NumericParser(/^([0-9a-f]+)h$/i, 16),
-        new NumericParser(/^[0@]([0-7]+)$/, 8),
-        new NumericParser(/^([0-7]+)o$/i, 8),
-        new NumericParser(/^%([0-1]+)$/i, 2),
-        new NumericParser(/^([0-1]+)b$/i, 2),
-        new NumericParser(/^(\d+)$/, 10)
-    ];
-
     // Configuration
-    private directivesAsInstructions: string | undefined = undefined;
+    private directivesAsInstructions: string;
 
     private constructor() {
 
@@ -51,7 +20,7 @@ export class AssemblyDirectiveParser {
         this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
     }
 
-    public parse(instruction: string | undefined): AbstractInstruction[] | undefined {
+    public parse(instruction: string | undefined): Meterable[] | undefined {
 
         if (!instruction) {
             return undefined;
@@ -59,13 +28,13 @@ export class AssemblyDirectiveParser {
 
         // Locates defb/defw/defs directives
         const mnemonic = extractMnemonicOf(instruction);
-        if (mnemonic.match(/^(DEFB|DB)$/)) {
+        if (mnemonic.match(/^[.]?(DEFB|DB)$/)) {
             return this.parseDefbDirective(instruction);
         }
-        if (mnemonic.match(/^(DEFW|DW)$/)) {
+        if (mnemonic.match(/^[.]?(DEFW|DW)$/)) {
             return this.parseDefwDirective(instruction);
         }
-        if (mnemonic.match(/^(DEFS|DS)$/)) {
+        if (mnemonic.match(/^[.]?(DEFS|DS)$/)) {
             return this.parseDefsDirective(instruction);
         }
 
@@ -92,7 +61,7 @@ export class AssemblyDirectiveParser {
                 });
             } else {
                 // Raw values
-                const value = this.parseNumericExpression(operand);
+                const value = NumericExpressionParser.parse(operand);
                 bytes.push(value !== undefined ? formatHexadecimalByte(value) : "n");
             }
         });
@@ -102,7 +71,7 @@ export class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFB", bytes.join(" "), bytes.length)];
+        return [new AssemblyDirective("DEFB", bytes, bytes.length)];
     }
 
     private parseDefwDirective(pInstruction: string): AssemblyDirective[] | undefined {
@@ -115,11 +84,11 @@ export class AssemblyDirectiveParser {
         // Extracts bytes
         const bytes: string[] = [];
         operands.forEach(operand => {
-            const value = this.parseNumericExpression(operand);
+            const value = NumericExpressionParser.parse(operand);
             if (value !== undefined) {
-                bytes.push(formatHexadecimalByte(value & 0xff), formatHexadecimalByte((value & 0xff00) >> 8));
+                bytes.push(formatHexadecimalByte(value & 0xff) + " " + formatHexadecimalByte((value & 0xff00) >> 8));
             } else {
-                bytes.push("nn", "nn");
+                bytes.push("n n");
             }
         });
 
@@ -128,10 +97,10 @@ export class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFW", bytes.join(" "), bytes.length)];
+        return [new AssemblyDirective("DEFW", bytes, bytes.length)];
     }
 
-    private parseDefsDirective(pInstruction: string): AbstractInstruction[] | undefined {
+    private parseDefsDirective(pInstruction: string): Meterable[] | undefined {
 
         const operands = extractOperandsOf(pInstruction);
         if ((operands.length < 1) || (operands.length > 2)) {
@@ -139,12 +108,12 @@ export class AssemblyDirectiveParser {
         }
 
         // Extracts count and byte
-        const count = this.parseNumericExpression(operands[0]);
+        const count = NumericExpressionParser.parse(operands[0]);
         if ((count === undefined) || (count < 0)) {
             return undefined;
         }
         let value = operands.length === 2
-                ? this.parseNumericExpression(operands[1])
+                ? NumericExpressionParser.parse(operands[1])
                 : undefined;
 
         // Determines instruction
@@ -159,18 +128,6 @@ export class AssemblyDirectiveParser {
         // Returns as directive
         const byte = value !== undefined ? formatHexadecimalByte(value) : "n";
         const bytes = new Array(count).fill(byte);
-        return [new AssemblyDirective("DEFS", bytes.join(" "), count)];
-    }
-
-    private parseNumericExpression(s: string): number | undefined {
-
-        for (let numericParser of AssemblyDirectiveParser.numericParsers) {
-            const value = numericParser.parse(s);
-            if ((value !== undefined) && (!isNaN(value))) {
-                return value;
-            }
-        }
-
-        return undefined;
+        return [new AssemblyDirective("DEFS", bytes, count)];
     }
 }

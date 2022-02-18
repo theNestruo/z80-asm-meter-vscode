@@ -1,50 +1,42 @@
 import { workspace } from 'vscode';
 import { AssemblyDirectiveParser } from './AssemblyDirectiveParser';
-import { MacrosParser } from './MacrosParser';
+import { MacroParser } from './MacroParser';
+import { MeterableCollection } from './MeterableCollection';
 import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
 import { extractRawInstructionsFrom } from './utils';
-import { Z80Block } from './Z80Block';
 import { Z80InstructionParser } from './Z80InstructionParser';
 
-export class Parser {
+export class MainParser {
 
     // Configuration
-    private maxLines: number | undefined = undefined;
-    private platformConfiguration: string | undefined = undefined;
-    private syntaxLabelConfiguration: string | undefined = undefined;
-    private syntaxLineSeparatorConfiguration: string | undefined = undefined;
-    private sjasmplus: boolean = false;
+    private platformConfiguration: string;
+    private syntaxLabelConfiguration: string;
+    private syntaxLineSeparatorConfiguration: string;
+    private sjasmplus: boolean;
 
     constructor() {
 
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-
         // Saves configuration
-        this.maxLines = configuration.get("maxLines");
+        const configuration = workspace.getConfiguration("z80-asm-meter");
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
         this.sjasmplus = configuration.get("sjasmplus", false);
     }
 
-    parse(sourceCode: string | undefined): Z80Block {
+    parse(sourceCode: string | undefined): MeterableCollection {
 
-        const block = new Z80Block();
+        const meterables = new MeterableCollection();
 
         if (!sourceCode) {
-            return block;
+            return meterables;
         }
         const rawLines = sourceCode.split(/[\r\n]+/);
         if (rawLines.length === 0) {
-            return block;
+            return meterables;
         }
         if (rawLines[rawLines.length - 1].trim() === "") {
             rawLines.pop(); // (removes possible spurious empty line at the end of the selection)
-        }
-
-        // (disables if maximum lines exceeded)
-        if ((!!this.maxLines) && (rawLines.length > this.maxLines)) {
-            return block;
         }
 
         // Determines instruction sets
@@ -72,38 +64,38 @@ export class Parser {
             rawInstructions.forEach((rawInstruction: string | undefined) => {
 
                 // Tries to parse Z80 instructions
-                const lInstruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
-                if (!!lInstruction) {
-                    block.addInstructions([lInstruction]);
+                const z80Instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
+                if (!!z80Instruction) {
+                    meterables.add(z80Instruction);
                     return;
                 }
 
                 // Tries to parse sjasmplus alternative syntax and fake instructions
                 if (this.sjasmplus) {
-                    const lInstructions = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
-                    if (!!lInstructions) {
-                        block.addInstructions(lInstructions);
+                    const sjasmplusFakeInstruction = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
+                    if (!!sjasmplusFakeInstruction) {
+                        meterables.add(sjasmplusFakeInstruction);
                         return;
                     }
                 }
 
-                // Tries to parse macro
-                const lMacro = MacrosParser.instance.parse(rawInstruction, instructionSets);
-                if (!!lMacro) {
+                // Tries to parse user-defined macro
+                const macro = MacroParser.instance.parse(rawInstruction, instructionSets);
+                if (!!macro) {
                     // const lInstructions = lMacro.getInstructions();
-                    block.addInstructions([lMacro]);
+                    meterables.add(macro);
                     return;
                 }
 
                 // Tries to parse assembly directives
-                const lDirective = AssemblyDirectiveParser.instance.parse(rawInstruction);
-                if (!!lDirective) {
-                    block.addInstructions(lDirective);
+                const directive = AssemblyDirectiveParser.instance.parse(rawInstruction);
+                if (!!directive) {
+                    meterables.addAll(directive);
                     return;
                 }
             });
         });
 
-        return block;
+        return meterables;
     }
 }

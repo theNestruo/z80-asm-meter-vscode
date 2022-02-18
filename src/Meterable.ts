@@ -1,35 +1,35 @@
 /**
  * Anything that can be metered: Z80 Instructions, ASM directives, sjasmplus fake instructions...
  */
-export abstract class AbstractInstruction {
+export interface Meterable {
 
     /**
-     * @returns The raw instruction
+     * @returns The normalized Z80 instruction, ASM directive, sjasmplus fake instruction...
      */
-    public abstract getInstruction(): string;
+    getInstruction(): string;
 
     /**
      * @returns The Z80 timing, in time (T) cycles
      */
-    public abstract getZ80Timing(): number[];
+    getZ80Timing(): number[];
 
     /**
      * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
      */
-    public abstract getMsxTiming(): number[];
+    getMsxTiming(): number[];
 
     /**
      * @returns The CPC timing, in NOPS
      */
-    public abstract getCpcTiming(): number[];
+    getCpcTiming(): number[];
 
     /**
-     * @returns The bytes of the instruction
+     * @returns The bytes, logically grouped
      */
-    public abstract getBytes(): string;
+    getBytes(): string[];
 
     /**
      * @returns The size in bytes
      */
-    public abstract getSize(): number;
+    getSize(): number;
 }

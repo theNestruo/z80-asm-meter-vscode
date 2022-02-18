@@ -1,8 +1,9 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
-import { Parser } from "./Parser";
-import { Z80Block } from "./Z80Block";
+import { MeterableCollection } from "./MeterableCollection";
+import { MeterableDecorator } from "./MeterableDecorator";
+import { MainParser } from "./MainParser";
 
-export class Z80MeterController {
+export class ExtensionController {
 
     private static commandId = "z80AsmMeter.copyToClipboard";
 
@@ -19,7 +20,7 @@ export class Z80MeterController {
         window.onDidChangeActiveTextEditor(this._onEvent, this, subscriptions);
 
         // create a command to copy timing and size to clipboard
-        let command = commands.registerCommand(Z80MeterController.commandId, this._onCommand, this);
+        let command = commands.registerCommand(ExtensionController.commandId, this._onCommand, this);
 
         // create a combined disposable from both event subscriptions
         this._disposable = Disposable.from(...subscriptions, command);
@@ -28,11 +29,13 @@ export class Z80MeterController {
     private _onEvent() {
 
         // Reads the Z80 block
-        const z80Block = this.readZ80BlockFromSelection();
-        if (!z80Block) {
+        const metered = this.readFromSelection();
+        if (!metered) {
             this.hideStatusBar();
             return;
         }
+
+        const info = new MeterableDecorator(metered);
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
@@ -42,19 +45,19 @@ export class Z80MeterController {
         // Builds the text
         let text = "";
         if (viewInstructionConfiguration) {
-            const instruction = z80Block.getInstructionText();
+            const instruction = info.getInstructionsAsText();
             text += `$(code) ${instruction} `;
         }
-        const timing = z80Block.getTimingText(false);
-        const size = z80Block.getSizeText();
+        const timing = info.getTimingAsText(false) || "0";
+        const size = info.getSizeAsText();
         text += `$(watch) ${timing} $(file-binary) ${size}`;
         if (viewBytesConfiguration) {
-            const bytes = z80Block.getBytesText();
+            const bytes = info.getBytesAsText();
             text += ` (${bytes})`;
         }
 
         // Builds the tooltip
-        const tooltip = z80Block.getDetailedMarkdownString();
+        const tooltip = info.getDetailedMarkdownString();
 
         // Builds the status bar item
         if (!this._statusBarItem) {
@@ -62,21 +65,23 @@ export class Z80MeterController {
         }
         this._statusBarItem.text = text;
         this._statusBarItem.tooltip = tooltip;
-        this._statusBarItem.command = Z80MeterController.commandId;
+        this._statusBarItem.command = ExtensionController.commandId;
         this._statusBarItem.show();
     }
 
     private _onCommand() {
 
-        const z80Block = this.readZ80BlockFromSelection();
+        const z80Block = this.readFromSelection();
         if (!z80Block) {
             // (should never happen)
             return;
         }
 
+        const info = new MeterableDecorator(z80Block);
+
         // Builds the text to copy to clipbaord
-        const timingText = z80Block.getTimingText(true);
-        const sizeText = z80Block.getSizeText();
+        const timingText = info.getTimingAsText(true);
+        const sizeText = info.getSizeAsText();
         const text = `${timingText}, ${sizeText}`;
 
         // Copies to clipboard and notifies the user
@@ -90,23 +95,23 @@ export class Z80MeterController {
         }
     }
 
-    private readZ80BlockFromSelection(): Z80Block | undefined{
+    private readFromSelection(): MeterableCollection | undefined {
 
         // Reads the Z80 block
         const editor = window.activeTextEditor;
         if ((!editor)
-                || (!this.isEnabledFor(editor.document.languageId))) {
+            || (!this.isEnabledFor(editor.document.languageId))) {
             return undefined;
         }
         const sourceCode = editor.selection.isEmpty
             ? editor.document.lineAt(editor.selection.active.line).text
             : editor.document.getText(editor.selection);
-        const z80Block = new Parser().parse(sourceCode);
-        if (z80Block.loc === 0) {
+        const metered = new MainParser().parse(sourceCode);
+        if (metered.getSize() === 0) {
             return undefined;
         }
 
-        return z80Block;
+        return metered;
     }
 
     private isEnabledFor(languageId: string): boolean {

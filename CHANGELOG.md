@@ -1,7 +1,8 @@
 
-## 2.2.0 (unreleased)
+## ~~2.2.0~~ 3.0.0 (unreleased)
 
-- Support for user-defined macros
+- Code refactor
+- Support for user-defined macros. #73
 
 ## 2.1.0
 
