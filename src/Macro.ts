@@ -1,9 +1,10 @@
 import { MacroDefinition } from "./MacroDefinition";
+import { MeterableAggregation } from "./MeterableAggregation";
 import { MeterableCollection } from "./MeterableCollection";
 import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "./utils";
 import { Z80InstructionParser } from "./Z80InstructionParser";
 
-export class Macro extends MeterableCollection {
+export class Macro extends MeterableAggregation {
 
 	// User-provided information
 	private instructionSets: string[];

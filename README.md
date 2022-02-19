@@ -66,11 +66,64 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Enabled by default.
 
+## Macro definitions
+
+Macro definitions are not read from actual source code. They must provided in user settings in order to be detected and properly metered. Macro definitions can be added to either user settings (`settings.json`) or workspace settings (`.vscode/settings.json`).
+
+As most of the macro definition fields are optional, this extension uses a best-effort to meter a macro with the provided information. But, generally speaking, there are three ways to define a macro:
+
+1. Macro definition with instructions. Macro will be metered by aggregating the metrics of the instructions.
+
+    ```jsonc
+    "z80-asm-meter.macros": [
+        {
+            "name": "ADD_HL_A",
+            "instructions": [
+                "ADD A, L",
+                "LD L, A",
+                "JR NC, zz",
+                "INC H"
+            ]
+        }
+    ]
+    ```
+
+2. Macro definition with timing and size. Macro will be metered using the provided timing and/or size.
+
+    ```jsonc
+    "z80-asm-meter.macros": [
+        {
+            "name": "ADD_HL_A",
+            "z80": "24/19", // (note that there is no cpc timing,
+            "msx": "28/23", // so this macro won't be metered
+            "size": 5       // if platform=cpc)
+        }
+    ]
+    ```
+
+3. Macro definition with both instructions and timing and/or size. Provided timing and/or size will override the metrics of the instructions.
+
+    ```jsonc
+    "z80-asm-meter.macros": [
+        {
+            "name": "ADD_HL_A",
+            "instructions": [
+                "ADD A, L", "LD L, A", "JR NC, zz", "INC H"
+            ],
+            "msx": "23" // (overrides actual timing for platform=msx)
+        }
+    ]
+    ```
+
 ## F.A.Q.
 
-### The lower status bar does not display any information. I don't get clock cycles and bytecode size!
+### The status bar does not display any information. I don't get clock cycles and bytecode size!
 
 Double check the `z80-asm-meter.languageIds` setting.
+
+### My macros are not recognized
+
+Macro definitions are not read from actual source code, but from user settings. Double check the `z80-asm-meter.macros` setting.
 
 ## Credits
 
