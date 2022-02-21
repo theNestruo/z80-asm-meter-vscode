@@ -1,4 +1,5 @@
 import { MarkdownString, workspace } from 'vscode';
+import { Meterable } from './Meterable';
 import { MeterableCollection } from './MeterableCollection';
 import { formatTiming } from './utils';
 
@@ -24,16 +25,21 @@ export class MeterableDecorator {
 
     public getInstructionsAsText(): string | undefined {
 
-        const meterables = this.metered.getMeterables();
+        const queue = this.queue();
+        const firstMeterable = this.next(queue);
 
         // (empty)
-        if (!meterables.length) {
+        if (!firstMeterable) {
             return undefined;
         }
 
-        let text = meterables[0].getInstruction();
-        if (meterables.length > 1) {
-           text += " ...";
+        const lastMeterable = this.last(queue);
+        let text = firstMeterable.getInstruction();
+        if (lastMeterable) {
+            if (queue.length) {
+                text += " ...";
+            }
+            text += " " + lastMeterable.getInstruction();
         }
         return text;
     }
@@ -61,30 +67,23 @@ export class MeterableDecorator {
 
     public getBytesAsText(): string | undefined {
 
-        const meterables = this.metered.getMeterables();
+        const queue = this.queue();
+        const firstMeterable = this.next(queue);
 
         // (empty)
-        if (!meterables.length) {
+        if (!firstMeterable) {
             return undefined;
         }
 
-        let allBytes: string[] = [];
-        meterables.forEach(meterable => {
-            allBytes.push(...meterable.getBytes());
-        });
-        let bytes: string[] = [], byteCount = 0;
-        for (let i = 0, n = allBytes.length; i < n; i++) {
-            const b = allBytes[i], bLenght = b.split(/\s+/).length;
-            // (abbreviates beyond 8 bytes)
-            if ((byteCount + bLenght >= 8) && (i < n - 1)) {
-                bytes.push("...");
-                bytes.push(allBytes[n - 1]);
-                break;
+        const lastMeterable = this.last(queue);
+        let text = firstMeterable.getBytes().join(" ");
+        if (lastMeterable) {
+            if (queue.length) {
+                text += " ...";
             }
-            bytes.push(b);
-            byteCount += bLenght;
+            text += " " + lastMeterable.getBytes().join(" ");
         }
-        return bytes.join(" ");
+        return text;
     }
 
     public getSizeAsText(): string | undefined {
@@ -107,24 +106,6 @@ export class MeterableDecorator {
         }
 
         const tooltip = new MarkdownString();
-
-        // Tooltip: Bytes (up to maxBytes bytes)
-        // const n = this.maxBytesConfiguration ? Math.min(this.loc, this.maxBytesConfiguration) : this.loc;
-        tooltip.appendMarkdown("|Instructions|Bytes|\n")
-                .appendMarkdown("|---|---|\n");
-        const lInstructions = this.getInstructionsAsText();
-        const lBytes = this.getBytesAsText();
-        // for (let i = 0; i < n; i++) {
-        //     const bytes = lBytes[i];
-        //     const instruction = lInstructions[i];
-        //     tooltip.appendMarkdown(`|${instruction}|\`${bytes}\`|\n`);
-        // }
-        // if (this.maxBytesConfiguration && this.maxBytesConfiguration < this.loc) {
-        //     const etc = this.loc - this.maxBytesConfiguration;
-        //     tooltip.appendMarkdown(`|(+${etc} ${(etc === 1 ? "instruction" : "instructions")})|\`(...)\`|\n`);
-        // }
-        tooltip.appendMarkdown("\n")
-                .appendMarkdown("---\n\n");
 
         // Tooltip: Timing and size table
         tooltip.appendMarkdown("|||\n|---|---|\n");
@@ -150,5 +131,47 @@ export class MeterableDecorator {
         tooltip.appendMarkdown(`Copy "${timingText}, ${sizeText}" to clipboard\n`);
 
         return tooltip;
+    }
+
+    /**
+     * The MeterableCollection instance, as a queue to be used in next() and last() methods
+     */
+     private queue(): Meterable[] {
+
+        return [this.metered];
+    }
+
+    /**
+     * Advances the meterable collection from the start, unnesting the meterables if possible
+     * @return the next unaggregated Meterable in the collection
+     */
+    private next(queue: Meterable[]): Meterable | undefined {
+
+        if (!queue) {
+            return undefined;
+        }
+        const meterable = queue.shift();
+        if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
+            queue.unshift(...meterable.getMeterables());
+            return this.next(queue);
+        }
+        return meterable;
+    }
+
+    /**
+     * Advances the meterable collection from the end, unnesting the meterables if possible
+     * @return the last unaggregated Meterable in the collection
+     */
+     private last(queue: Meterable[]): Meterable | undefined {
+
+        if (!queue) {
+            return undefined;
+        }
+        const meterable = queue.pop();
+        if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
+            queue.unshift(...meterable.getMeterables());
+            return this.last(queue);
+        }
+        return meterable;
     }
 }

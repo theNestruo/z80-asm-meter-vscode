@@ -1,6 +1,5 @@
 import { MacroDefinition } from "./MacroDefinition";
 import { MeterableAggregation } from "./MeterableAggregation";
-import { MeterableCollection } from "./MeterableCollection";
 import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "./utils";
 import { Z80InstructionParser } from "./Z80InstructionParser";
 
