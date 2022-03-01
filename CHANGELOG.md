@@ -1,8 +1,9 @@
 
-## ~~2.2.0~~ 3.0.0 (unreleased)
+## 3.0.0
 
 - Code refactor
 - Support for user-defined macros. #73
+- Configuration properties ~~`maxBytes`~~, ~~`maxLines`~~, and ~~`maxLoC`~~ removed
 
 ## 2.1.0
 
