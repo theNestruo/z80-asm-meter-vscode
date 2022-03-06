@@ -97,7 +97,7 @@ export class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFW", bytes, bytes.length)];
+        return [new AssemblyDirective("DEFW", bytes, bytes.length * 2)];
     }
 
     private parseDefsDirective(pInstruction: string): Meterable[] | undefined {

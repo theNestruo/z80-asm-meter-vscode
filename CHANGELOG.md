@@ -1,4 +1,8 @@
 
+## 3.0.1
+
+- Fixes wrong `dw`/`defw` directive size
+
 ## 3.0.0
 
 - Code refactor

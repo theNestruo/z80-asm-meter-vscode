@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.1.0",
+	"version": "3.0.1",
 	"engines": {
 		"vscode": "^1.64.0"
 	},
