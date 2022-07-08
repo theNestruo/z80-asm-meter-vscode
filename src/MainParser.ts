@@ -49,7 +49,7 @@ export class MainParser {
                 ? /(^\s*[^\s:]+:)/
                 : /(^[^\s:]+([\s:]|$))/;
         const commentRegExp = /((;|\/\/).*$)/;
-        const lineSepartorRegExp =
+        const lineSeparatorRegExp =
                 this.syntaxLineSeparatorConfiguration === "colon" ? /\s*:\s*/
                 : this.syntaxLineSeparatorConfiguration === "pipe" ? /\s*\|\s*/
                 : undefined;
@@ -57,7 +57,7 @@ export class MainParser {
         // For every line...
         rawLines.forEach(rawLine => {
             // Extracts the instructions
-            const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSepartorRegExp);
+            const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSeparatorRegExp);
             if (!rawInstructions) {
                 return;
             }
