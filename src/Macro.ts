@@ -105,7 +105,7 @@ export class Macro extends MeterableAggregation {
 				this.providedInstructions.forEach(rawPart => {
 					const rawInstruction = extractRawInstructionFrom(rawPart);
 					var instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
-					this.add(instruction);
+					this.add(instruction, 1);
 				});
 			}
             this.ready = true;

@@ -1,7 +1,6 @@
-import { workspace } from "vscode";
-import { z80InstructionSet } from "./Z80InstructionSet";
 import { extractMnemonicOf, formatHexadecimalByte } from "./utils";
 import { Z80Instruction } from "./Z80Instruction";
+import { z80InstructionSet } from "./Z80InstructionSet";
 
 export class Z80InstructionParser {
 

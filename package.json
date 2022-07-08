@@ -161,21 +161,6 @@
 					],
 					"default": "z80"
 				},
-				"z80-asm-meter.syntax.repeat": {
-					"type": "string",
-					"description": "Enables support for parsing repeat pseudo-op",
-					"enum": [
-						"none",
-						"sjasm",
-						"sjasmplus"
-					],
-					"enumDescriptions": [
-						"Disables repeat pseudo-op",
-						"The repeat count is specified within square brackets ([ and ])",
-						"The repeat count is specified after a dot (.)"
-					],
-					"default": "none"
-				},
 				"z80-asm-meter.sjasmplus": {
 					"type": "boolean",
 					"description": "Enables support for parsing SjASMPlus alternative syntax and fake instructions",
@@ -206,6 +191,21 @@
 						"Does not allow multiple instructions on a single line",
 						"Use colon (:) to have more than one instruction on a line",
 						"Use pipe (|) to have more than one instruction on a line. This behaviour matches some assemblers such as tniASM"
+					],
+					"default": "none"
+				},
+				"z80-asm-meter.syntax.repeat": {
+					"type": "string",
+					"description": "Enables support for parsing repeat count",
+					"enum": [
+						"none",
+						"brackets",
+						"dot"
+					],
+					"enumDescriptions": [
+						"Disables repeat count",
+						"The repeat count is specified before the instruction within square brackets ([ and ]) before the instruction",
+						"The repeat count is specified before the instruction after a dot (.) before the instruction"
 					],
 					"default": "none"
 				},

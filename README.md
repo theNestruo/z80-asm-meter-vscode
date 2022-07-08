@@ -63,6 +63,16 @@ This extension contributes the following settings:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
     * `colonOptional`: The trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as [Pasmo](http://pasmo.speccy.org/) and [SjASMPlus](https://github.com/sjasmplus/sjasmplus).
 
+* `z80-asm-meter.syntax.lineSeparator`: Adjusts the line separator to match the syntax of the assembler:
+    * `none` (default): Does not allow multiple instructions on a single line.
+    * `colon`: Use colon (`:`) to have more than one instruction on a line.
+    * `pipe`: Use pipe (`|`) to have more than one instruction on a line. This behaviour matches some assemblers such as [tniASM](http://www.tni.nl/products/tniasm.html).
+
+* `z80-asm-meter.syntax.repeat`: Enables support for parsing repeat count:
+    * `none` (default): Disables repeat count.
+    * `brackets`: The repeat count is specified before the instruction within square brackets (`[` and `]`) before the instruction. This behaviour partially matches the source format of [Sjasm](http://www.xl2s.tk/sjasmman2.html#s3), but multiple repeat counts and iteration count are not supported.
+    * `dot`: The repeat count is specified before the instruction after a dot (`.`) before the instruction. This behaviour partially matches the repeat pseudo-op of [SjASMPlus](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops), but multiple repeat counts and expressions are not supported.
+
 * `z80-asm-meter.viewBytes`: Enables the opcode in the status bar. Disabled by default.
 
 * `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Enabled by default.
@@ -96,8 +106,8 @@ As most of the macro definition fields are optional, this extension uses a best-
         {
             "name": "ADD_HL_A",
             "z80": "24/19", // (note that there is no cpc timing,
-            "msx": "28/23", // so this macro won't be metered
-            "size": 5       // if platform=cpc)
+            "msx": "28/23", //    so this macro won't be metered
+            "size": 5       //    if platform=cpc)
         }
     ]
     ```

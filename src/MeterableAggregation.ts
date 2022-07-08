@@ -15,42 +15,48 @@ export class MeterableAggregation implements Meterable {
 	/**
 	 * Adds meterables to the aggregation
 	 * @param meterables The Meterable instances to aggregate
+	 * @param repeatCount The number of times to add the meterables to the aggregation
 	 */
-	public addAll(meterables: Meterable[] | undefined): void {
+	public addAll(meterables: Meterable[] | undefined, repeatCount: number): void {
 
 		// (sanity check)
-		if (!meterables) {
+		if ((!meterables) || (repeatCount <= 0)) {
 			return;
 		}
 
-		meterables.forEach(meterable => this.add(meterable));
+		for (var i = 0; i < repeatCount; i++) {
+			meterables.forEach(meterable => this.add(meterable, 1));
+		}
 	}
 
 	/**
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
+	 * @param repeatCount The number of times to add the meterable to the aggregation
 	 */
-	public add(meterable: Meterable | undefined): void {
+	public add(meterable: Meterable | undefined, repeatCount: number): void {
 
 		// (sanity check)
-		if (!meterable) {
+		if ((!meterable) || (repeatCount <= 0)) {
 			return;
 		}
 
 		const instructionZ80Timing = meterable.getZ80Timing();
-		this.z80Timing[0] += instructionZ80Timing[0];
-		this.z80Timing[1] += instructionZ80Timing[1];
+		this.z80Timing[0] += instructionZ80Timing[0] * repeatCount;
+		this.z80Timing[1] += instructionZ80Timing[1] * repeatCount;
 
 		const instructionMsxTiming = meterable.getMsxTiming();
-		this.msxTiming[0] += instructionMsxTiming[0];
-		this.msxTiming[1] += instructionMsxTiming[1];
+		this.msxTiming[0] += instructionMsxTiming[0] * repeatCount;
+		this.msxTiming[1] += instructionMsxTiming[1] * repeatCount;
 
 		const instructionCpcTiming = meterable.getCpcTiming();
-		this.cpcTiming[0] += instructionCpcTiming[0];
-		this.cpcTiming[1] += instructionCpcTiming[1];
+		this.cpcTiming[0] += instructionCpcTiming[0] * repeatCount;
+		this.cpcTiming[1] += instructionCpcTiming[1] * repeatCount;
 
-		this.bytes.push(...meterable.getBytes());
-		this.size += meterable.getSize();
+		for (var i = 0; i < repeatCount; i++) {
+			this.bytes.push(...meterable.getBytes());
+		}
+		this.size += meterable.getSize() * repeatCount;
 	}
 
 	/**

@@ -2,6 +2,7 @@ import { workspace } from 'vscode';
 import { AssemblyDirectiveParser } from './AssemblyDirectiveParser';
 import { MacroParser } from './MacroParser';
 import { MeterableCollection } from './MeterableCollection';
+import { NumericExpressionParser } from "./NumericExpressionParser";
 import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
 import { extractRawInstructionsFrom } from './utils';
 import { Z80InstructionParser } from './Z80InstructionParser';
@@ -12,6 +13,7 @@ export class MainParser {
     private platformConfiguration: string;
     private syntaxLabelConfiguration: string;
     private syntaxLineSeparatorConfiguration: string;
+    private syntaxRepeatConfiguration: string;
     private sjasmplus: boolean;
 
     constructor() {
@@ -21,6 +23,7 @@ export class MainParser {
         this.platformConfiguration = configuration.get("platform", "z80");
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
+        this.syntaxRepeatConfiguration = configuration.get("syntax.repeat", "none");
         this.sjasmplus = configuration.get("sjasmplus", false);
     }
 
@@ -53,6 +56,10 @@ export class MainParser {
                 this.syntaxLineSeparatorConfiguration === "colon" ? /\s*:\s*/
                 : this.syntaxLineSeparatorConfiguration === "pipe" ? /\s*\|\s*/
                 : undefined;
+        const repeatRegExp =
+                this.syntaxRepeatConfiguration == "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
+                : this.syntaxRepeatConfiguration == "dot" ? /^(?:.(\S+)\s)(.+)$/
+                : undefined;
 
         // For every line...
         rawLines.forEach(rawLine => {
@@ -61,12 +68,25 @@ export class MainParser {
             if (!rawInstructions) {
                 return;
             }
-            rawInstructions.forEach((rawInstruction: string | undefined) => {
+            rawInstructions.forEach((rawInstructionCandidate: string | undefined) => {
+
+                // (sanity check)
+                if (!rawInstructionCandidate) {
+                    return;
+                }
+
+                // Tries to parse repeat pseudo-op
+                const matches = !!repeatRegExp ? repeatRegExp.exec(rawInstructionCandidate) : null;
+                const hasRepeatCount = matches && matches.length >= 1 && !!matches[1];
+                const repeatCountCandidate = hasRepeatCount ? NumericExpressionParser.parse(matches[1]) : undefined;
+                const repeatCount = repeatCountCandidate && repeatCountCandidate > 0 ? repeatCountCandidate : 1;
+                const hasRepeatInstruction = matches && matches.length >= 2 && !!matches[2];
+                const rawInstruction = hasRepeatInstruction ? matches[2] : rawInstructionCandidate;
 
                 // Tries to parse Z80 instructions
                 const z80Instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
                 if (!!z80Instruction) {
-                    meterables.add(z80Instruction);
+                    meterables.add(z80Instruction, repeatCount);
                     return;
                 }
 
@@ -74,7 +94,7 @@ export class MainParser {
                 if (this.sjasmplus) {
                     const sjasmplusFakeInstruction = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
                     if (!!sjasmplusFakeInstruction) {
-                        meterables.add(sjasmplusFakeInstruction);
+                        meterables.add(sjasmplusFakeInstruction, repeatCount);
                         return;
                     }
                 }
@@ -83,14 +103,14 @@ export class MainParser {
                 const macro = MacroParser.instance.parse(rawInstruction, instructionSets);
                 if (!!macro) {
                     // const lInstructions = lMacro.getInstructions();
-                    meterables.add(macro);
+                    meterables.add(macro, repeatCount);
                     return;
                 }
 
                 // Tries to parse assembly directives
                 const directive = AssemblyDirectiveParser.instance.parse(rawInstruction);
                 if (!!directive) {
-                    meterables.addAll(directive);
+                    meterables.addAll(directive, repeatCount);
                     return;
                 }
             });
@@ -99,3 +119,4 @@ export class MainParser {
         return meterables;
     }
 }
+

@@ -2,6 +2,7 @@
 ## 3.1.0
 
 - Support for NEC PC-8000 series.
+- Support for Sjasm and SjASMPlus repeat count.
 
 ## 3.0.1
 

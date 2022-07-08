@@ -19,8 +19,9 @@ export class MeterableCollection extends MeterableAggregation {
 	/**
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
+	 * @param repeatCount The number of times to add the meterable to the aggregation
 	 */
-	public add(meterable: Meterable | undefined): void {
+	public add(meterable: Meterable | undefined, repeatCount: number): void {
 
 		// (sanity check)
 		if (!meterable) {
@@ -28,11 +29,15 @@ export class MeterableCollection extends MeterableAggregation {
 		}
 
 		if (meterable instanceof MeterableCollection) {
-			this.meterables.push(...meterable.getMeterables());
+			for (var i = 0; i < repeatCount; i++) {
+				this.meterables.push(...meterable.getMeterables());
+			}
 		} else {
-			this.meterables.push(meterable);
+			for (var i = 0; i < repeatCount; i++) {
+				this.meterables.push(meterable);
+			}
 		}
 
-		super.add(meterable);
+		super.add(meterable, repeatCount);
 	}
 }
