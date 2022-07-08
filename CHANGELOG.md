@@ -1,4 +1,8 @@
 
+## 3.1.0
+
+- Support for NEC PC-8000 series.
+
 ## 3.0.1
 
 - Fixes wrong `dw`/`defw` directive size

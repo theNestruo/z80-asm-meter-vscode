@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.0.1",
+	"version": "3.1.0",
 	"engines": {
 		"vscode": "^1.68.1"
 	},
@@ -148,16 +148,33 @@
 					"enum": [
 						"z80",
 						"msx",
+						"pc8000",
 						"cpc",
 						"z80n"
 					],
 					"enumDescriptions": [
 						"Default Z80 instruction set and default timing information",
 						"MSX: default Z80 instruction set and Z80+M1 timing information (MSX standard)",
+						"NEC PC-8000 series: default Z80 instruction set and both default and Z80+M1 timing information",
 						"Amstrad CPC: default Z80 instruction set and timing measured in number of NOPs",
 						"ZX Spectrum Next Extended Z80 instruction set and default timing information"
 					],
 					"default": "z80"
+				},
+				"z80-asm-meter.syntax.repeat": {
+					"type": "string",
+					"description": "Enables support for parsing repeat pseudo-op",
+					"enum": [
+						"none",
+						"sjasm",
+						"sjasmplus"
+					],
+					"enumDescriptions": [
+						"Disables repeat pseudo-op",
+						"The repeat count is specified within square brackets ([ and ])",
+						"The repeat count is specified after a dot (.)"
+					],
+					"default": "none"
 				},
 				"z80-asm-meter.sjasmplus": {
 					"type": "boolean",

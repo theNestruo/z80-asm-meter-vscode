@@ -59,6 +59,10 @@ export class MeterableDecorator {
 
         // As text, with optional suffix
         let text = formatTiming(timing);
+        if (this.platformConfiguration === "pc8000") {
+            const m1Text = formatTiming(this.metered.getMsxTiming());
+            text += ` / ${m1Text}`;
+        }
         if (suffix) {
             text += (this.platformConfiguration === "cpc") ? " NOPs" : " clock cycles";
         }
@@ -119,6 +123,10 @@ export class MeterableDecorator {
         }
         const z80text = formatTiming(this.metered.getZ80Timing());
         tooltip.appendMarkdown(`|**Z80**|${z80text} clock cycles|\n`);
+        if (this.platformConfiguration === "pc8000") {
+            const m1Text = formatTiming(this.metered.getMsxTiming());
+            tooltip.appendMarkdown(`|**Z80+M1**|${m1Text} clock cycles|\n`);
+        }
 
         const sizeText = this.getSizeAsText();
         if (sizeText) {

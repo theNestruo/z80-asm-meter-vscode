@@ -53,6 +53,7 @@ This extension contributes the following settings:
 * `z80-asm-meter.platform`: Controls the instruction set to use and the timing information to display:
     * `z80` (default): Uses the default Z80 instruction set and shows default timing information.
     * `msx`: For MSX developers. Uses the default Z80 instruction set and shows Z80+M1 timing information (MSX standard).
+    * `pc8000`: For NEC PC-8000 series developers. Uses the default Z80 instruction set and conveniently shows both default Z80 timing and Z80+M1 timing information.
     * `cpc`: For Amstrad CPC developers. Uses the default Z80 instruction set and shows timing measured in number of NOPs.
     * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
 
