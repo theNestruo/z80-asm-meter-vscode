@@ -131,11 +131,27 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 ### The status bar does not display any information. I don't get clock cycles and bytecode size!
 
-Double check the `z80-asm-meter.languageIds` setting.
+Double check the `z80-asm-meter.languageIds` setting in your settings.
 
 ### My macros are not recognized
 
 Macro definitions are not read from actual source code, but from user settings. Double check the `z80-asm-meter.macros` setting.
+
+### How can I get clock cycles and bytecode size for in-lined assembly in my C files?
+
+Double check the `z80-asm-meter.languageIds` setting in your settings. It has to include `c`:
+
+```json
+"z80-asm-meter.languageIds": [ "c" ],
+```
+
+### I've added `"z80-asm-meter.languageIds": [ "c", "s", "asm" ]`, but I only get clock cycles for in-lined assembly; now I don't get clock cycles in my assembly files!
+
+The `z80-asm-meter.languageIds` setting uses language IDs, not extensions. Check the language ID of your assembly files and replace `"s"` and `"asm"` with that extension ID. Or use the default language IDs, then add `"c"`:
+
+```json
+"z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ],
+```
 
 ## Credits
 
