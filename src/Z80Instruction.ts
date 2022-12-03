@@ -1,4 +1,5 @@
 import { Meterable } from './Meterable';
+import { NumericExpressionParser } from './NumericExpressionParser';
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIX8bitScore, isIXhScore, isIXlScore, isIXWithOffsetScore, isIY8bitScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
 
 /**
@@ -298,16 +299,25 @@ export class Z80Instruction implements Meterable {
                 return is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
             case "q":
                 return is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
-            case "0": // IM 0, RST 0, and OUT (C), 0
-            case "1": // IM 1
-            case "2": // IM 2
-                if (candidateOperand === expectedOperand) {
-                    return 1; // (exact match for better OUT (C),0 detection)
+            case "0":   // IM 0, RST 0, and OUT (C), 0
+            case "1":   // IM 1
+            case "2":   // IM 2
+            case "8H":  // RST 8H
+            case "10H": // RST 10H
+            case "18H": // RST 18H
+            case "20H": // RST 20H
+            case "28H": // RST 28H
+            case "30H": // RST 30H
+            case "38H": // RST 38H
+                const candidateNumber = NumericExpressionParser.parse(candidateOperand);
+                if ((candidateNumber !== undefined)
+                        && (candidateNumber === NumericExpressionParser.parse(expectedOperand))) {
+                    return 1; // (exact match)
                 }
             // falls-through
             default:
                 // (due possibility of using constants, labels, and expressions in the source code,
-                // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
+                // there is no proper way to discriminate: b, n, nn, o, 0, 1, 2, 8H, 10H, 18H, 20H, 28H, 30H, 38H;
                 // but uses a "best effort" to discard registers)
                 return isAnyRegister(
                     isIndirectionOperand(candidateOperand, false)

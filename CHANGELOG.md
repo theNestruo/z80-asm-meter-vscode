@@ -1,4 +1,8 @@
 
+## 3.2.0
+
+- Improved detection for `RST 8H`, `RST 10H`, `RST 18H`, `RST 20H`, `RST 28H`, `RST 30H` and `RST 38H`
+
 ## 3.1.0
 
 - Support for NEC PC-8000 series.
