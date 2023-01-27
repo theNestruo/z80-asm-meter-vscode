@@ -106,16 +106,6 @@ export class Z80Instruction implements Meterable {
     }
 
     /**
-     * @returns true if this operation can be expanded
-     */
-    public isExpandable(): boolean {
-
-        // (for the moment, we only need to expand single byte operations with an 8 bit register operand)
-        return this.size === 1
-            && !!this.opcodes[0].match(/^[0-9A-F]{2}\+r$/);
-    }
-
-    /**
      * @returns an array of Z80Instruction, expanded from the actual instruction
      */
     public expand(): Z80Instruction[] {
@@ -124,8 +114,20 @@ export class Z80Instruction implements Meterable {
             return [this];
         }
 
+        // Expands the bit
+        var expandedBit: Z80Instruction[] = [this];
+        if (this.hasExpandableBit()) {
+            for (var b = 0; b <= 7; b++) {
+                expandedBit.push(this.expandBit(b));
+            }
+        }
+
         // Expands the 8 bit register operand
-        return [
+        if (!this.hasExpandableRegister()) {
+            return expandedBit;
+        }
+        var expanded8bitRegister: Z80Instruction[] = [];
+        expanded8bitRegister.push(
             this.expand8bitRegister('A', 7),
             this.expand8bitRegister('B', 0),
             this.expand8bitRegister('C', 1),
@@ -133,13 +135,33 @@ export class Z80Instruction implements Meterable {
             this.expand8bitRegister('E', 3),
             this.expand8bitRegister('H', 4),
             this.expand8bitRegister('L', 5)
-        ];
+        );
+        return expanded8bitRegister;
     }
 
-    private expand8bitRegister(register: string, addend: number): Z80Instruction {
+    /**
+     * @returns true if this operation can be expanded
+     */
+    public isExpandable(): boolean {
+        return this.hasExpandableBit() || this.hasExpandableRegister();
+    }
 
-        const expandedInstruction = this.instruction.replace(/r/, register);
-        const expandedOpcode = parseInt(this.opcodes[0].substring(0, 2), 16) + addend;
+    private hasExpandableBit(): boolean {
+        return this.opcodes.indexOf("+8*b") != -1;
+    }
+
+    private hasExpandableRegister(): boolean {
+        return this.opcodes.indexOf("+r") != -1;
+    }
+
+    private expandBit(bit: number): Z80Instruction {
+
+        const expandedInstruction = this.instruction.replace(/b/, bit.toString());
+        const opcodeBitIndex = this.opcodes.indexOf("+8*b");
+        const expandedOpcode = parseInt(this.opcodes.substring(opcodeBitIndex - 2, opcodeBitIndex), 16) + 8 * bit;
+        const expandedOpcodes = this.opcodes.substring(0, opcodeBitIndex - 2)
+            + formatHexadecimalByte(expandedOpcode)
+            + this.opcodes.substring(opcodeBitIndex + 4);
 
         return new Z80Instruction(
             this.instructionSet,
@@ -147,7 +169,26 @@ export class Z80Instruction implements Meterable {
             formatTiming(this.z80Timing),
             formatTiming(this.msxTiming),
             formatTiming(this.cpcTiming),
-            formatHexadecimalByte(expandedOpcode),
+            expandedOpcodes,
+            this.size.toString());
+    }
+
+    private expand8bitRegister(register: string, addend: number): Z80Instruction {
+
+        const expandedInstruction = this.instruction.replace(/r/, register);
+        const opcodeRegisterIndex = this.opcodes.indexOf("+r");
+        const expandedOpcode = parseInt(this.opcodes.substring(opcodeRegisterIndex - 2, opcodeRegisterIndex), 16) + addend;
+        const expandedOpcodes = this.opcodes.substring(0, opcodeRegisterIndex - 2)
+            + formatHexadecimalByte(expandedOpcode)
+            + this.opcodes.substring(opcodeRegisterIndex + 4);
+
+        return new Z80Instruction(
+            this.instructionSet,
+            expandedInstruction,
+            formatTiming(this.z80Timing),
+            formatTiming(this.msxTiming),
+            formatTiming(this.cpcTiming),
+            expandedOpcodes,
             this.size.toString());
     }
 
@@ -299,9 +340,14 @@ export class Z80Instruction implements Meterable {
                 return is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
             case "q":
                 return is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
-            case "0":   // IM 0, RST 0, and OUT (C), 0
-            case "1":   // IM 1
-            case "2":   // IM 2
+            case "0":   // BIT/SET/RES, IM 0, RST 0, and OUT (C), 0
+            case "1":   // BIT/SET/RES, IM 1
+            case "2":   // BIT/SET/RES, IM 2
+            case "3":   // BIT/SET/RES
+            case "4":   // BIT/SET/RES
+            case "5":   // BIT/SET/RES
+            case "6":   // BIT/SET/RES
+            case "7":   // BIT/SET/RES
             case "8H":  // RST 8H
             case "10H": // RST 10H
             case "18H": // RST 18H
