@@ -118,130 +118,134 @@ export class Z80Instruction implements Meterable {
 
         var expandableExpression = this.opcodes.substring(expandableIndex);
 
-        // Expands bit and 8bit register
-        if (expandableExpression.substring(0, 6) === "+8*b+r") {
-            const ret: Z80Instruction[] = [];
-            for (var bit = 0; bit <= 7; bit++) {
-                const expandedBit = this.expandedBit(this, bit);
-                ret.push(...this.expanded8bitRegisters(expandedBit), expandedBit);
+        // Expands bit
+        if (expandableExpression.substring(0, 4) === "+8*b") {
+            const bitExpanded: Z80Instruction[] = [
+                    this.expandWithFactorUsing(this, /b/, "0", "+8*b", 8, 0),
+                    this.expandWithFactorUsing(this, /b/, "1", "+8*b", 8, 1),
+                    this.expandWithFactorUsing(this, /b/, "2", "+8*b", 8, 2),
+                    this.expandWithFactorUsing(this, /b/, "3", "+8*b", 8, 3),
+                    this.expandWithFactorUsing(this, /b/, "4", "+8*b", 8, 4),
+                    this.expandWithFactorUsing(this, /b/, "5", "+8*b", 8, 5),
+                    this.expandWithFactorUsing(this, /b/, "6", "+8*b", 8, 6),
+                    this.expandWithFactorUsing(this, /b/, "7", "+8*b", 8, 7) ];
+            if (expandableExpression.substring(0, 6) !== "+8*b+r") {
+                return [
+                        this, // (keeps unexpanded bit instruction)
+                        ...bitExpanded ];
             }
+
+            // Expands bit *and* 8 bit register
+            const ret: Z80Instruction[] = [];
+            bitExpanded.forEach(base => {
+                ret.push(
+                        this.expandUsing(base, /r/, "A", "+r", 7),
+                        this.expandUsing(base, /r/, "B", "+r", 0),
+                        this.expandUsing(base, /r/, "C", "+r", 1),
+                        this.expandUsing(base, /r/, "D", "+r", 2),
+                        this.expandUsing(base, /r/, "E", "+r", 3),
+                        this.expandUsing(base, /r/, "H", "+r", 4),
+                        this.expandUsing(base, /r/, "L", "+r", 5) );
+            });
             // (keeps unexpanded bit instructions)
-            ret.push(...this.expanded8bitRegistersAfterBit(this), this);
+            ret.push(
+                this.expandWithInfixUsing(this, /r/, "A", "+8*b+r", 1, 7, "+8*b"),
+                this.expandWithInfixUsing(this, /r/, "B", "+8*b+r", 1, 0, "+8*b"),
+                this.expandWithInfixUsing(this, /r/, "C", "+8*b+r", 1, 1, "+8*b"),
+                this.expandWithInfixUsing(this, /r/, "D", "+8*b+r", 1, 2, "+8*b"),
+                this.expandWithInfixUsing(this, /r/, "E", "+8*b+r", 1, 3, "+8*b"),
+                this.expandWithInfixUsing(this, /r/, "H", "+8*b+r", 1, 4, "+8*b"),
+                this.expandWithInfixUsing(this, /r/, "L", "+8*b+r", 1, 5, "+8*b")
+            );
             return ret;
         }
 
-        // Expands bit
-        if (expandableExpression.substring(0, 4) === "+8*b") {
-            // (keeps unexpanded bit instruction)
-            return [ this, ...this.expandedBits(this) ];
+        // Expands high/low part of the IX register
+        if (this.instruction.indexOf("IXp") !== -1) {
+            return (expandableExpression.substring(0, 4) === "+8*p")
+                    ? [ this.expandWithFactorUsing(this, /IXp/, "IXh", "+8*p", 8, 4),
+                        this.expandWithFactorUsing(this, /IXp/, "IXl", "+8*p", 8, 5) ]
+                    : [ this.expandUsing(this, /IXp/, "IXh", "+p", 4),
+                        this.expandUsing(this, /IXp/, "IXl", "+p", 5) ];
         }
 
-        if (expandableExpression.substring(0, 4) === "+8*p") {
+        // Expands high/low part of the IY register
+        if (this.instruction.indexOf("IYq") !== -1) {
+            return (expandableExpression.substring(0, 4) === "+8*q")
+                    ? [ this.expandWithFactorUsing(this, /IYp/, "IYh", "+8*q", 8, 4),
+                        this.expandWithFactorUsing(this, /IYp/, "IYl", "+8*q", 8, 5) ]
+                    : [ this.expandUsing(this, /IYp/, "IYh", "+q", 4),
+                        this.expandUsing(this, /IYp/, "IYl", "+q", 5) ];
         }
 
-        if (expandableExpression.substring(0, 4) === "+8*q") {
-        }
-
+        // Expands 8 bit register where H/L have been replaced by IXh/IXl
         if (expandableExpression.substring(0, 2) === "+p") {
+            return [
+                    this.expandUsing(this, /p/, "A", "+p", 7),
+                    this.expandUsing(this, /p/, "B", "+p", 0),
+                    this.expandUsing(this, /p/, "C", "+p", 1),
+                    this.expandUsing(this, /p/, "D", "+p", 2),
+                    this.expandUsing(this, /p/, "E", "+p", 3),
+                    this.expandUsing(this, /p/, "IXh", "+p", 4),
+                    this.expandUsing(this, /p/, "IXl", "+p", 5) ];
         }
 
+        // Expands 8 bit register where H/L have been replaced by IYh/IYl
         if (expandableExpression.substring(0, 2) === "+q") {
+            return [
+                    this.expandUsing(this, /q/, "A", "+q", 7),
+                    this.expandUsing(this, /q/, "B", "+q", 0),
+                    this.expandUsing(this, /q/, "C", "+q", 1),
+                    this.expandUsing(this, /q/, "D", "+q", 2),
+                    this.expandUsing(this, /q/, "E", "+q", 3),
+                    this.expandUsing(this, /q/, "IYh", "+q", 4),
+                    this.expandUsing(this, /q/, "IYl", "+q", 5) ];
         }
 
-        // Expands 8bit register
+        // Expands 8 bit register
         if (expandableExpression.substring(0, 2) === "+r") {
-            return this.expanded8bitRegisters(this);
+            return [
+                    this.expandUsing(this, /r/, "A", "+r", 7),
+                    this.expandUsing(this, /r/, "B", "+r", 0),
+                    this.expandUsing(this, /r/, "C", "+r", 1),
+                    this.expandUsing(this, /r/, "D", "+r", 2),
+                    this.expandUsing(this, /r/, "E", "+r", 3),
+                    this.expandUsing(this, /r/, "H", "+r", 4),
+                    this.expandUsing(this, /r/, "L", "+r", 5) ];
         }
 
+        // (should never happen)
         return [this];
     }
 
-    private expandedBits(base: Z80Instruction): Z80Instruction[] {
+    private expandUsing(base: Z80Instruction,
+            searchInstruction: RegExp, replacementInstruction: string,
+            searchOpcodes: string, addend: number): Z80Instruction {
 
-        return [
-                this.expandedBit(base, 0),
-                this.expandedBit(base, 1),
-                this.expandedBit(base, 2),
-                this.expandedBit(base, 3),
-                this.expandedBit(base, 4),
-                this.expandedBit(base, 5),
-                this.expandedBit(base, 6),
-                this.expandedBit(base, 7)
-            ];
+        return this.expandWithFactorUsing(base,
+                searchInstruction, replacementInstruction,
+                searchOpcodes, 1, addend);
     }
 
-    private expandedBit(base: Z80Instruction, bit: number): Z80Instruction {
+    private expandWithFactorUsing(base: Z80Instruction,
+            searchInstruction: RegExp, replacementInstruction: string,
+            searchOpcodes: string, factor: number, addend: number): Z80Instruction {
 
-        const expandedInstruction = base.instruction.replace(/b/, bit.toString());
-        const index = base.opcodes.indexOf("+8*b") - 2;
-        const prefix = base.opcodes.substring(0, index);
-        const baseValue = parseInt(base.opcodes.substring(index, index + 2), 16);
-        const suffix = base.opcodes.substring(index + 6); // "00+8*b"
-        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + 8 * bit) + suffix;
-
-        return new Z80Instruction(
-            base.instructionSet,
-            expandedInstruction,
-            formatTiming(base.z80Timing),
-            formatTiming(base.msxTiming),
-            formatTiming(base.cpcTiming),
-            expandedOpcodes,
-            base.size.toString());
+        return this.expandWithInfixUsing(base,
+                searchInstruction, replacementInstruction,
+                searchOpcodes, factor, addend, "");
     }
 
-    private expanded8bitRegisters(base: Z80Instruction): Z80Instruction[] {
+    private expandWithInfixUsing(base: Z80Instruction,
+            searchInstruction: RegExp, replacementInstruction: string,
+            searchOpcodes: string, factor: number, addend: number, infix: string): Z80Instruction {
 
-        return [
-                this.expanded8bitRegister(base, 'A', 7),
-                this.expanded8bitRegister(base, 'B', 0),
-                this.expanded8bitRegister(base, 'C', 1),
-                this.expanded8bitRegister(base, 'D', 2),
-                this.expanded8bitRegister(base, 'E', 3),
-                this.expanded8bitRegister(base, 'H', 4),
-                this.expanded8bitRegister(base, 'L', 5)
-            ];
-    }
-
-    private expanded8bitRegister(base: Z80Instruction, register: string, addend: number): Z80Instruction {
-
-        const expandedInstruction = base.instruction.replace(/r/, register);
-        const index = base.opcodes.indexOf("+r") - 2;
-        const prefix = base.opcodes.substring(0, index);
-        const baseValue = parseInt(base.opcodes.substring(index, index + 2), 16);
-        const suffix = base.opcodes.substring(index + 4); // "00+r"
-        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + addend) + suffix;
-
-        return new Z80Instruction(
-                base.instructionSet,
-                expandedInstruction,
-                formatTiming(base.z80Timing),
-                formatTiming(base.msxTiming),
-                formatTiming(base.cpcTiming),
-                expandedOpcodes,
-                base.size.toString());
-    }
-
-    private expanded8bitRegistersAfterBit(base: Z80Instruction): Z80Instruction[] {
-
-        return [
-                this.expanded8bitRegisterAfterBit(base, 'A', 7),
-                this.expanded8bitRegisterAfterBit(base, 'B', 0),
-                this.expanded8bitRegisterAfterBit(base, 'C', 1),
-                this.expanded8bitRegisterAfterBit(base, 'D', 2),
-                this.expanded8bitRegisterAfterBit(base, 'E', 3),
-                this.expanded8bitRegisterAfterBit(base, 'H', 4),
-                this.expanded8bitRegisterAfterBit(base, 'L', 5)
-            ];
-    }
-
-    private expanded8bitRegisterAfterBit(base: Z80Instruction, register: string, addend: number): Z80Instruction {
-
-        const expandedInstruction = base.instruction.replace(/r/, register);
-        const index = base.opcodes.indexOf("+8*b+r") - 2;
-        const prefix = base.opcodes.substring(0, index);
-        const baseValue = parseInt(base.opcodes.substring(index, index + 2), 16);
-        const suffix = "+8*b" + base.opcodes.substring(index + 8); // "00+8*b+r"
-        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + addend) + suffix;
+        const expandedInstruction = base.instruction.replace(searchInstruction, replacementInstruction);
+        const index = base.opcodes.indexOf(searchOpcodes);
+        const prefix = base.opcodes.substring(0, index - 2);
+        const baseValue = parseInt(base.opcodes.substring(index - 2, index), 16);
+        const suffix = base.opcodes.substring(index + searchOpcodes.length);
+        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + factor * addend) + infix + suffix;
 
         return new Z80Instruction(
                 base.instructionSet,
@@ -389,26 +393,22 @@ export class Z80Instruction implements Meterable {
                 return isIXhScore(candidateOperand);
             case "IXl":
                 return isIXlScore(candidateOperand);
-            case "IXp":
-                return isIX8bitScore(candidateOperand);
             case "IYh":
                 return isIYhScore(candidateOperand);
             case "IYl":
                 return isIYlScore(candidateOperand);
-            case "IYq":
-                return isIY8bitScore(candidateOperand);
             case "p":
                 return is8bitRegisterReplacingHLByIX8bitScore(candidateOperand);
             case "q":
                 return is8bitRegisterReplacingHLByIY8bitScore(candidateOperand);
-            case "0":   // BIT/SET/RES, IM 0, RST 0, and OUT (C), 0
-            case "1":   // BIT/SET/RES, IM 1
-            case "2":   // BIT/SET/RES, IM 2
-            case "3":   // BIT/SET/RES
-            case "4":   // BIT/SET/RES
-            case "5":   // BIT/SET/RES
-            case "6":   // BIT/SET/RES
-            case "7":   // BIT/SET/RES
+            case "0":   // BIT/RES/SET, IM 0, RST 0, and OUT (C), 0
+            case "1":   // BIT/RES/SET, IM 1
+            case "2":   // BIT/RES/SET, IM 2
+            case "3":   // BIT/RES/SET
+            case "4":   // BIT/RES/SET
+            case "5":   // BIT/RES/SET
+            case "6":   // BIT/RES/SET
+            case "7":   // BIT/RES/SET
             case "8H":  // RST 8H
             case "10H": // RST 10H
             case "18H": // RST 18H
@@ -419,13 +419,17 @@ export class Z80Instruction implements Meterable {
                 const candidateNumber = NumericExpressionParser.parse(candidateOperand);
                 if (candidateNumber !== undefined) {
                     return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
-                            ? 1 // (exact match)
-                            : 0; // (discards match; will default to unexpadned instruction if exists)
+                        ? 1 // (exact match)
+                        : 0; // (discards match; will default to unexpanded instruction if exists)
                 }
-                // falls-through
+                // (due possibility of using constants, labels, and expressions in the source code,
+                // uses a "best effort" to discard registers)
+                return isAnyRegister(candidateOperand) || isIndirectionOperand(candidateOperand, false)
+                    ? 0
+                    : 0.25;
             default:
                 // (due possibility of using constants, labels, and expressions in the source code,
-                // there is no proper way to discriminate: b, n, nn, o, 0-7, 8H, 10H, 18H, 20H, 28H, 30H, 38H;
+                // there is no proper way to discriminate: b, n, nn, o;
                 // but uses a "best effort" to discard registers)
                 return isAnyRegister(
                     isIndirectionOperand(candidateOperand, false)
