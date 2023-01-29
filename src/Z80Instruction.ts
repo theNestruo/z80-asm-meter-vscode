@@ -108,88 +108,149 @@ export class Z80Instruction implements Meterable {
     /**
      * @returns an array of Z80Instruction, expanded from the actual instruction
      */
-    public expand(): Z80Instruction[] {
+    public expanded(): Z80Instruction[] {
 
-        if (!this.isExpandable()) {
+        var expandableIndex = this.opcodes.indexOf("+");
+        if (expandableIndex == -1) {
+            // Not expandable
             return [this];
         }
 
-        // Expands the bit
-        var expandedBit: Z80Instruction[] = [this];
-        if (this.hasExpandableBit()) {
-            for (var b = 0; b <= 7; b++) {
-                expandedBit.push(this.expandBit(b));
+        var expandableExpression = this.opcodes.substring(expandableIndex);
+
+        // Expands bit and 8bit register
+        if (expandableExpression.substring(0, 6) === "+8*b+r") {
+            const ret: Z80Instruction[] = [];
+            for (var bit = 0; bit <= 7; bit++) {
+                const expandedBit = this.expandedBit(this, bit);
+                ret.push(...this.expanded8bitRegisters(expandedBit), expandedBit);
             }
+            // (keeps unexpanded bit instructions)
+            ret.push(...this.expanded8bitRegistersAfterBit(this), this);
+            return ret;
         }
 
-        // Expands the 8 bit register operand
-        if (!this.hasExpandableRegister()) {
-            return expandedBit;
+        // Expands bit
+        if (expandableExpression.substring(0, 4) === "+8*b") {
+            // (keeps unexpanded bit instruction)
+            return [ this, ...this.expandedBits(this) ];
         }
-        var expanded8bitRegister: Z80Instruction[] = [];
-        expanded8bitRegister.push(
-            this.expand8bitRegister('A', 7),
-            this.expand8bitRegister('B', 0),
-            this.expand8bitRegister('C', 1),
-            this.expand8bitRegister('D', 2),
-            this.expand8bitRegister('E', 3),
-            this.expand8bitRegister('H', 4),
-            this.expand8bitRegister('L', 5)
-        );
-        return expanded8bitRegister;
+
+        if (expandableExpression.substring(0, 4) === "+8*p") {
+        }
+
+        if (expandableExpression.substring(0, 4) === "+8*q") {
+        }
+
+        if (expandableExpression.substring(0, 2) === "+p") {
+        }
+
+        if (expandableExpression.substring(0, 2) === "+q") {
+        }
+
+        // Expands 8bit register
+        if (expandableExpression.substring(0, 2) === "+r") {
+            return this.expanded8bitRegisters(this);
+        }
+
+        return [this];
     }
 
-    /**
-     * @returns true if this operation can be expanded
-     */
-    public isExpandable(): boolean {
-        return this.hasExpandableBit() || this.hasExpandableRegister();
+    private expandedBits(base: Z80Instruction): Z80Instruction[] {
+
+        return [
+                this.expandedBit(base, 0),
+                this.expandedBit(base, 1),
+                this.expandedBit(base, 2),
+                this.expandedBit(base, 3),
+                this.expandedBit(base, 4),
+                this.expandedBit(base, 5),
+                this.expandedBit(base, 6),
+                this.expandedBit(base, 7)
+            ];
     }
 
-    private hasExpandableBit(): boolean {
-        return this.opcodes.indexOf("+8*b") != -1;
-    }
+    private expandedBit(base: Z80Instruction, bit: number): Z80Instruction {
 
-    private hasExpandableRegister(): boolean {
-        return this.opcodes.indexOf("+r") != -1;
-    }
-
-    private expandBit(bit: number): Z80Instruction {
-
-        const expandedInstruction = this.instruction.replace(/b/, bit.toString());
-        const opcodeBitIndex = this.opcodes.indexOf("+8*b");
-        const expandedOpcode = parseInt(this.opcodes.substring(opcodeBitIndex - 2, opcodeBitIndex), 16) + 8 * bit;
-        const expandedOpcodes = this.opcodes.substring(0, opcodeBitIndex - 2)
-            + formatHexadecimalByte(expandedOpcode)
-            + this.opcodes.substring(opcodeBitIndex + 4);
+        const expandedInstruction = base.instruction.replace(/b/, bit.toString());
+        const index = base.opcodes.indexOf("+8*b") - 2;
+        const prefix = base.opcodes.substring(0, index);
+        const baseValue = parseInt(base.opcodes.substring(index, index + 2), 16);
+        const suffix = base.opcodes.substring(index + 6); // "00+8*b"
+        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + 8 * bit) + suffix;
 
         return new Z80Instruction(
-            this.instructionSet,
+            base.instructionSet,
             expandedInstruction,
-            formatTiming(this.z80Timing),
-            formatTiming(this.msxTiming),
-            formatTiming(this.cpcTiming),
+            formatTiming(base.z80Timing),
+            formatTiming(base.msxTiming),
+            formatTiming(base.cpcTiming),
             expandedOpcodes,
-            this.size.toString());
+            base.size.toString());
     }
 
-    private expand8bitRegister(register: string, addend: number): Z80Instruction {
+    private expanded8bitRegisters(base: Z80Instruction): Z80Instruction[] {
 
-        const expandedInstruction = this.instruction.replace(/r/, register);
-        const opcodeRegisterIndex = this.opcodes.indexOf("+r");
-        const expandedOpcode = parseInt(this.opcodes.substring(opcodeRegisterIndex - 2, opcodeRegisterIndex), 16) + addend;
-        const expandedOpcodes = this.opcodes.substring(0, opcodeRegisterIndex - 2)
-            + formatHexadecimalByte(expandedOpcode)
-            + this.opcodes.substring(opcodeRegisterIndex + 4);
+        return [
+                this.expanded8bitRegister(base, 'A', 7),
+                this.expanded8bitRegister(base, 'B', 0),
+                this.expanded8bitRegister(base, 'C', 1),
+                this.expanded8bitRegister(base, 'D', 2),
+                this.expanded8bitRegister(base, 'E', 3),
+                this.expanded8bitRegister(base, 'H', 4),
+                this.expanded8bitRegister(base, 'L', 5)
+            ];
+    }
+
+    private expanded8bitRegister(base: Z80Instruction, register: string, addend: number): Z80Instruction {
+
+        const expandedInstruction = base.instruction.replace(/r/, register);
+        const index = base.opcodes.indexOf("+r") - 2;
+        const prefix = base.opcodes.substring(0, index);
+        const baseValue = parseInt(base.opcodes.substring(index, index + 2), 16);
+        const suffix = base.opcodes.substring(index + 4); // "00+r"
+        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + addend) + suffix;
 
         return new Z80Instruction(
-            this.instructionSet,
-            expandedInstruction,
-            formatTiming(this.z80Timing),
-            formatTiming(this.msxTiming),
-            formatTiming(this.cpcTiming),
-            expandedOpcodes,
-            this.size.toString());
+                base.instructionSet,
+                expandedInstruction,
+                formatTiming(base.z80Timing),
+                formatTiming(base.msxTiming),
+                formatTiming(base.cpcTiming),
+                expandedOpcodes,
+                base.size.toString());
+    }
+
+    private expanded8bitRegistersAfterBit(base: Z80Instruction): Z80Instruction[] {
+
+        return [
+                this.expanded8bitRegisterAfterBit(base, 'A', 7),
+                this.expanded8bitRegisterAfterBit(base, 'B', 0),
+                this.expanded8bitRegisterAfterBit(base, 'C', 1),
+                this.expanded8bitRegisterAfterBit(base, 'D', 2),
+                this.expanded8bitRegisterAfterBit(base, 'E', 3),
+                this.expanded8bitRegisterAfterBit(base, 'H', 4),
+                this.expanded8bitRegisterAfterBit(base, 'L', 5)
+            ];
+    }
+
+    private expanded8bitRegisterAfterBit(base: Z80Instruction, register: string, addend: number): Z80Instruction {
+
+        const expandedInstruction = base.instruction.replace(/r/, register);
+        const index = base.opcodes.indexOf("+8*b+r") - 2;
+        const prefix = base.opcodes.substring(0, index);
+        const baseValue = parseInt(base.opcodes.substring(index, index + 2), 16);
+        const suffix = "+8*b" + base.opcodes.substring(index + 8); // "00+8*b+r"
+        const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + addend) + suffix;
+
+        return new Z80Instruction(
+                base.instructionSet,
+                expandedInstruction,
+                formatTiming(base.z80Timing),
+                formatTiming(base.msxTiming),
+                formatTiming(base.cpcTiming),
+                expandedOpcodes,
+                base.size.toString());
     }
 
     /**
@@ -356,14 +417,15 @@ export class Z80Instruction implements Meterable {
             case "30H": // RST 30H
             case "38H": // RST 38H
                 const candidateNumber = NumericExpressionParser.parse(candidateOperand);
-                if ((candidateNumber !== undefined)
-                        && (candidateNumber === NumericExpressionParser.parse(expectedOperand))) {
-                    return 1; // (exact match)
+                if (candidateNumber !== undefined) {
+                    return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
+                            ? 1 // (exact match)
+                            : 0; // (discards match; will default to unexpadned instruction if exists)
                 }
-            // falls-through
+                // falls-through
             default:
                 // (due possibility of using constants, labels, and expressions in the source code,
-                // there is no proper way to discriminate: b, n, nn, o, 0, 1, 2, 8H, 10H, 18H, 20H, 28H, 30H, 38H;
+                // there is no proper way to discriminate: b, n, nn, o, 0-7, 8H, 10H, 18H, 20H, 28H, 30H, 38H;
                 // but uses a "best effort" to discard registers)
                 return isAnyRegister(
                     isIndirectionOperand(candidateOperand, false)

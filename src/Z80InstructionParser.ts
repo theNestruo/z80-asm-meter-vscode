@@ -28,7 +28,7 @@ export class Z80InstructionParser {
                     rawData[5], // opcode
                     rawData[6]); // size
 
-            originalInstruction.expand().forEach(instruction => {
+            originalInstruction.expanded().forEach(instruction => {
                 // Prepares a map by mnemonic for performance reasons
                 const mnemonic = instruction.getMnemonic();
                 if (!this.instructionByMnemonic[mnemonic]) {
