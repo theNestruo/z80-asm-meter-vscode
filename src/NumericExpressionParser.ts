@@ -2,7 +2,7 @@ export class NumericExpressionParser {
 
     public static parse(s: string): number | undefined {
 
-        for (let numericParser of NumericExpressionParser.numericParsers) {
+        for (const numericParser of NumericExpressionParser.numericParsers) {
             const value = numericParser.parse(s);
             if ((value !== undefined) && (!isNaN(value))) {
                 return value;

@@ -83,7 +83,7 @@ export class Macro extends MeterableAggregation {
 			return bytes;
 		}
 		const size = this.getSize();
-		return !!size
+		return size
 				? new Array(size).fill("n")
 				: [];
 	}
@@ -104,7 +104,7 @@ export class Macro extends MeterableAggregation {
 			if (this.providedInstructions !== undefined) {
 				this.providedInstructions.forEach(rawPart => {
 					const rawInstruction = extractRawInstructionFrom(rawPart);
-					var instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
+					const instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
 					this.add(instruction, 1);
 				});
 			}

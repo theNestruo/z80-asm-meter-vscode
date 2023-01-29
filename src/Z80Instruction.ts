@@ -1,6 +1,6 @@
 import { Meterable } from './Meterable';
 import { NumericExpressionParser } from './NumericExpressionParser';
-import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIX8bitScore, isIXhScore, isIXlScore, isIXWithOffsetScore, isIY8bitScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
+import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
 
 /**
  * A Z80 instruction
@@ -110,13 +110,13 @@ export class Z80Instruction implements Meterable {
      */
     public expanded(): Z80Instruction[] {
 
-        var expandableIndex = this.opcodes.indexOf("+");
+        const expandableIndex = this.opcodes.indexOf("+");
         if (expandableIndex == -1) {
             // Not expandable
             return [this];
         }
 
-        var expandableExpression = this.opcodes.substring(expandableIndex);
+        const expandableExpression = this.opcodes.substring(expandableIndex);
 
         // Expands bit
         if (expandableExpression.substring(0, 4) === "+8*b") {
@@ -416,11 +416,13 @@ export class Z80Instruction implements Meterable {
             case "28H": // RST 28H
             case "30H": // RST 30H
             case "38H": // RST 38H
-                const candidateNumber = NumericExpressionParser.parse(candidateOperand);
-                if (candidateNumber !== undefined) {
-                    return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
-                        ? 1 // (exact match)
-                        : 0; // (discards match; will default to unexpanded instruction if exists)
+                {
+                    const candidateNumber = NumericExpressionParser.parse(candidateOperand);
+                    if (candidateNumber !== undefined) {
+                        return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
+                            ? 1 // (exact match)
+                            : 0; // (discards match; will default to unexpanded instruction if exists)
+                    }
                 }
                 // (due possibility of using constants, labels, and expressions in the source code,
                 // uses a "best effort" to discard registers)

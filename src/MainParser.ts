@@ -76,16 +76,16 @@ export class MainParser {
                 }
 
                 // Tries to parse repeat pseudo-op
-                const matches = !!repeatRegExp ? repeatRegExp.exec(rawInstructionCandidate) : null;
-                const hasRepeatCount = matches && matches.length >= 1 && !!matches[1];
+                const matches = repeatRegExp ? repeatRegExp.exec(rawInstructionCandidate) : null;
+                const hasRepeatCount = matches && matches.length >= 1 && matches[1];
                 const repeatCountCandidate = hasRepeatCount ? NumericExpressionParser.parse(matches[1]) : undefined;
                 const repeatCount = repeatCountCandidate && repeatCountCandidate > 0 ? repeatCountCandidate : 1;
-                const hasRepeatInstruction = matches && matches.length >= 2 && !!matches[2];
+                const hasRepeatInstruction = matches && matches.length >= 2 && matches[2];
                 const rawInstruction = hasRepeatInstruction ? matches[2] : rawInstructionCandidate;
 
                 // Tries to parse Z80 instructions
                 const z80Instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
-                if (!!z80Instruction) {
+                if (z80Instruction) {
                     meterables.add(z80Instruction, repeatCount);
                     return;
                 }
@@ -93,7 +93,7 @@ export class MainParser {
                 // Tries to parse sjasmplus alternative syntax and fake instructions
                 if (this.sjasmplus) {
                     const sjasmplusFakeInstruction = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
-                    if (!!sjasmplusFakeInstruction) {
+                    if (sjasmplusFakeInstruction) {
                         meterables.add(sjasmplusFakeInstruction, repeatCount);
                         return;
                     }
@@ -101,7 +101,7 @@ export class MainParser {
 
                 // Tries to parse user-defined macro
                 const macro = MacroParser.instance.parse(rawInstruction, instructionSets);
-                if (!!macro) {
+                if (macro) {
                     // const lInstructions = lMacro.getInstructions();
                     meterables.add(macro, repeatCount);
                     return;
@@ -109,7 +109,7 @@ export class MainParser {
 
                 // Tries to parse assembly directives
                 const directive = AssemblyDirectiveParser.instance.parse(rawInstruction);
-                if (!!directive) {
+                if (directive) {
                     meterables.addAll(directive, repeatCount);
                     return;
                 }

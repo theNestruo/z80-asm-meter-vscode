@@ -29,11 +29,11 @@ export class MeterableCollection extends MeterableAggregation {
 		}
 
 		if (meterable instanceof MeterableCollection) {
-			for (var i = 0; i < repeatCount; i++) {
+			for (let i = 0; i < repeatCount; i++) {
 				this.meterables.push(...meterable.getMeterables());
 			}
 		} else {
-			for (var i = 0; i < repeatCount; i++) {
+			for (let i = 0; i < repeatCount; i++) {
 				this.meterables.push(meterable);
 			}
 		}

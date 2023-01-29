@@ -24,7 +24,7 @@ export class MeterableAggregation implements Meterable {
 			return;
 		}
 
-		for (var i = 0; i < repeatCount; i++) {
+		for (let i = 0; i < repeatCount; i++) {
 			meterables.forEach(meterable => this.add(meterable, 1));
 		}
 	}
@@ -53,7 +53,7 @@ export class MeterableAggregation implements Meterable {
 		this.cpcTiming[0] += instructionCpcTiming[0] * repeatCount;
 		this.cpcTiming[1] += instructionCpcTiming[1] * repeatCount;
 
-		for (var i = 0; i < repeatCount; i++) {
+		for (let i = 0; i < repeatCount; i++) {
 			this.bytes.push(...meterable.getBytes());
 		}
 		this.size += meterable.getSize() * repeatCount;

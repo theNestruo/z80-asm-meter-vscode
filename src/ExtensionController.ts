@@ -15,12 +15,12 @@ export class ExtensionController {
         this._onEvent();
 
         // subscribe to selection change and editor activation events
-        let subscriptions: Disposable[] = [];
+        const subscriptions: Disposable[] = [];
         window.onDidChangeTextEditorSelection(this._onEvent, this, subscriptions);
         window.onDidChangeActiveTextEditor(this._onEvent, this, subscriptions);
 
         // create a command to copy timing and size to clipboard
-        let command = commands.registerCommand(ExtensionController.commandId, this._onCommand, this);
+        const command = commands.registerCommand(ExtensionController.commandId, this._onCommand, this);
 
         // create a combined disposable from both event subscriptions
         this._disposable = Disposable.from(...subscriptions, command);

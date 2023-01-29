@@ -52,10 +52,10 @@ export class AssemblyDirectiveParser {
         // Extracts bytes
         const bytes: string[] = [];
         operands.forEach(operand => {
-            if (operand.match(/^\".*\"$/)) {
+            if (operand.match(/^".*"$/)) {
                 // String
                 operand.substring(1, operand.length - 1).split(/""/).forEach(substring => {
-                    for (var i = 0; i < substring.length; i++) {
+                    for (let i = 0; i < substring.length; i++) {
                         bytes.push(formatHexadecimalByte(substring.charCodeAt(i)));
                     }
                 });
@@ -112,7 +112,7 @@ export class AssemblyDirectiveParser {
         if ((count === undefined) || (count < 0)) {
             return undefined;
         }
-        let value = operands.length === 2
+        const value = operands.length === 2
                 ? NumericExpressionParser.parse(operands[1])
                 : undefined;
 
