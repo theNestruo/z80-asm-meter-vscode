@@ -416,43 +416,50 @@ export class Z80Instruction implements Meterable {
             case "28H": // RST 28H
             case "30H": // RST 30H
             case "38H": // RST 38H
-                {
-                    const candidateNumber = NumericExpressionParser.parse(candidateOperand);
-                    if (candidateNumber !== undefined) {
-                        return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
-                            ? 1 // (exact match)
-                            : 0; // (discards match; will default to unexpanded instruction if exists)
-                    }
-                }
-                // (due possibility of using constants, labels, and expressions in the source code,
-                // uses a "best effort" to discard registers)
-                return isAnyRegister(candidateOperand) || isIndirectionOperand(candidateOperand, false)
-                    ? 0
-                    : 0.25;
+                return this.numericOperandScore(expectedOperand, candidateOperand);
             default:
-                // (due possibility of using constants, labels, and expressions in the source code,
-                // there is no proper way to discriminate: b, n, nn, o;
-                // but uses a "best effort" to discard registers)
-                return isAnyRegister(
-                    isIndirectionOperand(candidateOperand, false)
-                        ? extractIndirection(candidateOperand)
-                        : candidateOperand)
-                    ? 0
-                    : 0.75;
+                return this.anySymbolOperandScore(candidateOperand);
         }
     }
 
-    /**
-     * @param expectedOperand the operand of the instruction
-     * @param candidateOperand the operand from the cleaned-up line
-     * @returns number between 0 and 1 with the score of the match,
-     * or 0 if the candidate operand is not valid
-     */
     private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
 
         // Compares the expression inside the indirection
         return isIndirectionOperand(candidateOperand, false)
             ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
             : 0;
+    }
+
+    private numericOperandScore(expectedOperand: string, candidateOperand: string): number {
+
+        // Compares as numeric expressions
+        const candidateNumber = NumericExpressionParser.parse(candidateOperand);
+        if (candidateNumber !== undefined) {
+            return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
+                ? 1 // (exact match)
+                : 0; // (discards match; will default to unexpanded instruction if exists)
+        }
+
+        // (due possibility of using constants, labels, and expressions in the source code,
+        // uses a "best effort" to discard registers and indirections)
+        return isAnyRegister(
+            isIndirectionOperand(candidateOperand, false)
+                ? extractIndirection(candidateOperand)
+                : candidateOperand)
+            ? 0
+            : 0.25;
+    }
+
+    private anySymbolOperandScore(candidateOperand: string): number {
+
+        // (due possibility of using constants, labels, and expressions in the source code,
+        // there is no proper way to discriminate: b, n, nn, o;
+        // but uses a "best effort" to discard registers)
+        return isAnyRegister(
+            isIndirectionOperand(candidateOperand, false)
+                ? extractIndirection(candidateOperand)
+                : candidateOperand)
+            ? 0
+            : 0.75;
     }
 }
