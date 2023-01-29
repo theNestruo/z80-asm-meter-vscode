@@ -1,4 +1,8 @@
 
+## 3.3.0
+
+- Improved opcodes for "generic" instructions (such as `BIT b,r`)
+
 ## 3.2.0
 
 - Improved detection for `RST 8H`, `RST 10H`, `RST 18H`, `RST 20H`, `RST 28H`, `RST 30H` and `RST 38H`
