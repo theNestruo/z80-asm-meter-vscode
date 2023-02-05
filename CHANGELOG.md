@@ -1,4 +1,8 @@
 
+## 3.4.0
+
+- Support for `dm`/`defm` directives (as synonyms for `db`/`defb`)
+
 ## 3.3.0
 
 - Improved opcodes for "generic" instructions (such as `BIT b,r`)

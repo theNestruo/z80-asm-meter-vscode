@@ -28,7 +28,7 @@ export class AssemblyDirectiveParser {
 
         // Locates defb/defw/defs directives
         const mnemonic = extractMnemonicOf(instruction);
-        if (mnemonic.match(/^[.]?(DEFB|DB)$/)) {
+        if (mnemonic.match(/^[.]?(DEFB|DB|DEFM|DM)$/)) {
             return this.parseDefbDirective(instruction);
         }
         if (mnemonic.match(/^[.]?(DEFW|DW)$/)) {
