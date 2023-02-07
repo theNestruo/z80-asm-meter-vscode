@@ -1,12 +1,14 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
+import { MainParser } from "./MainParser";
 import { MeterableCollection } from "./MeterableCollection";
 import { MeterableDecorator } from "./MeterableDecorator";
-import { MainParser } from "./MainParser";
+import { hashCode } from "./utils";
 
 export class ExtensionController {
 
     private static commandId = "z80AsmMeter.copyToClipboard";
 
+    private previousHashCode: number | undefined = undefined;
     private _statusBarItem: StatusBarItem | undefined;
     private _disposable: Disposable;
 
@@ -29,8 +31,21 @@ export class ExtensionController {
     private _onEvent() {
 
         // Reads the Z80 block
-        const metered = this.readFromSelection();
+        const sourceCode = this.readFromSelection();
+        if (!sourceCode) {
+            this.previousHashCode = undefined;
+            this.hideStatusBar();
+            return;
+        }
+        const currentHashCode = hashCode(sourceCode);
+        if (currentHashCode == this.previousHashCode) {
+            // (no changes)
+            return;
+        }
+        this.previousHashCode = currentHashCode;
+        const metered = this.meterFromSourceCode(sourceCode);
         if (!metered) {
+            this.previousHashCode = undefined;
             this.hideStatusBar();
             return;
         }
@@ -71,7 +86,7 @@ export class ExtensionController {
 
     private _onCommand() {
 
-        const z80Block = this.readFromSelection();
+        const z80Block = this.meterFromSourceCode(this.readFromSelection());
         if (!z80Block) {
             // (should never happen)
             return;
@@ -95,7 +110,7 @@ export class ExtensionController {
         }
     }
 
-    private readFromSelection(): MeterableCollection | undefined {
+    private readFromSelection(): string | undefined {
 
         // Reads the Z80 block
         const editor = window.activeTextEditor;
@@ -103,15 +118,17 @@ export class ExtensionController {
             || (!this.isEnabledFor(editor.document.languageId))) {
             return undefined;
         }
-        const sourceCode = editor.selection.isEmpty
+        return editor.selection.isEmpty
             ? editor.document.lineAt(editor.selection.active.line).text
             : editor.document.getText(editor.selection);
-        const metered = new MainParser().parse(sourceCode);
-        if (metered.getSize() === 0) {
-            return undefined;
-        }
+    }
 
-        return metered;
+    private meterFromSourceCode(sourceCode: string | undefined): MeterableCollection | undefined {
+
+        const metered = new MainParser().parse(sourceCode);
+        return (metered.getSize() === 0)
+                ? undefined
+                : metered;
     }
 
     private isEnabledFor(languageId: string): boolean {

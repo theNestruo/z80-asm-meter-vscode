@@ -1,3 +1,17 @@
+export function hashCode(s: string): number {
+
+    if (!s || !s.length) {
+        return 0;
+    }
+
+    var hash = 0;
+    for (var i = 0, n = s.length; i < n; i++) {
+        hash = ((hash << 5) - hash) + s.charCodeAt(i);
+        hash |= 0; // (as 32 bit integer)
+    }
+    return hash;
+}
+
 export function extractRawInstructionsFrom(
         rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparatorRegExp: RegExp | undefined): string[] | undefined {
 
