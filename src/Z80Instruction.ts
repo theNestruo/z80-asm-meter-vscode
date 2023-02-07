@@ -172,10 +172,10 @@ export class Z80Instruction implements Meterable {
         // Expands high/low part of the IY register
         if (this.instruction.indexOf("IYq") !== -1) {
             return (expandableExpression.substring(0, 4) === "+8*q")
-                    ? [ this.expandWithFactorUsing(this, /IYp/, "IYh", "+8*q", 8, 4),
-                        this.expandWithFactorUsing(this, /IYp/, "IYl", "+8*q", 8, 5) ]
-                    : [ this.expandUsing(this, /IYp/, "IYh", "+q", 4),
-                        this.expandUsing(this, /IYp/, "IYl", "+q", 5) ];
+                    ? [ this.expandWithFactorUsing(this, /IYq/, "IYh", "+8*q", 8, 4),
+                        this.expandWithFactorUsing(this, /IYq/, "IYl", "+8*q", 8, 5) ]
+                    : [ this.expandUsing(this, /IYq/, "IYh", "+q", 4),
+                        this.expandUsing(this, /IYq/, "IYl", "+q", 5) ];
         }
 
         // Expands 8 bit register where H/L have been replaced by IXh/IXl
