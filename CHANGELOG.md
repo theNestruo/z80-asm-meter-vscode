@@ -2,6 +2,9 @@
 ## 3.4.0
 
 - Support for `dm`/`defm` directives (as synonyms for `db`/`defb`)
+- Fixes wrong "generic" instructions detection (such as `INC IYq`)
+- Support for SjASMPlus register lists instructions. #99
+- Performance improvement
 
 ## 3.3.0
 
@@ -13,8 +16,8 @@
 
 ## 3.1.0
 
-- Support for NEC PC-8000 series.
-- Support for Sjasm and SjASMPlus repeat count.
+- Support for NEC PC-8000 series
+- Support for Sjasm and SjASMPlus repeat count
 
 ## 3.0.1
 
