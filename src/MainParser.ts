@@ -4,6 +4,7 @@ import { MacroParser } from './MacroParser';
 import { MeterableCollection } from './MeterableCollection';
 import { NumericExpressionParser } from "./NumericExpressionParser";
 import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
+import { SjasmplusRegisterListInstructionParser } from './SjasmplusRegisterListInstructionParser';
 import { extractRawInstructionsFrom } from './utils';
 import { Z80InstructionParser } from './Z80InstructionParser';
 
@@ -95,6 +96,12 @@ export class MainParser {
                     const sjasmplusFakeInstruction = SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
                     if (sjasmplusFakeInstruction) {
                         meterables.add(sjasmplusFakeInstruction, repeatCount);
+                        return;
+                    }
+
+                    const sjasmplusRegisterListInstruction = SjasmplusRegisterListInstructionParser.instance.parse(rawInstruction, instructionSets);
+                    if (sjasmplusRegisterListInstruction) {
+                        meterables.add(sjasmplusRegisterListInstruction, repeatCount);
                         return;
                     }
                 }

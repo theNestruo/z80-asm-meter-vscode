@@ -1,6 +1,6 @@
-import { extractMnemonicOf } from "./utils";
 import { SjasmplusFakeInstruction } from "./SjasmplusFakeInstruction";
 import { sjasmplusFakeInstructionSet } from "./SjasmplusFakeInstructionSet";
+import { extractMnemonicOf } from "./utils";
 
 export class SjasmplusFakeInstructionParser {
 
