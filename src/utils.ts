@@ -4,8 +4,9 @@ export function hashCode(s: string): number {
         return 0;
     }
 
-    var hash = 0;
-    for (var i = 0, n = s.length; i < n; i++) {
+    const n = s.length;
+    let hash = 0;
+    for (let i = 0; i < n; i++) {
         hash = ((hash << 5) - hash) + s.charCodeAt(i);
         hash |= 0; // (as 32 bit integer)
     }
