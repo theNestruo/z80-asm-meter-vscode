@@ -71,8 +71,8 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.syntax.repeat`: Enables support for parsing repeat count:
     * `none` (default): Disables repeat count.
-    * `brackets`: The repeat count is specified before the instruction within square brackets (`[` and `]`) before the instruction. This behaviour partially matches the source format of [Sjasm](http://www.xl2s.tk/sjasmman2.html#s3), but multiple repeat counts and iteration count are not supported.
-    * `dot`: The repeat count is specified before the instruction after a dot (`.`) before the instruction. This behaviour partially matches the repeat pseudo-op of [SjASMPlus](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops), but multiple repeat counts and expressions are not supported.
+    * `brackets`: The repeat count is specified within square brackets (`[` and `]`) before the instruction. This behaviour partially matches the source format of [Sjasm](http://www.xl2s.tk/sjasmman2.html#s3), but multiple repeat counts and iteration count are not supported.
+    * `dot`: The repeat count is specified after a dot (`.`) before the instruction. This behaviour partially matches the repeat pseudo-op of [SjASMPlus](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops), but multiple repeat counts and expressions are not supported.
 
 * `z80-asm-meter.viewBytes`: Enables the opcode in the status bar. Disabled by default.
 

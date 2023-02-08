@@ -1,4 +1,8 @@
 
+## 3.4.1
+
+- Fixes Sjasm and SjASMPlus repeat count. #99
+
 ## 3.4.0
 
 - Support for `dm`/`defm` directives (as synonyms for `db`/`defb`)

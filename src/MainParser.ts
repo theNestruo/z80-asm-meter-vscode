@@ -59,7 +59,7 @@ export class MainParser {
                 : undefined;
         const repeatRegExp =
                 this.syntaxRepeatConfiguration == "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-                : this.syntaxRepeatConfiguration == "dot" ? /^(?:.(\S+)\s)(.+)$/
+                : this.syntaxRepeatConfiguration == "dot" ? /^(?:\.(\S+)\s)(.+)$/
                 : undefined;
 
         // For every line...

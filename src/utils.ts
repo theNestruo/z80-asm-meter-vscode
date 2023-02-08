@@ -39,7 +39,7 @@ export function extractRawInstructionsFrom(
 export function extractRawInstructionFrom(rawPart: string): string | undefined {
 
     // Simplifies whitespace and converts to uppercase
-    const rawInstruction = rawPart.replace(/\s+/, " ").toUpperCase();
+    const rawInstruction = rawPart.replace(/\s+/g, " ").toUpperCase();
     return (rawInstruction.length !== 0) ? rawInstruction : undefined;
 }
 

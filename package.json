@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.4.0",
+	"version": "3.4.1",
 	"engines": {
 		"vscode": "^1.75.0"
 	},
@@ -204,8 +204,8 @@
 					],
 					"enumDescriptions": [
 						"Disables repeat count",
-						"The repeat count is specified before the instruction within square brackets ([ and ]) before the instruction",
-						"The repeat count is specified before the instruction after a dot (.) before the instruction"
+						"The repeat count is specified within square brackets ([ and ]) before the instruction",
+						"The repeat count is specified after a dot (.) before the instruction"
 					],
 					"default": "none"
 				},
