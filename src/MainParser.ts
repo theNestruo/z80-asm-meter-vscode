@@ -32,6 +32,7 @@ export class MainParser {
 
         const meterables = new MeterableCollection();
 
+        // (sanity checks)
         if (!sourceCode) {
             return meterables;
         }
