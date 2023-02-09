@@ -13,34 +13,86 @@ export function hashCode(s: string): number {
     return hash;
 }
 
-export function extractRawInstructionsFrom(
-        rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparatorRegExp: RegExp | undefined): string[] | undefined {
+export function extractRawInstructionFrom(rawPart: string): string | undefined {
 
-    // Removes surrounding label, whitespace and/or comments
-    const line = rawLine.replace(labelRegExp, "").replace(commentRegExp, "").trim();
-    if (line.length === 0) {
+    const rawInstructions = normalizeAndSplitQuotesAware(rawPart, undefined);
+    if (rawInstructions.length === 0) {
         return undefined;
     }
+    const rawInstruction = rawInstructions[0];
+    return (rawInstruction.length !== 0) ? rawInstruction : undefined;
+}
 
-    // For every part separated with : ...
+export function extractRawInstructionsFrom(
+        rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparator: string | undefined): string[] | undefined {
+
+    // For every part of the line
     const rawInstructions: string[] = [];
-    const rawParts = lineSeparatorRegExp ? line.split(lineSeparatorRegExp) : [line];
-    rawParts.forEach(rawPart => {
-        // Simplifies whitespace and converts to uppercase
-        const rawInstruction = extractRawInstructionFrom(rawPart);
-        if (rawInstruction) {
-            rawInstructions.push(rawInstruction);
+    normalizeAndSplitQuotesAware(rawLine, lineSeparator).forEach(rawPart => {
+
+        // Removes surrounding label, whitespace and/or comments
+        const part = rawPart.replace(labelRegExp, "").replace(commentRegExp, "").trim();
+        if (part.length !== 0) {
+            rawInstructions.push(part);
         }
     });
 
     return rawInstructions.length === 0 ? undefined : rawInstructions;
 }
 
-export function extractRawInstructionFrom(rawPart: string): string | undefined {
+function normalizeAndSplitQuotesAware(
+        line: string, separator: string | undefined): string[] {
 
-    // Simplifies whitespace and converts to uppercase
-    const rawInstruction = rawPart.replace(/\s+/g, " ").toUpperCase();
-    return (rawInstruction.length !== 0) ? rawInstruction : undefined;
+    const parts: string[] = [];
+
+    const n = line.length;
+    for (let i = 0; i < n; i++) {
+
+        // For every part
+        let currentPart = "";
+        let quoted = false;
+        let whitespace = -1;
+        for ( ; i < n; i++) {
+            const c = line.charAt(i);
+
+            // Inside quotes
+            if (quoted) {
+                currentPart += c;
+                if (c === "\"") {
+                    quoted = false;
+                }
+                continue;
+            }
+
+            // Separator?
+            if (separator && c === separator) {
+                break;
+            }
+
+            // Whitespace?
+            if (/\s/.test(c)) {
+                whitespace = whitespace < 0 ? -1 : 1;
+                continue;
+            }
+
+            // Not whitespace
+            if (whitespace > 0) {
+                currentPart += " ";
+            }
+            whitespace = 0;
+
+            // Quote?
+            if (c === "\"") {
+                quoted = true;
+            }
+
+            currentPart += c.toUpperCase();
+        }
+
+        parts.push(currentPart);
+    }
+
+    return parts;
 }
 
 export function extractMnemonicOf(s: string): string {

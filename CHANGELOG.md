@@ -1,4 +1,8 @@
 
+## 3.4.2
+
+- Fixes quoted values detection (mainly in `db`/`defb` directives)
+
 ## 3.4.1
 
 - Fixes Sjasm and SjASMPlus repeat count. #99
