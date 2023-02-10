@@ -1,6 +1,7 @@
 
 ## 3.4.2
 
+- Code clean-up
 - Fixes quoted values detection (mainly in `db`/`defb` directives)
 
 ## 3.4.1
