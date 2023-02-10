@@ -329,14 +329,14 @@ export class Z80Instruction implements Meterable {
                     return 0;
                 }
 
-                // Checks explicit accumulator syntax
+            // Checks explicit accumulator syntax
             } else if (candidateOperands.length === expectedOperands.length + 1) {
                 if ((!(explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed()))
                     || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
 
-                // Operand count mismatch
+            // Operand count mismatch
             } else {
                 return 0;
             }
@@ -373,12 +373,9 @@ export class Z80Instruction implements Meterable {
 
         // Must the candidate operand be an indirection?
         if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
-            // Checks for SDCC index register syntax
-            const score = sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand);
-            if (score !== undefined) {
-                return score;
-            }
-            return this.indirectOperandScore(expectedOperand, candidateOperand);
+            // (checks for SDCC index register syntax first)
+            return sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand)
+                    || this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
         // Depending on the expected operand...
