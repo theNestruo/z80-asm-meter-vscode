@@ -272,6 +272,23 @@ export function isAnyRegister(operand: string): boolean {
     return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
 }
 
+/**
+ * @param operand the candidate operand
+ * @returns 0.75 if the operand is any constant, label, or expression
+ */
+export function anySymbolOperandScore(candidateOperand: string): number {
+
+    // (due possibility of using constants, labels, and expressions in the source code,
+    // there is no proper way to discriminate: b, n, nn, o;
+    // but uses a "best effort" to discard registers)
+    return isAnyRegister(
+        isIndirectionOperand(candidateOperand, false)
+            ? extractIndirection(candidateOperand)
+            : candidateOperand)
+        ? 0
+        : 0.75;
+}
+
 export function parseTimingsLenient(o: unknown): number[] | undefined {
 
     return (typeof o == "number") ? [o, o]

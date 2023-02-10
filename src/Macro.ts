@@ -100,15 +100,19 @@ export class Macro extends MeterableAggregation {
 
 	private init(): void {
 
-		if (!this.ready) {
-			if (this.providedInstructions !== undefined) {
-				this.providedInstructions.forEach(rawPart => {
-					const rawInstruction = extractRawInstructionFrom(rawPart);
-					const instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
-					this.add(instruction, 1);
-				});
-			}
-            this.ready = true;
+		// (sanity check)
+		if (this.ready) {
+			return;
 		}
+
+		if (this.providedInstructions !== undefined) {
+			this.providedInstructions.forEach(rawPart => {
+				const rawInstruction = extractRawInstructionFrom(rawPart);
+				const instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
+				this.add(instruction, 1);
+			});
+		}
+
+		this.ready = true;
 	}
 }

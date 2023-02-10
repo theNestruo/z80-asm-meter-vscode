@@ -78,63 +78,82 @@ export class MainParser {
             return;
         }
 
+        // Tries to parse repeat pseudo-op
+        const repeatCount = this.extractRepeatCount(rawInstructionCandidate);
+        const rawInstruction = this.extractRawInstruction(rawInstructionCandidate);
+
         // Determines instruction sets
         const instructionSets =
             this.platformConfiguration === "z80n" ? [ "S", "N" ]
             : [ "S" ];
+
+        // Tries to parse Z80 instructions
+        if (meterables.add(
+            Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets), repeatCount)) {
+            return;
+        }
+
+        // Tries to parse sjasmplus alternative syntax and fake instructions
+        if (this.sjasmplus) {
+            if (meterables.add(
+                    SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets),
+                    repeatCount)
+                || meterables.add(
+                    SjasmplusRegisterListInstructionParser.instance.parse(rawInstruction, instructionSets),
+                    repeatCount)) {
+                return;
+            }
+        }
+
+        // Tries to parse user-defined macro
+        if (meterables.add(MacroParser.instance.parse(rawInstruction, instructionSets), repeatCount)) {
+            return;
+        }
+
+        // Tries to parse assembly directives
+        if (meterables.addAll(AssemblyDirectiveParser.instance.parse(rawInstruction), repeatCount)) {
+            return;
+        }
+
+        // (could not parse raw instruction)
+    }
+
+    private extractRepeatCount(rawInstructionCandidate: string): number {
 
         // Determines syntax
         const repeatRegExp =
             this.syntaxRepeatConfiguration == "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
             : this.syntaxRepeatConfiguration == "dot" ? /^(?:\.(\S+)\s)(.+)$/
             : undefined;
+        if (!repeatRegExp) {
+            return 1;
+        }
 
         // Tries to parse repeat pseudo-op
-        const matches = repeatRegExp ? repeatRegExp.exec(rawInstructionCandidate) : null;
+        const matches = repeatRegExp.exec(rawInstructionCandidate);
         const hasRepeatCount = matches && matches.length >= 1 && matches[1];
-        const repeatCountCandidate = hasRepeatCount ? NumericExpressionParser.parse(matches[1]) : undefined;
-        const repeatCount = repeatCountCandidate && repeatCountCandidate > 0 ? repeatCountCandidate : 1;
+        if (!hasRepeatCount) {
+            return 1;
+        }
+        const repeatCountCandidate = NumericExpressionParser.parse(matches[1]);
+        return repeatCountCandidate && repeatCountCandidate > 0 ? repeatCountCandidate : 1;
+    }
+
+    private extractRawInstruction(rawInstructionCandidate: string): string {
+
+        // Determines syntax
+        const repeatRegExp =
+            this.syntaxRepeatConfiguration == "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
+            : this.syntaxRepeatConfiguration == "dot" ? /^(?:\.(\S+)\s)(.+)$/
+            : undefined;
+        if (!repeatRegExp) {
+            return rawInstructionCandidate;
+        }
+
+        // Tries to parse beyond the repeat pseudo-op
+        const matches = repeatRegExp.exec(rawInstructionCandidate);
         const hasRepeatInstruction = matches && matches.length >= 2 && matches[2];
-        const rawInstruction = hasRepeatInstruction ? matches[2] : rawInstructionCandidate;
-
-        // Tries to parse Z80 instructions
-        const z80Instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
-        if (z80Instruction) {
-            meterables.add(z80Instruction, repeatCount);
-            return;
-        }
-
-        // Tries to parse sjasmplus alternative syntax and fake instructions
-        if (this.sjasmplus) {
-            const sjasmplusFakeInstruction =
-                    SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
-            if (sjasmplusFakeInstruction) {
-                meterables.add(sjasmplusFakeInstruction, repeatCount);
-                return;
-            }
-
-            const sjasmplusRegisterListInstruction =
-                    SjasmplusRegisterListInstructionParser.instance.parse(rawInstruction, instructionSets);
-            if (sjasmplusRegisterListInstruction) {
-                meterables.add(sjasmplusRegisterListInstruction, repeatCount);
-                return;
-            }
-        }
-
-        // Tries to parse user-defined macro
-        const macro = MacroParser.instance.parse(rawInstruction, instructionSets);
-        if (macro) {
-            // const lInstructions = lMacro.getInstructions();
-            meterables.add(macro, repeatCount);
-            return;
-        }
-
-        // Tries to parse assembly directives
-        const directive = AssemblyDirectiveParser.instance.parse(rawInstruction);
-        if (directive) {
-            meterables.addAll(directive, repeatCount);
-            return;
-        }
+        return hasRepeatInstruction ? matches[2] : rawInstructionCandidate;
     }
 }
 

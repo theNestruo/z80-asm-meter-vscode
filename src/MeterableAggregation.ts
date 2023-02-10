@@ -16,29 +16,33 @@ export class MeterableAggregation implements Meterable {
 	 * Adds meterables to the aggregation
 	 * @param meterables The Meterable instances to aggregate
 	 * @param repeatCount The number of times to add the meterables to the aggregation
+	 * @return true if all the meterable instances were aggregated (at least one); false otherwise
 	 */
-	public addAll(meterables: Meterable[] | undefined, repeatCount: number): void {
+	public addAll(meterables: Meterable[] | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
 		if ((!meterables) || (repeatCount <= 0)) {
-			return;
+			return false;
 		}
 
+		let ret = true;
 		for (let i = 0; i < repeatCount; i++) {
-			meterables.forEach(meterable => this.add(meterable, 1));
+			meterables.forEach(meterable => ret &&= this.add(meterable, 1));
 		}
+		return ret;
 	}
 
 	/**
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
 	 * @param repeatCount The number of times to add the meterable to the aggregation
+	 * @return true if the meterable was aggregated; false otherwise
 	 */
-	public add(meterable: Meterable | undefined, repeatCount: number): void {
+	public add(meterable: Meterable | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
 		if ((!meterable) || (repeatCount <= 0)) {
-			return;
+			return false;
 		}
 
 		const instructionZ80Timing = meterable.getZ80Timing();
@@ -57,6 +61,8 @@ export class MeterableAggregation implements Meterable {
 			this.bytes.push(...meterable.getBytes());
 		}
 		this.size += meterable.getSize() * repeatCount;
+
+		return true;
 	}
 
 	/**

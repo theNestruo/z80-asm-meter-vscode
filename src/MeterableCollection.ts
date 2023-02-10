@@ -20,12 +20,13 @@ export class MeterableCollection extends MeterableAggregation {
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
 	 * @param repeatCount The number of times to add the meterable to the aggregation
+	 * @return true if the meterable was aggregated; false otherwise
 	 */
-	public add(meterable: Meterable | undefined, repeatCount: number): void {
+	public add(meterable: Meterable | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
 		if (!meterable) {
-			return;
+			return false;
 		}
 
 		if (meterable instanceof MeterableCollection) {
@@ -38,6 +39,6 @@ export class MeterableCollection extends MeterableAggregation {
 			}
 		}
 
-		super.add(meterable, repeatCount);
+		return super.add(meterable, repeatCount);
 	}
 }

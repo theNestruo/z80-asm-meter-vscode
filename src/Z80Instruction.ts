@@ -1,6 +1,6 @@
 import { Meterable } from './Meterable';
 import { NumericExpressionParser } from './NumericExpressionParser';
-import { extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from './utils';
 
 /**
  * A Z80 instruction
@@ -415,7 +415,7 @@ export class Z80Instruction implements Meterable {
             case "38H": // RST 38H
                 return this.numericOperandScore(expectedOperand, candidateOperand);
             default:
-                return this.anySymbolOperandScore(candidateOperand);
+                return anySymbolOperandScore(candidateOperand);
         }
     }
 
@@ -445,18 +445,5 @@ export class Z80Instruction implements Meterable {
                 : candidateOperand)
             ? 0
             : 0.25;
-    }
-
-    private anySymbolOperandScore(candidateOperand: string): number {
-
-        // (due possibility of using constants, labels, and expressions in the source code,
-        // there is no proper way to discriminate: b, n, nn, o;
-        // but uses a "best effort" to discard registers)
-        return isAnyRegister(
-            isIndirectionOperand(candidateOperand, false)
-                ? extractIndirection(candidateOperand)
-                : candidateOperand)
-            ? 0
-            : 0.75;
     }
 }
