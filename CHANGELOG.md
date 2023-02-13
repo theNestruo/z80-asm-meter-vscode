@@ -1,4 +1,8 @@
 
+## 3.5.0
+
+- Performance improvement (better `activationEvents`). #3
+
 ## 3.4.2
 
 - Code clean-up

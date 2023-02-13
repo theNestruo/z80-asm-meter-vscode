@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.4.2",
+	"version": "3.5.0",
 	"engines": {
 		"vscode": "^1.75.0"
 	},
@@ -35,7 +35,13 @@
 	},
 	"license": "LGPL-3.0",
 	"activationEvents": [
-		"*"
+		"onLanguage:asm-collection",
+		"onLanguage:pasmo",
+		"onLanguage:z80",
+		"onLanguage:z80-asm",
+		"onLanguage:z80-macroasm",
+		"onLanguage:zeus-asm",
+		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
