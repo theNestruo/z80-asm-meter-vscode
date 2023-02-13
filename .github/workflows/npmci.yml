@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
         node-version: 16
     - run: npm install
@@ -16,7 +16,7 @@ jobs:
     - name: get-npm-version
       id: package-version
       uses: martinbeentjes/npm-get-version-action@master
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: z80-asm-meter-${{ steps.package-version.outputs.current-version}}-nightly
         path: z80-asm-meter-${{ steps.package-version.outputs.current-version}}.vsix
