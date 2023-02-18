@@ -23,29 +23,12 @@ export function extractRawInstructionFrom(rawPart: string): string | undefined {
     return (rawInstruction.length !== 0) ? rawInstruction : undefined;
 }
 
-export function extractRawInstructionsFrom(
-        rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparator: string | undefined): string[] | undefined {
-
-    // For every part of the line
-    const rawInstructions: string[] = [];
-    normalizeAndSplitQuotesAware(rawLine, lineSeparator).forEach(rawPart => {
-
-        // Removes surrounding label, whitespace and/or comments
-        const part = rawPart.replace(labelRegExp, "").replace(commentRegExp, "").trim();
-        if (part.length !== 0) {
-            rawInstructions.push(part);
-        }
-    });
-
-    return rawInstructions.length === 0 ? undefined : rawInstructions;
-}
-
-function normalizeAndSplitQuotesAware(
-        line: string, separator: string | undefined): string[] {
+export function normalizeAndSplitQuotesAware(
+        part: string, separator: string | undefined): string[] {
 
     const parts: string[] = [];
 
-    const n = line.length;
+    const n = part.length;
     for (let i = 0; i < n; i++) {
 
         // For every part
@@ -53,7 +36,7 @@ function normalizeAndSplitQuotesAware(
         let quoted = false;
         let whitespace = -1;
         for ( ; i < n; i++) {
-            const c = line.charAt(i);
+            const c = part.charAt(i);
 
             // Inside quotes
             if (quoted) {

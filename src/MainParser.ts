@@ -5,7 +5,7 @@ import { MeterableCollection } from './MeterableCollection';
 import { NumericExpressionParser } from "./NumericExpressionParser";
 import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
 import { SjasmplusRegisterListInstructionParser } from './SjasmplusRegisterListInstructionParser';
-import { extractRawInstructionsFrom } from './utils';
+import { normalizeAndSplitQuotesAware } from './utils';
 import { Z80InstructionParser } from './Z80InstructionParser';
 
 export class MainParser {
@@ -45,9 +45,9 @@ export class MainParser {
         }
 
         // Determines syntax
-        const labelRegExp = this.syntaxLabelConfiguration === "default"
-                ? /(^\s*[^\s:]+:)/
-                : /(^[^\s:]+([\s:]|$))/;
+        const labelRegExp = this.syntaxLabelConfiguration === "colonOptional"
+                ? /(^[^\s:]+([\s:]|$))/
+                : /(^\s*[^\s:]+:)/;
         const commentRegExp = /((;|\/\/).*$)/;
         const lineSeparator =
                 this.syntaxLineSeparatorConfiguration === "colon" ? ":"
@@ -56,7 +56,7 @@ export class MainParser {
 
         // Extracts the instructions for every line
         rawLines.forEach(rawLine => {
-            const rawInstructions = extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSeparator);
+            const rawInstructions = this.extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSeparator);
             if (!rawInstructions) {
                 return;
             }
@@ -68,6 +68,23 @@ export class MainParser {
         });
 
         return meterables;
+    }
+
+    private extractRawInstructionsFrom(
+        rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparator: string | undefined): string[] | undefined {
+
+        // Removes surrounding label, whitespace and/or comments
+        const rawParts = rawLine.replace(labelRegExp, "").replace(commentRegExp, "").trim();
+
+        // For every part of the line
+        const rawInstructions: string[] = [];
+        normalizeAndSplitQuotesAware(rawParts, lineSeparator).forEach(part => {
+            if (part.length !== 0) {
+                rawInstructions.push(part);
+            }
+        });
+
+        return rawInstructions.length === 0 ? undefined : rawInstructions;
     }
 
     private parseRawInstructionCandidateAndAddTo(

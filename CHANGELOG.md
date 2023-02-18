@@ -1,4 +1,8 @@
 
+## 3.5.1
+
+- Fixes wrong instructions detection when `"z80-asm-meter.syntax.label": "colonOptional"`. #100
+
 ## 3.5.0
 
 - Performance improvement (better `activationEvents`). #3
