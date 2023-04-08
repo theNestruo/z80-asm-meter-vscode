@@ -48,7 +48,6 @@ export class MainParser {
         const labelRegExp = this.syntaxLabelConfiguration === "colonOptional"
                 ? /(^[^\s:]+([\s:]|$))/
                 : /(^\s*[^\s:]+:)/;
-        const commentRegExp = /((;|\/\/).*$)/;
         const lineSeparator =
                 this.syntaxLineSeparatorConfiguration === "colon" ? ":"
                 : this.syntaxLineSeparatorConfiguration === "pipe" ? "|"
@@ -56,7 +55,7 @@ export class MainParser {
 
         // Extracts the instructions for every line
         rawLines.forEach(rawLine => {
-            const rawInstructions = this.extractRawInstructionsFrom(rawLine, labelRegExp, commentRegExp, lineSeparator);
+            const rawInstructions = this.extractRawInstructionsFrom(rawLine, labelRegExp, lineSeparator);
             if (!rawInstructions) {
                 return;
             }
@@ -71,10 +70,11 @@ export class MainParser {
     }
 
     private extractRawInstructionsFrom(
-        rawLine: string, labelRegExp: RegExp, commentRegExp: RegExp, lineSeparator: string | undefined): string[] | undefined {
+        rawLine: string, labelRegExp: RegExp,
+        lineSeparator: string | undefined): string[] | undefined {
 
         // Removes surrounding label, whitespace and/or comments
-        const rawParts = rawLine.replace(labelRegExp, "").replace(commentRegExp, "").trim();
+        const rawParts = rawLine.replace(labelRegExp, "").trim();
 
         // For every part of the line
         const rawInstructions: string[] = [];

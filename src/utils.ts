@@ -33,7 +33,7 @@ export function normalizeAndSplitQuotesAware(
 
         // For every part
         let currentPart = "";
-        let quoted = false;
+        let quoted = null;
         let whitespace = -1;
         for ( ; i < n; i++) {
             const c = part.charAt(i);
@@ -41,10 +41,18 @@ export function normalizeAndSplitQuotesAware(
             // Inside quotes
             if (quoted) {
                 currentPart += c;
-                if (c === "\"") {
-                    quoted = false;
+                if (c === quoted) {
+                    quoted = null;
                 }
                 continue;
+            }
+
+            // Comment?
+            if ((c === ";")
+                    || (c === "/")
+                        && (i + 1 < n)
+                        && (part.charAt(i + 1) === "/")) {
+                break;
             }
 
             // Separator?
@@ -65,8 +73,8 @@ export function normalizeAndSplitQuotesAware(
             whitespace = 0;
 
             // Quote?
-            if (c === "\"") {
-                quoted = true;
+            if ((c === "\"") || (c === "'")) {
+                quoted = c;
             }
 
             currentPart += c.toUpperCase();
