@@ -49,10 +49,9 @@ export function normalizeAndSplitQuotesAware(
 
             // Comment?
             if ((c === ";")
-                    || (c === "/")
-                        && (i + 1 < n)
-                        && (part.charAt(i + 1) === "/")) {
-                break;
+                    || (c === "/") && (i + 1 < n) && (part.charAt(i + 1) === "/")) {
+                parts.push(currentPart);
+                return parts;
             }
 
             // Separator?
