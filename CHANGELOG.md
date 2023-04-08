@@ -1,4 +1,8 @@
 
+## 3.5.2
+
+- Fixes incorrect byte counting with ";". #105
+
 ## 3.5.1
 
 - Fixes wrong instructions detection when `"z80-asm-meter.syntax.label": "colonOptional"`. #100
