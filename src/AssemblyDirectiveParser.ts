@@ -52,13 +52,12 @@ export class AssemblyDirectiveParser {
         // Extracts bytes
         const bytes: string[] = [];
         operands.forEach(operand => {
-            if (operand.match(/^".*"$/)) {
+            if (operand.match(/^((".*")|('.*'))$/)) {
                 // String
-                operand.substring(1, operand.length - 1).split(/""/).forEach(substring => {
-                    for (let i = 0; i < substring.length; i++) {
-                        bytes.push(formatHexadecimalByte(substring.charCodeAt(i)));
-                    }
-                });
+                var string = operand.substring(1, operand.length - 1);
+                for (let i = 0; i < string.length; i++) {
+                    bytes.push(formatHexadecimalByte(string.charCodeAt(i)));
+                }
             } else {
                 // Raw values
                 const value = NumericExpressionParser.parse(operand);

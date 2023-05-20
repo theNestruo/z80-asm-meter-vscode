@@ -1,4 +1,8 @@
 
+## 3.5.3
+
+- Fixes incorrect byte counting with single quotes. #107
+
 ## 3.5.2
 
 - Fixes incorrect byte counting with ";". #105

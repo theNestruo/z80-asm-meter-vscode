@@ -100,7 +100,7 @@ export function extractOperandsOf(s: string): string[] {
 export function extractOperandsOfQuotesAware(s: string): string[] {
 
     const i = s.indexOf(" ");
-    return i === -1 ? [] : s.substring(i + 1).split(/\s*,(?=(?:[^"]*"[^"]*")*[^"]*$)\s*/);
+    return i === -1 ? [] : normalizeAndSplitQuotesAware(s.substring(i + 1), ",");
 }
 
 /**
