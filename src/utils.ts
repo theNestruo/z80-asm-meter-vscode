@@ -72,7 +72,10 @@ export function normalizeAndSplitQuotesAware(
             whitespace = 0;
 
             // Quote?
-            if ((c === "\"") || (c === "'")) {
+            if ((c === "\"")
+                    // Prevents considering "'" as a quote
+                    // when parsing the instruction "ex af,af'"
+                    || ((c === "'") && (!/^ex\s*af\s*,\s*af$/i.test(currentPart)))) {
                 quoted = c;
             }
 

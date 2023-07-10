@@ -1,3 +1,6 @@
+## 3.5.4
+
+- Fixes missing instruction when `EX AF,AF'` is followed by a comment. #112
 
 ## 3.5.3
 
