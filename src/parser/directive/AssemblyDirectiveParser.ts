@@ -1,14 +1,14 @@
 import { workspace } from "vscode";
-import { AssemblyDirective } from "./model/AssemblyDirective";
-import { Meterable } from "../../model/Meterable";
-import { NumericExpressionParser } from "../NumericExpressionParser";
+import AssemblyDirective from "./model/AssemblyDirective";
+import Meterable from "../../model/Meterable";
+import NumericExpressionParser from "../NumericExpressionParser";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "../../utils";
-import { Z80InstructionParser } from "../z80/Z80InstructionParser";
+import Z80InstructionParser from "../z80/Z80InstructionParser";
 
 export class AssemblyDirectiveParser {
 
     // Singleton
-    public static instance = new AssemblyDirectiveParser();
+    static instance = new AssemblyDirectiveParser();
 
     // Configuration
     private directivesAsInstructions: string;
@@ -20,7 +20,7 @@ export class AssemblyDirectiveParser {
         this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
     }
 
-    public parse(instruction: string | undefined): Meterable[] | undefined {
+    parse(instruction: string | undefined): Meterable[] | undefined {
 
         if (!instruction) {
             return undefined;

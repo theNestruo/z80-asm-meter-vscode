@@ -1,10 +1,10 @@
-import { Meterable } from "./Meterable";
-import { MeterableAggregation } from "./MeterableAggregation";
+import Meterable from "./Meterable";
+import MeterableAggregation from "./MeterableAggregation";
 
 /**
  * Anything that can be metered composed by an aggregation of actual meterables
  */
-export class MeterableCollection extends MeterableAggregation {
+export default class MeterableCollection extends MeterableAggregation {
 
 	// The aggregated meterable instances
 	private meterables: Meterable[] = [];
@@ -12,7 +12,7 @@ export class MeterableCollection extends MeterableAggregation {
 	/**
 	 * @returns The aggregated meterable instances
 	 */
-	public getMeterables(): Meterable[] {
+	getMeterables(): Meterable[] {
 		return this.meterables;
 	}
 
@@ -22,7 +22,7 @@ export class MeterableCollection extends MeterableAggregation {
 	 * @param repeatCount The number of times to add the meterable to the aggregation
 	 * @return true if the meterable was aggregated; false otherwise
 	 */
-	public add(meterable: Meterable | undefined, repeatCount: number): boolean {
+	add(meterable: Meterable | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
 		if (!meterable) {

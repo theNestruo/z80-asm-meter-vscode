@@ -1,16 +1,16 @@
-import { MeterableCollection } from "../../model/MeterableCollection";
+import MeterableCollection from "../../model/MeterableCollection";
 import { extractMnemonicOf, extractOperandsOf } from "../../utils";
-import { Z80InstructionParser } from "../z80/Z80InstructionParser";
+import Z80InstructionParser from "../z80/Z80InstructionParser";
 
 export class SjasmplusRegisterListInstructionParser {
 
     // Singleton
-    public static instance = new SjasmplusRegisterListInstructionParser();
+    static instance = new SjasmplusRegisterListInstructionParser();
 
     private constructor() {
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): MeterableCollection | undefined {
+    parse(instruction: string | undefined, instructionSets: string[]): MeterableCollection | undefined {
 
         if (!instruction) {
             return undefined;

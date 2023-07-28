@@ -1,35 +1,46 @@
 /**
  * Anything that can be metered: Z80 Instructions, ASM directives, sjasmplus fake instructions...
  */
-export interface Meterable {
+export default interface Meterable {
 
     /**
-     * @returns The normalized Z80 instruction, ASM directive, sjasmplus fake instruction...
+     * @returns the normalized Z80 instruction, ASM directive, sjasmplus fake instruction...
      */
     getInstruction(): string;
 
     /**
-     * @returns The Z80 timing, in time (T) cycles
+     * @returns the Z80 timing, in time (T) cycles
      */
     getZ80Timing(): number[];
 
     /**
-     * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
+     * @returns the Z80 timing with the M1 wait cycles required by the MSX standard
      */
     getMsxTiming(): number[];
 
     /**
-     * @returns The CPC timing, in NOPS
+     * @returns the CPC timing, in NOPS
      */
     getCpcTiming(): number[];
 
     /**
-     * @returns The bytes, logically grouped
+     * @returns the bytes, logically grouped
      */
     getBytes(): string[];
 
     /**
-     * @returns The size in bytes
+     * @returns the size in bytes
      */
     getSize(): number;
+
+    /**
+     * @returns if the meterable is composed of finer-grained meterables
+     */
+    isComposed(): boolean;
+
+    /**
+     * @returns the finer-grained meterables that compose it (when the meterable is composed);
+     * undefined otherwise
+     */
+    decompose(): Meterable[] | undefined;
 }

@@ -1,9 +1,9 @@
-import { Meterable } from "./Meterable";
+import Meterable from "./Meterable";
 
 /**
  * Anything that can be metered by aggregation of meterables
  */
-export class MeterableAggregation implements Meterable {
+export default class MeterableAggregation implements Meterable {
 
 	// Aggregated information
 	private z80Timing: number[] = [0, 0];
@@ -18,7 +18,7 @@ export class MeterableAggregation implements Meterable {
 	 * @param repeatCount The number of times to add the meterables to the aggregation
 	 * @return true if all the meterable instances were aggregated (at least one); false otherwise
 	 */
-	public addAll(meterables: Meterable[] | undefined, repeatCount: number): boolean {
+	addAll(meterables: Meterable[] | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
 		if ((!meterables) || (repeatCount <= 0)) {
@@ -38,7 +38,7 @@ export class MeterableAggregation implements Meterable {
 	 * @param repeatCount The number of times to add the meterable to the aggregation
 	 * @return true if the meterable was aggregated; false otherwise
 	 */
-	public add(meterable: Meterable | undefined, repeatCount: number): boolean {
+	add(meterable: Meterable | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
 		if ((!meterable) || (repeatCount <= 0)) {
@@ -65,45 +65,35 @@ export class MeterableAggregation implements Meterable {
 		return true;
 	}
 
-	/**
-	 * @returns The empty string
-	 */
-	public getInstruction(): string {
+	getInstruction(): string {
 		return "";
 	}
 
-	/**
-	 * @returns The Z80 timing, in time (T) cycles
-	 */
-	public getZ80Timing(): number[] {
+	getZ80Timing(): number[] {
 		return this.z80Timing;
 	}
 
-	/**
-	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
-	 */
-	public getMsxTiming(): number[] {
+	getMsxTiming(): number[] {
 		return this.msxTiming;
 	}
 
-	/**
-	 * @returns The CPC timing, in NOPS
-	 */
-	public getCpcTiming(): number[] {
+	getCpcTiming(): number[] {
 		return this.cpcTiming;
 	}
 
-	/**
-	 * @returns The bytes
-	 */
-	public getBytes(): string[] {
+	getBytes(): string[] {
 		return this.bytes;
 	}
 
-	/**
-	 * @returns The size in bytes
-	 */
-	public getSize(): number {
+	getSize(): number {
 		return this.size;
+	}
+
+	isComposed(): boolean {
+		return false; // FIXME
+	}
+
+	decompose(): Meterable[] | undefined {
+		return undefined; // FIXME
 	}
 }

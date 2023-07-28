@@ -1,6 +1,6 @@
 import { MarkdownString, workspace } from 'vscode';
-import { Meterable } from '../model/Meterable';
-import { MeterableCollection } from '../model/MeterableCollection';
+import Meterable from '../model/Meterable';
+import MeterableCollection from '../model/MeterableCollection';
 import { formatTiming } from '../utils';
 
 /**
@@ -23,7 +23,7 @@ export class MeterableDecorator {
         this.platformConfiguration = configuration.get("platform", "z80");
     }
 
-    public getInstructionsAsText(): string | undefined {
+    getInstructionsAsText(): string | undefined {
 
         const queue = this.queue();
         const firstMeterable = this.next(queue);
@@ -44,7 +44,7 @@ export class MeterableDecorator {
         return text;
     }
 
-    public getTimingAsText(suffix: boolean): string | undefined {
+    getTimingAsText(suffix: boolean): string | undefined {
 
         const timing = this.platformConfiguration === "msx" ? this.metered.getMsxTiming()
                 : this.platformConfiguration === "cpc" ? this.metered.getCpcTiming()
@@ -69,7 +69,7 @@ export class MeterableDecorator {
         return text;
     }
 
-    public getBytesAsText(): string | undefined {
+    getBytesAsText(): string | undefined {
 
         const queue = this.queue();
         const firstMeterable = this.next(queue);
@@ -90,7 +90,7 @@ export class MeterableDecorator {
         return text;
     }
 
-    public getSizeAsText(): string | undefined {
+    getSizeAsText(): string | undefined {
 
         const size = this.metered.getSize();
         switch (size) {
@@ -100,7 +100,7 @@ export class MeterableDecorator {
         }
     }
 
-    public getDetailedMarkdownString(): MarkdownString | undefined {
+    getDetailedMarkdownString(): MarkdownString | undefined {
 
         const meterables = this.metered.getMeterables();
 

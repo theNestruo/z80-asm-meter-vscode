@@ -1,7 +1,7 @@
 import { MacroDefinition } from "./MacroDefinition";
-import { MeterableAggregation } from "../../../model/MeterableAggregation";
+import MeterableAggregation from "../../../model/MeterableAggregation";
 import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../../../utils";
-import { Z80InstructionParser } from "../../z80/Z80InstructionParser";
+import Z80InstructionParser from "../../z80/Z80InstructionParser";
 
 export class Macro extends MeterableAggregation {
 
@@ -17,7 +17,7 @@ export class Macro extends MeterableAggregation {
 	// Derived information (will be cached for performance reasons)
 	private ready: boolean = false;
 
-	public constructor(source: MacroDefinition, instructionSets: string[]) {
+	constructor(source: MacroDefinition, instructionSets: string[]) {
 		super();
 
 		this.providedName = source.name;
@@ -35,7 +35,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The name of the macro
 	 */
-	public getInstruction(): string {
+	getInstruction(): string {
 
 		return this.providedName;
 	}
@@ -43,7 +43,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The Z80 timing, in time (T) cycles
 	 */
-	public getZ80Timing(): number[] {
+	getZ80Timing(): number[] {
 		if (this.providedZ80Timing !== undefined) {
 			return this.providedZ80Timing;
 		}
@@ -54,7 +54,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
 	 */
-	public getMsxTiming(): number[] {
+	getMsxTiming(): number[] {
 		if (this.providedMsxTiming !== undefined) {
 			return this.providedMsxTiming;
 		}
@@ -65,7 +65,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The CPC timing, in NOPS
 	 */
-	public getCpcTiming(): number[] {
+	getCpcTiming(): number[] {
 		if (this.providedCpcTiming !== undefined) {
 			return this.providedCpcTiming;
 		}
@@ -76,7 +76,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The bytes
 	 */
-	public getBytes(): string[] {
+	getBytes(): string[] {
 		this.init();
 		const bytes = super.getBytes();
 		if (bytes.length) {
@@ -91,7 +91,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The size in bytes
 	 */
-	public getSize(): number {
+	getSize(): number {
 		if (this.providedSize !== undefined) {
 			return this.providedSize;
 		}

@@ -5,7 +5,7 @@ import { extractMnemonicOf } from "../../utils";
 export class SjasmplusFakeInstructionParser {
 
     // Singleton
-    public static instance = new SjasmplusFakeInstructionParser();
+    static instance = new SjasmplusFakeInstructionParser();
 
     // Instruction maps
     private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
@@ -31,7 +31,7 @@ export class SjasmplusFakeInstructionParser {
         });
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
+    parse(instruction: string | undefined, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         if (!instruction) {
             return undefined;

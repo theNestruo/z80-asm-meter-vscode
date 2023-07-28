@@ -1,11 +1,11 @@
 import { extractMnemonicOf, formatHexadecimalByte } from "../../utils";
-import { Z80Instruction } from "./model/Z80Instruction";
+import Z80Instruction from "./model/Z80Instruction";
 import { z80InstructionSet } from "./data/Z80InstructionSet";
 
-export class Z80InstructionParser {
+export default class Z80InstructionParser {
 
     // Singleton
-    public static instance = new Z80InstructionParser();
+    static instance = new Z80InstructionParser();
 
     // Instruction maps
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
@@ -45,7 +45,7 @@ export class Z80InstructionParser {
         });
     }
 
-    public parseInstruction(instruction: string | undefined, instructionSets: string[]): Z80Instruction | undefined {
+    parseInstruction(instruction: string | undefined, instructionSets: string[]): Z80Instruction | undefined {
 
         if (!instruction) {
             return undefined;
@@ -62,7 +62,7 @@ export class Z80InstructionParser {
         return undefined;
     }
 
-    public parseOpcode(opcode: number): Z80Instruction | undefined {
+    parseOpcode(opcode: number): Z80Instruction | undefined {
 
         return this.instructionByOpcode[formatHexadecimalByte(opcode)];
     }

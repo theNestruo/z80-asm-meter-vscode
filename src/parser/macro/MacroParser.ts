@@ -6,7 +6,7 @@ import { extractMnemonicOf } from "../../utils";
 export class MacroParser {
 
     // Singleton
-    public static instance = new MacroParser();
+    static instance = new MacroParser();
 
     // Macro maps
     private macroDefinitionByMnemonic: Record<string, MacroDefinition>;
@@ -28,7 +28,7 @@ export class MacroParser {
         });
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): Macro | undefined {
+    parse(instruction: string | undefined, instructionSets: string[]): Macro | undefined {
 
         if (!instruction) {
             return undefined;

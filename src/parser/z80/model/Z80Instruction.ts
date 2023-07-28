@@ -1,11 +1,11 @@
-import { Meterable } from '../../../model/Meterable';
-import { NumericExpressionParser } from '../../NumericExpressionParser';
+import Meterable from '../../../model/Meterable';
+import NumericExpressionParser from '../../NumericExpressionParser';
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from '../../../utils';
 
 /**
  * A Z80 instruction
  */
-export class Z80Instruction implements Meterable {
+export default class Z80Instruction implements Meterable {
 
     private instructionSet: string;
 
@@ -41,56 +41,46 @@ export class Z80Instruction implements Meterable {
     /**
      * @returns The instruction set this instruction belongs to
      */
-    public getInstructionSet(): string {
+    getInstructionSet(): string {
         return this.instructionSet;
     }
 
-    /**
-     * @returns The normalized Z80 instruction
-     */
-    public getInstruction(): string {
+    getInstruction(): string {
         return this.instruction;
     }
 
-    /**
-     * @returns The Z80 timing, in time (T) cycles
-     */
-    public getZ80Timing(): number[] {
+    getZ80Timing(): number[] {
         return this.z80Timing;
     }
 
-    /**
-     * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
-     */
-    public getMsxTiming(): number[] {
+    getMsxTiming(): number[] {
         return this.msxTiming;
     }
 
-    /**
-     * @returns The CPC timing, in NOPS
-     */
-    public getCpcTiming(): number[] {
+    getCpcTiming(): number[] {
         return this.cpcTiming;
     }
 
-    /**
-     * @returns The opcodes of the instruction (bytes)
-     */
-    public getBytes(): string[] {
+    getBytes(): string[] {
         return [this.opcodes];
     }
 
-    /**
-     * @returns The size in bytes
-     */
-    public getSize(): number {
+    getSize(): number {
         return this.size;
+    }
+
+    isComposed(): boolean {
+        return false;
+    }
+
+    decompose(): undefined {
+        return undefined;
     }
 
     /**
      * @returns the mnemonic
      */
-    public getMnemonic(): string {
+    getMnemonic(): string {
         return this.mnemonic
             ? this.mnemonic
             : this.mnemonic = extractMnemonicOf(this.instruction);
@@ -99,7 +89,7 @@ export class Z80Instruction implements Meterable {
     /**
      * @returns the operands
      */
-    public getOperands(): string[] {
+    getOperands(): string[] {
         return this.operands
             ? this.operands
             : this.operands = extractOperandsOf(this.instruction);
@@ -108,7 +98,7 @@ export class Z80Instruction implements Meterable {
     /**
      * @returns an array of Z80Instruction, expanded from the actual instruction
      */
-    public expanded(): Z80Instruction[] {
+    expanded(): Z80Instruction[] {
 
         const expandableIndex = this.opcodes.indexOf("+");
         if (expandableIndex == -1) {
@@ -299,7 +289,7 @@ export class Z80Instruction implements Meterable {
      * 1 means the line is this instruction,
      * and intermediate values mean the line may be this instruction
      */
-    public match(candidateInstruction: string): number {
+    match(candidateInstruction: string): number {
 
         // Compares mnemonic
         if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {

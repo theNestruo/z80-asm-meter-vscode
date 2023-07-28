@@ -1,6 +1,6 @@
-import { MeterableCollection } from "../../../model/MeterableCollection";
+import MeterableCollection from "../../../model/MeterableCollection";
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "../../../utils";
-import { Z80InstructionParser } from "../../z80/Z80InstructionParser";
+import Z80InstructionParser from "../../z80/Z80InstructionParser";
 
 /**
  * A sjasmplus fake instruction
@@ -30,21 +30,21 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The instruction set this instruction belongs to
      */
-    public getInstructionSet(): string {
+    getInstructionSet(): string {
         return this.instructionSet;
     }
 
     /**
      * @returns The normalized sjasmplus fake instruction
      */
-    public getInstruction(): string {
+    getInstruction(): string {
         return this.fakeInstruction;
     }
 
     /**
      * @returns the mnemonic
      */
-    public getMnemonic(): string {
+    getMnemonic(): string {
         return this.mnemonic
             ? this.mnemonic
             : this.mnemonic = extractMnemonicOf(this.fakeInstruction);
@@ -53,7 +53,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns the operands
      */
-    public getOperands(): string[] {
+    getOperands(): string[] {
         return this.operands
             ? this.operands
             : this.operands = extractOperandsOf(this.fakeInstruction);
@@ -62,7 +62,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The Z80 timing, in time (T) cycles
      */
-    public getZ80Timing(): number[] {
+    getZ80Timing(): number[] {
         this.init();
         return super.getZ80Timing();
     }
@@ -70,7 +70,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
      */
-    public getMsxTiming(): number[] {
+    getMsxTiming(): number[] {
         this.init();
         return super.getMsxTiming();
     }
@@ -78,7 +78,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The CPC timing, in NOPS
      */
-    public getCpcTiming(): number[] {
+    getCpcTiming(): number[] {
         this.init();
         return super.getCpcTiming();
     }
@@ -86,7 +86,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The bytes
      */
-    public getBytes(): string[] {
+    getBytes(): string[] {
         this.init();
         return super.getBytes();
     }
@@ -94,7 +94,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The size in bytes
      */
-    public getSize(): number {
+    getSize(): number {
         this.init();
         return super.getSize();
     }
@@ -118,7 +118,7 @@ export class SjasmplusFakeInstruction extends MeterableCollection {
      * 1 means the line is this instruction,
      * and intermediate values mean the line may be this instruction
      */
-    public match(candidateInstruction: string): number {
+    match(candidateInstruction: string): number {
 
         // Compares mnemonic
         if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {

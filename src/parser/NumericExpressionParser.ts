@@ -1,6 +1,6 @@
-export class NumericExpressionParser {
+export default class NumericExpressionParser {
 
-    public static parse(s: string): number | undefined {
+    static parse(s: string): number | undefined {
 
         for (const numericParser of NumericExpressionParser.numericParsers) {
             const value = numericParser.parse(s);

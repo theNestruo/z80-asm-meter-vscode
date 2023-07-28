@@ -1,6 +1,6 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
 import { MainParser } from "./parser/MainParser";
-import { MeterableCollection } from "./model/MeterableCollection";
+import MeterableCollection from "./model/MeterableCollection";
 import { MeterableDecorator } from "./viewer/MeterableDecorator";
 import { hashCode } from "./utils";
 
