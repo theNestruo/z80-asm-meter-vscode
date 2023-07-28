@@ -139,8 +139,8 @@ export default class MainParser {
 
         // Determines syntax
         const repeatRegExp =
-            this.syntaxRepeatConfiguration == "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-            : this.syntaxRepeatConfiguration == "dot" ? /^(?:\.(\S+)\s)(.+)$/
+            this.syntaxRepeatConfiguration === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
+            : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
             : undefined;
         if (!repeatRegExp) {
             return 1;

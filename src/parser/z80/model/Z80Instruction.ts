@@ -101,7 +101,7 @@ export default class Z80Instruction implements Meterable {
     expanded(): Z80Instruction[] {
 
         const expandableIndex = this.opcodes.indexOf("+");
-        if (expandableIndex == -1) {
+        if (expandableIndex === -1) {
             // Not expandable
             return [this];
         }

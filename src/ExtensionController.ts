@@ -38,7 +38,7 @@ export default class ExtensionController {
             return;
         }
         const currentHashCode = hashCode(sourceCode);
-        if (currentHashCode == this.previousHashCode) {
+        if (currentHashCode === this.previousHashCode) {
             // (no changes)
             return;
         }
