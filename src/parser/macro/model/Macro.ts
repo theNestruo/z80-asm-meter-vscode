@@ -109,7 +109,7 @@ export default class Macro extends MeterableCollection {
 			this.providedInstructions.forEach(rawPart => {
 				const rawInstruction = extractRawInstructionFrom(rawPart);
 				const instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
-				this.add(instruction, 1);
+				this.add(instruction);
 			});
 		}
 

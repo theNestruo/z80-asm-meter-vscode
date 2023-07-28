@@ -4,6 +4,7 @@ import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, for
 import NumericExpressionParser from "../NumericExpressionParser";
 import Z80InstructionParser from "../z80/Z80InstructionParser";
 import AssemblyDirective from "./model/AssemblyDirective";
+import MeterableRepetition from "../../model/MeterableRepetition";
 
 export default class AssemblyDirectiveParser {
 
@@ -20,7 +21,7 @@ export default class AssemblyDirectiveParser {
         this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
     }
 
-    parse(instruction: string | undefined): Meterable[] | undefined {
+    parse(instruction: string | undefined): Meterable | undefined {
 
         if (!instruction) {
             return undefined;
@@ -42,7 +43,7 @@ export default class AssemblyDirectiveParser {
         return undefined;
     }
 
-    private parseDefbDirective(pInstruction: string): AssemblyDirective[] | undefined {
+    private parseDefbDirective(pInstruction: string): AssemblyDirective | undefined {
 
         const operands = extractOperandsOfQuotesAware(pInstruction);
         if (operands.length < 1) {
@@ -70,10 +71,10 @@ export default class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFB", bytes, bytes.length)];
+        return new AssemblyDirective("DEFB", bytes, bytes.length);
     }
 
-    private parseDefwDirective(pInstruction: string): AssemblyDirective[] | undefined {
+    private parseDefwDirective(pInstruction: string): AssemblyDirective | undefined {
 
         const operands = extractOperandsOfQuotesAware(pInstruction);
         if (operands.length < 1) {
@@ -96,10 +97,10 @@ export default class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFW", bytes, bytes.length * 2)];
+        return new AssemblyDirective("DEFW", bytes, bytes.length * 2);
     }
 
-    private parseDefsDirective(pInstruction: string): Meterable[] | undefined {
+    private parseDefsDirective(pInstruction: string): Meterable | undefined {
 
         const operands = extractOperandsOf(pInstruction);
         if ((operands.length < 1) || (operands.length > 2)) {
@@ -120,13 +121,13 @@ export default class AssemblyDirectiveParser {
             const opcode = value !== undefined ? value : 0x00; // (defaults to NOP)
             const instruction = Z80InstructionParser.instance.parseOpcode(opcode);
             if (instruction) {
-                return new Array(count).fill(instruction);
+                return MeterableRepetition.of(instruction, count);
             }
         }
 
         // Returns as directive
         const byte = value !== undefined ? formatHexadecimalByte(value) : "n";
         const bytes = new Array(count).fill(byte);
-        return [new AssemblyDirective("DEFS", bytes, count)];
+        return new AssemblyDirective("DEFS", bytes, count);
     }
 }

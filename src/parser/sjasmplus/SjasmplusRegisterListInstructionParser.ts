@@ -37,7 +37,7 @@ export default class SjasmplusRegisterListInstructionParser {
                 return undefined;
             }
 
-            collection.add(z80Instruction, 1);
+            collection.add(z80Instruction);
         }
         return collection;
     }

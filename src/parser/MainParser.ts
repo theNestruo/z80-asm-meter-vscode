@@ -7,6 +7,7 @@ import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstruction
 import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
 import { normalizeAndSplitQuotesAware } from '../utils/utils';
 import Z80InstructionParser from './z80/Z80InstructionParser';
+import MeterableRepetition from '../model/MeterableRepetition';
 
 export default class MainParser {
 
@@ -105,30 +106,32 @@ export default class MainParser {
             : [ "S" ];
 
         // Tries to parse Z80 instructions
-        if (meterables.add(
-            Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets), repeatCount)) {
+        if (meterables.add(MeterableRepetition.of(
+            Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets), repeatCount))) {
             return;
         }
 
         // Tries to parse sjasmplus alternative syntax and fake instructions
         if (this.sjasmplus) {
-            if (meterables.add(
+            if (meterables.add(MeterableRepetition.of(
                     SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets),
-                    repeatCount)
-                || meterables.add(
+                    repeatCount))
+                || meterables.add(MeterableRepetition.of(
                     SjasmplusRegisterListInstructionParser.instance.parse(rawInstruction, instructionSets),
-                    repeatCount)) {
+                    repeatCount))) {
                 return;
             }
         }
 
         // Tries to parse user-defined macro
-        if (meterables.add(MacroParser.instance.parse(rawInstruction, instructionSets), repeatCount)) {
+        if (meterables.add(MeterableRepetition.of(
+                MacroParser.instance.parse(rawInstruction, instructionSets), repeatCount))) {
             return;
         }
 
         // Tries to parse assembly directives
-        if (meterables.addAll(AssemblyDirectiveParser.instance.parse(rawInstruction), repeatCount)) {
+        if (meterables.add(MeterableRepetition.of(
+                AssemblyDirectiveParser.instance.parse(rawInstruction), repeatCount))) {
             return;
         }
 
