@@ -284,8 +284,8 @@ export function anySymbolOperandScore(candidateOperand: string): number {
 
 export function parseTimingsLenient(o: unknown): number[] | undefined {
 
-    return (typeof o == "number") ? [o, o]
-            : (typeof o == "string") ? parseTimings(o)
+    return (typeof o === "number") ? [o, o]
+            : (typeof o === "string") ? parseTimings(o)
             : undefined;
 }
 
@@ -302,8 +302,8 @@ export function formatTiming(t: number[]): string {
 
 export function parteIntLenient(o: unknown): number {
 
-    return (typeof o == "number") ? o
-            : (typeof o == "string") ? parseInt(o)
+    return (typeof o === "number") ? o
+            : (typeof o === "string") ? parseInt(o)
             : NaN;
 }
 
