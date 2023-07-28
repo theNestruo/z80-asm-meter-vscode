@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.5.4",
+	"version": "3.6.0",
 	"engines": {
 		"vscode": "^1.80.0"
 	},
@@ -56,6 +56,11 @@
 		"configuration": {
 			"title": "Z80 Assembly meter settings",
 			"properties": {
+				"z80-asm-meter.timings.lastConditionMet": {
+					"type": "boolean",
+					"description": "When enabled, if the selection ends with a conditional operation, measures its timing as met and the timings of any previous conditional operation as not met",
+					"default": false
+				},
 				"z80-asm-meter.directivesAsInstructions": {
 					"type": "string",
 					"description": "Controls which directives should try to be parsed as single byte instructions",

@@ -1,3 +1,7 @@
+## 3.6.0 (unreleased)
+
+- Branch timing
+
 ## 3.5.4
 
 - Fixes missing instruction when `EX AF,AF'` is followed by a comment. #112
