@@ -1,7 +1,7 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
-import { MainParser } from "./MainParser";
-import { MeterableCollection } from "./MeterableCollection";
-import { MeterableDecorator } from "./MeterableDecorator";
+import { MainParser } from "./parser/MainParser";
+import { MeterableCollection } from "./model/MeterableCollection";
+import { MeterableDecorator } from "./viewer/MeterableDecorator";
 import { hashCode } from "./utils";
 
 export class ExtensionController {

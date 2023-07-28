@@ -1,12 +1,12 @@
 import { workspace } from 'vscode';
-import { AssemblyDirectiveParser } from './AssemblyDirectiveParser';
-import { MacroParser } from './MacroParser';
-import { MeterableCollection } from './MeterableCollection';
+import { AssemblyDirectiveParser } from './directive/AssemblyDirectiveParser';
+import { MacroParser } from './macro/MacroParser';
+import { MeterableCollection } from '../model/MeterableCollection';
 import { NumericExpressionParser } from "./NumericExpressionParser";
-import { SjasmplusFakeInstructionParser } from './SjasmplusFakeInstructionParser';
-import { SjasmplusRegisterListInstructionParser } from './SjasmplusRegisterListInstructionParser';
-import { normalizeAndSplitQuotesAware } from './utils';
-import { Z80InstructionParser } from './Z80InstructionParser';
+import { SjasmplusFakeInstructionParser } from './sjasmplus/SjasmplusFakeInstructionParser';
+import { SjasmplusRegisterListInstructionParser } from './sjasmplus/SjasmplusRegisterListInstructionParser';
+import { normalizeAndSplitQuotesAware } from '../utils';
+import { Z80InstructionParser } from './z80/Z80InstructionParser';
 
 export class MainParser {
 

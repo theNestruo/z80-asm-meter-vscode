@@ -1,7 +1,7 @@
 import { workspace } from "vscode";
-import { Macro } from "./Macro";
-import { MacroDefinition } from "./MacroDefinition";
-import { extractMnemonicOf } from "./utils";
+import { Macro } from "./model/Macro";
+import { MacroDefinition } from "./model/MacroDefinition";
+import { extractMnemonicOf } from "../../utils";
 
 export class MacroParser {
 

@@ -1,9 +1,9 @@
 import { workspace } from "vscode";
-import { AssemblyDirective } from "./AssemblyDirective";
-import { Meterable } from "./Meterable";
-import { NumericExpressionParser } from "./NumericExpressionParser";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import { AssemblyDirective } from "./model/AssemblyDirective";
+import { Meterable } from "../../model/Meterable";
+import { NumericExpressionParser } from "../NumericExpressionParser";
+import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "../../utils";
+import { Z80InstructionParser } from "../z80/Z80InstructionParser";
 
 export class AssemblyDirectiveParser {
 

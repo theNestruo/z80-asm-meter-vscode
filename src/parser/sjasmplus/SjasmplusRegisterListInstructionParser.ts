@@ -1,6 +1,6 @@
-import { MeterableCollection } from "./MeterableCollection";
-import { extractMnemonicOf, extractOperandsOf } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import { MeterableCollection } from "../../model/MeterableCollection";
+import { extractMnemonicOf, extractOperandsOf } from "../../utils";
+import { Z80InstructionParser } from "../z80/Z80InstructionParser";
 
 export class SjasmplusRegisterListInstructionParser {
 

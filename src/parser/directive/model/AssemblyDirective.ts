@@ -1,4 +1,4 @@
-import { Meterable } from './Meterable';
+import { Meterable } from '../../../model/Meterable';
 
 /**
  * An assembly directive, such as `db`, `dw` or `ds`

@@ -1,7 +1,7 @@
 import { MarkdownString, workspace } from 'vscode';
-import { Meterable } from './Meterable';
-import { MeterableCollection } from './MeterableCollection';
-import { formatTiming } from './utils';
+import { Meterable } from '../model/Meterable';
+import { MeterableCollection } from '../model/MeterableCollection';
+import { formatTiming } from '../utils';
 
 /**
  * Decorates a MeterableCollection instance to print human-readble information
