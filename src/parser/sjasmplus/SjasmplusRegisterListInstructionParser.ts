@@ -1,8 +1,8 @@
 import MeterableCollection from "../../model/MeterableCollection";
-import { extractMnemonicOf, extractOperandsOf } from "../../utils";
+import { extractMnemonicOf, extractOperandsOf } from "../../utils/utils";
 import Z80InstructionParser from "../z80/Z80InstructionParser";
 
-export class SjasmplusRegisterListInstructionParser {
+export default class SjasmplusRegisterListInstructionParser {
 
     // Singleton
     static instance = new SjasmplusRegisterListInstructionParser();

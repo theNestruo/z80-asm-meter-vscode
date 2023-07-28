@@ -1,9 +1,9 @@
 import { workspace } from "vscode";
-import { Macro } from "./model/Macro";
-import { MacroDefinition } from "./model/MacroDefinition";
-import { extractMnemonicOf } from "../../utils";
+import { extractMnemonicOf } from "../../utils/utils";
+import Macro from "./model/Macro";
+import MacroDefinition from "./model/MacroDefinition";
 
-export class MacroParser {
+export default class MacroParser {
 
     // Singleton
     static instance = new MacroParser();

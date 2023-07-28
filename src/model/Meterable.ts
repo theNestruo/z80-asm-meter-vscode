@@ -39,8 +39,8 @@ export default interface Meterable {
     isComposed(): boolean;
 
     /**
-     * @returns the finer-grained meterables that compose it (when the meterable is composed);
-     * undefined otherwise
+     * @returns the flattened array of the finer-grained meterables that compose this meterable
+     * (when the meterable is composed); empty array otherwise
      */
-    decompose(): Meterable[] | undefined;
+    decompose(): Meterable[];
 }

@@ -1,8 +1,8 @@
-import { SjasmplusFakeInstruction } from "./model/SjasmplusFakeInstruction";
+import { extractMnemonicOf } from "../../utils/utils";
 import { sjasmplusFakeInstructionSet } from "./data/SjasmplusFakeInstructionSet";
-import { extractMnemonicOf } from "../../utils";
+import SjasmplusFakeInstruction from "./model/SjasmplusFakeInstruction";
 
-export class SjasmplusFakeInstructionParser {
+export default class SjasmplusFakeInstructionParser {
 
     // Singleton
     static instance = new SjasmplusFakeInstructionParser();

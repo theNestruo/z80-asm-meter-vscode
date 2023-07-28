@@ -1,10 +1,10 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
-import { MainParser } from "./parser/MainParser";
 import MeterableCollection from "./model/MeterableCollection";
-import { MeterableDecorator } from "./viewer/MeterableDecorator";
-import { hashCode } from "./utils";
+import MainParser from "./parser/MainParser";
+import { hashCode } from "./utils/utils";
+import MeterableDecorator from "./viewer/MeterableDecorator";
 
-export class ExtensionController {
+export default class ExtensionController {
 
     private static commandId = "z80AsmMeter.copyToClipboard";
 

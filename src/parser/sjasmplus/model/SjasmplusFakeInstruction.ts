@@ -1,11 +1,11 @@
 import MeterableCollection from "../../../model/MeterableCollection";
-import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "../../../utils";
+import { extractIndirection, extractMnemonicOf, extractOperandsOf, extractRawInstructionFrom, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "../../../utils/utils";
 import Z80InstructionParser from "../../z80/Z80InstructionParser";
 
 /**
  * A sjasmplus fake instruction
  */
-export class SjasmplusFakeInstruction extends MeterableCollection {
+export default class SjasmplusFakeInstruction extends MeterableCollection {
 
     // Information
     private instructionSet: string;

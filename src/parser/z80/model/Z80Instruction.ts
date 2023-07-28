@@ -1,6 +1,6 @@
 import Meterable from '../../../model/Meterable';
 import NumericExpressionParser from '../../NumericExpressionParser';
-import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from '../../../utils';
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from '../../../utils/utils';
 
 /**
  * A Z80 instruction
@@ -73,8 +73,8 @@ export default class Z80Instruction implements Meterable {
         return false;
     }
 
-    decompose(): undefined {
-        return undefined;
+    decompose(): Meterable[] {
+        return [];
     }
 
     /**

@@ -1,6 +1,6 @@
-import { extractMnemonicOf, formatHexadecimalByte } from "../../utils";
-import Z80Instruction from "./model/Z80Instruction";
+import { extractMnemonicOf, formatHexadecimalByte } from "../../utils/utils";
 import { z80InstructionSet } from "./data/Z80InstructionSet";
+import Z80Instruction from "./model/Z80Instruction";
 
 export default class Z80InstructionParser {
 

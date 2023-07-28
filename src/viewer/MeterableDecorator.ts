@@ -1,12 +1,12 @@
 import { MarkdownString, workspace } from 'vscode';
 import Meterable from '../model/Meterable';
 import MeterableCollection from '../model/MeterableCollection';
-import { formatTiming } from '../utils';
+import { formatTiming } from '../utils/utils';
 
 /**
  * Decorates a MeterableCollection instance to print human-readble information
  */
-export class MeterableDecorator {
+export default class MeterableDecorator {
 
     // The MeterableCollection instance
     private metered: MeterableCollection;
@@ -102,7 +102,7 @@ export class MeterableDecorator {
 
     getDetailedMarkdownString(): MarkdownString | undefined {
 
-        const meterables = this.metered.getMeterables();
+        const meterables = this.metered.decompose();
 
         // (empty)
         if (!meterables.length) {
@@ -159,10 +159,10 @@ export class MeterableDecorator {
             return undefined;
         }
         const meterable = queue.shift();
-        if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
-            queue.unshift(...meterable.getMeterables());
-            return this.next(queue);
-        }
+        // if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
+        //     queue.unshift(...meterable.getMeterables());
+        //     return this.next(queue);
+        // }
         return meterable;
     }
 
@@ -176,10 +176,10 @@ export class MeterableDecorator {
             return undefined;
         }
         const meterable = queue.pop();
-        if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
-            queue.unshift(...meterable.getMeterables());
-            return this.last(queue);
-        }
+        // if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
+        //     queue.unshift(...meterable.getMeterables());
+        //     return this.last(queue);
+        // }
         return meterable;
     }
 }

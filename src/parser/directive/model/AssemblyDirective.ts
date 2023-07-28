@@ -3,7 +3,7 @@ import Meterable from '../../../model/Meterable';
 /**
  * An assembly directive, such as `db`, `dw` or `ds`
  */
- export default class AssemblyDirective implements Meterable {
+export default class AssemblyDirective implements Meterable {
 
     // Information
     private directive: string;
@@ -49,7 +49,7 @@ import Meterable from '../../../model/Meterable';
         return false;
     }
 
-    decompose(): undefined {
-        return undefined;
+    decompose(): Meterable[] {
+		return [];
     }
 }

@@ -1,11 +1,11 @@
 import { workspace } from "vscode";
-import AssemblyDirective from "./model/AssemblyDirective";
 import Meterable from "../../model/Meterable";
+import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "../../utils/utils";
 import NumericExpressionParser from "../NumericExpressionParser";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "../../utils";
 import Z80InstructionParser from "../z80/Z80InstructionParser";
+import AssemblyDirective from "./model/AssemblyDirective";
 
-export class AssemblyDirectiveParser {
+export default class AssemblyDirectiveParser {
 
     // Singleton
     static instance = new AssemblyDirectiveParser();

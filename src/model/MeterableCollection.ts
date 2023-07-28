@@ -1,19 +1,33 @@
+import AggregatedMeterable from "./AggregatedMeterable";
 import Meterable from "./Meterable";
-import MeterableAggregation from "./MeterableAggregation";
 
 /**
- * Anything that can be metered composed by an aggregation of actual meterables
+ * A meterable collection of Meterables
  */
-export default class MeterableCollection extends MeterableAggregation {
+export default class MeterableCollection extends AggregatedMeterable {
 
-	// The aggregated meterable instances
-	private meterables: Meterable[] = [];
+	getInstruction(): string {
+		return "";
+	}
 
 	/**
-	 * @returns The aggregated meterable instances
+	 * Adds meterables to the aggregation
+	 * @param meterables The Meterable instances to aggregate
+	 * @param repeatCount The number of times to add the meterables to the aggregation
+	 * @return true if all the meterable instances were aggregated (at least one); false otherwise
 	 */
-	getMeterables(): Meterable[] {
-		return this.meterables;
+	addAll(meterables: Meterable[] | undefined, repeatCount: number): boolean {
+
+		// (sanity check)
+		if ((!meterables) || (repeatCount <= 0)) {
+			return false;
+		}
+
+		let ret = true;
+		for (let i = 0; i < repeatCount; i++) {
+			meterables.forEach(meterable => ret &&= this.add(meterable, 1));
+		}
+		return ret;
 	}
 
 	/**
@@ -25,20 +39,14 @@ export default class MeterableCollection extends MeterableAggregation {
 	add(meterable: Meterable | undefined, repeatCount: number): boolean {
 
 		// (sanity check)
-		if (!meterable) {
+		if ((!meterable) || (repeatCount <= 0)) {
 			return false;
 		}
 
-		if (meterable instanceof MeterableCollection) {
-			for (let i = 0; i < repeatCount; i++) {
-				this.meterables.push(...meterable.getMeterables());
-			}
-		} else {
-			for (let i = 0; i < repeatCount; i++) {
-				this.meterables.push(meterable);
-			}
+		// FIXME
+		for (let i = 0; i < repeatCount; i++) {
+			this.meterables.push(meterable);
 		}
-
-		return super.add(meterable, repeatCount);
+		return true;
 	}
 }
