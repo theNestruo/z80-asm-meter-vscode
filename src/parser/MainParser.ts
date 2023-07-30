@@ -1,4 +1,5 @@
 import { workspace } from 'vscode';
+import Meterable from '../model/Meterable';
 import MeterableCollection from '../model/MeterableCollection';
 import MeterableRepetition from '../model/MeterableRepetition';
 import { normalizeAndSplitQuotesAware } from '../utils/utils';
@@ -56,21 +57,19 @@ export default class MainParser {
 
         // Extracts the instructions for every line
         rawLines.forEach(rawLine => {
-            const rawInstructions = this.extractRawInstructionsFrom(rawLine, labelRegExp, lineSeparator);
-            if (!rawInstructions) {
-                return;
-            }
+            const rawInstructionCandidates =
+                    this.extractRawInstructionCandidatesFrom(rawLine, labelRegExp, lineSeparator);
 
             // Parses the instructions
-            rawInstructions.forEach((rawInstructionCandidate: string | undefined) => {
-                this.parseRawInstructionCandidateAndAddTo(rawInstructionCandidate, meterables);
+            rawInstructionCandidates?.forEach((rawInstructionCandidate: string | undefined) => {
+                meterables.add(this.parseRawInstructionCandidate(rawInstructionCandidate));
             });
         });
 
         return meterables;
     }
 
-    private extractRawInstructionsFrom(
+    private extractRawInstructionCandidatesFrom(
         rawLine: string, labelRegExp: RegExp,
         lineSeparator: string | undefined): string[] | undefined {
 
@@ -78,64 +77,28 @@ export default class MainParser {
         const rawParts = rawLine.replace(labelRegExp, "").trim();
 
         // For every part of the line
-        const rawInstructions: string[] = [];
+        const rawInstructionCandidates: string[] = [];
         normalizeAndSplitQuotesAware(rawParts, lineSeparator).forEach(part => {
             if (part.length !== 0) {
-                rawInstructions.push(part);
+                rawInstructionCandidates.push(part);
             }
         });
 
-        return rawInstructions.length === 0 ? undefined : rawInstructions;
+        return rawInstructionCandidates.length === 0 ? undefined : rawInstructionCandidates;
     }
 
-    private parseRawInstructionCandidateAndAddTo(
-            rawInstructionCandidate: string | undefined, meterables: MeterableCollection) {
+    private parseRawInstructionCandidate(
+            rawInstructionCandidate: string | undefined): Meterable | undefined {
 
         // (sanity check)
         if (!rawInstructionCandidate) {
-            return;
+            return undefined;
         }
 
-        // Tries to parse repeat pseudo-op
+        // Tries to parse the optional repeat pseudo-op
         const repeatCount = this.extractRepeatCount(rawInstructionCandidate);
         const rawInstruction = this.extractRawInstruction(rawInstructionCandidate);
-
-        // Determines instruction sets
-        const instructionSets =
-            this.platformConfiguration === "z80n" ? [ "S", "N" ]
-            : [ "S" ];
-
-        // Tries to parse Z80 instructions
-        if (meterables.add(MeterableRepetition.of(
-            Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets), repeatCount))) {
-            return;
-        }
-
-        // Tries to parse sjasmplus alternative syntax and fake instructions
-        if (this.sjasmplus) {
-            if (meterables.add(MeterableRepetition.of(
-                    SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets),
-                    repeatCount))
-                || meterables.add(MeterableRepetition.of(
-                    SjasmplusRegisterListInstructionParser.instance.parse(rawInstruction, instructionSets),
-                    repeatCount))) {
-                return;
-            }
-        }
-
-        // Tries to parse user-defined macro
-        if (meterables.add(MeterableRepetition.of(
-                MacroParser.instance.parse(rawInstruction, instructionSets), repeatCount))) {
-            return;
-        }
-
-        // Tries to parse assembly directives
-        if (meterables.add(MeterableRepetition.of(
-                AssemblyDirectiveParser.instance.parse(rawInstruction), repeatCount))) {
-            return;
-        }
-
-        // (could not parse raw instruction)
+        return MeterableRepetition.of(this.parseRawInstruction(rawInstruction), repeatCount);
     }
 
     private extractRepeatCount(rawInstructionCandidate: string): number {
@@ -175,5 +138,49 @@ export default class MainParser {
         const hasRepeatInstruction = matches && matches.length >= 2 && matches[2];
         return hasRepeatInstruction ? matches[2] : rawInstructionCandidate;
     }
+
+    private parseRawInstruction(rawInstruction: string): Meterable | undefined {
+
+        // Determines instruction sets
+        const instructionSets =
+            this.platformConfiguration === "z80n" ? [ "S", "N" ]
+            : [ "S" ];
+
+        // Tries to parse Z80 instructions
+        const z80Instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, instructionSets);
+        if (!!z80Instruction) {
+            return z80Instruction;
+        }
+
+        // Tries to parse sjasmplus alternative syntax and fake instructions
+        if (this.sjasmplus) {
+            const sjasmplusFakeInstruction =
+                    SjasmplusFakeInstructionParser.instance.parse(rawInstruction, instructionSets);
+            if (!!sjasmplusFakeInstruction) {
+                return sjasmplusFakeInstruction;
+            }
+            const sjasmplusRegisterListInstruction =
+                    SjasmplusRegisterListInstructionParser.instance.parse(rawInstruction, instructionSets);
+            if (sjasmplusRegisterListInstruction) {
+                return sjasmplusRegisterListInstruction;
+            }
+        }
+
+        // Tries to parse user-defined macro
+        const macro = MacroParser.instance.parse(rawInstruction, instructionSets);
+        if (!!macro) {
+            return macro;
+        }
+
+        // Tries to parse assembly directives
+        const assemblyDirective = AssemblyDirectiveParser.instance.parse(rawInstruction);
+        if (!!assemblyDirective) {
+            return assemblyDirective;
+        }
+
+        // (could not parse raw instruction)
+        return undefined;
+    }
+
 }
 
