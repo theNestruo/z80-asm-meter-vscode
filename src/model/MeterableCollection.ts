@@ -15,6 +15,7 @@ export default class MeterableCollection extends AggregatedMeterable {
     private cachedCpcTiming: number[] | undefined;
     private cachedBytes: string[] | undefined;
     private cachedSize: number | undefined;
+	private cachedMeterables: Meterable[] | undefined;
 
 	/**
 	 * Adds a meterable to the aggregation
@@ -35,6 +36,7 @@ export default class MeterableCollection extends AggregatedMeterable {
 		this.cachedCpcTiming = undefined;
 		this.cachedBytes = undefined;
 		this.cachedSize = undefined;
+		this.cachedMeterables = undefined;
 
 		return true;
 	}
@@ -107,14 +109,17 @@ export default class MeterableCollection extends AggregatedMeterable {
 
 	decompose(): Meterable[] {
 
-		var flattenedMeterables: Meterable[] = [];
-		this.meterables.forEach(meterable => {
-			if (meterable.isComposed()) {
-				flattenedMeterables.push(...meterable.decompose());
-			} else {
-				flattenedMeterables.push(meterable);
-			}
-		});
-		return flattenedMeterables;
+		if (!this.cachedMeterables?.length) {
+			var flattenedMeterables: Meterable[] = [];
+			this.meterables.forEach(meterable => {
+				if (meterable.isComposed()) {
+					flattenedMeterables.push(...meterable.decompose());
+				} else {
+					flattenedMeterables.push(meterable);
+				}
+			});
+			this.cachedMeterables = flattenedMeterables;
+		}
+		return this.cachedMeterables;
 	}
 }

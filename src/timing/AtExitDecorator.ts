@@ -17,7 +17,7 @@ export default class AtExitDecorator implements Meterable {
 
 		// Length check
 		const meterables: Meterable[] = meterable.isComposed()
-				? meterable.decompose()
+				? [ ...meterable.decompose() ]
 				: [ meterable ];
 		if (meterables.length < 2) {
 			return meterable;
@@ -25,11 +25,8 @@ export default class AtExitDecorator implements Meterable {
 
 		// Last instruction check
 		const instruction = meterables.pop()?.getInstruction();
-		if (!instruction) {
-			return meterable;
-		}
-		const mnemonic = extractMnemonicOf(instruction);
-        if ([ "JP", "JR", "RET" ].indexOf(mnemonic) === -1) {
+		if ((!instruction)
+			|| (!this.isJump(instruction))) {
             return meterable;
         }
 
@@ -39,6 +36,12 @@ export default class AtExitDecorator implements Meterable {
 
 	// The meterable instance to be decorated
 	private decoratedMeterable: Meterable;
+
+    // Derived information (will be cached for performance reasons)
+    private cachedZ80Timing: number[] | undefined;
+    private cachedMsxTiming: number[] | undefined;
+    private cachedCpcTiming: number[] | undefined;
+	private cachedMeterables: Meterable[] | undefined;
 
 	private constructor(meterable: Meterable) {
 
@@ -51,44 +54,53 @@ export default class AtExitDecorator implements Meterable {
 
 	getZ80Timing(): number[] {
 
-		const meterables = this.decompose();
-		let i = 0;
-		const n = meterables.length;
-		var totalZ80Timing: number[] = [0, 0];
-		meterables.forEach(meterable => {
-			const z80Timing = this.modifiedTimingsOf(meterable.getZ80Timing(), i++, n, meterable.getInstruction());
-			totalZ80Timing[0] += z80Timing[0];
-			totalZ80Timing[1] += z80Timing[1];
-		});
-		return totalZ80Timing;
+		if (!this.cachedZ80Timing) {
+			const meterables = this.decompose();
+			let i = 0;
+			const n = meterables.length;
+			var totalZ80Timing: number[] = [0, 0];
+			meterables.forEach(meterable => {
+				const z80Timing = this.modifiedTimingsOf(meterable.getZ80Timing(), i++, n, meterable.getInstruction());
+				totalZ80Timing[0] += z80Timing[0];
+				totalZ80Timing[1] += z80Timing[1];
+			});
+			this.cachedZ80Timing = totalZ80Timing;
+		}
+		return this.cachedZ80Timing;
 	}
 
 	getMsxTiming(): number[] {
 
-		const meterables = this.decompose();
-		let i = 0;
-		const n = meterables.length;
-		var totalMsxTiming: number[] = [0, 0];
-		meterables.forEach(meterable => {
-			const msxTiming = this.modifiedTimingsOf(meterable.getMsxTiming(), i++, n, meterable.getInstruction());
-			totalMsxTiming[0] += msxTiming[0];
-			totalMsxTiming[1] += msxTiming[1];
-		});
-		return totalMsxTiming;
+		if (!this.cachedMsxTiming) {
+			const meterables = this.decompose();
+			let i = 0;
+			const n = meterables.length;
+			var totalMsxTiming: number[] = [0, 0];
+			meterables.forEach(meterable => {
+				const msxTiming = this.modifiedTimingsOf(meterable.getMsxTiming(), i++, n, meterable.getInstruction());
+				totalMsxTiming[0] += msxTiming[0];
+				totalMsxTiming[1] += msxTiming[1];
+			});
+			this.cachedMsxTiming = totalMsxTiming;
+		}
+		return this.cachedMsxTiming;
 	}
 
 	getCpcTiming(): number[] {
 
-		const meterables = this.decompose();
-		let i = 0;
-		const n = meterables.length;
-		var totalCpcTiming: number[] = [0, 0];
-		meterables.forEach(meterable => {
-			const cpcTiming = this.modifiedTimingsOf(meterable.getCpcTiming(), i++, n, meterable.getInstruction());
-			totalCpcTiming[0] += cpcTiming[0];
-			totalCpcTiming[1] += cpcTiming[1];
-		});
-		return totalCpcTiming;
+		if (!this.cachedCpcTiming) {
+			const meterables = this.decompose();
+			let i = 0;
+			const n = meterables.length;
+			var totalCpcTiming: number[] = [0, 0];
+			meterables.forEach(meterable => {
+				const cpcTiming = this.modifiedTimingsOf(meterable.getCpcTiming(), i++, n, meterable.getInstruction());
+				totalCpcTiming[0] += cpcTiming[0];
+				totalCpcTiming[1] += cpcTiming[1];
+			});
+			this.cachedCpcTiming = totalCpcTiming;
+		}
+		return this.cachedCpcTiming;
 	}
 
 	getBytes(): string[] {
@@ -104,25 +116,36 @@ export default class AtExitDecorator implements Meterable {
 	}
 
 	decompose(): Meterable[] {
-		return this.decoratedMeterable.isComposed()
-				? this.decoratedMeterable.decompose()
-				: [ this.decoratedMeterable ];
+
+		if (!this.cachedMeterables) {
+			this.cachedMeterables = this.decoratedMeterable.isComposed()
+					? this.decoratedMeterable.decompose()
+					: [ this.decoratedMeterable ];
+		}
+		return this.cachedMeterables;
 	}
 
 	private modifiedTimingsOf(timing: number[], i: number, n: number, instruction: string): number[] {
 
-		if (!this.isConditionalJump(instruction)) {
+		if (!AtExitDecorator.isConditionalJump(instruction)) {
 			return timing;
 		}
+
+		// Last instruction?
 		return (i === n -1)
-			? [ timing[0], timing[0] ]
-			: [ timing[1], timing[1] ];
+			? [ timing[0], timing[0] ]	// "Taken" timings
+			: [ timing[1], timing[1] ];	// "Not taken" timings
 	}
 
-	private isConditionalJump(instruction: string): boolean {
+	private static isJump(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		if ([ "JP", "JR", "RET" ].indexOf(mnemonic) === -1) {
+		return [ "JP", "JR", "RET" ].indexOf(mnemonic) !== -1;
+	}
+
+	private static isConditionalJump(instruction: string): boolean {
+
+		if (!this.isJump(instruction)) {
 			return false;
 		}
 		const operands = extractOperandsOf(instruction);

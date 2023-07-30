@@ -159,7 +159,7 @@ export default class MeterableViewer {
     private queue(): Meterable[] {
 
         return this.metered.isComposed()
-                ? this.metered.decompose()
+                ? [ ...this.metered.decompose() ]
                 : [ this.metered ];
     }
 
