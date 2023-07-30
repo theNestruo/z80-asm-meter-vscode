@@ -56,7 +56,7 @@ export default class SubroutineTimingHintDecorator implements Meterable {
 				case "msx":
 					msxTimingHint = parsedTimingHint;
 					break;
-			};
+			}
 		}
 
 		// Validates timing hint comment
