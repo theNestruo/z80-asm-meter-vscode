@@ -1,6 +1,6 @@
 ## 3.6.0 (unreleased)
 
-- Advanced timing algorithm: timing "at exit". #114
+- Advanced timing algorithms: timing "at exit", subroutine timing hints. #114
 - Extension is now [bundled](https://code.visualstudio.com/api/working-with-extensions/bundling-extension)
 
 ## 3.5.4

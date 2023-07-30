@@ -1,5 +1,5 @@
 import MeterableCollection from "../../../model/MeterableCollection";
-import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../../../utils/utils";
+import { extractRawInstruction, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../../../utils/utils";
 import Z80InstructionParser from "../../z80/Z80InstructionParser";
 import MacroDefinition from "./MacroDefinition";
 
@@ -107,8 +107,9 @@ export default class Macro extends MeterableCollection {
 
 		if (this.providedInstructions !== undefined) {
 			this.providedInstructions.forEach(rawPart => {
-				const rawInstruction = extractRawInstructionFrom(rawPart);
-				const instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
+				const rawInstruction = extractRawInstruction(rawPart);
+				const instruction =
+						Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
 				this.add(instruction);
 			});
 		}

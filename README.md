@@ -78,6 +78,22 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, the timings shown will be the best and the worst case scenarios of the code flow up to the selected exit point.
 
+    TO BE DONE: screenshots and examples
+
+* `z80-asm-meter.timings.hints`: Enables subroutine timing hints read from the line comment. Subroutine timing hint will be added to `CALL`, `JP`, `JR`, or `RST` instructions.
+
+    A subroutine timing hint follows the pattern: `[z80=27]` or `[msx=32/22]` with the key being `z80` for Z80 timings, `msx` for Z80+M1 timings, `cpc` for number of NOPs timings, or `t` or `ts` for the timing to be used regardless the platform. The timing can be either a single value or a pair of values separated by slash (`/`). Current platform timing will taken precedence over `t` or `ts` timing hint.
+
+    If the timing hint is a pair of values, both will be added to the current source code block timings.
+
+    If the instruction is conditional, timing hint will only be added to the _taken_ branch timing.
+
+    For example:
+
+    * `CALL ADD_HL_A ; [msx=32/22]` will be metered as 50/40 Z80+M1 clock cycles, as the result of adding 18(/18) + 32/22.
+
+    * `CALL Z, ADD_HL_A ; [msx=32/22]` will be metered as 50/11 Z80+M1 clock cycles, as the result of adding 18/11 + 32(/0). Please note the second timing hint (22) will be ignored in conditional operations.
+
 ### Macro definitions
 
 * `z80-asm-meter.macros`: An array of [user-defined macros](#macro-definitions):

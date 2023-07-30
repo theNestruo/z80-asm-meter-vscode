@@ -1,3 +1,5 @@
+import SourceCodeLine from "../model/SourceCodeLine";
+
 export function hashCode(s: string): number {
 
     if (!s || !s.length) {
@@ -13,22 +15,17 @@ export function hashCode(s: string): number {
     return hash;
 }
 
-export function extractRawInstructionFrom(rawPart: string): string | undefined {
+export function extractRawInstruction(rawPart: string): string | undefined {
 
-    const rawInstructions = normalizeAndSplitQuotesAware(rawPart, undefined);
-    if (rawInstructions.length === 0) {
-        return undefined;
-    }
-    const rawInstruction = rawInstructions[0];
-    return (rawInstruction.length !== 0) ? rawInstruction : undefined;
+    return normalizeAndSplitQuotesAware(rawPart, undefined).getParts().shift()?.getPart();
 }
 
 export function normalizeAndSplitQuotesAware(
-        part: string, separator: string | undefined): string[] {
+        s: string, separator: string | undefined): SourceCodeLine {
 
-    const parts: string[] = [];
+    var sourceCodeLine: SourceCodeLine = new SourceCodeLine();
 
-    const n = part.length;
+    const n = s.length;
     for (let i = 0; i < n; i++) {
 
         // For every part
@@ -36,7 +33,7 @@ export function normalizeAndSplitQuotesAware(
         let quoted = null;
         let whitespace = -1;
         for ( ; i < n; i++) {
-            const c = part.charAt(i);
+            const c = s.charAt(i);
 
             // Inside quotes
             if (quoted) {
@@ -48,10 +45,14 @@ export function normalizeAndSplitQuotesAware(
             }
 
             // Comment?
-            if ((c === ";")
-                    || (c === "/") && (i + 1 < n) && (part.charAt(i + 1) === "/")) {
-                parts.push(currentPart);
-                return parts;
+            const isCommentStart = (c === ";")
+                    || (c === "/") && (i + 1 < n) && (s.charAt(i + 1) === "/")
+                    ? c
+                    : undefined;
+            if (isCommentStart) {
+                sourceCodeLine.addPart(currentPart);
+                sourceCodeLine.setComment(s.substring(isCommentStart === ";" ? i + 1 : i + 2).trim());
+                return sourceCodeLine;
             }
 
             // Separator?
@@ -82,10 +83,10 @@ export function normalizeAndSplitQuotesAware(
             currentPart += c.toUpperCase();
         }
 
-        parts.push(currentPart);
+        sourceCodeLine.addPart(currentPart);
     }
 
-    return parts;
+    return sourceCodeLine;
 }
 
 export function extractMnemonicOf(s: string): string {
@@ -103,7 +104,9 @@ export function extractOperandsOf(s: string): string[] {
 export function extractOperandsOfQuotesAware(s: string): string[] {
 
     const i = s.indexOf(" ");
-    return i === -1 ? [] : normalizeAndSplitQuotesAware(s.substring(i + 1), ",");
+    return i === -1
+            ? []
+            : normalizeAndSplitQuotesAware(s.substring(i + 1), ",").getPartsAsString();
 }
 
 /**

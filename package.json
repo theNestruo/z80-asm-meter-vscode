@@ -56,11 +56,6 @@
 		"configuration": {
 			"title": "Z80 Assembly meter settings",
 			"properties": {
-				"z80-asm-meter.timings.atExit": {
-					"type": "boolean",
-					"description": "When enabled, if the selection ends with a jump or return operation, measures any previous conditional jump or return operation as not taken",
-					"default": false
-				},
 				"z80-asm-meter.directivesAsInstructions": {
 					"type": "string",
 					"description": "Controls which directives should try to be parsed as single byte instructions",
@@ -219,6 +214,16 @@
 						"The repeat count is specified after a dot (.) before the instruction"
 					],
 					"default": "none"
+				},
+				"z80-asm-meter.timings.atExit": {
+					"type": "boolean",
+					"description": "When enabled, if the selection ends with a jump or return operation, measures any previous conditional jump or return operation as not taken",
+					"default": false
+				},
+				"z80-asm-meter.timings.hints": {
+					"type": "boolean",
+					"description": "Enables subroutine timing hints read from the line comment. Subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
+					"default": false
 				},
 				"z80-asm-meter.viewBytes": {
 					"type": "boolean",
