@@ -1,6 +1,6 @@
 import { MarkdownString, workspace } from 'vscode';
 import Meterable from '../model/Meterable';
-import LastConditionMetDecorator from '../timing/LastConditionMetDecorator';
+import AtExitDecorator from '../timing/AtExitDecorator';
 import { formatTiming } from '../utils/utils';
 
 /**
@@ -57,7 +57,7 @@ export default class MeterableViewer {
             return undefined;
         }
 
-        const decorated = this.metered instanceof LastConditionMetDecorator;
+        const decorated = this.metered instanceof AtExitDecorator;
 
         // As text, with optional suffix
         let text = formatTiming(timing);
@@ -114,7 +114,7 @@ export default class MeterableViewer {
             return undefined;
         }
 
-        const decorated = this.metered instanceof LastConditionMetDecorator;
+        const decorated = this.metered instanceof AtExitDecorator;
         const decoration = decorated ? "<sup>*</sup>" : "";
 
         const tooltip = new MarkdownString();

@@ -1,6 +1,6 @@
 ## 3.6.0 (unreleased)
 
-- Branch timing
+- Advanced timing algorithm: timing "at exit". #114
 
 ## 3.5.4
 

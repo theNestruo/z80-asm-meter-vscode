@@ -1,7 +1,7 @@
 import Meterable from "../model/Meterable";
 import { extractMnemonicOf, extractOperandsOf } from "../utils/utils";
 
-export default class LastConditionMetDecorator implements Meterable {
+export default class AtExitDecorator implements Meterable {
 
 	/**
 	 * Conditionaly builds an instance of the "last condition met" decorator
@@ -34,7 +34,7 @@ export default class LastConditionMetDecorator implements Meterable {
         }
 
 		// Builds the "last condition met" decorator
-		return new LastConditionMetDecorator(meterable);
+		return new AtExitDecorator(meterable);
 	}
 
 	// The meterable instance to be decorated

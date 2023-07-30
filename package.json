@@ -56,9 +56,9 @@
 		"configuration": {
 			"title": "Z80 Assembly meter settings",
 			"properties": {
-				"z80-asm-meter.timings.lastConditionMet": {
+				"z80-asm-meter.timings.atExit": {
 					"type": "boolean",
-					"description": "When enabled, if the selection ends with a conditional operation, measures its timing as met and the timings of any previous conditional operation as not met",
+					"description": "When enabled, if the selection ends with a jump or return operation, measures any previous conditional jump or return operation as not taken",
 					"default": false
 				},
 				"z80-asm-meter.directivesAsInstructions": {

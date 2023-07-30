@@ -76,7 +76,7 @@ This extension contributes the following settings:
 
 ### Advanced timing-related settings
 
-* `z80-asm-meter.timings.lastConditionMet`: When enabled, if the selection ends with a conditional `JP`, `JR` or `RET` operation, measures the timing of this last operation condition as _met_, and measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not met_. Therefore, the timings shown will be the best and the worst case scenarios of the code flow.
+* `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, and measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, the timings shown will be the best and the worst case scenarios of the code flow up to the selected exit point.
 
 ### Macro definitions
 

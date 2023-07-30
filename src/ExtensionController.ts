@@ -1,10 +1,9 @@
 import { commands, Disposable, env, StatusBarItem, window, workspace } from "vscode";
-import MeterableCollection from "./model/MeterableCollection";
+import Meterable from "./model/Meterable";
 import MainParser from "./parser/MainParser";
+import AtExitDecorator from "./timing/AtExitDecorator";
 import { hashCode } from "./utils/utils";
 import MeterableViewer from "./viewer/MeterableViewer";
-import LastConditionMetDecorator from "./timing/LastConditionMetDecorator";
-import Meterable from "./model/Meterable";
 
 export default class ExtensionController {
 
@@ -132,11 +131,11 @@ export default class ExtensionController {
             return undefined;
         }
 
-        const timingsLastConditionMet =
-                workspace.getConfiguration("z80-asm-meter").get("timings.lastConditionMet", false);
+        const timingsAtExit =
+                workspace.getConfiguration("z80-asm-meter").get("timings.atExit", false);
 
-        return timingsLastConditionMet
-                ? LastConditionMetDecorator.of(metered)
+        return timingsAtExit
+                ? AtExitDecorator.of(metered)
                 : metered;
     }
 
