@@ -1,3 +1,7 @@
+## (unreleased)
+
+- Extension is now [bundled](https://code.visualstudio.com/api/working-with-extensions/bundling-extension)
+
 ## 3.5.4
 
 - Fixes missing instruction when `EX AF,AF'` is followed by a comment. #112
