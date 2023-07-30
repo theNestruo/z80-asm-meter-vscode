@@ -9,6 +9,13 @@ export default class MeterableCollection extends AggregatedMeterable {
 	// The collection of meterable instances
 	protected meterables: Meterable[] = [];
 
+    // Derived information (will be cached for performance reasons)
+    private cachedZ80Timing: number[] | undefined;
+    private cachedMsxTiming: number[] | undefined;
+    private cachedCpcTiming: number[] | undefined;
+    private cachedBytes: string[] | undefined;
+    private cachedSize: number | undefined;
+
 	/**
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
@@ -22,6 +29,13 @@ export default class MeterableCollection extends AggregatedMeterable {
 		}
 
 		this.meterables.push(meterable);
+
+		this.cachedZ80Timing = undefined;
+		this.cachedMsxTiming = undefined;
+		this.cachedCpcTiming = undefined;
+		this.cachedBytes = undefined;
+		this.cachedSize = undefined;
+
 		return true;
 	}
 
@@ -31,49 +45,64 @@ export default class MeterableCollection extends AggregatedMeterable {
 
 	getZ80Timing(): number[] {
 
-		var totalZ80Timing: number[] = [0, 0];
-		this.meterables.forEach(meterable => {
-			const z80Timing = meterable.getZ80Timing();
-			totalZ80Timing[0] += z80Timing[0];
-			totalZ80Timing[1] += z80Timing[1];
-		});
-		return totalZ80Timing;
+		if (!this.cachedZ80Timing) {
+			var totalZ80Timing: number[] = [0, 0];
+			this.meterables.forEach(meterable => {
+				const z80Timing = meterable.getZ80Timing();
+				totalZ80Timing[0] += z80Timing[0];
+				totalZ80Timing[1] += z80Timing[1];
+			});
+			this.cachedZ80Timing = totalZ80Timing;
+		}
+		return this.cachedZ80Timing;
 	}
 
 	getMsxTiming(): number[] {
 
-		var totalMsxTiming: number[] = [0, 0];
-		this.meterables.forEach(meterable => {
-			const msxTiming = meterable.getMsxTiming();
-			totalMsxTiming[0] += msxTiming[0];
-			totalMsxTiming[1] += msxTiming[1];
-		});
-		return totalMsxTiming;
+		if (!this.cachedMsxTiming) {
+			var totalMsxTiming: number[] = [0, 0];
+			this.meterables.forEach(meterable => {
+				const msxTiming = meterable.getMsxTiming();
+				totalMsxTiming[0] += msxTiming[0];
+				totalMsxTiming[1] += msxTiming[1];
+			});
+			this.cachedMsxTiming = totalMsxTiming;
+		}
+		return this.cachedMsxTiming;
 	}
 
 	getCpcTiming(): number[] {
 
-		var totalCpcTiming: number[] = [0, 0];
-		this.meterables.forEach(meterable => {
-			const cpcTiming = meterable.getCpcTiming();
-			totalCpcTiming[0] += cpcTiming[0];
-			totalCpcTiming[1] += cpcTiming[1];
-		});
-		return totalCpcTiming;
+		if (!this.cachedCpcTiming) {
+			var totalCpcTiming: number[] = [0, 0];
+			this.meterables.forEach(meterable => {
+				const cpcTiming = meterable.getCpcTiming();
+				totalCpcTiming[0] += cpcTiming[0];
+				totalCpcTiming[1] += cpcTiming[1];
+			});
+			this.cachedCpcTiming = totalCpcTiming;
+		}
+		return this.cachedCpcTiming;
 	}
 
 	getBytes(): string[] {
 
-		var bytes: string[] = [];
-		this.meterables.forEach(meterable => bytes.push(...meterable.getBytes()));
-		return bytes;
+		if (!this.cachedBytes) {
+			var bytes: string[] = [];
+			this.meterables.forEach(meterable => bytes.push(...meterable.getBytes()));
+			this.cachedBytes = bytes;
+		}
+		return this.cachedBytes;
 	}
 
 	getSize(): number {
 
-		var size: number = 0;
-		this.meterables.forEach(meterable => size += meterable.getSize());
-		return size;
+		if (!this.cachedSize) {
+			var size: number = 0;
+			this.meterables.forEach(meterable => size += meterable.getSize());
+			this.cachedSize = size;
+		}
+		return this.cachedSize;
 	}
 
 	decompose(): Meterable[] {

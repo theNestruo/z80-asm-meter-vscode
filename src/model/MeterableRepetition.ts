@@ -31,6 +31,14 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	// The number of times the meterable instance is repeated
 	private repeatCount: number;
 
+    // Derived information (will be cached for performance reasons)
+    private cachedInstruction: string | undefined;
+    private cachedZ80Timing: number[] | undefined;
+    private cachedMsxTiming: number[] | undefined;
+    private cachedCpcTiming: number[] | undefined;
+    private cachedBytes: string[] | undefined;
+    private cachedSize: number | undefined;
+
 	private constructor(meterable: Meterable, repeatCount: number) {
 		super();
 
@@ -39,42 +47,64 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	}
 
 	getInstruction(): string {
-		return this.meterable.getInstruction();
+
+		if (!this.cachedInstruction) {
+			this.cachedInstruction = this.meterable.getInstruction();
+		}
+		return this.cachedInstruction;
 	}
 
 	getZ80Timing(): number[] {
 
-		const z80Timing = this.meterable.getZ80Timing();
-		return [z80Timing[0] * this.repeatCount,
-				z80Timing[1] * this.repeatCount];
+		if (!this.cachedZ80Timing) {
+			const z80Timing = this.meterable.getZ80Timing();
+			this.cachedZ80Timing = [
+					z80Timing[0] * this.repeatCount,
+					z80Timing[1] * this.repeatCount];
+		}
+		return this.cachedZ80Timing;
 	}
 
 	getMsxTiming(): number[] {
 
-		const msxTiming = this.meterable.getMsxTiming();
-		return [msxTiming[0] * this.repeatCount,
-				msxTiming[1] * this.repeatCount];
+		if (!this.cachedMsxTiming) {
+			const msxTiming = this.meterable.getMsxTiming();
+			this.cachedMsxTiming =[
+					msxTiming[0] * this.repeatCount,
+					msxTiming[1] * this.repeatCount];
+		}
+		return this.cachedMsxTiming;
 	}
 
 	getCpcTiming(): number[] {
 
-		const cpcTiming = this.meterable.getCpcTiming();
-		return [cpcTiming[0] * this.repeatCount,
-				cpcTiming[1] * this.repeatCount];
+		if (!this.cachedCpcTiming) {
+			const cpcTiming = this.meterable.getCpcTiming();
+			this.cachedCpcTiming = [
+					cpcTiming[0] * this.repeatCount,
+					cpcTiming[1] * this.repeatCount];
+		}
+		return this.cachedCpcTiming;
 	}
 
 	getBytes(): string[] {
 
-		var bytes: string[] = [];
-		for (let i = 0; i < this.repeatCount; i++) {
-			bytes.push(...this.meterable.getBytes());
+		if (!this.cachedBytes) {
+			var bytes: string[] = [];
+			for (let i = 0; i < this.repeatCount; i++) {
+				bytes.push(...this.meterable.getBytes());
+			}
+			this.cachedBytes = bytes;
 		}
-		return bytes;
+		return this.cachedBytes;
 	}
 
 	getSize(): number {
 
-		return this.meterable.getSize() * this.repeatCount;
+		if (!this.cachedSize) {
+			this.cachedSize = this.meterable.getSize() * this.repeatCount;
+		}
+		return this.cachedSize;
 	}
 
 	isComposed(): boolean {
