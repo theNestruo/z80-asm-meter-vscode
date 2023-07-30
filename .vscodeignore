@@ -1,7 +1,6 @@
 .github
 .vscode
 node_modules/
-out/
 src/
 .gitignore
 tsconfig.json
