@@ -74,7 +74,7 @@ export default class MainParser {
         rawLine: string, labelRegExp: RegExp,
         lineSeparator: string | undefined): string[] | undefined {
 
-        // Removes surrounding label, whitespace and/or comments
+        // Removes surrounding label and/or whitespace
         const rawParts = rawLine.replace(labelRegExp, "").trim();
 
         // For every part of the line
