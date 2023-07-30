@@ -6,6 +6,13 @@ import Meterable from "./Meterable";
  */
 export default class MeterableRepetition extends AggregatedMeterable {
 
+	/**
+	 * Conditionaly builds an instance of a repetition of Meterables
+	 * @param meterable The repeated meterable instance
+	 * @param repeatCount The number of times the meterable instance is repeated
+	 * @return The repeated meterable instance, or a repetition of that Meterable,
+	 * depending on the value of repeatCount
+	 */
 	static of(meterable: Meterable | undefined, repeatCount: number): Meterable | undefined {
 
 		// (sanity check)
@@ -24,7 +31,7 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	// The number of times the meterable instance is repeated
 	private repeatCount: number;
 
-	constructor(meterable: Meterable, repeatCount: number) {
+	private constructor(meterable: Meterable, repeatCount: number) {
 		super();
 
 		this.meterable = meterable;
@@ -37,23 +44,23 @@ export default class MeterableRepetition extends AggregatedMeterable {
 
 	getZ80Timing(): number[] {
 
-		const instructionZ80Timing = this.meterable.getZ80Timing();
-		return [instructionZ80Timing[0] * this.repeatCount,
-				instructionZ80Timing[1] * this.repeatCount];
+		const z80Timing = this.meterable.getZ80Timing();
+		return [z80Timing[0] * this.repeatCount,
+				z80Timing[1] * this.repeatCount];
 	}
 
 	getMsxTiming(): number[] {
 
-		const instructionMsxTiming = this.meterable.getMsxTiming();
-		return [instructionMsxTiming[0] * this.repeatCount,
-				instructionMsxTiming[1] * this.repeatCount];
+		const msxTiming = this.meterable.getMsxTiming();
+		return [msxTiming[0] * this.repeatCount,
+				msxTiming[1] * this.repeatCount];
 	}
 
 	getCpcTiming(): number[] {
 
-		const instructionCpcTiming = this.meterable.getCpcTiming();
-		return [instructionCpcTiming[0] * this.repeatCount,
-				instructionCpcTiming[1] * this.repeatCount];
+		const cpcTiming = this.meterable.getCpcTiming();
+		return [cpcTiming[0] * this.repeatCount,
+				cpcTiming[1] * this.repeatCount];
 	}
 
 	getBytes(): string[] {
@@ -71,14 +78,10 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	}
 
 	isComposed(): boolean {
-		return false; // (for performance reasons)
+		return true;
 	}
 
 	decompose(): Meterable[] {
-
-		return [];
-		// (for performance reasons, instead of:
-		// return new Array(this.repeatCount).fill(this.meterable);
-		// )
+		return new Array(this.repeatCount).fill(this.meterable);
 	}
 }

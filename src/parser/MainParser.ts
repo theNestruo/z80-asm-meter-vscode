@@ -1,32 +1,32 @@
 import { workspace } from 'vscode';
+import MeterableCollection from '../model/MeterableCollection';
+import MeterableRepetition from '../model/MeterableRepetition';
+import { normalizeAndSplitQuotesAware } from '../utils/utils';
+import NumericExpressionParser from "./NumericExpressionParser";
 import AssemblyDirectiveParser from './directive/AssemblyDirectiveParser';
 import MacroParser from './macro/MacroParser';
-import MeterableCollection from '../model/MeterableCollection';
-import NumericExpressionParser from "./NumericExpressionParser";
 import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstructionParser';
 import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
-import { normalizeAndSplitQuotesAware } from '../utils/utils';
 import Z80InstructionParser from './z80/Z80InstructionParser';
-import MeterableRepetition from '../model/MeterableRepetition';
 
 export default class MainParser {
 
     // Configuration
     private platformConfiguration: string;
+    private sjasmplus: boolean;
     private syntaxLabelConfiguration: string;
     private syntaxLineSeparatorConfiguration: string;
     private syntaxRepeatConfiguration: string;
-    private sjasmplus: boolean;
 
     constructor() {
 
         // Saves configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         this.platformConfiguration = configuration.get("platform", "z80");
+        this.sjasmplus = configuration.get("sjasmplus", false);
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
         this.syntaxRepeatConfiguration = configuration.get("syntax.repeat", "none");
-        this.sjasmplus = configuration.get("sjasmplus", false);
     }
 
     parse(sourceCode: string | undefined): MeterableCollection {

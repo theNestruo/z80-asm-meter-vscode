@@ -9,26 +9,6 @@ export default class MeterableCollection extends AggregatedMeterable {
 	// The collection of meterable instances
 	protected meterables: Meterable[] = [];
 
-	// /**
-	//  * Adds meterables to the aggregation
-	//  * @param meterables The Meterable instances to aggregate
-	//  * @param repeatCount The number of times to add the meterables to the aggregation
-	//  * @return true if all the meterable instances were aggregated (at least one); false otherwise
-	//  */
-	// addAll(meterables: Meterable[] | undefined, repeatCount: number): boolean {
-
-	// 	// (sanity check)
-	// 	if ((!meterables) || (repeatCount <= 0)) {
-	// 		return false;
-	// 	}
-
-	// 	let ret = true;
-	// 	for (let i = 0; i < repeatCount; i++) {
-	// 		meterables.forEach(meterable => ret &&= this.add(meterable));
-	// 	}
-	// 	return ret;
-	// }
-
 	/**
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
@@ -45,61 +25,41 @@ export default class MeterableCollection extends AggregatedMeterable {
 		return true;
 	}
 
-	// /**
-	//  * Adds a meterable to the aggregation
-	//  * @param meterable The Meterable to aggregate
-	//  * @param repeatCount The number of times to add the meterable to the aggregation
-	//  * @return true if the meterable was aggregated; false otherwise
-	//  */
-	// add(meterable: Meterable | undefined, repeatCount: number): boolean {
-
-	// 	// (sanity check)
-	// 	if ((!meterable) || (repeatCount <= 0)) {
-	// 		return false;
-	// 	}
-
-	// 	// FIXME
-	// 	for (let i = 0; i < repeatCount; i++) {
-	// 		this.meterables.push(meterable);
-	// 	}
-	// 	return true;
-	// }
-
 	getInstruction(): string {
 		return "";
 	}
 
 	getZ80Timing(): number[] {
 
-		var z80Timing: number[] = [0, 0];
+		var totalZ80Timing: number[] = [0, 0];
 		this.meterables.forEach(meterable => {
-			const instructionZ80Timing = meterable.getZ80Timing();
-			z80Timing[0] += instructionZ80Timing[0];
-			z80Timing[1] += instructionZ80Timing[1];
+			const z80Timing = meterable.getZ80Timing();
+			totalZ80Timing[0] += z80Timing[0];
+			totalZ80Timing[1] += z80Timing[1];
 		});
-		return z80Timing;
+		return totalZ80Timing;
 	}
 
 	getMsxTiming(): number[] {
 
-		var msxTiming: number[] = [0, 0];
+		var totalMsxTiming: number[] = [0, 0];
 		this.meterables.forEach(meterable => {
-			const instructionMsxTiming = meterable.getMsxTiming();
-			msxTiming[0] += instructionMsxTiming[0];
-			msxTiming[1] += instructionMsxTiming[1];
+			const msxTiming = meterable.getMsxTiming();
+			totalMsxTiming[0] += msxTiming[0];
+			totalMsxTiming[1] += msxTiming[1];
 		});
-		return msxTiming;
+		return totalMsxTiming;
 	}
 
 	getCpcTiming(): number[] {
 
-		var cpcTiming: number[] = [0, 0];
+		var totalCpcTiming: number[] = [0, 0];
 		this.meterables.forEach(meterable => {
-			const instructionCpcTiming = meterable.getCpcTiming();
-			cpcTiming[0] += instructionCpcTiming[0];
-			cpcTiming[1] += instructionCpcTiming[1];
+			const cpcTiming = meterable.getCpcTiming();
+			totalCpcTiming[0] += cpcTiming[0];
+			totalCpcTiming[1] += cpcTiming[1];
 		});
-		return cpcTiming;
+		return totalCpcTiming;
 	}
 
 	getBytes(): string[] {

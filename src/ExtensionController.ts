@@ -2,7 +2,9 @@ import { commands, Disposable, env, StatusBarItem, window, workspace } from "vsc
 import MeterableCollection from "./model/MeterableCollection";
 import MainParser from "./parser/MainParser";
 import { hashCode } from "./utils/utils";
-import MeterableDecorator from "./viewer/MeterableDecorator";
+import MeterableViewer from "./viewer/MeterableViewer";
+import LastConditionMetDecorator from "./timing/LastConditionMetDecorator";
+import Meterable from "./model/Meterable";
 
 export default class ExtensionController {
 
@@ -50,7 +52,7 @@ export default class ExtensionController {
             return;
         }
 
-        const info = new MeterableDecorator(metered);
+        const info = new MeterableViewer(metered);
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
@@ -92,7 +94,7 @@ export default class ExtensionController {
             return;
         }
 
-        const info = new MeterableDecorator(z80Block);
+        const info = new MeterableViewer(z80Block);
 
         // Builds the text to copy to clipbaord
         const timingText = info.getTimingAsText(true);
@@ -123,11 +125,18 @@ export default class ExtensionController {
             : editor.document.getText(editor.selection);
     }
 
-    private meterFromSourceCode(sourceCode: string | undefined): MeterableCollection | undefined {
+    private meterFromSourceCode(sourceCode: string | undefined): Meterable | undefined {
 
         const metered = new MainParser().parse(sourceCode);
-        return (metered.getSize() === 0)
-                ? undefined
+        if (metered.getSize() === 0) {
+            return undefined;
+        }
+
+        const timingsLastConditionMet =
+                workspace.getConfiguration("z80-asm-meter").get("timings.lastConditionMet", false);
+
+        return timingsLastConditionMet
+                ? LastConditionMetDecorator.of(metered)
                 : metered;
     }
 

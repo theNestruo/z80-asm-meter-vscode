@@ -1,20 +1,20 @@
 import { MarkdownString, workspace } from 'vscode';
 import Meterable from '../model/Meterable';
-import MeterableCollection from '../model/MeterableCollection';
+import LastConditionMetDecorator from '../timing/LastConditionMetDecorator';
 import { formatTiming } from '../utils/utils';
 
 /**
- * Decorates a MeterableCollection instance to print human-readble information
+ * Print human-readble information from a Meterable instance
  */
-export default class MeterableDecorator {
+export default class MeterableViewer {
 
     // The MeterableCollection instance
-    private metered: MeterableCollection;
+    private metered: Meterable;
 
     // Configuration
     private platformConfiguration: string | undefined = undefined;
 
-    constructor(metered: MeterableCollection) {
+    constructor(metered: Meterable) {
 
         this.metered = metered;
 
@@ -57,6 +57,8 @@ export default class MeterableDecorator {
             return undefined;
         }
 
+        const decorated = this.metered instanceof LastConditionMetDecorator;
+
         // As text, with optional suffix
         let text = formatTiming(timing);
         if (this.platformConfiguration === "pc8000") {
@@ -65,6 +67,9 @@ export default class MeterableDecorator {
         }
         if (suffix) {
             text += (this.platformConfiguration === "cpc") ? " NOPs" : " clock cycles";
+        }
+        if (decorated) {
+            text += "*";
         }
         return text;
     }
@@ -109,25 +114,30 @@ export default class MeterableDecorator {
             return undefined;
         }
 
+        const decorated = this.metered instanceof LastConditionMetDecorator;
+        const decoration = decorated ? "<sup>*</sup>" : "";
+
         const tooltip = new MarkdownString();
 
         // Tooltip: Timing and size table
         tooltip.appendMarkdown("|||\n|---|---|\n");
         if (this.platformConfiguration === "msx") {
             const msxText = formatTiming(this.metered.getMsxTiming());
-            tooltip.appendMarkdown(`|**MSX (Z80+M1)**|${msxText} clock cycles|\n`);
+            tooltip.appendMarkdown(`|**MSX (Z80+M1)**|${msxText} clock cycles${decoration}|\n`);
         }
         if (this.platformConfiguration === "cpc") {
             const cpcText = formatTiming(this.metered.getCpcTiming());
-            tooltip.appendMarkdown(`|**Amstrad CPC**|${cpcText} NOPs|\n`);
+            tooltip.appendMarkdown(`|**Amstrad CPC**|${cpcText} NOPs${decoration}|\n`);
         }
         const z80text = formatTiming(this.metered.getZ80Timing());
-        tooltip.appendMarkdown(`|**Z80**|${z80text} clock cycles|\n`);
+        tooltip.appendMarkdown(`|**Z80**|${z80text} clock cycles${decoration}|\n`);
         if (this.platformConfiguration === "pc8000") {
             const m1Text = formatTiming(this.metered.getMsxTiming());
-            tooltip.appendMarkdown(`|**Z80+M1**|${m1Text} clock cycles|\n`);
+            tooltip.appendMarkdown(`|**Z80+M1**|${m1Text} clock cycles${decoration}|\n`);
         }
-
+        if (decorated) {
+            tooltip.appendMarkdown("||<sup>*</sup>at exit|\n");
+        }
         const sizeText = this.getSizeAsText();
         if (sizeText) {
             tooltip.appendMarkdown(`|**Size**|${sizeText}|\n\n`);
@@ -136,7 +146,9 @@ export default class MeterableDecorator {
 
         // Tooltip: action
         const timingText = this.getTimingAsText(true);
-        tooltip.appendMarkdown(`Copy "${timingText}, ${sizeText}" to clipboard\n`);
+        tooltip.appendMarkdown(!!timingText
+                ? `Copy "${timingText}, ${sizeText}" to clipboard\n`
+                : `Copy "${sizeText}" to clipboard\n`);
 
         return tooltip;
     }
@@ -144,9 +156,11 @@ export default class MeterableDecorator {
     /**
      * The MeterableCollection instance, as a queue to be used in next() and last() methods
      */
-     private queue(): Meterable[] {
+    private queue(): Meterable[] {
 
-        return [this.metered];
+        return this.metered.isComposed()
+                ? this.metered.decompose()
+                : [ this.metered ];
     }
 
     /**
@@ -155,15 +169,7 @@ export default class MeterableDecorator {
      */
     private next(queue: Meterable[]): Meterable | undefined {
 
-        if (!queue) {
-            return undefined;
-        }
-        const meterable = queue.shift();
-        // if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
-        //     queue.unshift(...meterable.getMeterables());
-        //     return this.next(queue);
-        // }
-        return meterable;
+        return queue?.shift();
     }
 
     /**
@@ -172,14 +178,6 @@ export default class MeterableDecorator {
      */
      private last(queue: Meterable[]): Meterable | undefined {
 
-        if (!queue) {
-            return undefined;
-        }
-        const meterable = queue.pop();
-        // if ((meterable instanceof MeterableCollection) && (!meterable.getInstruction())) {
-        //     queue.unshift(...meterable.getMeterables());
-        //     return this.last(queue);
-        // }
-        return meterable;
+        return queue?.pop();
     }
 }
