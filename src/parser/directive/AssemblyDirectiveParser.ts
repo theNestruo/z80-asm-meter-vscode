@@ -113,8 +113,8 @@ export default class AssemblyDirectiveParser {
             return undefined;
         }
         const value = operands.length === 2
-                ? NumericExpressionParser.parse(operands[1])
-                : undefined;
+            ? NumericExpressionParser.parse(operands[1])
+            : undefined;
 
         // Determines instruction
         if (this.directivesAsInstructions === "defs") {

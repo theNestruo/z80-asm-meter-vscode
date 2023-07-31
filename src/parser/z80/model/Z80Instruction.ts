@@ -111,31 +111,31 @@ export default class Z80Instruction implements Meterable {
         // Expands bit
         if (expandableExpression.substring(0, 4) === "+8*b") {
             const bitExpanded: Z80Instruction[] = [
-                    this.expandWithFactorUsing(this, /b/, "0", "+8*b", 8, 0),
-                    this.expandWithFactorUsing(this, /b/, "1", "+8*b", 8, 1),
-                    this.expandWithFactorUsing(this, /b/, "2", "+8*b", 8, 2),
-                    this.expandWithFactorUsing(this, /b/, "3", "+8*b", 8, 3),
-                    this.expandWithFactorUsing(this, /b/, "4", "+8*b", 8, 4),
-                    this.expandWithFactorUsing(this, /b/, "5", "+8*b", 8, 5),
-                    this.expandWithFactorUsing(this, /b/, "6", "+8*b", 8, 6),
-                    this.expandWithFactorUsing(this, /b/, "7", "+8*b", 8, 7) ];
+                this.expandWithFactorUsing(this, /b/, "0", "+8*b", 8, 0),
+                this.expandWithFactorUsing(this, /b/, "1", "+8*b", 8, 1),
+                this.expandWithFactorUsing(this, /b/, "2", "+8*b", 8, 2),
+                this.expandWithFactorUsing(this, /b/, "3", "+8*b", 8, 3),
+                this.expandWithFactorUsing(this, /b/, "4", "+8*b", 8, 4),
+                this.expandWithFactorUsing(this, /b/, "5", "+8*b", 8, 5),
+                this.expandWithFactorUsing(this, /b/, "6", "+8*b", 8, 6),
+                this.expandWithFactorUsing(this, /b/, "7", "+8*b", 8, 7)];
             if (expandableExpression.substring(0, 6) !== "+8*b+r") {
                 return [
-                        this, // (keeps unexpanded bit instruction)
-                        ...bitExpanded ];
+                    this, // (keeps unexpanded bit instruction)
+                    ...bitExpanded];
             }
 
             // Expands bit *and* 8 bit register
             const ret: Z80Instruction[] = [];
             bitExpanded.forEach(base => {
                 ret.push(
-                        this.expandUsing(base, /r/, "A", "+r", 7),
-                        this.expandUsing(base, /r/, "B", "+r", 0),
-                        this.expandUsing(base, /r/, "C", "+r", 1),
-                        this.expandUsing(base, /r/, "D", "+r", 2),
-                        this.expandUsing(base, /r/, "E", "+r", 3),
-                        this.expandUsing(base, /r/, "H", "+r", 4),
-                        this.expandUsing(base, /r/, "L", "+r", 5) );
+                    this.expandUsing(base, /r/, "A", "+r", 7),
+                    this.expandUsing(base, /r/, "B", "+r", 0),
+                    this.expandUsing(base, /r/, "C", "+r", 1),
+                    this.expandUsing(base, /r/, "D", "+r", 2),
+                    this.expandUsing(base, /r/, "E", "+r", 3),
+                    this.expandUsing(base, /r/, "H", "+r", 4),
+                    this.expandUsing(base, /r/, "L", "+r", 5));
             });
             // (keeps unexpanded bit instructions)
             ret.push(
@@ -153,55 +153,55 @@ export default class Z80Instruction implements Meterable {
         // Expands high/low part of the IX register
         if (this.instruction.indexOf("IXp") !== -1) {
             return (expandableExpression.substring(0, 4) === "+8*p")
-                    ? [ this.expandWithFactorUsing(this, /IXp/, "IXh", "+8*p", 8, 4),
-                        this.expandWithFactorUsing(this, /IXp/, "IXl", "+8*p", 8, 5) ]
-                    : [ this.expandUsing(this, /IXp/, "IXh", "+p", 4),
-                        this.expandUsing(this, /IXp/, "IXl", "+p", 5) ];
+                ? [this.expandWithFactorUsing(this, /IXp/, "IXh", "+8*p", 8, 4),
+                this.expandWithFactorUsing(this, /IXp/, "IXl", "+8*p", 8, 5)]
+                : [this.expandUsing(this, /IXp/, "IXh", "+p", 4),
+                this.expandUsing(this, /IXp/, "IXl", "+p", 5)];
         }
 
         // Expands high/low part of the IY register
         if (this.instruction.indexOf("IYq") !== -1) {
             return (expandableExpression.substring(0, 4) === "+8*q")
-                    ? [ this.expandWithFactorUsing(this, /IYq/, "IYh", "+8*q", 8, 4),
-                        this.expandWithFactorUsing(this, /IYq/, "IYl", "+8*q", 8, 5) ]
-                    : [ this.expandUsing(this, /IYq/, "IYh", "+q", 4),
-                        this.expandUsing(this, /IYq/, "IYl", "+q", 5) ];
+                ? [this.expandWithFactorUsing(this, /IYq/, "IYh", "+8*q", 8, 4),
+                this.expandWithFactorUsing(this, /IYq/, "IYl", "+8*q", 8, 5)]
+                : [this.expandUsing(this, /IYq/, "IYh", "+q", 4),
+                this.expandUsing(this, /IYq/, "IYl", "+q", 5)];
         }
 
         // Expands 8 bit register where H/L have been replaced by IXh/IXl
         if (expandableExpression.substring(0, 2) === "+p") {
             return [
-                    this.expandUsing(this, /p/, "A", "+p", 7),
-                    this.expandUsing(this, /p/, "B", "+p", 0),
-                    this.expandUsing(this, /p/, "C", "+p", 1),
-                    this.expandUsing(this, /p/, "D", "+p", 2),
-                    this.expandUsing(this, /p/, "E", "+p", 3),
-                    this.expandUsing(this, /p/, "IXh", "+p", 4),
-                    this.expandUsing(this, /p/, "IXl", "+p", 5) ];
+                this.expandUsing(this, /p/, "A", "+p", 7),
+                this.expandUsing(this, /p/, "B", "+p", 0),
+                this.expandUsing(this, /p/, "C", "+p", 1),
+                this.expandUsing(this, /p/, "D", "+p", 2),
+                this.expandUsing(this, /p/, "E", "+p", 3),
+                this.expandUsing(this, /p/, "IXh", "+p", 4),
+                this.expandUsing(this, /p/, "IXl", "+p", 5)];
         }
 
         // Expands 8 bit register where H/L have been replaced by IYh/IYl
         if (expandableExpression.substring(0, 2) === "+q") {
             return [
-                    this.expandUsing(this, /q/, "A", "+q", 7),
-                    this.expandUsing(this, /q/, "B", "+q", 0),
-                    this.expandUsing(this, /q/, "C", "+q", 1),
-                    this.expandUsing(this, /q/, "D", "+q", 2),
-                    this.expandUsing(this, /q/, "E", "+q", 3),
-                    this.expandUsing(this, /q/, "IYh", "+q", 4),
-                    this.expandUsing(this, /q/, "IYl", "+q", 5) ];
+                this.expandUsing(this, /q/, "A", "+q", 7),
+                this.expandUsing(this, /q/, "B", "+q", 0),
+                this.expandUsing(this, /q/, "C", "+q", 1),
+                this.expandUsing(this, /q/, "D", "+q", 2),
+                this.expandUsing(this, /q/, "E", "+q", 3),
+                this.expandUsing(this, /q/, "IYh", "+q", 4),
+                this.expandUsing(this, /q/, "IYl", "+q", 5)];
         }
 
         // Expands 8 bit register
         if (expandableExpression.substring(0, 2) === "+r") {
             return [
-                    this.expandUsing(this, /r/, "A", "+r", 7),
-                    this.expandUsing(this, /r/, "B", "+r", 0),
-                    this.expandUsing(this, /r/, "C", "+r", 1),
-                    this.expandUsing(this, /r/, "D", "+r", 2),
-                    this.expandUsing(this, /r/, "E", "+r", 3),
-                    this.expandUsing(this, /r/, "H", "+r", 4),
-                    this.expandUsing(this, /r/, "L", "+r", 5) ];
+                this.expandUsing(this, /r/, "A", "+r", 7),
+                this.expandUsing(this, /r/, "B", "+r", 0),
+                this.expandUsing(this, /r/, "C", "+r", 1),
+                this.expandUsing(this, /r/, "D", "+r", 2),
+                this.expandUsing(this, /r/, "E", "+r", 3),
+                this.expandUsing(this, /r/, "H", "+r", 4),
+                this.expandUsing(this, /r/, "L", "+r", 5)];
         }
 
         // (should never happen)
@@ -209,26 +209,26 @@ export default class Z80Instruction implements Meterable {
     }
 
     private expandUsing(base: Z80Instruction,
-            searchInstruction: RegExp, replacementInstruction: string,
-            searchOpcodes: string, addend: number): Z80Instruction {
+        searchInstruction: RegExp, replacementInstruction: string,
+        searchOpcodes: string, addend: number): Z80Instruction {
 
         return this.expandWithFactorUsing(base,
-                searchInstruction, replacementInstruction,
-                searchOpcodes, 1, addend);
+            searchInstruction, replacementInstruction,
+            searchOpcodes, 1, addend);
     }
 
     private expandWithFactorUsing(base: Z80Instruction,
-            searchInstruction: RegExp, replacementInstruction: string,
-            searchOpcodes: string, factor: number, addend: number): Z80Instruction {
+        searchInstruction: RegExp, replacementInstruction: string,
+        searchOpcodes: string, factor: number, addend: number): Z80Instruction {
 
         return this.expandWithInfixUsing(base,
-                searchInstruction, replacementInstruction,
-                searchOpcodes, factor, addend, "");
+            searchInstruction, replacementInstruction,
+            searchOpcodes, factor, addend, "");
     }
 
     private expandWithInfixUsing(base: Z80Instruction,
-            searchInstruction: RegExp, replacementInstruction: string,
-            searchOpcodes: string, factor: number, addend: number, infix: string): Z80Instruction {
+        searchInstruction: RegExp, replacementInstruction: string,
+        searchOpcodes: string, factor: number, addend: number, infix: string): Z80Instruction {
 
         const expandedInstruction = base.instruction.replace(searchInstruction, replacementInstruction);
         const index = base.opcodes.indexOf(searchOpcodes);
@@ -238,13 +238,13 @@ export default class Z80Instruction implements Meterable {
         const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + factor * addend) + infix + suffix;
 
         return new Z80Instruction(
-                base.instructionSet,
-                expandedInstruction,
-                formatTiming(base.z80Timing),
-                formatTiming(base.msxTiming),
-                formatTiming(base.cpcTiming),
-                expandedOpcodes,
-                base.size.toString());
+            base.instructionSet,
+            expandedInstruction,
+            formatTiming(base.z80Timing),
+            formatTiming(base.msxTiming),
+            formatTiming(base.cpcTiming),
+            expandedOpcodes,
+            base.size.toString());
     }
 
     /**
@@ -324,14 +324,14 @@ export default class Z80Instruction implements Meterable {
                     return 0;
                 }
 
-            // Checks explicit accumulator syntax
+                // Checks explicit accumulator syntax
             } else if (candidateOperands.length === expectedOperands.length + 1) {
                 if ((!(explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed()))
                     || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
 
-            // Operand count mismatch
+                // Operand count mismatch
             } else {
                 return 0;
             }
@@ -370,7 +370,7 @@ export default class Z80Instruction implements Meterable {
         if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
             // (checks for SDCC index register syntax first)
             return sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand)
-                    || this.indirectOperandScore(expectedOperand, candidateOperand);
+                || this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
         // Depending on the expected operand...

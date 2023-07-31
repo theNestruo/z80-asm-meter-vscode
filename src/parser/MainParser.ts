@@ -2,6 +2,9 @@ import { workspace } from 'vscode';
 import Meterable from '../model/Meterable';
 import MeterableCollection from '../model/MeterableCollection';
 import MeterableRepetition from '../model/MeterableRepetition';
+import SourceCodeLine from '../model/SourceCodeLine';
+import SourceCodePart from '../model/SourceCodePart';
+import SubroutineTimingHintDecorator from '../timing/SubroutineTimingHintDecorator';
 import { normalizeAndSplitQuotesAware } from '../utils/utils';
 import NumericExpressionParser from "./NumericExpressionParser";
 import AssemblyDirectiveParser from './directive/AssemblyDirectiveParser';
@@ -9,9 +12,6 @@ import MacroParser from './macro/MacroParser';
 import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstructionParser';
 import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
 import Z80InstructionParser from './z80/Z80InstructionParser';
-import SourceCodeLine from '../model/SourceCodeLine';
-import SourceCodePart from '../model/SourceCodePart';
-import SubroutineTimingHintDecorator from '../timing/SubroutineTimingHintDecorator';
 
 export default class MainParser {
 
@@ -53,17 +53,17 @@ export default class MainParser {
 
         // Determines syntax
         const labelRegExp = this.syntaxLabelConfiguration === "colonOptional"
-                ? /(^[^\s:]+([\s:]|$))/
-                : /(^\s*[^\s:]+:)/;
+            ? /(^[^\s:]+([\s:]|$))/
+            : /(^\s*[^\s:]+:)/;
         const lineSeparator =
-                this.syntaxLineSeparatorConfiguration === "colon" ? ":"
+            this.syntaxLineSeparatorConfiguration === "colon" ? ":"
                 : this.syntaxLineSeparatorConfiguration === "pipe" ? "|"
-                : undefined;
+                    : undefined;
 
         // Extracts the instructions for every line
         rawSourceCodeLines.forEach(rawSourceCodeLine => {
             const sourceCodeLines =
-                    this.extractSourceCodeLinesFrom(rawSourceCodeLine, labelRegExp, lineSeparator);
+                this.extractSourceCodeLinesFrom(rawSourceCodeLine, labelRegExp, lineSeparator);
 
             // Parses the instructions
             sourceCodeLines.getParts().forEach((sourceCodePart: SourceCodePart) => {
@@ -86,7 +86,7 @@ export default class MainParser {
     }
 
     private parseSourceCodePart(
-            sourceCodePart: SourceCodePart): Meterable | undefined {
+        sourceCodePart: SourceCodePart): Meterable | undefined {
 
         const rawPart = sourceCodePart.getPart();
         const rawInstruction = this.extractRawInstruction(rawPart);
@@ -108,8 +108,8 @@ export default class MainParser {
         // Determines syntax
         const repeatRegExp =
             this.syntaxRepeatConfiguration === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-            : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
-            : undefined;
+                : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
+                    : undefined;
         if (!repeatRegExp) {
             return 1;
         }
@@ -129,8 +129,8 @@ export default class MainParser {
         // Determines syntax
         const repeatRegExp =
             this.syntaxRepeatConfiguration === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-            : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
-            : undefined;
+                : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
+                    : undefined;
         if (!repeatRegExp) {
             return s;
         }
@@ -145,8 +145,8 @@ export default class MainParser {
 
         // Determines instruction sets
         const instructionSets =
-            this.platformConfiguration === "z80n" ? [ "S", "N" ]
-            : [ "S" ];
+            this.platformConfiguration === "z80n" ? ["S", "N"]
+                : ["S"];
 
         // Tries to parse Z80 instructions
         const z80Instruction = Z80InstructionParser.instance.parseInstruction(s, instructionSets);
@@ -157,12 +157,12 @@ export default class MainParser {
         // Tries to parse sjasmplus alternative syntax and fake instructions
         if (this.sjasmplusConfiguration) {
             const sjasmplusFakeInstruction =
-                    SjasmplusFakeInstructionParser.instance.parse(s, instructionSets);
+                SjasmplusFakeInstructionParser.instance.parse(s, instructionSets);
             if (!!sjasmplusFakeInstruction) {
                 return sjasmplusFakeInstruction;
             }
             const sjasmplusRegisterListInstruction =
-                    SjasmplusRegisterListInstructionParser.instance.parse(s, instructionSets);
+                SjasmplusRegisterListInstructionParser.instance.parse(s, instructionSets);
             if (sjasmplusRegisterListInstruction) {
                 return sjasmplusRegisterListInstruction;
             }

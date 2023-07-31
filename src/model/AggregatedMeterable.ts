@@ -17,15 +17,15 @@ export default abstract class AggregatedMeterable implements Meterable {
 
 	abstract getSize(): number;
 
-    /**
-     * @returns true; this meterable is composed
-     */
+	/**
+	 * @returns true; this meterable is composed
+	 */
 	isComposed(): boolean {
 		return true;
 	}
 
-    /**
-     * @returns the flattened array of the finer-grained meterables that compose this meterable
-     */
+	/**
+	 * @returns the flattened array of the finer-grained meterables that compose this meterable
+	 */
 	abstract getFlattenedMeterables(): Meterable[];
 }

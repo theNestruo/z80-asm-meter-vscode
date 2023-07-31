@@ -44,10 +44,11 @@ export default class Macro extends MeterableCollection {
 	 * @returns The Z80 timing, in time (T) cycles
 	 */
 	getZ80Timing(): number[] {
-		if (this.providedZ80Timing !== undefined) {
+
+		if (this.providedZ80Timing) {
 			return this.providedZ80Timing;
 		}
-        this.init();
+		this.init();
 		return super.getZ80Timing();
 	}
 
@@ -55,7 +56,8 @@ export default class Macro extends MeterableCollection {
 	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
 	 */
 	getMsxTiming(): number[] {
-		if (this.providedMsxTiming !== undefined) {
+
+		if (this.providedMsxTiming) {
 			return this.providedMsxTiming;
 		}
 		this.init();
@@ -66,7 +68,8 @@ export default class Macro extends MeterableCollection {
 	 * @returns The CPC timing, in NOPS
 	 */
 	getCpcTiming(): number[] {
-		if (this.providedCpcTiming !== undefined) {
+
+		if (this.providedCpcTiming) {
 			return this.providedCpcTiming;
 		}
 		this.init();
@@ -77,6 +80,7 @@ export default class Macro extends MeterableCollection {
 	 * @returns The bytes
 	 */
 	getBytes(): string[] {
+
 		this.init();
 		const bytes = super.getBytes();
 		if (bytes.length) {
@@ -84,15 +88,16 @@ export default class Macro extends MeterableCollection {
 		}
 		const size = this.getSize();
 		return size
-				? new Array(size).fill("n")
-				: [];
+			? new Array(size).fill("n")
+			: [];
 	}
 
 	/**
 	 * @returns The size in bytes
 	 */
 	getSize(): number {
-		if (this.providedSize !== undefined) {
+
+		if (this.providedSize) {
 			return this.providedSize;
 		}
 		return super.getSize();
@@ -105,11 +110,11 @@ export default class Macro extends MeterableCollection {
 			return;
 		}
 
-		if (this.providedInstructions !== undefined) {
+		if (this.providedInstructions) {
 			this.providedInstructions.forEach(rawPart => {
 				const rawInstruction = extractRawInstruction(rawPart);
 				const instruction =
-						Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
+					Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
 				this.add(instruction);
 			});
 		}
