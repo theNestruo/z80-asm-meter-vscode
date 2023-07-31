@@ -17,7 +17,7 @@ export default class AtExitDecorator implements Meterable {
 
 		// Length check
 		const meterables: Meterable[] = meterable.isComposed()
-				? [ ...meterable.decompose() ]
+				? [ ...meterable.getFlattenedMeterables() ]
 				: [ meterable ];
 		if (meterables.length < 2) {
 			return meterable;
@@ -55,7 +55,7 @@ export default class AtExitDecorator implements Meterable {
 	getZ80Timing(): number[] {
 
 		if (!this.cachedZ80Timing) {
-			const meterables = this.decompose();
+			const meterables = this.getFlattenedMeterables();
 			let i = 0;
 			const n = meterables.length;
 			var totalZ80Timing: number[] = [0, 0];
@@ -72,7 +72,7 @@ export default class AtExitDecorator implements Meterable {
 	getMsxTiming(): number[] {
 
 		if (!this.cachedMsxTiming) {
-			const meterables = this.decompose();
+			const meterables = this.getFlattenedMeterables();
 			let i = 0;
 			const n = meterables.length;
 			var totalMsxTiming: number[] = [0, 0];
@@ -89,7 +89,7 @@ export default class AtExitDecorator implements Meterable {
 	getCpcTiming(): number[] {
 
 		if (!this.cachedCpcTiming) {
-			const meterables = this.decompose();
+			const meterables = this.getFlattenedMeterables();
 			let i = 0;
 			const n = meterables.length;
 			var totalCpcTiming: number[] = [0, 0];
@@ -115,11 +115,11 @@ export default class AtExitDecorator implements Meterable {
 		return true;
 	}
 
-	decompose(): Meterable[] {
+	getFlattenedMeterables(): Meterable[] {
 
 		if (!this.cachedMeterables) {
 			this.cachedMeterables = this.decoratedMeterable.isComposed()
-					? this.decoratedMeterable.decompose()
+					? this.decoratedMeterable.getFlattenedMeterables()
 					: [ this.decoratedMeterable ];
 		}
 		return this.cachedMeterables;

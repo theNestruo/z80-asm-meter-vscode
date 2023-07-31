@@ -107,7 +107,7 @@ export default class MeterableViewer {
 
     getDetailedMarkdownString(): MarkdownString | undefined {
 
-        const meterables = this.metered.decompose();
+        const meterables = this.metered.getFlattenedMeterables();
 
         // (empty)
         if (!meterables.length) {
@@ -159,7 +159,7 @@ export default class MeterableViewer {
     private queue(): Meterable[] {
 
         return this.metered.isComposed()
-                ? [ ...this.metered.decompose() ]
+                ? [ ...this.metered.getFlattenedMeterables() ]
                 : [ this.metered ];
     }
 

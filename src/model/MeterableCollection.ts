@@ -107,13 +107,13 @@ export default class MeterableCollection extends AggregatedMeterable {
 		return this.cachedSize;
 	}
 
-	decompose(): Meterable[] {
+	getFlattenedMeterables(): Meterable[] {
 
 		if (!this.cachedMeterables?.length) {
 			var flattenedMeterables: Meterable[] = [];
 			this.meterables.forEach(meterable => {
 				if (meterable.isComposed()) {
-					flattenedMeterables.push(...meterable.decompose());
+					flattenedMeterables.push(...meterable.getFlattenedMeterables());
 				} else {
 					flattenedMeterables.push(meterable);
 				}

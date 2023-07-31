@@ -5,10 +5,14 @@ import SourceCodePart from "./SourceCodePart";
  */
 export default class SourceCodeLine {
 
+	/** The source code parts */
 	private parts: string[] = [];
+
+	/** The trailing comment */
 	private comment: string | undefined;
 
 	constructor(parts?: string[], comment?: string) {
+
 		this.parts = parts ? parts : [];
 		this.comment = comment;
 	}
@@ -32,7 +36,6 @@ export default class SourceCodeLine {
 	}
 
 	getPartsAsString(): string[] {
-
 		return this.parts;
 	}
 

@@ -124,7 +124,7 @@ export default class SubroutineTimingHintDecorator implements Meterable {
 		return false;
 	}
 
-	decompose(): Meterable[] {
+	getFlattenedMeterables(): Meterable[] {
 		return [];
 	}
 

@@ -73,7 +73,7 @@ export default class Z80Instruction implements Meterable {
         return false;
     }
 
-    decompose(): Meterable[] {
+    getFlattenedMeterables(): Meterable[] {
         return [];
     }
 
@@ -275,9 +275,14 @@ export default class Z80Instruction implements Meterable {
             return this.explicitAccumulatorSyntaxAllowed;
         }
 
-        if (!this.getMnemonic().match(/^(ADC|ADD|AND|CP|DEC|INC|OR|RL|RLC|RR|RRC|SBC|SLA|SRA|SRL|SUB|XOR)$/)) {
+        const explicitAccumulatorSyntaxMnemonics = [
+            "ADC", "ADD", "AND", "CP", "DEC", "INC", "OR", "RL", "RLC", "RR",
+            "RRC", "SBC", "SLA", "SRA", "SRL", "SUB", "XOR"
+        ];
+        if (explicitAccumulatorSyntaxMnemonics.indexOf(this.getMnemonic()) === -1) {
             return this.explicitAccumulatorSyntaxAllowed = false;
         }
+
         const operands = this.getOperands();
         return this.explicitAccumulatorSyntaxAllowed = operands.length === 1;
     }

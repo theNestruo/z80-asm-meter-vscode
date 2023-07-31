@@ -49,7 +49,7 @@ export default class AssemblyDirective implements Meterable {
         return false;
     }
 
-    decompose(): Meterable[] {
+    getFlattenedMeterables(): Meterable[] {
 		return [];
     }
 }

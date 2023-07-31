@@ -42,5 +42,5 @@ export default interface Meterable {
      * @returns the flattened array of the finer-grained meterables that compose this meterable
      * (when the meterable is composed); empty array otherwise
      */
-    decompose(): Meterable[];
+    getFlattenedMeterables(): Meterable[];
 }

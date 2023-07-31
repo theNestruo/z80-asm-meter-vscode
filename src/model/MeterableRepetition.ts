@@ -39,6 +39,11 @@ export default class MeterableRepetition extends AggregatedMeterable {
     private cachedBytes: string[] | undefined;
     private cachedSize: number | undefined;
 
+	/**
+	 * Constructor
+	 * @param meterable The repeated meterable instance
+	 * @param repeatCount The number of times the meterable instance is repeated
+	 */
 	private constructor(meterable: Meterable, repeatCount: number) {
 		super();
 
@@ -107,11 +112,19 @@ export default class MeterableRepetition extends AggregatedMeterable {
 		return this.cachedSize;
 	}
 
-	isComposed(): boolean {
-		return true;
-	}
+	getFlattenedMeterables(): Meterable[] {
 
-	decompose(): Meterable[] {
-		return new Array(this.repeatCount).fill(this.meterable);
+		// Nested meterable is simple
+		if (!this.meterable.isComposed()) {
+			return new Array(this.repeatCount).fill(this.meterable);
+		}
+
+		// Nested meterable is composed
+		const repeatedMeterables = this.meterable.getFlattenedMeterables();
+		const meterables = new Array();
+		for (let i = 0; i < this.repeatCount; i++) {
+			meterables.push(...repeatedMeterables);
+		}
+		return meterables;
 	}
 }
