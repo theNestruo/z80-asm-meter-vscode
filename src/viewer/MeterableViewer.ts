@@ -26,20 +26,20 @@ export default class MeterableViewer {
     getInstructionsAsText(): string | undefined {
 
         const queue = this.queue();
-        const firstMeterable = this.next(queue);
+        const firstInstruction = this.firstInstruction(queue);
 
         // (empty)
-        if (!firstMeterable) {
+        if (!firstInstruction) {
             return undefined;
         }
 
-        const lastMeterable = this.last(queue);
-        let text = firstMeterable.getInstruction();
-        if (lastMeterable) {
+        const lastInstruction = this.lastInstruction(queue);
+        let text = firstInstruction;
+        if (lastInstruction) {
             if (queue.length) {
                 text += " ...";
             }
-            text += " " + lastMeterable.getInstruction();
+            text += ` ${lastInstruction}`;
         }
         return text;
     }
@@ -77,20 +77,20 @@ export default class MeterableViewer {
     getBytesAsText(): string | undefined {
 
         const queue = this.queue();
-        const firstMeterable = this.next(queue);
+        const firstBytes = this.firstBytes(queue);
 
         // (empty)
-        if (!firstMeterable) {
+        if (!firstBytes) {
             return undefined;
         }
 
-        const lastMeterable = this.last(queue);
-        let text = firstMeterable.getBytes().join(" ");
-        if (lastMeterable) {
+        const lastBytes = this.lastBytes(queue);
+        let text = firstBytes.join(" ");
+        if (lastBytes) {
             if (queue.length) {
                 text += " ...";
             }
-            text += " " + lastMeterable.getBytes().join(" ");
+            text += " " + lastBytes.join(" ");
         }
         return text;
     }
@@ -154,7 +154,8 @@ export default class MeterableViewer {
     }
 
     /**
-     * The MeterableCollection instance, as a queue to be used in next() and last() methods
+     * @return the flattened array of the finer-grained meterables,
+     * as a queue to be used in first*() and last*() methods
      */
     private queue(): Meterable[] {
 
@@ -163,21 +164,47 @@ export default class MeterableViewer {
                 : [ this.metered ];
     }
 
-    /**
-     * Advances the meterable collection from the start, unnesting the meterables if possible
-     * @return the next unaggregated Meterable in the collection
-     */
-    private next(queue: Meterable[]): Meterable | undefined {
+    private firstInstruction(queue: Meterable[]): string | undefined {
 
-        return queue?.shift();
+        while (queue.length) {
+            const instruction = queue.shift()?.getInstruction();
+            if (instruction) {
+                return instruction;
+            }
+        }
+        return undefined;
     }
 
-    /**
-     * Advances the meterable collection from the end, unnesting the meterables if possible
-     * @return the last unaggregated Meterable in the collection
-     */
-     private last(queue: Meterable[]): Meterable | undefined {
+    private lastInstruction(queue: Meterable[]): string | undefined {
 
-        return queue?.pop();
+        while (queue.length) {
+            const instruction = queue.pop()?.getInstruction();
+            if (instruction) {
+                return instruction;
+            }
+        }
+        return undefined;
+    }
+
+    private firstBytes(queue: Meterable[]): string[] | undefined {
+
+        while (queue.length) {
+            const bytes = queue.shift()?.getBytes();
+            if (bytes && bytes.length) {
+                return bytes;
+            }
+        }
+        return undefined;
+    }
+
+    private lastBytes(queue: Meterable[]): string[] | undefined {
+
+        while (queue.length) {
+            const bytes = queue.pop()?.getBytes();
+            if (bytes && bytes.length) {
+                return bytes;
+            }
+        }
+        return undefined;
     }
 }

@@ -115,7 +115,15 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
  */
 export function isVerbatimOperand(operand: string): boolean {
 
-    return !!operand.match(/^(A|AF'?|BC?|N?C|DE?|E|HL?|L|I|I[XY]|R|SP|N?Z|M|P[OE]?)$/);
+    const verbatimOperands = [
+        "A", "AF", "AF'",
+        "B", "BC", "C", "NC",
+        "D", "DE", "E",
+        "H", "HL", "L",
+        "I", "IX", "IY", "R", "SP",
+        "Z", "NZ", "M", "P", "PE", "PO"
+    ];
+    return verbatimOperands.indexOf(operand) !== -1;
 }
 
 /**

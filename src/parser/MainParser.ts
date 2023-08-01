@@ -4,7 +4,7 @@ import MeterableCollection from '../model/MeterableCollection';
 import MeterableRepetition from '../model/MeterableRepetition';
 import SourceCodeLine from '../model/SourceCodeLine';
 import SourceCodePart from '../model/SourceCodePart';
-import SubroutineTimingHintDecorator from '../timing/SubroutineTimingHintDecorator';
+import TimingHintDecorator from '../timing/TimingHintDecorator';
 import { normalizeAndSplitQuotesAware } from '../utils/utils';
 import NumericExpressionParser from "./NumericExpressionParser";
 import AssemblyDirectiveParser from './directive/AssemblyDirectiveParser';
@@ -12,6 +12,7 @@ import MacroParser from './macro/MacroParser';
 import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstructionParser';
 import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
 import Z80InstructionParser from './z80/Z80InstructionParser';
+import MeterableHint from '../model/MeterableHint';
 
 export default class MainParser {
 
@@ -21,7 +22,7 @@ export default class MainParser {
     private syntaxLabelConfiguration: string;
     private syntaxLineSeparatorConfiguration: string;
     private syntaxRepeatConfiguration: string;
-    private timingsHintsConfiguration: boolean;
+    private timingsHintsConfiguration: string;
 
     constructor() {
 
@@ -32,7 +33,7 @@ export default class MainParser {
         this.syntaxLabelConfiguration = configuration.get("syntax.label", "default");
         this.syntaxLineSeparatorConfiguration = configuration.get("syntax.lineSeparator", "none");
         this.syntaxRepeatConfiguration = configuration.get("syntax.repeat", "none");
-        this.timingsHintsConfiguration = configuration.get("timings.hints", false);
+        this.timingsHintsConfiguration = configuration.get("timings.hints", "none");
     }
 
     parse(rawSourceCode: string | undefined): MeterableCollection {
@@ -49,6 +50,9 @@ export default class MainParser {
         }
         if (rawSourceCodeLines[rawSourceCodeLines.length - 1].trim() === "") {
             rawSourceCodeLines.pop(); // (removes possible spurious empty line at the end of the selection)
+            if (rawSourceCodeLines.length === 0) {
+                return meterables;
+            }
         }
 
         // Determines syntax
@@ -57,16 +61,16 @@ export default class MainParser {
             : /(^\s*[^\s:]+:)/;
         const lineSeparator =
             this.syntaxLineSeparatorConfiguration === "colon" ? ":"
-                : this.syntaxLineSeparatorConfiguration === "pipe" ? "|"
-                    : undefined;
+            : this.syntaxLineSeparatorConfiguration === "pipe" ? "|"
+            : undefined;
 
         // Extracts the instructions for every line
         rawSourceCodeLines.forEach(rawSourceCodeLine => {
-            const sourceCodeLines =
-                this.extractSourceCodeLinesFrom(rawSourceCodeLine, labelRegExp, lineSeparator);
+            const sourceCodeParts =
+                this.extractSourceCodePartsFrom(rawSourceCodeLine, labelRegExp, lineSeparator);
 
             // Parses the instructions
-            sourceCodeLines.getParts().forEach((sourceCodePart: SourceCodePart) => {
+            sourceCodeParts.forEach(sourceCodePart => {
                 meterables.add(this.parseSourceCodePart(sourceCodePart));
             });
         });
@@ -74,28 +78,38 @@ export default class MainParser {
         return meterables;
     }
 
-    private extractSourceCodeLinesFrom(
+    private extractSourceCodePartsFrom(
         rawSourceCodeLine: string, labelRegExp: RegExp,
-        lineSeparator: string | undefined): SourceCodeLine {
+        lineSeparator: string | undefined): SourceCodePart[] {
 
-        // Removes surrounding label and/or whitespace
+        // Removes surrounding label, splits the line, removes whitespace and extracts trailing comment
         const cleanRawSourceCodeLine = rawSourceCodeLine.replace(labelRegExp, "").trim();
-
-        // Splits the line and extracts trailing comment
-        return normalizeAndSplitQuotesAware(cleanRawSourceCodeLine, lineSeparator);
+        const sourceCodeLines = normalizeAndSplitQuotesAware(cleanRawSourceCodeLine, lineSeparator);
+        return sourceCodeLines.getParts();
     }
 
     private parseSourceCodePart(
         sourceCodePart: SourceCodePart): Meterable | undefined {
 
         const rawPart = sourceCodePart.getPart();
+
+        const isTimingsHintAny = this.timingsHintsConfiguration === "any";
+        if (!rawPart) {
+            // Empty source code part: tries to parse timing hints from the comment
+            return isTimingsHintAny
+                    ? MeterableHint.of(sourceCodePart.getComment())
+                    : undefined;
+        }
+
+        // Actually parses the source code part
         const rawInstruction = this.extractRawInstruction(rawPart);
         var meterable = this.parseRawInstruction(rawInstruction);
 
         // Tries to parse timing hints from the comment
-        if (this.timingsHintsConfiguration) {
+        const isTimingsHintSubroutines = this.timingsHintsConfiguration === "subroutines";
+        if (isTimingsHintSubroutines || isTimingsHintAny) {
             const rawComment = sourceCodePart.getComment();
-            meterable = SubroutineTimingHintDecorator.of(meterable, rawComment);
+            meterable = TimingHintDecorator.of(meterable, rawComment, isTimingsHintSubroutines);
         }
 
         // Tries to parse the optional repeat pseudo-op

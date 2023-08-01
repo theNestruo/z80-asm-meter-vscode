@@ -30,9 +30,16 @@ export default class SourceCodeLine {
 
 	getParts(): SourceCodePart[] {
 
-		const sourceCodeParts: SourceCodePart[] = [];
-		this.parts.forEach(part => sourceCodeParts.push(new SourceCodePart(part, this.comment)));
-		return sourceCodeParts;
+		if (this.parts.length) {
+			const sourceCodeParts: SourceCodePart[] = [];
+			this.parts.forEach(part => sourceCodeParts.push(new SourceCodePart(part, this.comment)));
+			return sourceCodeParts;
+		}
+
+		// Preserves emtpy line (i.e.: no source code parts) line comments
+		return !!this.comment
+				? [new SourceCodePart("", this.comment)]
+				: [];
 	}
 
 	getPartsAsString(): string[] {

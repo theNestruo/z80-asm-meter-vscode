@@ -51,25 +51,31 @@ export default class ExtensionController {
             return;
         }
 
-        const info = new MeterableViewer(metered);
-
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const viewBytesConfiguration = configuration.get("viewBytes") || false;
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
         // Builds the text
+        const info = new MeterableViewer(metered);
         let text = "";
         if (viewInstructionConfiguration) {
             const instruction = info.getInstructionsAsText();
-            text += `$(code) ${instruction} `;
+            if (instruction) {
+                text += `$(code) ${instruction} `;
+            }
         }
         const timing = info.getTimingAsText(false) || "0";
+        text += `$(watch) ${timing}`;
         const size = info.getSizeAsText();
-        text += `$(watch) ${timing} $(file-binary) ${size}`;
-        if (viewBytesConfiguration) {
-            const bytes = info.getBytesAsText();
-            text += ` (${bytes})`;
+        if (size !== undefined) {
+            text += ` $(file-binary) ${size}`;
+            if (viewBytesConfiguration) {
+                const bytes = info.getBytesAsText();
+                if (bytes) {
+                    text += ` (${bytes})`;
+                }
+            }
         }
 
         // Builds the tooltip
@@ -127,7 +133,7 @@ export default class ExtensionController {
     private meterFromSourceCode(sourceCode: string | undefined): Meterable | undefined {
 
         const metered = new MainParser().parse(sourceCode);
-        if (metered.getSize() === 0) {
+        if (metered.isEmpty()) {
             return undefined;
         }
 

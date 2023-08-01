@@ -1,33 +1,29 @@
 import { extractMnemonicOf, extractOperandsOf, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../utils/utils";
 import Meterable from "../model/Meterable";
 
-export default class SubroutineTimingHintDecorator implements Meterable {
+export default class TimingHintDecorator implements Meterable {
 
 	/**
 	 * Conditionaly builds an instance of a repetition of Meterables
-	 * @param meterable The repeated meterable instance
-	 * @param repeatCount The number of times the meterable instance is repeated
-	 * @return The repeated meterable instance, or a repetition of that Meterable,
-	 * depending on the value of repeatCount
+	 * @param meterable The meterable instance
+	 * @param rawComment The line comment; can contain timing hints
+	 * @return The meterable instance, or a hinted meterable instance,
+	 * depending on the contents of the line comment
 	 */
-	static of(meterable: Meterable | undefined, s: string | undefined): Meterable | undefined {
+	static of(meterable: Meterable | undefined, rawComment: string | undefined,
+		subroutines: boolean): Meterable | undefined {
 
 		// (sanity check)
 		if (!meterable) {
 			return undefined;
 		}
-		if (!s) {
+		if (!rawComment) {
 			return meterable;
 		}
 
 		// Checks timing hint comment
-		const matches = s?.matchAll(/\[(ts?|z80|cpc|msx)=(\d+(?:\/\d+)?)\]/g);
+		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx)\s*=\s*((?:\-\s*)?\d+(?:\/(?:\-\s*)?\d+)?)\]/g);
 		if (!matches) {
-			return meterable;
-		}
-
-		// Checks instruction
-		if (!this.isJumpOrCall(meterable.getInstruction())) {
 			return meterable;
 		}
 
@@ -64,7 +60,12 @@ export default class SubroutineTimingHintDecorator implements Meterable {
 			return meterable;
 		}
 
-		return new SubroutineTimingHintDecorator(meterable,
+		// Checks instruction
+		if (subroutines && (!this.isJumpOrCall(meterable.getInstruction()))) {
+			return meterable;
+		}
+
+		return new TimingHintDecorator(meterable,
 				timingHint, z80TimingHint, msxTimingHint, cpcTimingHint);
 	}
 
@@ -83,7 +84,7 @@ export default class SubroutineTimingHintDecorator implements Meterable {
 			msxTimingHint: number[] | undefined, cpcTimingHint: number[] | undefined) {
 
 		this.meterable = meterable;
-		this.conditional = SubroutineTimingHintDecorator.isConditional(meterable.getInstruction());
+		this.conditional = TimingHintDecorator.isConditional(meterable.getInstruction());
 
 		this.timingHint = timingHint;
 		this.z80TimingHint = z80TimingHint;
@@ -144,10 +145,15 @@ export default class SubroutineTimingHintDecorator implements Meterable {
 	private static isJumpOrCall(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		return [ "CALL", "JP", "JR", "RST" ].indexOf(mnemonic) !== -1;
+		return [ "CALL", "DJNZ", "JP", "JR", "RET", "RST" ].indexOf(mnemonic) !== -1;
 	}
 
 	private static isConditional(instruction: string): boolean {
+
+		const mnemonic = extractMnemonicOf(instruction);
+		if (mnemonic === "DJNZ") {
+			return true;
+		}
 
 		const operands = extractOperandsOf(instruction);
 		return !!operands.length

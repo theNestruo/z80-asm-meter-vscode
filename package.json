@@ -221,9 +221,19 @@
 					"default": false
 				},
 				"z80-asm-meter.timings.hints": {
-					"type": "boolean",
-					"description": "Enables subroutine timing hints read from the line comment. Subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
-					"default": false
+					"type": "string",
+					"description": "Enables timing hints read from the line comment.",
+					"enum": [
+						"none",
+						"subroutines",
+						"any"
+					],
+					"enumDescriptions": [
+						"Disables timing hints",
+						"Subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
+						"Any timing hint will be added"
+					],
+					"default": "none"
 				},
 				"z80-asm-meter.viewBytes": {
 					"type": "boolean",
