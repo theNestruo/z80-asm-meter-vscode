@@ -57,21 +57,22 @@ export default class ExtensionController {
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
         // Builds the text
-        const info = new MeterableViewer(metered);
+        const viewer = new MeterableViewer(metered);
         let text = "";
         if (viewInstructionConfiguration) {
-            const instruction = info.getInstructionsAsText();
+            const instruction = viewer.getStatusBarInstructions();
             if (instruction) {
                 text += `$(code) ${instruction} `;
             }
         }
-        const timing = info.getTimingAsText(false) || "0";
-        text += `$(watch) ${timing}`;
-        const size = info.getSizeAsText();
+        const timing = viewer.getStatusBarTiming() || "0";
+        const decoration = metered instanceof AtExitDecorator ? " $(debug-step-into)" : "";
+        text += `$(watch)${decoration} ${timing}`;
+        const size = viewer.getStatusBarSize();
         if (size !== undefined) {
             text += ` $(file-binary) ${size}`;
             if (viewBytesConfiguration) {
-                const bytes = info.getBytesAsText();
+                const bytes = viewer.getStatusBarBytes();
                 if (bytes) {
                     text += ` (${bytes})`;
                 }
@@ -79,7 +80,7 @@ export default class ExtensionController {
         }
 
         // Builds the tooltip
-        const tooltip = info.getDetailedMarkdownString();
+        const tooltip = viewer.getTooltip();
 
         // Builds the status bar item
         if (!this._statusBarItem) {
@@ -99,12 +100,13 @@ export default class ExtensionController {
             return;
         }
 
-        const info = new MeterableViewer(z80Block);
-
         // Builds the text to copy to clipbaord
-        const timingText = info.getTimingAsText(true);
-        const sizeText = info.getSizeAsText();
-        const text = `${timingText}, ${sizeText}`;
+        const info = new MeterableViewer(z80Block);
+        const text = info.getCommand();
+        if (!text) {
+            // (should never happen)
+            return;
+        }
 
         // Copies to clipboard and notifies the user
         env.clipboard.writeText(text);

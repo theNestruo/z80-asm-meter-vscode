@@ -82,7 +82,7 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment.
 
-    A timing hint follows the pattern: `[z80=27]` or `[msx=32/22]` with the key being `z80` for Z80 timings, `msx` for Z80+M1 timings, `cpc` for number of NOPs timings, or `t` or `ts` for the timing to be used regardless the platform. Current platform timing will taken precedence over `t` or `ts` timing hint.
+    A timing hint follows the pattern: `[z80=27]` or `[msx=32/22]` with the key being `z80` for Z80 timings, `msx` or `m1` for Z80+M1 timings, `cpc` for number of NOPs timings, or `t` or `ts` for the timing to be used regardless the platform. Current platform timing will taken precedence over `t` or `ts` timing hint.
 
     The timing can be either a single value or a pair of values separated by slash (`/`). Negative timings are supported.
 

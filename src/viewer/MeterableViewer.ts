@@ -12,7 +12,8 @@ export default class MeterableViewer {
     private metered: Meterable;
 
     // Configuration
-    private platformConfiguration: string | undefined = undefined;
+    private platformConfiguration: string;
+    private timingsHintsConfiguration: string;
 
     constructor(metered: Meterable) {
 
@@ -21,9 +22,10 @@ export default class MeterableViewer {
         // Saves configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         this.platformConfiguration = configuration.get("platform", "z80");
+        this.timingsHintsConfiguration = configuration.get("timings.hints", "none");
     }
 
-    getInstructionsAsText(): string | undefined {
+    getStatusBarInstructions(): string | undefined {
 
         const queue = this.queue();
         const firstInstruction = this.firstInstruction(queue);
@@ -44,7 +46,29 @@ export default class MeterableViewer {
         return text;
     }
 
-    getTimingAsText(suffix: boolean): string | undefined {
+    getStatusBarTiming(): string | undefined {
+
+        const text = this.getBasicTiming();
+        if (this.platformConfiguration !== "pc8000") {
+            return text;
+        }
+
+        const m1Text = formatTiming(this.metered.getMsxTiming());
+        return `${text} / ${m1Text}`;
+    }
+
+    getCommandTiming(): string | undefined {
+
+        const text = this.getStatusBarTiming();
+        if (text === undefined) {
+            return undefined;
+        }
+
+        // As text, with suffix
+        return text + ((this.platformConfiguration === "cpc") ? " NOPs" : " clock cycles");
+    }
+
+    private getBasicTiming(): string | undefined {
 
         const timing = this.platformConfiguration === "msx" ? this.metered.getMsxTiming()
                 : this.platformConfiguration === "cpc" ? this.metered.getCpcTiming()
@@ -57,29 +81,26 @@ export default class MeterableViewer {
             return undefined;
         }
 
-        let text = "";
-
-        // Optional prefix (if decorated)
-        if (!suffix) {
-            const decorated = this.metered instanceof AtExitDecorator;
-            if (decorated) {
-                text += "$(debug-step-out)";
-            }
-        }
-
-        // As text, with optional suffix
-        text += formatTiming(timing);
-        if (this.platformConfiguration === "pc8000") {
-            const m1Text = formatTiming(this.metered.getMsxTiming());
-            text += ` / ${m1Text}`;
-        }
-        if (suffix) {
-            text += (this.platformConfiguration === "cpc") ? " NOPs" : " clock cycles";
-        }
-        return text;
+        // As text
+        return formatTiming(timing);
     }
 
-    getBytesAsText(): string | undefined {
+    getStatusBarSize(): string | undefined {
+
+        const size = this.metered.getSize();
+        switch (size) {
+            case 0: return undefined;
+            case 1: return size + " byte";
+            default: return size + " bytes";
+        }
+    }
+
+    getCommandSize(): string | undefined {
+
+        return this.getStatusBarSize();
+    }
+
+    getStatusBarBytes(): string | undefined {
 
         const queue = this.queue();
         const firstBytes = this.firstBytes(queue);
@@ -100,17 +121,7 @@ export default class MeterableViewer {
         return text;
     }
 
-    getSizeAsText(): string | undefined {
-
-        const size = this.metered.getSize();
-        switch (size) {
-            case 0: return undefined;
-            case 1: return size + " byte";
-            default: return size + " bytes";
-        }
-    }
-
-    getDetailedMarkdownString(): MarkdownString | undefined {
+    getTooltip(): MarkdownString | undefined {
 
         const meterables = this.metered.getFlattenedMeterables();
 
@@ -143,19 +154,59 @@ export default class MeterableViewer {
         if (decorated) {
             tooltip.appendMarkdown("||<sup>*</sup>at exit|\n");
         }
-        const sizeText = this.getSizeAsText();
+        const sizeText = this.getStatusBarSize();
         if (sizeText) {
             tooltip.appendMarkdown(`|**Size**|${sizeText}|\n\n`);
         }
         tooltip.appendMarkdown("---\n\n");
 
         // Tooltip: action
-        const timingText = this.getTimingAsText(true);
-        tooltip.appendMarkdown(!!timingText
-                ? `Copy "${timingText}, ${sizeText}" to clipboard\n`
-                : `Copy "${sizeText}" to clipboard\n`);
+        const command = this.getCommand();
+        tooltip.appendMarkdown(`Copy "${command}" to clipboard\n`);
 
         return tooltip;
+    }
+
+    getCommand(): string | undefined {
+
+        const isTimingsHintsEnabled = [ "subroutines", "any" ].indexOf(this.timingsHintsConfiguration) !== -1;
+
+        return isTimingsHintsEnabled
+            ? this.getTimingHintsCommand()
+            : this.getDefaultCommand();
+    }
+
+    private getDefaultCommand(): string | undefined {
+
+        const timing = this.getCommandTiming();
+        const size = this.getCommandSize();
+
+        return timing
+            ? (size
+                ? `${timing}, ${size}`
+                : `${timing}`)
+            : (size
+                ? `${size}`
+                : undefined);
+    }
+
+    private getTimingHintsCommand(): string | undefined {
+
+        if (this.platformConfiguration === "msx") {
+            const msxText = formatTiming(this.metered.getMsxTiming());
+            return `[msx=${msxText}]`;
+        }
+        if (this.platformConfiguration === "cpc") {
+            const cpcText = formatTiming(this.metered.getCpcTiming());
+            return `[cpc=${cpcText}]`;
+        }
+        const z80text = formatTiming(this.metered.getZ80Timing());
+        let text = `[z80=${z80text}]`;
+        if (this.platformConfiguration === "pc8000") {
+            const m1Text = formatTiming(this.metered.getMsxTiming());
+            text += ` [m1=${m1Text}]`;
+        }
+        return text;
     }
 
     /**

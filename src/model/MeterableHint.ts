@@ -18,7 +18,7 @@ export default class MeterableHint implements Meterable {
 		}
 
 		// Checks timing hint comment
-		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx)\s*=\s*((?:\-\s*)?\d+(?:\/(?:\-\s*)?\d+)?)\]/g);
+		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:\-\s*)?\d+(?:\/(?:\-\s*)?\d+)?)\]/g);
 		if (!matches) {
 			return undefined;
 		}
@@ -46,6 +46,7 @@ export default class MeterableHint implements Meterable {
 					cpcTimingHint = parsedTimingHint;
 					break;
 				case "msx":
+				case "m1":
 					msxTimingHint = parsedTimingHint;
 					break;
 			}
