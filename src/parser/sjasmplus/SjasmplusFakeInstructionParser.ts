@@ -51,7 +51,7 @@ export default class SjasmplusFakeInstructionParser {
     private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         // Locates instruction
-        let bestCandidate = undefined;
+        let bestCandidate;
         let bestScore = 0;
         for (let i = 0, n = candidates.length; i < n; i++) {
             const candidate = candidates[i];
