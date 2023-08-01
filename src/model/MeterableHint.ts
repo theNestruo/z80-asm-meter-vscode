@@ -24,10 +24,10 @@ export default class MeterableHint implements Meterable {
 		}
 
 		// Parses timing hint comment
-		var timingHint: number[] | undefined = undefined;
-		var z80TimingHint: number[] | undefined = undefined;
-		var msxTimingHint: number[] | undefined = undefined;
-		var cpcTimingHint: number[] | undefined = undefined;
+		var timingHint: number[] | undefined;
+		var z80TimingHint: number[] | undefined;
+		var msxTimingHint: number[] | undefined;
+		var cpcTimingHint: number[] | undefined;
 		for (const match of matches) {
 			const parsedTimingHint = parseTimingsLenient(match[2]);
 			if (!parsedTimingHint) {

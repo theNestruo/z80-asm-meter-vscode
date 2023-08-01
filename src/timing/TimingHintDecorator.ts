@@ -28,10 +28,10 @@ export default class TimingHintDecorator implements Meterable {
 		}
 
 		// Parses timing hint comment
-		var timingHint: number[] | undefined = undefined;
-		var z80TimingHint: number[] | undefined = undefined;
-		var msxTimingHint: number[] | undefined = undefined;
-		var cpcTimingHint: number[] | undefined = undefined;
+		var timingHint: number[] | undefined;
+		var z80TimingHint: number[] | undefined;
+		var msxTimingHint: number[] | undefined;
+		var cpcTimingHint: number[] | undefined;
 		for (const match of matches) {
 			const parsedTimingHint = parseTimingsLenient(match[2]);
 			if (!parsedTimingHint) {
@@ -74,10 +74,10 @@ export default class TimingHintDecorator implements Meterable {
 
     // Information
 	private conditional: boolean;
-	private timingHint: number[] | undefined = undefined;
-    private z80TimingHint: number[] | undefined = undefined;
-    private msxTimingHint: number[] | undefined = undefined;
-    private cpcTimingHint: number[] | undefined = undefined;
+	private timingHint: number[] | undefined;
+    private z80TimingHint: number[] | undefined;
+    private msxTimingHint: number[] | undefined;
+    private cpcTimingHint: number[] | undefined;
 
 	private constructor(meterable: Meterable,
 			timingHint: number[] | undefined, z80TimingHint: number[] | undefined,

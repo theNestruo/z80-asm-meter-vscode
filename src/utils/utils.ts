@@ -303,8 +303,8 @@ export function parseTimingsLenient(o: unknown): number[] | undefined {
 export function parseTimings(s: string): number[] {
 
     const ss = s.split("/");
-    const t0 = parseInt(ss[0]);
-    return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1])];
+    const t0 = parseInt(ss[0], 10);
+    return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1], 10)];
 }
 
 export function formatTiming(t: number[]): string {
@@ -314,7 +314,7 @@ export function formatTiming(t: number[]): string {
 export function parteIntLenient(o: unknown): number {
 
     return (typeof o === "number") ? o
-            : (typeof o === "string") ? parseInt(o)
+            : (typeof o === "string") ? parseInt(o, 10)
             : NaN;
 }
 

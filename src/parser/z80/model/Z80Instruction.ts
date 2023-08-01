@@ -35,7 +35,7 @@ export default class Z80Instruction implements Meterable {
         this.msxTiming = parseTimings(msxTiming);
         this.cpcTiming = parseTimings(cpcTiming);
         this.opcodes = opcodes;
-        this.size = parseInt(size);
+        this.size = parseInt(size, 10);
     }
 
     /**
@@ -320,13 +320,15 @@ export default class Z80Instruction implements Meterable {
 
             // Checks implicit accumulator syntax
             if (candidateOperands.length === expectedOperands.length - 1) {
-                if (!(implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed())) {
+                implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
+                if (!implicitAccumulatorSyntax) {
                     return 0;
                 }
 
                 // Checks explicit accumulator syntax
             } else if (candidateOperands.length === expectedOperands.length + 1) {
-                if ((!(explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed()))
+                explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed();
+                if ((!explicitAccumulatorSyntax)
                     || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
