@@ -1,5 +1,6 @@
-import { extractMnemonicOf, extractOperandsOf, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../utils/utils";
 import Meterable from "../model/Meterable";
+import MeterableHint from "../model/MeterableHint";
+import { extractMnemonicOf, extractOperandsOf, parseTimingsLenient } from "../utils/utils";
 
 export default class TimingHintDecorator implements Meterable {
 
@@ -10,53 +11,11 @@ export default class TimingHintDecorator implements Meterable {
 	 * @return The meterable instance, or a hinted meterable instance,
 	 * depending on the contents of the line comment
 	 */
-	static of(meterable: Meterable | undefined, rawComment: string | undefined,
+	static of(meterable: Meterable | undefined, meterableHint: MeterableHint | undefined,
 		subroutines: boolean): Meterable | undefined {
 
 		// (sanity check)
-		if (!meterable) {
-			return undefined;
-		}
-		if (!rawComment) {
-			return meterable;
-		}
-
-		// Checks timing hint comment
-		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx)\s*=\s*((?:\-\s*)?\d+(?:\/(?:\-\s*)?\d+)?)\]/g);
-		if (!matches) {
-			return meterable;
-		}
-
-		// Parses timing hint comment
-		var timingHint: number[] | undefined;
-		var z80TimingHint: number[] | undefined;
-		var msxTimingHint: number[] | undefined;
-		var cpcTimingHint: number[] | undefined;
-		for (const match of matches) {
-			const parsedTimingHint = parseTimingsLenient(match[2]);
-			if (!parsedTimingHint) {
-				continue;
-			}
-
-			switch (match[1]) {
-				case "t":
-				case "ts":
-					timingHint = parsedTimingHint;
-					break;
-				case "z80":
-					z80TimingHint = parsedTimingHint;
-					break;
-				case "cpc":
-					cpcTimingHint = parsedTimingHint;
-					break;
-				case "msx":
-					msxTimingHint = parsedTimingHint;
-					break;
-			}
-		}
-
-		// Validates timing hint comment
-		if (!timingHint && !z80TimingHint && !msxTimingHint && !cpcTimingHint) {
+		if ((!meterable) || (!meterableHint)) {
 			return meterable;
 		}
 
@@ -65,31 +24,24 @@ export default class TimingHintDecorator implements Meterable {
 			return meterable;
 		}
 
-		return new TimingHintDecorator(meterable,
-				timingHint, z80TimingHint, msxTimingHint, cpcTimingHint);
+		return new TimingHintDecorator(meterable, meterableHint);
 	}
 
-	// The hinted meterable instance
+	// The meterable instance
 	private meterable: Meterable;
+
+	// The hinted meterable instance
+	private meterableHint: MeterableHint;
 
     // Information
 	private conditional: boolean;
-	private timingHint: number[] | undefined;
-    private z80TimingHint: number[] | undefined;
-    private msxTimingHint: number[] | undefined;
-    private cpcTimingHint: number[] | undefined;
 
-	private constructor(meterable: Meterable,
-			timingHint: number[] | undefined, z80TimingHint: number[] | undefined,
-			msxTimingHint: number[] | undefined, cpcTimingHint: number[] | undefined) {
+	private constructor(meterable: Meterable, meterableHint: MeterableHint) {
 
 		this.meterable = meterable;
-		this.conditional = TimingHintDecorator.isConditional(meterable.getInstruction());
+		this.meterableHint = meterableHint;
 
-		this.timingHint = timingHint;
-		this.z80TimingHint = z80TimingHint;
-		this.msxTimingHint = msxTimingHint;
-		this.cpcTimingHint = cpcTimingHint;
+		this.conditional = TimingHintDecorator.isConditional(meterable.getInstruction());
 	}
 
 	getInstruction(): string {
@@ -98,17 +50,17 @@ export default class TimingHintDecorator implements Meterable {
 
 	getZ80Timing(): number[] {
 
-		return this.modifiedTimingsOf(this.meterable.getZ80Timing(), this.z80TimingHint || this.timingHint);
+		return this.modifiedTimingsOf(this.meterable.getZ80Timing(), this.meterableHint.getZ80Timing());
 	}
 
 	getMsxTiming(): number[] {
 
-		return this.modifiedTimingsOf(this.meterable.getMsxTiming(), this.msxTimingHint || this.timingHint);
+		return this.modifiedTimingsOf(this.meterable.getMsxTiming(), this.meterableHint.getMsxTiming());
 	}
 
 	getCpcTiming(): number[] {
 
-		return this.modifiedTimingsOf(this.meterable.getCpcTiming(), this.cpcTimingHint || this.timingHint);
+		return this.modifiedTimingsOf(this.meterable.getCpcTiming(), this.meterableHint.getCpcTiming());
 	}
 
 	getBytes(): string[] {

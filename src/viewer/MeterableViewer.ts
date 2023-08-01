@@ -57,19 +57,24 @@ export default class MeterableViewer {
             return undefined;
         }
 
-        const decorated = this.metered instanceof AtExitDecorator;
+        let text = "";
+
+        // Optional prefix (if decorated)
+        if (!suffix) {
+            const decorated = this.metered instanceof AtExitDecorator;
+            if (decorated) {
+                text += "$(debug-step-out)";
+            }
+        }
 
         // As text, with optional suffix
-        let text = formatTiming(timing);
+        text += formatTiming(timing);
         if (this.platformConfiguration === "pc8000") {
             const m1Text = formatTiming(this.metered.getMsxTiming());
             text += ` / ${m1Text}`;
         }
         if (suffix) {
             text += (this.platformConfiguration === "cpc") ? " NOPs" : " clock cycles";
-        }
-        if (decorated) {
-            text += "*";
         }
         return text;
     }

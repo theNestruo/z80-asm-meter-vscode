@@ -10,7 +10,7 @@ export default class MeterableHint implements Meterable {
 	 * @return The meterable instance, or a hinted meterable instance,
 	 * depending on the contents of the line comment
 	 */
-	static of(rawComment: string | undefined): Meterable | undefined {
+	static of(rawComment: string | undefined): MeterableHint | undefined {
 
 		// (sanity check)
 		if (!rawComment) {

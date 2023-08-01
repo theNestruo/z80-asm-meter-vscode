@@ -93,28 +93,26 @@ export default class MainParser {
 
         const rawPart = sourceCodePart.getPart();
 
-        const isTimingsHintAny = this.timingsHintsConfiguration === "any";
-        if (!rawPart) {
-            // Empty source code part: tries to parse timing hints from the comment
-            return isTimingsHintAny
-                    ? MeterableHint.of(sourceCodePart.getComment())
-                    : undefined;
-        }
+        // Tries to parse timing hints from the comment
+        const isTimingsHintsSubroutines = this.timingsHintsConfiguration === "subroutines";
+        const isTimingsHintsAny = this.timingsHintsConfiguration === "any";
+        const timingHints = isTimingsHintsSubroutines || isTimingsHintsAny
+                ? MeterableHint.of(sourceCodePart.getComment())
+                : undefined;
 
         // Actually parses the source code part
-        const rawInstruction = this.extractRawInstruction(rawPart);
-        var meterable = this.parseRawInstruction(rawInstruction);
-
-        // Tries to parse timing hints from the comment
-        const isTimingsHintSubroutines = this.timingsHintsConfiguration === "subroutines";
-        if (isTimingsHintSubroutines || isTimingsHintAny) {
-            const rawComment = sourceCodePart.getComment();
-            meterable = TimingHintDecorator.of(meterable, rawComment, isTimingsHintSubroutines);
+        var meterable = this.parseRawInstruction(this.extractRawInstruction(rawPart));
+        if (!meterable) {
+            return isTimingsHintsAny ? timingHints : undefined;
         }
 
-        // Tries to parse the optional repeat pseudo-op
-        const repeatCount = this.extractRepeatCount(rawPart);
-        return MeterableRepetition.of(meterable, repeatCount);
+        // Applies the optional timing hints from the comment
+        if (timingHints) {
+            meterable = TimingHintDecorator.of(meterable, timingHints, isTimingsHintsSubroutines);
+        }
+
+        // Parses and applies the optional repeat pseudo-op
+        return MeterableRepetition.of(meterable, this.extractRepeatCount(rawPart));
     }
 
     private extractRepeatCount(s: string): number {
