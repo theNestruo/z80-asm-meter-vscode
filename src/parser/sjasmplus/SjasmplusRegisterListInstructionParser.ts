@@ -10,11 +10,7 @@ export default class SjasmplusRegisterListInstructionParser {
     private constructor() {
     }
 
-    parse(instruction: string | undefined, instructionSets: string[]): MeterableCollection | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string, instructionSets: string[]): MeterableCollection | undefined {
 
         // Register lists instructions
         const mnemonic = extractMnemonicOf(instruction);

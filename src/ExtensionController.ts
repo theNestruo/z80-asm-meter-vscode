@@ -31,7 +31,7 @@ export default class ExtensionController {
 
     private _onEvent() {
 
-        // Reads the Z80 block
+        // Reads the source code
         const sourceCode = this.readFromSelection();
         if (!sourceCode) {
             this.previousHashCode = undefined;
@@ -44,6 +44,8 @@ export default class ExtensionController {
             return;
         }
         this.previousHashCode = currentHashCode;
+
+        // Parses the source code
         const metered = this.meterFromSourceCode(sourceCode);
         if (!metered) {
             this.previousHashCode = undefined;
@@ -56,7 +58,7 @@ export default class ExtensionController {
         const viewBytesConfiguration = configuration.get("viewBytes") || false;
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
 
-        // Builds the text
+        // Builds the statur bar text
         const viewer = new MeterableViewer(metered);
         let text = "";
         if (viewInstructionConfiguration) {
@@ -79,7 +81,7 @@ export default class ExtensionController {
             }
         }
 
-        // Builds the tooltip
+        // Builds the tooltip text
         const tooltip = viewer.getTooltip();
 
         // Builds the status bar item
@@ -94,23 +96,30 @@ export default class ExtensionController {
 
     private _onCommand() {
 
-        const z80Block = this.meterFromSourceCode(this.readFromSelection());
-        if (!z80Block) {
+        // Reads the source code
+        const sourceCode = this.readFromSelection();
+        if (!sourceCode) {
             // (should never happen)
             return;
         }
 
-        // Builds the text to copy to clipbaord
-        const info = new MeterableViewer(z80Block);
-        const text = info.getCommand();
-        if (!text) {
+        // Parses the source code
+        const metered = this.meterFromSourceCode(sourceCode);
+        if (!metered) {
+            // (should never happen)
+            return;
+        }
+
+        // Builds the text to copy to clipboard
+        const textToCopy = new MeterableViewer(metered).getCommand();
+        if (!textToCopy) {
             // (should never happen)
             return;
         }
 
         // Copies to clipboard and notifies the user
-        env.clipboard.writeText(text);
-        window.showInformationMessage(`"${text}" copied to clipboard`);
+        env.clipboard.writeText(textToCopy);
+        window.showInformationMessage(`"${textToCopy}" copied to clipboard`);
 
         // Returns the focus to the editor
         const editor = window.activeTextEditor;
@@ -121,7 +130,6 @@ export default class ExtensionController {
 
     private readFromSelection(): string | undefined {
 
-        // Reads the Z80 block
         const editor = window.activeTextEditor;
         if ((!editor)
             || (!this.isEnabledFor(editor.document.languageId))) {
@@ -132,38 +140,42 @@ export default class ExtensionController {
             : editor.document.getText(editor.selection);
     }
 
-    private meterFromSourceCode(sourceCode: string | undefined): Meterable | undefined {
-
-        const metered = new MainParser().parse(sourceCode);
-        if (metered.isEmpty()) {
-            return undefined;
-        }
-
-        const timingsAtExit =
-                workspace.getConfiguration("z80-asm-meter").get("timings.atExit", false);
-
-        return timingsAtExit
-                ? AtExitDecorator.of(metered)
-                : metered;
-    }
-
     private isEnabledFor(languageId: string): boolean {
 
         // Enabled if it is a Z80 assembly file
         if (languageId === "z80-asm-meter") {
             return true;
         }
-        const languageIds: string[] = workspace.getConfiguration("z80-asm-meter").get("languageIds", []);
+        const languageIds: string[] =
+            workspace.getConfiguration("z80-asm-meter").get("languageIds", []);
         return languageIds.indexOf(languageId) !== -1;
     }
 
+    private meterFromSourceCode(sourceCode: string): Meterable | undefined {
+
+        // Parses the source code
+        const metered = new MainParser().parse(sourceCode);
+        if (metered.isEmpty()) {
+            return undefined;
+        }
+
+        // Optionally applies "timings at exit"
+        const isTimingsAtExit =
+            workspace.getConfiguration("z80-asm-meter").get("timings.atExit", false);
+        return isTimingsAtExit
+            ? AtExitDecorator.of(metered)
+            : metered;
+    }
+
     private hideStatusBar() {
+
         if (this._statusBarItem) {
             this._statusBarItem.hide();
         }
     }
 
     dispose() {
+
         if (this._statusBarItem) {
             this._statusBarItem.dispose();
             this._statusBarItem = undefined;

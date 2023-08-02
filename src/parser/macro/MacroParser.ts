@@ -28,11 +28,7 @@ export default class MacroParser {
         });
     }
 
-    parse(instruction: string | undefined, instructionSets: string[]): Macro | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string, instructionSets: string[]): Macro | undefined {
 
         // Locates macro definition
         const mnemonic = extractMnemonicOf(instruction);
@@ -41,7 +37,6 @@ export default class MacroParser {
             return undefined;
         }
 
-        const macro = new Macro(macroDefinition, instructionSets);
-        return macro;
+        return new Macro(macroDefinition, instructionSets);
     }
 }

@@ -31,11 +31,7 @@ export default class SjasmplusFakeInstructionParser {
         });
     }
 
-    parse(instruction: string | undefined, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         // Locates candidate instructions
         const mnemonic = extractMnemonicOf(instruction);
@@ -48,7 +44,8 @@ export default class SjasmplusFakeInstructionParser {
         return undefined;
     }
 
-    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
+    private findBestCandidate(instruction: string,
+        candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         // Locates instruction
         let bestCandidate;

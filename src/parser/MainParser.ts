@@ -36,7 +36,7 @@ export default class MainParser {
         this.timingsHintsConfiguration = configuration.get("timings.hints", "none");
     }
 
-    parse(rawSourceCode: string | undefined): MeterableCollection {
+    parse(rawSourceCode: string): MeterableCollection {
 
         const meterables = new MeterableCollection();
 
@@ -49,7 +49,8 @@ export default class MainParser {
             return meterables;
         }
         if (rawSourceCodeLines[rawSourceCodeLines.length - 1].trim() === "") {
-            rawSourceCodeLines.pop(); // (removes possible spurious empty line at the end of the selection)
+            // (removes possible spurious empty line at the end of the selection)
+            rawSourceCodeLines.pop();
             if (rawSourceCodeLines.length === 0) {
                 return meterables;
             }
@@ -64,12 +65,12 @@ export default class MainParser {
             : this.syntaxLineSeparatorConfiguration === "pipe" ? "|"
             : undefined;
 
-        // Extracts the instructions for every line
+        // Extracts the source code parts for every line
         rawSourceCodeLines.forEach(rawSourceCodeLine => {
             const sourceCodeParts =
                 this.extractSourceCodePartsFrom(rawSourceCodeLine, labelRegExp, lineSeparator);
 
-            // Parses the instructions
+            // Parses the source code parts
             sourceCodeParts.forEach(sourceCodePart => {
                 meterables.add(this.parseSourceCodePart(sourceCodePart));
             });
@@ -78,18 +79,17 @@ export default class MainParser {
         return meterables;
     }
 
-    private extractSourceCodePartsFrom(
-        rawSourceCodeLine: string, labelRegExp: RegExp,
-        lineSeparator: string | undefined): SourceCodePart[] {
+    private extractSourceCodePartsFrom(rawSourceCodeLine: string,
+        labelRegExp: RegExp, lineSeparator: string | undefined): SourceCodePart[] {
 
-        // Removes surrounding label, splits the line, removes whitespace and extracts trailing comment
+        // Removes surrounding label and whitespace
         const cleanRawSourceCodeLine = rawSourceCodeLine.replace(labelRegExp, "").trim();
-        const sourceCodeLines = normalizeAndSplitQuotesAware(cleanRawSourceCodeLine, lineSeparator);
-        return sourceCodeLines.getParts();
+
+        // Splits the line and extracts trailing comment
+        return normalizeAndSplitQuotesAware(cleanRawSourceCodeLine, lineSeparator).getParts();
     }
 
-    private parseSourceCodePart(
-        sourceCodePart: SourceCodePart): Meterable | undefined {
+    private parseSourceCodePart(sourceCodePart: SourceCodePart): Meterable | undefined {
 
         const rawPart = sourceCodePart.getPart();
 
@@ -103,16 +103,34 @@ export default class MainParser {
         // Actually parses the source code part
         var meterable = this.parseRawInstruction(this.extractRawInstruction(rawPart));
         if (!meterable) {
+            // No source code; returns timing hints (if any)
             return isTimingsHintsAny ? timingHints : undefined;
         }
 
-        // Applies the optional timing hints from the comment
+        // Decorates source code with the optional timing hints (if any)
         if (timingHints) {
             meterable = TimingHintDecorator.of(meterable, timingHints, isTimingsHintsSubroutines);
         }
 
         // Parses and applies the optional repeat pseudo-op
         return MeterableRepetition.of(meterable, this.extractRepeatCount(rawPart));
+    }
+
+    private extractRawInstruction(s: string): string {
+
+        // Determines syntax
+        const repeatRegExp =
+            this.syntaxRepeatConfiguration === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
+                : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
+                    : undefined;
+        if (!repeatRegExp) {
+            return s;
+        }
+
+        // Tries to parse beyond the repeat pseudo-op
+        const matches = repeatRegExp.exec(s);
+        const hasRepeatInstruction = matches && matches.length >= 2 && matches[2];
+        return hasRepeatInstruction ? matches[2] : s;
     }
 
     private extractRepeatCount(s: string): number {
@@ -136,23 +154,6 @@ export default class MainParser {
         return repeatCountCandidate && repeatCountCandidate > 0 ? repeatCountCandidate : 1;
     }
 
-    private extractRawInstruction(s: string): string {
-
-        // Determines syntax
-        const repeatRegExp =
-            this.syntaxRepeatConfiguration === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-                : this.syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
-                    : undefined;
-        if (!repeatRegExp) {
-            return s;
-        }
-
-        // Tries to parse beyond the repeat pseudo-op
-        const matches = repeatRegExp.exec(s);
-        const hasRepeatInstruction = matches && matches.length >= 2 && matches[2];
-        return hasRepeatInstruction ? matches[2] : s;
-    }
-
     private parseRawInstruction(s: string): Meterable | undefined {
 
         // Determines instruction sets
@@ -162,7 +163,7 @@ export default class MainParser {
 
         // Tries to parse Z80 instructions
         const z80Instruction = Z80InstructionParser.instance.parseInstruction(s, instructionSets);
-        if (!!z80Instruction) {
+        if (z80Instruction) {
             return z80Instruction;
         }
 
@@ -170,7 +171,7 @@ export default class MainParser {
         if (this.sjasmplusConfiguration) {
             const sjasmplusFakeInstruction =
                 SjasmplusFakeInstructionParser.instance.parse(s, instructionSets);
-            if (!!sjasmplusFakeInstruction) {
+            if (sjasmplusFakeInstruction) {
                 return sjasmplusFakeInstruction;
             }
             const sjasmplusRegisterListInstruction =
@@ -182,18 +183,17 @@ export default class MainParser {
 
         // Tries to parse user-defined macro
         const macro = MacroParser.instance.parse(s, instructionSets);
-        if (!!macro) {
+        if (macro) {
             return macro;
         }
 
         // Tries to parse assembly directives
         const assemblyDirective = AssemblyDirectiveParser.instance.parse(s);
-        if (!!assemblyDirective) {
+        if (assemblyDirective) {
             return assemblyDirective;
         }
 
         // (could not parse raw instruction)
         return undefined;
     }
-
 }

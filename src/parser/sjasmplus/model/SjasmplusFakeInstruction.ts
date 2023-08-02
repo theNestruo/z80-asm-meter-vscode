@@ -104,6 +104,10 @@ export default class SjasmplusFakeInstruction extends MeterableCollection {
         if (!this.ready) {
             this.rawInstructions.forEach(rawPart => {
                 const rawInstruction = extractRawInstruction(rawPart);
+                if (!rawInstruction) {
+                    // (should never happen)
+                    return;
+                }
                 const instruction =
                         Z80InstructionParser.instance.parseInstruction(rawInstruction, [this.instructionSet]);
                 this.add(instruction);

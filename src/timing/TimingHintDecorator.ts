@@ -7,17 +7,12 @@ export default class TimingHintDecorator implements Meterable {
 	/**
 	 * Conditionaly builds an instance of a repetition of Meterables
 	 * @param meterable The meterable instance
-	 * @param rawComment The line comment; can contain timing hints
+	 * @param meterableHint The timing hints, extracted from the line comments
+	 * @param subroutines to apply timing hint only to subroutines
 	 * @return The meterable instance, or a hinted meterable instance,
 	 * depending on the contents of the line comment
 	 */
-	static of(meterable: Meterable | undefined, meterableHint: MeterableHint | undefined,
-		subroutines: boolean): Meterable | undefined {
-
-		// (sanity check)
-		if ((!meterable) || (!meterableHint)) {
-			return meterable;
-		}
+	static of(meterable: Meterable, meterableHint: MeterableHint, subroutines: boolean): Meterable {
 
 		// Checks instruction
 		if (subroutines && (!this.isJumpOrCall(meterable.getInstruction()))) {

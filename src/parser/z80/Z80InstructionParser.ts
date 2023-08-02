@@ -20,13 +20,13 @@ export default class Z80InstructionParser {
 
             // Parses the raw instruction
             const originalInstruction = new Z80Instruction(
-                    rawData[0], // instructionSet
-                    rawData[1], // raw instruction
-                    rawData[2], // z80Timing
-                    rawData[3], // msxTiming
-                    rawData[4], // cpcTiming
-                    rawData[5], // opcode
-                    rawData[6]); // size
+                rawData[0], // instructionSet
+                rawData[1], // raw instruction
+                rawData[2], // z80Timing
+                rawData[3], // msxTiming
+                rawData[4], // cpcTiming
+                rawData[5], // opcode
+                rawData[6]); // size
 
             originalInstruction.expanded().forEach(instruction => {
                 // Prepares a map by mnemonic for performance reasons
@@ -45,11 +45,7 @@ export default class Z80InstructionParser {
         });
     }
 
-    parseInstruction(instruction: string | undefined, instructionSets: string[]): Z80Instruction | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parseInstruction(instruction: string, instructionSets: string[]): Z80Instruction | undefined {
 
         // Locates candidate instructions
         const mnemonic = extractMnemonicOf(instruction);
@@ -67,7 +63,8 @@ export default class Z80InstructionParser {
         return this.instructionByOpcode[formatHexadecimalByte(opcode)];
     }
 
-    private findBestCandidate(instruction: string, candidates: Z80Instruction[], instructionSets: string[]): Z80Instruction | undefined {
+    private findBestCandidate(instruction: string,
+        candidates: Z80Instruction[], instructionSets: string[]): Z80Instruction | undefined {
 
         // Locates instruction
         let bestCandidate;

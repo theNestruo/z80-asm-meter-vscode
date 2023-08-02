@@ -20,8 +20,7 @@ export function extractRawInstruction(rawPart: string): string | undefined {
     return normalizeAndSplitQuotesAware(rawPart, undefined).getParts().shift()?.getPart();
 }
 
-export function normalizeAndSplitQuotesAware(
-        s: string, separator: string | undefined): SourceCodeLine {
+export function normalizeAndSplitQuotesAware(s: string, separator: string | undefined): SourceCodeLine {
 
     var sourceCodeLine: SourceCodeLine = new SourceCodeLine();
 

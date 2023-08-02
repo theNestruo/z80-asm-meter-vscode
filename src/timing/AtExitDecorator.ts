@@ -8,12 +8,7 @@ export default class AtExitDecorator implements Meterable {
 	 * @param meterable The meterable instance to be decorated
 	 * @return The "last condition met" decorator, or the original meterable
 	 */
-	static of(meterable: Meterable | undefined): Meterable | undefined {
-
-		// (sanity check)
-		if (!meterable) {
-			return undefined;
-		}
+	static of(meterable: Meterable): Meterable {
 
 		// Length check
 		const meterables: Meterable[] = meterable.isComposed()

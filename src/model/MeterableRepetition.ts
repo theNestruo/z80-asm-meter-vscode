@@ -13,12 +13,7 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	 * @return The repeated meterable instance, or a repetition of that Meterable,
 	 * depending on the value of repeatCount
 	 */
-	static of(meterable: Meterable | undefined, repeatCount: number): Meterable | undefined {
-
-		// (sanity check)
-		if (!meterable) {
-			return undefined;
-		}
+	static of(meterable: Meterable, repeatCount: number): Meterable {
 
 		return repeatCount <= 1
 				? meterable

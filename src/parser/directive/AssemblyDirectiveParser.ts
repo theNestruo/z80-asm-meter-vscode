@@ -21,11 +21,7 @@ export default class AssemblyDirectiveParser {
         this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
     }
 
-    parse(instruction: string | undefined): Meterable | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string): Meterable | undefined {
 
         // Locates defb/defw/defs directives
         const mnemonic = extractMnemonicOf(instruction);
@@ -43,9 +39,9 @@ export default class AssemblyDirectiveParser {
         return undefined;
     }
 
-    private parseDefbDirective(pInstruction: string): AssemblyDirective | undefined {
+    private parseDefbDirective(instruction: string): AssemblyDirective | undefined {
 
-        const operands = extractOperandsOfQuotesAware(pInstruction);
+        const operands = extractOperandsOfQuotesAware(instruction);
         if (operands.length < 1) {
             return undefined;
         }

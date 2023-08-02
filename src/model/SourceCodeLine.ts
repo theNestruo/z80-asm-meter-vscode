@@ -37,7 +37,7 @@ export default class SourceCodeLine {
 		}
 
 		// Preserves emtpy line (i.e.: no source code parts) line comments
-		return !!this.comment
+		return this.comment
 				? [new SourceCodePart("", this.comment)]
 				: [];
 	}
