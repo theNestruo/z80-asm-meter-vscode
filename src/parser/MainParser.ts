@@ -13,6 +13,7 @@ import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstruction
 import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
 import Z80InstructionParser from './z80/Z80InstructionParser';
 import MeterableHint from '../model/MeterableHint';
+import SjasmplusDupParser from './sjasmplus/SjasmplusDupParser';
 
 export default class MainParser {
 
@@ -38,21 +39,21 @@ export default class MainParser {
 
     parse(rawSourceCode: string): MeterableCollection {
 
-        const meterables = new MeterableCollection();
+        const emptyMeterablesCollection = new MeterableCollection();
 
         // (sanity checks)
         if (!rawSourceCode) {
-            return meterables;
+            return emptyMeterablesCollection;
         }
         const rawSourceCodeLines = rawSourceCode.split(/[\r\n]+/);
         if (rawSourceCodeLines.length === 0) {
-            return meterables;
+            return emptyMeterablesCollection;
         }
         if (rawSourceCodeLines[rawSourceCodeLines.length - 1].trim() === "") {
             // (removes possible spurious empty line at the end of the selection)
             rawSourceCodeLines.pop();
             if (rawSourceCodeLines.length === 0) {
-                return meterables;
+                return emptyMeterablesCollection;
             }
         }
 
@@ -64,6 +65,16 @@ export default class MainParser {
             this.syntaxLineSeparatorConfiguration === "colon" ? ":"
             : this.syntaxLineSeparatorConfiguration === "pipe" ? "|"
             : undefined;
+
+        return this.sjasmplusConfiguration
+            ? this.parseSjasm(rawSourceCodeLines, labelRegExp, lineSeparator)
+            : this.parseFlat(rawSourceCodeLines, labelRegExp, lineSeparator);
+    }
+
+    private parseFlat(rawSourceCodeLines: string[],
+        labelRegExp: RegExp, lineSeparator: string | undefined): MeterableCollection {
+
+        const meterables = new MeterableCollection();
 
         // Extracts the source code parts for every line
         rawSourceCodeLines.forEach(rawSourceCodeLine => {
@@ -77,6 +88,48 @@ export default class MainParser {
         });
 
         return meterables;
+    }
+
+    private parseSjasm(rawSourceCodeLines: string[],
+        labelRegExp: RegExp, lineSeparator: string | undefined): MeterableCollection {
+
+        const ret = new MeterableCollection();
+        let meterables = ret;
+        let repeatCount = 1;
+
+        const meterablesStack: MeterableCollection[] = [];
+        const repeatCountStack: number[] = [];
+
+        // Extracts the source code parts for every line
+        rawSourceCodeLines.forEach(rawSourceCodeLine => {
+            const sourceCodeParts =
+                this.extractSourceCodePartsFrom(rawSourceCodeLine, labelRegExp, lineSeparator);
+
+            // Parses the source code parts
+            sourceCodeParts.forEach(sourceCodePart => {
+
+                const rawPart = sourceCodePart.getPart();
+                const newRepeatCount = SjasmplusDupParser.instance.parseDupOrRept(rawPart);
+                if (newRepeatCount !== undefined) {
+                    const previousMeterables = meterables;
+                    meterablesStack.push(meterables);
+                    meterables = new MeterableCollection();
+                    repeatCount *= newRepeatCount;
+                    previousMeterables.add(MeterableRepetition.of(meterables, newRepeatCount));
+                    return;
+                }
+
+                if (SjasmplusDupParser.instance.parseEdupOrEndr(rawPart)) {
+                    meterables = meterablesStack.pop() || ret;
+                    repeatCount = repeatCountStack.pop() || 1;
+                    return;
+                }
+
+                meterables.add(this.parseSourceCodePart(sourceCodePart));
+            });
+        });
+
+        return ret;
     }
 
     private extractSourceCodePartsFrom(rawSourceCodeLine: string,

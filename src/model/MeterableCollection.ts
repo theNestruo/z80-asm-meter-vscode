@@ -124,6 +124,6 @@ export default class MeterableCollection extends AggregatedMeterable {
 	}
 
 	isEmpty(): boolean {
-		return !this.meterables.length;
+		return !this.getFlattenedMeterables().length;
 	}
 }
