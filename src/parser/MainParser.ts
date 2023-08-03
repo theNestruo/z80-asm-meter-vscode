@@ -1,19 +1,18 @@
 import { workspace } from 'vscode';
 import Meterable from '../model/Meterable';
 import MeterableCollection from '../model/MeterableCollection';
+import MeterableHint from '../model/MeterableHint';
 import MeterableRepetition from '../model/MeterableRepetition';
-import SourceCodeLine from '../model/SourceCodeLine';
 import SourceCodePart from '../model/SourceCodePart';
 import TimingHintDecorator from '../timing/TimingHintDecorator';
 import { normalizeAndSplitQuotesAware } from '../utils/utils';
 import NumericExpressionParser from "./NumericExpressionParser";
 import AssemblyDirectiveParser from './directive/AssemblyDirectiveParser';
 import MacroParser from './macro/MacroParser';
+import SjasmplusDupParser from './sjasmplus/SjasmplusDupParser';
 import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstructionParser';
 import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
 import Z80InstructionParser from './z80/Z80InstructionParser';
-import MeterableHint from '../model/MeterableHint';
-import SjasmplusDupParser from './sjasmplus/SjasmplusDupParser';
 
 export default class MainParser {
 
@@ -114,8 +113,9 @@ export default class MainParser {
                     const previousMeterables = meterables;
                     meterablesStack.push(meterables);
                     meterables = new MeterableCollection();
-                    repeatCount *= newRepeatCount;
                     previousMeterables.add(MeterableRepetition.of(meterables, newRepeatCount));
+                    repeatCountStack.push(repeatCount);
+                    repeatCount *= newRepeatCount;
                     return;
                 }
 

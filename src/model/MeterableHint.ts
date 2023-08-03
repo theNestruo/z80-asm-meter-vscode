@@ -1,4 +1,4 @@
-import { extractMnemonicOf, extractOperandsOf, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../utils/utils";
+import { parseTimingsLenient } from "../utils/utils";
 import Meterable from "./Meterable";
 
 export default class MeterableHint implements Meterable {

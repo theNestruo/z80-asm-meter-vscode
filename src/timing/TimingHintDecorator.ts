@@ -1,6 +1,6 @@
 import Meterable from "../model/Meterable";
 import MeterableHint from "../model/MeterableHint";
-import { extractMnemonicOf, extractOperandsOf, parseTimingsLenient } from "../utils/utils";
+import { extractMnemonicOf, extractOperandsOf } from "../utils/utils";
 
 export default class TimingHintDecorator implements Meterable {
 
