@@ -1,4 +1,4 @@
-## 3.6.0 (unreleased)
+## 3.6.0
 
 - Support for SjASMPlus `DUP`/`EDUP` and `REPT`/`ENDR` repetitions. #99
 - Advanced timing algorithms: timing "at exit", subroutine timing hints. #114
