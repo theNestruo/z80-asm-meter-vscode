@@ -1,3 +1,7 @@
+## 3.6.1
+
+- Fixes wrong repeat counts with nested SjASMPlus `DUP`s/`REPT`s
+
 ## 3.6.0
 
 - Support for SjASMPlus `DUP`/`EDUP` and `REPT`/`ENDR` repetitions. #99
