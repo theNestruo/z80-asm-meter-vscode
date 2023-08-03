@@ -28,7 +28,7 @@ If there is no selection, the current line will be used.
 
 This extension can be installed standalone, but does not contribute any problem matcher, symbol provider, definition provider, or completion proproser for Z80 assembly.
 
-Therefore, this extension can be installed alongside other Z80-related extensions such as:
+Therefore, it is recommended to install this extension alongside other Z80-related extensions, such as:
 
 * [Z80 Macro-Assembler](https://marketplace.visualstudio.com/items?itemName=mborik.z80-macroasm) by mborik
 * [Z80 Assembly](https://marketplace.visualstudio.com/items?itemName=Imanolea.z80-asm) by Imanolea
@@ -58,7 +58,7 @@ This extension contributes the following settings:
 
 ### Assembler syntax related settings
 
-* `z80-asm-meter.sjasmplus`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [alternative syntax](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) and [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions). Disabled by default.
+* `z80-asm-meter.sjasmplus`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [alternative syntax](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang), [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) and [pseudo-ops](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops). Disabled by default.
 
 * `z80-asm-meter.syntax.label`: Adjusts the label detection to match the syntax of the assembler:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
@@ -76,9 +76,9 @@ This extension contributes the following settings:
 
 ### Timing related settings
 
-* `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, the timings shown will be the best and the worst case scenarios of the code flow up to the selected exit point. See [timing "at exit"](#timing-at-exit).
+* `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, timings shown will be the worst and best case scenarios of the code flow to the selected exit point. See [timing "at exit"](#timing-at-exit).
 
-* `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment.
+* `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment. See [timing hints](#timing-hints).
 
     * `none` (default): Disables timing hints.
     * `subroutine`: Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
@@ -116,7 +116,12 @@ It is also possible to meter the execution time of other execution flows. When t
 
 ### Timing hints
 
-A timing hint follows the pattern: `[z80=27]` or `[msx=32/22]` with the key being `z80` for Z80 timings, `msx` or `m1` for Z80+M1 timings, `cpc` for number of NOPs timings, or `t` or `ts` for the timing to be used regardless the platform. Current platform timing will taken precedence over `t` or `ts` timing hint.
+A timing hint follows the pattern: `[z80=27]` or `[msx=32/22]` with the key being:
+
+* `z80` for Z80 timings,
+* `msx` or `m1` for Z80+M1 timings,
+* `cpc` for number of NOPs timings, or
+* `t` or `ts` for the timing to be used regardless the platform. Specific platform timing hints will take precedence over `t` or `ts` generic timing hints.
 
 The timing can be either a single value or a pair of values separated by slash (`/`). This is convenient for taking into account different execution paths within the called routine:
 
@@ -134,19 +139,19 @@ For example:
 
     With _timing "at exit"_ disabled, the main timing of *.OFF_SCREEN* (41 clock cycles) would have been added to the timing of the `JR NC` instruction (13/8 clock cycles) when the condition is _met_, resulting in 54/8 clock cycles for this `JR NC` instruction.
 
-Negative timings are supported. This serves very particular use cases, including, but not limited to:
+Negative timings are supported. This may seem unintuitive, but serves very particular use cases including, but not limited to:
 
-* To specify the timing of the expected runtime instruction in self-modifying code.
+* Adjust the timing of an instruction in self-modifying code to match the timing of the replacement instruction.
 
-* To modify the metered timings when part of the code is to be skipped:
+* Adjust timings when part of the code is to be skipped:
 
     ```asm
         ; (...)
         jr z, .else
-        pop hl  ; abort caller [msx=-100]
+        pop hl  ; [msx=-100] will abort caller
     .else:
         ; (...)
-        ret     ; [msx=100] timing of the remaining code in the caller
+        ret     ; [msx=100] remaining code in the caller
     ```
 
 ### User-defined macros
@@ -155,7 +160,7 @@ Macro definitions are not read from actual source code. They must provided in us
 
 As most of the macro definition fields are optional, this extension uses a best-effort to meter a macro with the provided information. But, generally speaking, there are three ways to define a macro:
 
-1. Macro definition with instructions. Macro will be metered by aggregating the metrics of the instructions.
+1. Macro definition with instructions. Macro will be metered by aggregating the metrics of the instructions. For example:
 
     ```jsonc
     "z80-asm-meter.macros": [
@@ -171,7 +176,7 @@ As most of the macro definition fields are optional, this extension uses a best-
     ]
     ```
 
-2. Macro definition with timing and size. Macro will be metered using the provided timing and/or size.
+2. Macro definition with timing and size. Macro will be metered using the provided timing and/or size. For example:
 
     ```jsonc
     "z80-asm-meter.macros": [
@@ -184,7 +189,7 @@ As most of the macro definition fields are optional, this extension uses a best-
     ]
     ```
 
-3. Macro definition with both instructions and timing and/or size. Provided timing and/or size will override the metrics of the instructions.
+3. Macro definition with both instructions and timing and/or size. Provided timing and/or size will override the metrics of the instructions. For example:
 
     ```jsonc
     "z80-asm-meter.macros": [
