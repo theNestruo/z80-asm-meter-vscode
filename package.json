@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.5.4",
+	"version": "3.6.0",
 	"engines": {
 		"vscode": "^1.80.0"
 	},
@@ -43,7 +43,7 @@
 		"onLanguage:zeus-asm",
 		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
 	],
-	"main": "./dist/extension.js",
+	"main": "./out/extension.js",
 	"contributes": {
 		"languages": [
 			{
@@ -215,6 +215,26 @@
 					],
 					"default": "none"
 				},
+				"z80-asm-meter.timings.atExit": {
+					"type": "boolean",
+					"description": "When enabled, if the selection ends with a jump or return operation, measures any previous conditional jump or return operation as not taken",
+					"default": false
+				},
+				"z80-asm-meter.timings.hints": {
+					"type": "string",
+					"description": "Enables timing hints read from the line comment.",
+					"enum": [
+						"none",
+						"subroutines",
+						"any"
+					],
+					"enumDescriptions": [
+						"Disables timing hints",
+						"Subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
+						"Any timing hint will be added"
+					],
+					"default": "none"
+				},
 				"z80-asm-meter.viewBytes": {
 					"type": "boolean",
 					"description": "Enables the bytes (opcode) in the status bar",
@@ -229,16 +249,24 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run esbuild-base -- --minify",
-		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
-		"esbuild": "npm run esbuild-base -- --sourcemap",
-		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-		"test-compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./"
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.80.0",
-		"esbuild": "^0.18.17",
-		"typescript": "^5.1.6"
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "16.x",
+		"@typescript-eslint/eslint-plugin": "^5.31.0",
+		"@typescript-eslint/parser": "^5.31.0",
+		"eslint": "^8.20.0",
+		"glob": "^8.0.3",
+		"mocha": "^10.0.0",
+		"typescript": "^4.7.4",
+		"@vscode/test-electron": "^2.1.5"
 	}
 }

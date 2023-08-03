@@ -1,6 +1,8 @@
-## (unreleased)
+## 3.6.0 (unreleased)
 
-- Extension is now [bundled](https://code.visualstudio.com/api/working-with-extensions/bundling-extension)
+- Support for SjASMPlus `DUP`/`EDUP` and `REPT`/`ENDR` repetitions. #99
+- Advanced timing algorithms: timing "at exit", subroutine timing hints. #114
+- Performance improvements
 
 ## 3.5.4
 

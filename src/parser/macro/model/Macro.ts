@@ -1,9 +1,9 @@
-import { MacroDefinition } from "./MacroDefinition";
-import { MeterableAggregation } from "./MeterableAggregation";
-import { extractRawInstructionFrom, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import MeterableCollection from "../../../model/MeterableCollection";
+import { extractRawInstruction, parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../../../utils/utils";
+import Z80InstructionParser from "../../z80/Z80InstructionParser";
+import MacroDefinition from "./MacroDefinition";
 
-export class Macro extends MeterableAggregation {
+export default class Macro extends MeterableCollection {
 
 	// User-provided information
 	private instructionSets: string[];
@@ -17,7 +17,7 @@ export class Macro extends MeterableAggregation {
 	// Derived information (will be cached for performance reasons)
 	private ready: boolean = false;
 
-	public constructor(source: MacroDefinition, instructionSets: string[]) {
+	constructor(source: MacroDefinition, instructionSets: string[]) {
 		super();
 
 		this.providedName = source.name;
@@ -35,7 +35,7 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The name of the macro
 	 */
-	public getInstruction(): string {
+	getInstruction(): string {
 
 		return this.providedName;
 	}
@@ -43,19 +43,21 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The Z80 timing, in time (T) cycles
 	 */
-	public getZ80Timing(): number[] {
-		if (this.providedZ80Timing !== undefined) {
+	getZ80Timing(): number[] {
+
+		if (this.providedZ80Timing) {
 			return this.providedZ80Timing;
 		}
-        this.init();
+		this.init();
 		return super.getZ80Timing();
 	}
 
 	/**
 	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
 	 */
-	public getMsxTiming(): number[] {
-		if (this.providedMsxTiming !== undefined) {
+	getMsxTiming(): number[] {
+
+		if (this.providedMsxTiming) {
 			return this.providedMsxTiming;
 		}
 		this.init();
@@ -65,8 +67,9 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The CPC timing, in NOPS
 	 */
-	public getCpcTiming(): number[] {
-		if (this.providedCpcTiming !== undefined) {
+	getCpcTiming(): number[] {
+
+		if (this.providedCpcTiming) {
 			return this.providedCpcTiming;
 		}
 		this.init();
@@ -76,7 +79,8 @@ export class Macro extends MeterableAggregation {
 	/**
 	 * @returns The bytes
 	 */
-	public getBytes(): string[] {
+	getBytes(): string[] {
+
 		this.init();
 		const bytes = super.getBytes();
 		if (bytes.length) {
@@ -84,15 +88,16 @@ export class Macro extends MeterableAggregation {
 		}
 		const size = this.getSize();
 		return size
-				? new Array(size).fill("n")
-				: [];
+			? new Array(size).fill("n")
+			: [];
 	}
 
 	/**
 	 * @returns The size in bytes
 	 */
-	public getSize(): number {
-		if (this.providedSize !== undefined) {
+	getSize(): number {
+
+		if (this.providedSize) {
 			return this.providedSize;
 		}
 		return super.getSize();
@@ -105,11 +110,16 @@ export class Macro extends MeterableAggregation {
 			return;
 		}
 
-		if (this.providedInstructions !== undefined) {
+		if (this.providedInstructions) {
 			this.providedInstructions.forEach(rawPart => {
-				const rawInstruction = extractRawInstructionFrom(rawPart);
-				const instruction = Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
-				this.add(instruction, 1);
+				const rawInstruction = extractRawInstruction(rawPart);
+				if (!rawInstruction) {
+					// Syntax error in macro
+					return;
+				}
+				const instruction =
+					Z80InstructionParser.instance.parseInstruction(rawInstruction, this.instructionSets);
+				this.add(instruction);
 			});
 		}
 

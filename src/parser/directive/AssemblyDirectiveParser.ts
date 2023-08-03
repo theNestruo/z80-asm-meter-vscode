@@ -1,14 +1,15 @@
 import { workspace } from "vscode";
-import { AssemblyDirective } from "./AssemblyDirective";
-import { Meterable } from "./Meterable";
-import { NumericExpressionParser } from "./NumericExpressionParser";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import Meterable from "../../model/Meterable";
+import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware, formatHexadecimalByte } from "../../utils/utils";
+import NumericExpressionParser from "../NumericExpressionParser";
+import Z80InstructionParser from "../z80/Z80InstructionParser";
+import AssemblyDirective from "./model/AssemblyDirective";
+import MeterableRepetition from "../../model/MeterableRepetition";
 
-export class AssemblyDirectiveParser {
+export default class AssemblyDirectiveParser {
 
     // Singleton
-    public static instance = new AssemblyDirectiveParser();
+    static instance = new AssemblyDirectiveParser();
 
     // Configuration
     private directivesAsInstructions: string;
@@ -20,11 +21,7 @@ export class AssemblyDirectiveParser {
         this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
     }
 
-    public parse(instruction: string | undefined): Meterable[] | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string): Meterable | undefined {
 
         // Locates defb/defw/defs directives
         const mnemonic = extractMnemonicOf(instruction);
@@ -42,9 +39,9 @@ export class AssemblyDirectiveParser {
         return undefined;
     }
 
-    private parseDefbDirective(pInstruction: string): AssemblyDirective[] | undefined {
+    private parseDefbDirective(instruction: string): AssemblyDirective | undefined {
 
-        const operands = extractOperandsOfQuotesAware(pInstruction);
+        const operands = extractOperandsOfQuotesAware(instruction);
         if (operands.length < 1) {
             return undefined;
         }
@@ -70,10 +67,10 @@ export class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFB", bytes, bytes.length)];
+        return new AssemblyDirective("DEFB", bytes, bytes.length);
     }
 
-    private parseDefwDirective(pInstruction: string): AssemblyDirective[] | undefined {
+    private parseDefwDirective(pInstruction: string): AssemblyDirective | undefined {
 
         const operands = extractOperandsOfQuotesAware(pInstruction);
         if (operands.length < 1) {
@@ -96,10 +93,10 @@ export class AssemblyDirectiveParser {
         }
 
         // Returns as directive
-        return [new AssemblyDirective("DEFW", bytes, bytes.length * 2)];
+        return new AssemblyDirective("DEFW", bytes, bytes.length * 2);
     }
 
-    private parseDefsDirective(pInstruction: string): Meterable[] | undefined {
+    private parseDefsDirective(pInstruction: string): Meterable | undefined {
 
         const operands = extractOperandsOf(pInstruction);
         if ((operands.length < 1) || (operands.length > 2)) {
@@ -112,21 +109,21 @@ export class AssemblyDirectiveParser {
             return undefined;
         }
         const value = operands.length === 2
-                ? NumericExpressionParser.parse(operands[1])
-                : undefined;
+            ? NumericExpressionParser.parse(operands[1])
+            : undefined;
 
         // Determines instruction
         if (this.directivesAsInstructions === "defs") {
             const opcode = value !== undefined ? value : 0x00; // (defaults to NOP)
             const instruction = Z80InstructionParser.instance.parseOpcode(opcode);
             if (instruction) {
-                return new Array(count).fill(instruction);
+                return MeterableRepetition.of(instruction, count);
             }
         }
 
         // Returns as directive
         const byte = value !== undefined ? formatHexadecimalByte(value) : "n";
         const bytes = new Array(count).fill(byte);
-        return [new AssemblyDirective("DEFS", bytes, count)];
+        return new AssemblyDirective("DEFS", bytes, count);
     }
 }

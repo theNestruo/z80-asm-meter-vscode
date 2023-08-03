@@ -1,12 +1,12 @@
 import { workspace } from "vscode";
-import { Macro } from "./Macro";
-import { MacroDefinition } from "./MacroDefinition";
-import { extractMnemonicOf } from "./utils";
+import { extractMnemonicOf } from "../../utils/utils";
+import Macro from "./model/Macro";
+import MacroDefinition from "./model/MacroDefinition";
 
-export class MacroParser {
+export default class MacroParser {
 
     // Singleton
-    public static instance = new MacroParser();
+    static instance = new MacroParser();
 
     // Macro maps
     private macroDefinitionByMnemonic: Record<string, MacroDefinition>;
@@ -28,11 +28,7 @@ export class MacroParser {
         });
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): Macro | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string, instructionSets: string[]): Macro | undefined {
 
         // Locates macro definition
         const mnemonic = extractMnemonicOf(instruction);
@@ -41,7 +37,6 @@ export class MacroParser {
             return undefined;
         }
 
-        const macro = new Macro(macroDefinition, instructionSets);
-        return macro;
+        return new Macro(macroDefinition, instructionSets);
     }
 }

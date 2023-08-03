@@ -1,11 +1,11 @@
-import { SjasmplusFakeInstruction } from "./SjasmplusFakeInstruction";
-import { sjasmplusFakeInstructionSet } from "./SjasmplusFakeInstructionSet";
-import { extractMnemonicOf } from "./utils";
+import { extractMnemonicOf } from "../../utils/utils";
+import { sjasmplusFakeInstructionSet } from "./data/SjasmplusFakeInstructionSet";
+import SjasmplusFakeInstruction from "./model/SjasmplusFakeInstruction";
 
-export class SjasmplusFakeInstructionParser {
+export default class SjasmplusFakeInstructionParser {
 
     // Singleton
-    public static instance = new SjasmplusFakeInstructionParser();
+    static instance = new SjasmplusFakeInstructionParser();
 
     // Instruction maps
     private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
@@ -31,11 +31,7 @@ export class SjasmplusFakeInstructionParser {
         });
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string, instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         // Locates candidate instructions
         const mnemonic = extractMnemonicOf(instruction);
@@ -48,10 +44,11 @@ export class SjasmplusFakeInstructionParser {
         return undefined;
     }
 
-    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
+    private findBestCandidate(instruction: string,
+        candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
 
         // Locates instruction
-        let bestCandidate = undefined;
+        let bestCandidate;
         let bestScore = 0;
         for (let i = 0, n = candidates.length; i < n; i++) {
             const candidate = candidates[i];

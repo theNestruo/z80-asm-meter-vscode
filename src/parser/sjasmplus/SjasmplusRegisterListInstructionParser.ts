@@ -1,20 +1,16 @@
-import { MeterableCollection } from "./MeterableCollection";
-import { extractMnemonicOf, extractOperandsOf } from "./utils";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import MeterableCollection from "../../model/MeterableCollection";
+import { extractMnemonicOf, extractOperandsOf } from "../../utils/utils";
+import Z80InstructionParser from "../z80/Z80InstructionParser";
 
-export class SjasmplusRegisterListInstructionParser {
+export default class SjasmplusRegisterListInstructionParser {
 
     // Singleton
-    public static instance = new SjasmplusRegisterListInstructionParser();
+    static instance = new SjasmplusRegisterListInstructionParser();
 
     private constructor() {
     }
 
-    public parse(instruction: string | undefined, instructionSets: string[]): MeterableCollection | undefined {
-
-        if (!instruction) {
-            return undefined;
-        }
+    parse(instruction: string, instructionSets: string[]): MeterableCollection | undefined {
 
         // Register lists instructions
         const mnemonic = extractMnemonicOf(instruction);
@@ -37,7 +33,7 @@ export class SjasmplusRegisterListInstructionParser {
                 return undefined;
             }
 
-            collection.add(z80Instruction, 1);
+            collection.add(z80Instruction);
         }
         return collection;
     }

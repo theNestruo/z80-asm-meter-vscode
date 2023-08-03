@@ -1,7 +1,7 @@
 /**
  * An user-defined macro, as defined in extension settings
  */
-export interface MacroDefinition {
+export default interface MacroDefinition {
 
 	/**
 	 * The name of the macro
