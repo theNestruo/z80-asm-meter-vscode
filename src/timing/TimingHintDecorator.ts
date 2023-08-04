@@ -1,6 +1,6 @@
 import Meterable from "../model/Meterable";
 import MeterableHint from "../model/MeterableHint";
-import { extractMnemonicOf, extractOperandsOf } from "../utils/utils";
+import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../utils/utils";
 
 export default class TimingHintDecorator implements Meterable {
 
@@ -15,7 +15,7 @@ export default class TimingHintDecorator implements Meterable {
 	static of(meterable: Meterable, meterableHint: MeterableHint, subroutines: boolean): Meterable {
 
 		// Checks instruction
-		if (subroutines && (!this.isJumpOrCall(meterable.getInstruction()))) {
+		if (subroutines && (!this.isSubroutineInstruction(meterable.getInstruction()))) {
 			return meterable;
 		}
 
@@ -36,7 +36,7 @@ export default class TimingHintDecorator implements Meterable {
 		this.meterable = meterable;
 		this.meterableHint = meterableHint;
 
-		this.conditional = TimingHintDecorator.isConditional(meterable.getInstruction());
+		this.conditional = TimingHintDecorator.isConditionalSubroutineInstruction(meterable.getInstruction());
 	}
 
 	getInstruction(): string {
@@ -89,21 +89,30 @@ export default class TimingHintDecorator implements Meterable {
 			: [ timing[0] + addend[0], timing[1] + addend[1] ];
 	}
 
-	private static isJumpOrCall(instruction: string): boolean {
+	private static isSubroutineInstruction(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		return [ "CALL", "DJNZ", "JP", "JR", "RET", "RST" ].indexOf(mnemonic) !== -1;
+		return [ "CALL", "DJNZ", "JP", "JR", "RET", "RETI", "RETN", "RST" ].indexOf(mnemonic) !== -1;
 	}
 
-	private static isConditional(instruction: string): boolean {
+	private static isConditionalSubroutineInstruction(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		if (mnemonic === "DJNZ") {
-			return true;
+		const operands = extractOperandsOf(instruction);
+
+		if (!operands.length) {
+			return mnemonic === "DJNZ";
 		}
 
-		const operands = extractOperandsOf(instruction);
-		return !!operands.length
-				&& !!operands[0].match(/^(N?C|N?Z|M|P[OE]?)$/);
+		switch (mnemonic) {
+		case "CALL":
+		case "JP":
+		case "RET":
+			return isAnyCondition(operands[0]);
+		case "JR":
+			return isJrCondition(operands[0]);
+		default:
+			return false;
+		}
 	}
 }

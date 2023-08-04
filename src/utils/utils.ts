@@ -31,7 +31,7 @@ export function normalizeAndSplitQuotesAware(s: string, separator: string | unde
         let currentPart = "";
         let quoted = null;
         let whitespace = -1;
-        for ( ; i < n; i++) {
+        for (; i < n; i++) {
             const c = s.charAt(i);
 
             // Inside quotes
@@ -45,9 +45,9 @@ export function normalizeAndSplitQuotesAware(s: string, separator: string | unde
 
             // Comment?
             const isCommentStart = (c === ";")
-                    || (c === "/") && (i + 1 < n) && (s.charAt(i + 1) === "/")
-                    ? c
-                    : undefined;
+                || (c === "/") && (i + 1 < n) && (s.charAt(i + 1) === "/")
+                ? c
+                : undefined;
             if (isCommentStart) {
                 sourceCodeLine.addPart(currentPart);
                 sourceCodeLine.setComment(s.substring(isCommentStart === ";" ? i + 1 : i + 2).trim());
@@ -73,9 +73,9 @@ export function normalizeAndSplitQuotesAware(s: string, separator: string | unde
 
             // Quote?
             if ((c === "\"")
-                    // Prevents considering "'" as a quote
-                    // when parsing the instruction "ex af,af'"
-                    || ((c === "'") && (!/^ex\s*af\s*,\s*af$/i.test(currentPart)))) {
+                // Prevents considering "'" as a quote
+                // when parsing the instruction "ex af,af'"
+                || ((c === "'") && (!/^ex\s*af\s*,\s*af$/i.test(currentPart)))) {
                 quoted = c;
             }
 
@@ -104,8 +104,8 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
 
     const i = s.indexOf(" ");
     return i === -1
-            ? []
-            : normalizeAndSplitQuotesAware(s.substring(i + 1), ",").getPartsAsString();
+        ? []
+        : normalizeAndSplitQuotesAware(s.substring(i + 1), ",").getPartsAsString();
 }
 
 /**
@@ -113,16 +113,10 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
  * @returns true if the candidate operand must match verbatim the operand of the instruction
  */
 export function isVerbatimOperand(operand: string): boolean {
-
-    const verbatimOperands = [
-        "A", "AF", "AF'",
-        "B", "BC", "C", "NC",
-        "D", "DE", "E",
-        "H", "HL", "L",
+    return ["A", "AF", "AF'", "B", "BC", "C", "NC",
+        "D", "DE", "E", "H", "HL", "L",
         "I", "IX", "IY", "R", "SP",
-        "Z", "NZ", "M", "P", "PE", "PO"
-    ];
-    return verbatimOperands.indexOf(operand) !== -1;
+        "Z", "NZ", "M", "P", "PE", "PO"].indexOf(operand) !== -1;
 }
 
 /**
@@ -182,7 +176,7 @@ export function extractIndirection(operand: string): string {
  * @returns 1 if the operand is one of the 8 bit general purpose registers, 0 otherwise
  */
 export function is8bitRegisterScore(operand: string): number {
-    return operand.match(/^[ABCDEHL]$/) ? 1 : 0;
+    return ["A", "B", "C", "D", "E", "H", "L"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -206,7 +200,7 @@ export function isIYWithOffsetScore(operand: string): number {
  * @returns 1 if the operand is the high part of the IX index register, 0 otherwise
  */
 export function isIXhScore(operand: string): number {
-    return operand.match(/^(IX[HU]|XH|HX)$/) ? 1 : 0;
+    return ["IXH", "IXU", "XH", "HX"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -214,7 +208,7 @@ export function isIXhScore(operand: string): number {
  * @returns 1 if the operand is the low part of the IX index register, 0 otherwise
  */
 export function isIXlScore(operand: string): number {
-    return operand.match(/^(IXL|XL|LX)$/) ? 1 : 0;
+    return ["IXL", "XL", "LX"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -222,7 +216,7 @@ export function isIXlScore(operand: string): number {
  * @returns 1 if the operand is the high or low part of the IX index register, 0 otherwise
  */
 export function isIX8bitScore(operand: string): number {
-    return operand.match(/^(IX[HLU]|X[HL]|[HL]X)$/) ? 1 : 0;
+    return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -230,7 +224,7 @@ export function isIX8bitScore(operand: string): number {
  * @returns 1 if the operand is the high part of the IY index register, 0 otherwise
  */
 export function isIYhScore(operand: string): number {
-    return operand.match(/^(IY[HU]|YH|HY)$/) ? 1 : 0;
+    return ["IYH", "IYU", "YH", "HY"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -238,7 +232,7 @@ export function isIYhScore(operand: string): number {
  * @returns 1 if the operand is the low part of the IY index register, 0 otherwise
  */
 export function isIYlScore(operand: string): number {
-    return operand.match(/^(IYL|YL|LY)$/) ? 1 : 0;
+    return ["IYL", "YL", "LY"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -246,7 +240,7 @@ export function isIYlScore(operand: string): number {
  * @returns 1 if the operand is the high or low part of the IY index register, 0 otherwise
  */
 export function isIY8bitScore(operand: string): number {
-    return operand.match(/^(IY[HLU]|Y[HL]|[HL]Y)$/) ? 1 : 0;
+    return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].indexOf(operand) !== -1 ? 1 : 0;
 }
 
 /**
@@ -254,7 +248,7 @@ export function isIY8bitScore(operand: string): number {
  * @returns 1 if the operand is a register where H and L have been replaced by IXh and IXl, 0 otherwise
  */
 export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
-    return operand.match(/^[ABCDE]$/) ? 1 : isIX8bitScore(operand);
+    return ["A", "B", "C", "D", "E"].indexOf(operand) !== -1 ? 1 : isIX8bitScore(operand);
 }
 
 /**
@@ -262,7 +256,7 @@ export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number 
  * @returns 1 if the operand is a register where H and L have been replaced by IYh and IYl, 0 otherwise
  */
 export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
-    return operand.match(/^[ABCDE]$/) ? 1 : isIY8bitScore(operand);
+    return ["A", "B", "C", "D", "E"].indexOf(operand) !== -1 ? 1 : isIY8bitScore(operand);
 }
 
 /**
@@ -273,6 +267,22 @@ export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number 
  */
 export function isAnyRegister(operand: string): boolean {
     return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
+}
+
+/**
+ * @param operand the operand of the instruction
+ * @returns true if the operand is a flag for conditional operations
+ */
+export function isAnyCondition(operand: string): boolean {
+    return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].indexOf(operand) !== -1;
+}
+
+/**
+ * @param operand the operand of the instruction
+ * @returns true if the operand is a flag for conditional JR
+ */
+export function isJrCondition(operand: string): boolean {
+    return ["C", "NC", "Z", "NZ"].indexOf(operand) !== -1;
 }
 
 /**
@@ -295,7 +305,7 @@ export function anySymbolOperandScore(candidateOperand: string): number {
 export function parseTimingsLenient(o: unknown): number[] | undefined {
 
     return (typeof o === "number") ? [o, o]
-            : (typeof o === "string") ? parseTimings(o)
+        : (typeof o === "string") ? parseTimings(o)
             : undefined;
 }
 
@@ -313,7 +323,7 @@ export function formatTiming(t: number[]): string {
 export function parteIntLenient(o: unknown): number {
 
     return (typeof o === "number") ? o
-            : (typeof o === "string") ? parseInt(o, 10)
+        : (typeof o === "string") ? parseInt(o, 10)
             : NaN;
 }
 

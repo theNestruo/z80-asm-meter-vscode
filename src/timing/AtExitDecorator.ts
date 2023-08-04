@@ -1,5 +1,5 @@
 import Meterable from "../model/Meterable";
-import { extractMnemonicOf, extractOperandsOf } from "../utils/utils";
+import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../utils/utils";
 
 export default class AtExitDecorator implements Meterable {
 
@@ -21,7 +21,7 @@ export default class AtExitDecorator implements Meterable {
 		// Last instruction check
 		const instruction = meterables.pop()?.getInstruction();
 		if ((!instruction)
-			|| (!this.isJump(instruction))) {
+			|| (!this.isExitInstruction(instruction))) {
             return meterable;
         }
 
@@ -132,19 +132,27 @@ export default class AtExitDecorator implements Meterable {
 			: [ timing[1], timing[1] ];	// "Not taken" timings
 	}
 
-	private static isJump(instruction: string): boolean {
+	private static isExitInstruction(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		return [ "JP", "JR", "RET" ].indexOf(mnemonic) !== -1;
+		return [ "JP", "JR", "RET", "RETI", "RETN" ].indexOf(mnemonic) !== -1;
 	}
 
 	private static isConditionalJump(instruction: string): boolean {
 
-		if (!this.isJump(instruction)) {
+		const operands = extractOperandsOf(instruction);
+		if (!operands.length) {
 			return false;
 		}
-		const operands = extractOperandsOf(instruction);
-		return !!operands.length
-				&& !!operands[0].match(/^(N?C|N?Z|M|P[OE]?)$/);
+
+		switch (extractMnemonicOf(instruction)) {
+		case "JP":
+		case "RET":
+			return isAnyCondition(operands[0]);
+		case "JR":
+			return isJrCondition(operands[0]);
+		default:
+			return false;
+		}
 	}
 }
