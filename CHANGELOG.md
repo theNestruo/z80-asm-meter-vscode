@@ -1,6 +1,7 @@
 ## 3.6.1
 
 - Fixes wrong repeat counts with nested SjASMPlus `DUP`s/`REPT`s
+- Fixes edge cases when timing "at exit" is enabled
 
 ## 3.6.0
 
