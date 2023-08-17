@@ -1,3 +1,8 @@
+## 3.7.0
+
+- Fixes missing documentation of configuration property `directivesAsInstructions`
+- Prevents metering from being called too frequently when the selection changes
+
 ## 3.6.1
 
 - Fixes wrong repeat counts with nested SjASMPlus `DUP`s/`REPT`s
@@ -32,7 +37,7 @@
 ## 3.4.2
 
 - Code clean-up
-- Fixes quoted values detection (mainly in `db`/`defb` directives)
+- Fixes quoted values detection (mainly in `DB`/`DEFB` directives)
 
 ## 3.4.1
 
@@ -40,7 +45,7 @@
 
 ## 3.4.0
 
-- Support for `dm`/`defm` directives (as synonyms for `db`/`defb`)
+- Support for `DM`/`DEFM` directives (as synonyms for `DB`/`DEFB`)
 - Fixes wrong "generic" instructions detection (such as `INC IYq`)
 - Support for SjASMPlus register lists instructions. #99
 - Performance improvement
@@ -60,7 +65,7 @@
 
 ## 3.0.1
 
-- Fixes wrong `dw`/`defw` directive size
+- Fixes wrong `DW`/`DEFW` directive size
 
 ## 3.0.0
 
@@ -85,8 +90,8 @@
 
 ## 1.6.0
 
-- Support for `db`/`defb`/`dw`/`defw` directives
-- Improved support for `ds`/`defs` directives: single byte instruction detection can be disabled
+- Support for `DB`/`DEFB`/`DW`/`DEFW` directives
+- Improved support for `DS`/`DEFS` directives: single byte instruction detection can be disabled
 - Support for negative values
 - Support for multiple instructions on one line with line separators (such as colon `:` or pipe `|`)
 - Improved tooltip format
@@ -94,9 +99,9 @@
 
 ## 1.5.0
 
-- Single byte instructions with an 8 bit register operand (such as `AND r`) are now recognized as separate instructions (`AND A`. `AND B`, ...)
+- Single byte instructions with an 8 bit register operand (such as `AND r`) are now recognized as separate instructions (`AND A`, `AND B`, ...)
 - Fixed issues:
-    - Use of `ds`/`defs` directives for `NOP`s. #40
+    - Use of `DS`/`DEFS` directives for `NOP`s. #40
 
 ## 1.4.0
 

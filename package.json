@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.6.1",
+	"version": "3.7.0",
 	"engines": {
 		"vscode": "^1.81.0"
 	},
@@ -56,19 +56,6 @@
 		"configuration": {
 			"title": "Z80 Assembly meter settings",
 			"properties": {
-				"z80-asm-meter.directivesAsInstructions": {
-					"type": "string",
-					"description": "Controls which directives should try to be parsed as single byte instructions",
-					"enum": [
-						"none",
-						"defs"
-					],
-					"enumDescriptions": [
-						"None; directives will be parsed as bytes",
-						"Tries to parse DEFS directive bytes as single byte instructions"
-					],
-					"default": "defs"
-				},
 				"z80-asm-meter.languageIds": {
 					"type": [
 						"array",
@@ -83,70 +70,6 @@
 						"z80-macroasm",
 						"zeus-asm"
 					]
-				},
-				"z80-asm-meter.macros": {
-					"type": [
-						"array",
-						"null"
-					],
-					"description": "An array of user-defined macros",
-					"default": [],
-					"items": {
-						"type": "object",
-						"properties": {
-							"name": {
-								"type": "string",
-								"description": "The name of the macro"
-							},
-							"z80": {
-								"type": [
-									"number",
-									"string",
-									"null"
-								],
-								"description": "Declares or overrides Z80 default macro timing for the",
-								"default": null
-							},
-							"msx": {
-								"type": [
-									"number",
-									"string",
-									"null"
-								],
-								"description": "Declares or overrides Z80+M1 macro timing information (MSX standard)",
-								"default": null
-							},
-							"cpc": {
-								"type": [
-									"number",
-									"string",
-									"null"
-								],
-								"description": "Declares or overrides macro timing measured in number of NOPs",
-								"default": null
-							},
-							"size": {
-								"type": [
-									"number",
-									"string",
-									"null"
-								],
-								"description": "Declares or overrides macro byte count",
-								"default": null
-							},
-							"instructions": {
-								"type": [
-									"array",
-									"null"
-								],
-								"description": "The macro definition, as instructions",
-								"default": null,
-								"items": {
-									"type": "string"
-								}
-							}
-						}
-					}
 				},
 				"z80-asm-meter.platform": {
 					"type": "string",
@@ -166,6 +89,34 @@
 						"ZX Spectrum Next Extended Z80 instruction set and default timing information"
 					],
 					"default": "z80"
+				},
+				"z80-asm-meter.directivesAsInstructions": {
+					"type": "string",
+					"description": "Controls which directives should try to be parsed as single byte instructions",
+					"enum": [
+						"none",
+						"defs"
+					],
+					"enumDescriptions": [
+						"None; directives will be parsed as bytes",
+						"Tries to parse DEFS directive bytes as single byte instructions"
+					],
+					"default": "defs"
+				},
+				"z80-asm-meter.viewBytes": {
+					"type": "boolean",
+					"description": "Enables the bytes (opcode) in the status bar",
+					"default": false
+				},
+				"z80-asm-meter.viewInstruction": {
+					"type": "boolean",
+					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
+					"default": true
+				},
+				"z80-asm-meter.debounce": {
+					"type": "integer",
+					"description": "Milliseconds to prevent metering from being called too frequently when the selection changes",
+					"default": 100
 				},
 				"z80-asm-meter.sjasmplus": {
 					"type": "boolean",
@@ -235,15 +186,69 @@
 					],
 					"default": "none"
 				},
-				"z80-asm-meter.viewBytes": {
-					"type": "boolean",
-					"description": "Enables the bytes (opcode) in the status bar",
-					"default": false
-				},
-				"z80-asm-meter.viewInstruction": {
-					"type": "boolean",
-					"description": "Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions",
-					"default": true
+				"z80-asm-meter.macros": {
+					"type": [
+						"array",
+						"null"
+					],
+					"description": "An array of user-defined macros",
+					"default": [],
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"description": "The name of the macro"
+							},
+							"z80": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides Z80 default macro timing for the",
+								"default": null
+							},
+							"msx": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides Z80+M1 macro timing information (MSX standard)",
+								"default": null
+							},
+							"cpc": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides macro timing measured in number of NOPs",
+								"default": null
+							},
+							"size": {
+								"type": [
+									"number",
+									"string",
+									"null"
+								],
+								"description": "Declares or overrides macro byte count",
+								"default": null
+							},
+							"instructions": {
+								"type": [
+									"array",
+									"null"
+								],
+								"description": "The macro definition, as instructions",
+								"default": null,
+								"items": {
+									"type": "string"
+								}
+							}
+						}
+					}
 				}
 			}
 		}

@@ -15,21 +15,47 @@ export default class ExtensionController {
 
     constructor() {
 
-        this._onEvent();
-
         // subscribe to selection change and editor activation events
         const subscriptions: Disposable[] = [];
-        window.onDidChangeTextEditorSelection(this._onEvent, this, subscriptions);
-        window.onDidChangeActiveTextEditor(this._onEvent, this, subscriptions);
+        window.onDidChangeTextEditorSelection(this._onDidChangeTextEditorSelection, this, subscriptions);
+        window.onDidChangeActiveTextEditor(this._onDidChangeActiveTextEditor, this, subscriptions);
 
         // create a command to copy timing and size to clipboard
         const command = commands.registerCommand(ExtensionController.commandId, this._onCommand, this);
 
-        // create a combined disposable from both event subscriptions
+        // create a combined disposable from event subscriptions and command
         this._disposable = Disposable.from(...subscriptions, command);
+
+        this._onDidChangeActiveTextEditor();
     }
 
-    private _onEvent() {
+    private onDidChangeTextEditorSelectionTimeoutId: NodeJS.Timeout | undefined;
+
+    private _onDidChangeTextEditorSelection() {
+
+        clearTimeout(this.onDidChangeTextEditorSelectionTimeoutId);
+
+        const configuration = workspace.getConfiguration("z80-asm-meter");
+        const debounce = configuration.get("debounce", 100);
+
+        if (debounce <= 0) {
+            // (no debounce)
+            this.updateStatusBar();
+            return;
+        }
+
+        this.onDidChangeTextEditorSelectionTimeoutId = setTimeout(() => {
+            this.updateStatusBar();
+        }, debounce);
+    }
+
+    private _onDidChangeActiveTextEditor() {
+
+        clearTimeout(this.onDidChangeTextEditorSelectionTimeoutId);
+        return this.updateStatusBar();
+    }
+
+    private updateStatusBar() {
 
         // Reads the source code
         const sourceCode = this.readFromSelection();

@@ -11,7 +11,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 
 As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
-In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&micro;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
+In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&nbsp;&micro;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
 
 ZX Spectrum Next Extended Z80 Instruction Set is supported.
 
@@ -52,9 +52,15 @@ This extension contributes the following settings:
     * `cpc`: For Amstrad CPC developers. Uses the default Z80 instruction set and shows timing measured in number of NOPs.
     * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
 
+* `z80-asm-meter.directivesAsInstructions`: Controls which directives should try to be parsed as single byte instructions:
+    * `none` (default): None; directives will be parsed as bytes.
+    * `defs`: Tries to parse `DEFS` directive bytes as single byte instructions.
+
 * `z80-asm-meter.viewBytes`: Enables the opcode in the status bar. Disabled by default.
 
 * `z80-asm-meter.viewInstruction`: Enables the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Enabled by default.
+
+*  `z80-asm-meter.debounce`: Milliseconds to prevent metering from being called too frequently when the selection changes. Defaults to: `100` (100&nbsp;ms).
 
 ### Assembler syntax related settings
 
@@ -76,7 +82,7 @@ This extension contributes the following settings:
 
 ### Timing related settings
 
-* `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, timings shown will be the worst and best case scenarios of the code flow to the selected exit point. See [timing "at exit"](#timing-at-exit).
+* `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, timings shown will be the worst and best case scenarios of the code flow to the selected exit point. See [timing "at exit"](#timing-at-exit). Disabled by default.
 
 * `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment. See [timing hints](#timing-hints).
 
