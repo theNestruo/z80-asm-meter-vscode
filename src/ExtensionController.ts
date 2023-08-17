@@ -9,7 +9,9 @@ export default class ExtensionController {
 
     private static commandId = "z80AsmMeter.copyToClipboard";
 
+    private onDidChangeTextEditorSelectionTimeoutId: NodeJS.Timeout | undefined;
     private previousHashCode: number | undefined = undefined;
+
     private _statusBarItem: StatusBarItem | undefined;
     private _disposable: Disposable;
 
@@ -26,24 +28,25 @@ export default class ExtensionController {
         // create a combined disposable from event subscriptions and command
         this._disposable = Disposable.from(...subscriptions, command);
 
+        // First execution
         this._onDidChangeActiveTextEditor();
     }
 
-    private onDidChangeTextEditorSelectionTimeoutId: NodeJS.Timeout | undefined;
-
     private _onDidChangeTextEditorSelection() {
 
+        // Cancels any pending execution
         clearTimeout(this.onDidChangeTextEditorSelectionTimeoutId);
 
+        // Checks debounce
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const debounce = configuration.get("debounce", 100);
-
         if (debounce <= 0) {
-            // (no debounce)
+            // (no debounce: immediate execution)
             this.updateStatusBar();
             return;
         }
 
+        // Debounced execution
         this.onDidChangeTextEditorSelectionTimeoutId = setTimeout(() => {
             this.updateStatusBar();
         }, debounce);
@@ -51,7 +54,10 @@ export default class ExtensionController {
 
     private _onDidChangeActiveTextEditor() {
 
+        // Cancels any pending execution
         clearTimeout(this.onDidChangeTextEditorSelectionTimeoutId);
+
+        // Immediate execution
         return this.updateStatusBar();
     }
 

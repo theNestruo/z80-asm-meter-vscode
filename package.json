@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "3.7.0",
+	"version": "4.0.0",
 	"engines": {
 		"vscode": "^1.81.0"
 	},
@@ -43,7 +43,7 @@
 		"onLanguage:zeus-asm",
 		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/bundle.js",
 	"contributes": {
 		"languages": [
 			{
@@ -254,24 +254,28 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
+		"vscode:prepublish": "npm run esbuild-base -- --minify",
+		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/bundle.js --external:vscode --format=cjs --platform=node",
+		"esbuild": "npm run esbuild-base -- --sourcemap",
+		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+		"tsc-compile": "tsc -p ./",
+		"tsc-watch": "tsc -watch -p ./",
 		"lint": "eslint src --ext ts",
+		"pretest": "npm run tsc-compile && npm run lint",
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.81.0",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^10.0.1",
 		"@types/node": "20.x",
+		"@types/vscode": "^1.81.0",
 		"@typescript-eslint/eslint-plugin": "^6.2.1",
 		"@typescript-eslint/parser": "^6.2.1",
+		"@vscode/test-electron": "^2.3.4",
+		"esbuild": "^0.19.2",
 		"eslint": "^8.20.0",
 		"glob": "^10.3.3",
 		"mocha": "^10.0.0",
-		"typescript": "^5.1.6",
-		"@vscode/test-electron": "^2.3.4"
+		"typescript": "^5.1.6"
 	}
 }

@@ -1,3 +1,7 @@
+## 4.0.0
+
+- Extension is now bundled with esbuild (performance improvement)
+
 ## 3.7.0
 
 - Fixes missing documentation of configuration property `directivesAsInstructions`
