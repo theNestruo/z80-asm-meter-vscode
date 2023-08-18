@@ -9,56 +9,67 @@ export default class ExtensionController {
 
     private static commandId = "z80AsmMeter.copyToClipboard";
 
-    private onDidChangeTextEditorSelectionTimeoutId: NodeJS.Timeout | undefined;
-    private previousHashCode: number | undefined = undefined;
+    private disposable: Disposable;
 
-    private _statusBarItem: StatusBarItem | undefined;
-    private _disposable: Disposable;
+    private isLeadingEvent: boolean = true;
+    private previousEventTimestamp: number | undefined = undefined;
+    private previousHashCode: number | undefined = undefined;
+    private updateStatusBarTimeout: NodeJS.Timeout | undefined;
+
+    private statusBarItem: StatusBarItem | undefined;
 
     constructor() {
 
         // subscribe to selection change and editor activation events
         const subscriptions: Disposable[] = [];
-        window.onDidChangeTextEditorSelection(this._onDidChangeTextEditorSelection, this, subscriptions);
-        window.onDidChangeActiveTextEditor(this._onDidChangeActiveTextEditor, this, subscriptions);
+        window.onDidChangeTextEditorSelection(this.onEvent, this, subscriptions);
+        window.onDidChangeActiveTextEditor(this.onEvent, this, subscriptions);
 
         // create a command to copy timing and size to clipboard
-        const command = commands.registerCommand(ExtensionController.commandId, this._onCommand, this);
+        const command = commands.registerCommand(ExtensionController.commandId, this.onCommand, this);
 
         // create a combined disposable from event subscriptions and command
-        this._disposable = Disposable.from(...subscriptions, command);
+        this.disposable = Disposable.from(...subscriptions, command);
 
         // First execution
-        this._onDidChangeActiveTextEditor();
+        this.onEvent();
     }
 
-    private _onDidChangeTextEditorSelection() {
+    private onEvent() {
 
-        // Cancels any pending execution
-        clearTimeout(this.onDidChangeTextEditorSelectionTimeoutId);
-
-        // Checks debounce
+        // Checks debounce configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const debounce = configuration.get("debounce", 100);
         if (debounce <= 0) {
-            // (no debounce: immediate execution)
+            // No debounce: immediate execution
             this.updateStatusBar();
             return;
         }
 
-        // Debounced execution
-        this.onDidChangeTextEditorSelectionTimeoutId = setTimeout(() => {
-            this.updateStatusBar();
-        }, debounce);
-    }
-
-    private _onDidChangeActiveTextEditor() {
-
         // Cancels any pending execution
-        clearTimeout(this.onDidChangeTextEditorSelectionTimeoutId);
+        clearTimeout(this.updateStatusBarTimeout);
 
-        // Immediate execution
-        return this.updateStatusBar();
+        // Detect leading events
+        if (!this.isLeadingEvent
+            && this.previousEventTimestamp
+            && (this.previousEventTimestamp + debounce < new Date().getTime())) {
+            this.isLeadingEvent = true;
+        }
+        this.previousEventTimestamp = new Date().getTime();
+
+        // Leading event?
+        if (this.isLeadingEvent) {
+            // Immediate execution
+            this.updateStatusBar();
+            this.isLeadingEvent = false;
+            return;
+        }
+
+        // Debounced execution
+        this.updateStatusBarTimeout = setTimeout(() => {
+            this.updateStatusBar();
+            this.isLeadingEvent = true;
+        }, debounce);
     }
 
     private updateStatusBar() {
@@ -117,16 +128,16 @@ export default class ExtensionController {
         const tooltip = viewer.getTooltip();
 
         // Builds the status bar item
-        if (!this._statusBarItem) {
-            this._statusBarItem = window.createStatusBarItem();
+        if (!this.statusBarItem) {
+            this.statusBarItem = window.createStatusBarItem();
         }
-        this._statusBarItem.text = text;
-        this._statusBarItem.tooltip = tooltip;
-        this._statusBarItem.command = ExtensionController.commandId;
-        this._statusBarItem.show();
+        this.statusBarItem.text = text;
+        this.statusBarItem.tooltip = tooltip;
+        this.statusBarItem.command = ExtensionController.commandId;
+        this.statusBarItem.show();
     }
 
-    private _onCommand() {
+    private onCommand() {
 
         // Reads the source code
         const sourceCode = this.readFromSelection();
@@ -201,17 +212,17 @@ export default class ExtensionController {
 
     private hideStatusBar() {
 
-        if (this._statusBarItem) {
-            this._statusBarItem.hide();
+        if (this.statusBarItem) {
+            this.statusBarItem.hide();
         }
     }
 
     dispose() {
 
-        if (this._statusBarItem) {
-            this._statusBarItem.dispose();
-            this._statusBarItem = undefined;
+        if (this.statusBarItem) {
+            this.statusBarItem.dispose();
+            this.statusBarItem = undefined;
         }
-        this._disposable.dispose();
+        this.disposable.dispose();
     }
 }
