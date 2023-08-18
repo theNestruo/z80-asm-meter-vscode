@@ -1,3 +1,7 @@
+## 4.1.0
+
+- Responsiveness improvement
+
 ## 4.0.0
 
 - Extension is now bundled with esbuild (performance improvement)
