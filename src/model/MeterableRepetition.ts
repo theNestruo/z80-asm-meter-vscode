@@ -9,22 +9,22 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	/**
 	 * Conditionaly builds an instance of a repetition of Meterables
 	 * @param meterable The repeated meterable instance
-	 * @param repeatCount The number of times the meterable instance is repeated
+	 * @param repetitions The number of times the meterable instance is repeated
 	 * @return The repeated meterable instance, or a repetition of that Meterable,
-	 * depending on the value of repeatCount
+	 * depending on the value of repetitions
 	 */
-	static of(meterable: Meterable, repeatCount: number): Meterable {
+	static of(meterable: Meterable, repetitions: number): Meterable {
 
-		return repeatCount <= 1
+		return repetitions <= 1
 				? meterable
-				: new MeterableRepetition(meterable, repeatCount);
+				: new MeterableRepetition(meterable, repetitions);
 	}
 
 	// The repeated meterable instance
 	private meterable: Meterable;
 
 	// The number of times the meterable instance is repeated
-	private repeatCount: number;
+	private repetitions: number;
 
     // Derived information (will be cached for performance reasons)
     private cachedInstruction: string | undefined;
@@ -37,13 +37,13 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	/**
 	 * Constructor
 	 * @param meterable The repeated meterable instance
-	 * @param repeatCount The number of times the meterable instance is repeated
+	 * @param repetitions The number of times the meterable instance is repeated
 	 */
-	private constructor(meterable: Meterable, repeatCount: number) {
+	private constructor(meterable: Meterable, repetitions: number) {
 		super();
 
 		this.meterable = meterable;
-		this.repeatCount = repeatCount;
+		this.repetitions = repetitions;
 	}
 
 	getInstruction(): string {
@@ -59,8 +59,8 @@ export default class MeterableRepetition extends AggregatedMeterable {
 		if (!this.cachedZ80Timing) {
 			const z80Timing = this.meterable.getZ80Timing();
 			this.cachedZ80Timing = [
-					z80Timing[0] * this.repeatCount,
-					z80Timing[1] * this.repeatCount];
+					z80Timing[0] * this.repetitions,
+					z80Timing[1] * this.repetitions];
 		}
 		return this.cachedZ80Timing;
 	}
@@ -70,8 +70,8 @@ export default class MeterableRepetition extends AggregatedMeterable {
 		if (!this.cachedMsxTiming) {
 			const msxTiming = this.meterable.getMsxTiming();
 			this.cachedMsxTiming =[
-					msxTiming[0] * this.repeatCount,
-					msxTiming[1] * this.repeatCount];
+					msxTiming[0] * this.repetitions,
+					msxTiming[1] * this.repetitions];
 		}
 		return this.cachedMsxTiming;
 	}
@@ -81,8 +81,8 @@ export default class MeterableRepetition extends AggregatedMeterable {
 		if (!this.cachedCpcTiming) {
 			const cpcTiming = this.meterable.getCpcTiming();
 			this.cachedCpcTiming = [
-					cpcTiming[0] * this.repeatCount,
-					cpcTiming[1] * this.repeatCount];
+					cpcTiming[0] * this.repetitions,
+					cpcTiming[1] * this.repetitions];
 		}
 		return this.cachedCpcTiming;
 	}
@@ -91,7 +91,7 @@ export default class MeterableRepetition extends AggregatedMeterable {
 
 		if (!this.cachedBytes) {
 			var bytes: string[] = [];
-			for (let i = 0; i < this.repeatCount; i++) {
+			for (let i = 0; i < this.repetitions; i++) {
 				bytes.push(...this.meterable.getBytes());
 			}
 			this.cachedBytes = bytes;
@@ -102,7 +102,7 @@ export default class MeterableRepetition extends AggregatedMeterable {
 	getSize(): number {
 
 		if (!this.cachedSize) {
-			this.cachedSize = this.meterable.getSize() * this.repeatCount;
+			this.cachedSize = this.meterable.getSize() * this.repetitions;
 		}
 		return this.cachedSize;
 	}
@@ -111,13 +111,13 @@ export default class MeterableRepetition extends AggregatedMeterable {
 
 		// Nested meterable is simple
 		if (!this.meterable.isComposed()) {
-			return new Array(this.repeatCount).fill(this.meterable);
+			return new Array(this.repetitions).fill(this.meterable);
 		}
 
 		// Nested meterable is composed
 		const repeatedMeterables = this.meterable.getFlattenedMeterables();
 		const meterables = new Array();
-		for (let i = 0; i < this.repeatCount; i++) {
+		for (let i = 0; i < this.repetitions; i++) {
 			meterables.push(...repeatedMeterables);
 		}
 		return meterables;

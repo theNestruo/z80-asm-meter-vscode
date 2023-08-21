@@ -4,7 +4,7 @@
 	"displayName": "Z80 Assembly meter",
 	"icon": "doc/images/icon.128.png",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "4.1.0",
+	"version": "4.2.0",
 	"engines": {
 		"vscode": "^1.81.0"
 	},
@@ -120,8 +120,24 @@
 				},
 				"z80-asm-meter.sjasmplus": {
 					"type": "boolean",
-					"description": "Enables support for parsing SjASMPlus alternative syntax and fake instructions",
-					"default": false
+					"description": "Enables support for parsing SjASMPlus alternative syntax, fake instructions, and repetitions",
+					"default": false,
+					"deprecationMessage": "Deprecated. Set \"z80-asm-meter.syntax\" to \"sjasmplus\" instead"
+				},
+				"z80-asm-meter.syntax": {
+					"type": "string",
+					"description": "Adjusts the main syntax of the assembler",
+					"enum": [
+						"default",
+						"sjasmplus",
+						"glass"
+					],
+					"enumDescriptions": [
+						"Matches most assemblers",
+						"Enables support for parsing SjASMPlus alternative syntax, fake instructions, and pseudo-ops",
+						"Enables support for parsing Glass Z80 assembler syntax"
+					],
+					"default": "default"
 				},
 				"z80-asm-meter.syntax.label": {
 					"type": "string",
@@ -153,16 +169,16 @@
 				},
 				"z80-asm-meter.syntax.repeat": {
 					"type": "string",
-					"description": "Enables support for parsing repeat count",
+					"description": "Enables support for parsing single instruction repetitions",
 					"enum": [
 						"none",
 						"brackets",
 						"dot"
 					],
 					"enumDescriptions": [
-						"Disables repeat count",
-						"The repeat count is specified within square brackets ([ and ]) before the instruction",
-						"The repeat count is specified after a dot (.) before the instruction"
+						"Disables single instruction reptitions",
+						"The single instruction reptitions are specified within square brackets ([ and ]) before the instruction",
+						"The single instruction reptitions are specified after a dot (.) before the instruction"
 					],
 					"default": "none"
 				},

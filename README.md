@@ -64,7 +64,12 @@ This extension contributes the following settings:
 
 ### Assembler syntax related settings
 
-* `z80-asm-meter.sjasmplus`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [alternative syntax](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang), [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) and [pseudo-ops](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops). Disabled by default.
+* ~~`z80-asm-meter.sjasmplus`~~: Deprecated. Set `"z80-asm-meter.syntax"` to `"sjasmplus"` instead.
+
+* `z80-asm-meter.syntax`: Adjusts the main syntax of the assembler:
+    * `default` (default): Matches most assemblers.
+    * `sjasmplus`: Enables support for parsing [SjASMPlus](https://github.com/sjasmplus/sjasmplus) [alternative syntax](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang), [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) and [pseudo-ops](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops).
+    * `glass`: Enables support for parsing [Glass Z80 assembler](http://www.grauw.nl/projects/glass/) syntax.
 
 * `z80-asm-meter.syntax.label`: Adjusts the label detection to match the syntax of the assembler:
     * `default` (default): The labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.

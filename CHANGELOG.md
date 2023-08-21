@@ -1,3 +1,7 @@
+## 4.2.0
+
+- Glass Z80 assembler syntax support. #123
+
 ## 4.1.0
 
 - Responsiveness improvement

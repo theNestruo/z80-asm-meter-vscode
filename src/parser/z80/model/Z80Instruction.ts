@@ -267,7 +267,7 @@ export default class Z80Instruction implements Meterable {
     /**
      * @returns true if this operation allows SDCC explicit accumulator syntax
      * (it's mnemonic is ADC, ADD, AND, CP, DEC, INC, OR, RL, RLC, RR, RRC, SBC, SLA, SRA, SRL, SUB, or XOR,
-     * and  there is one single operand)
+     * and there is one single operand)
      */
     private isExplicitAccumulatorSyntaxAllowed(): boolean {
 
@@ -318,23 +318,23 @@ export default class Z80Instruction implements Meterable {
         let explicitAccumulatorSyntax = false;
         if (candidateOperandsLength !== expectedOperandsLength) {
 
-            // Checks implicit accumulator syntax
             if (candidateOperands.length === expectedOperands.length - 1) {
+                // Checks implicit accumulator syntax
                 implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
                 if (!implicitAccumulatorSyntax) {
                     return 0;
                 }
 
-                // Checks explicit accumulator syntax
             } else if (candidateOperands.length === expectedOperands.length + 1) {
+                // Checks explicit accumulator syntax
                 explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed();
                 if ((!explicitAccumulatorSyntax)
                     || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
 
-                // Operand count mismatch
             } else {
+                // Operand count mismatch
                 return 0;
             }
         }

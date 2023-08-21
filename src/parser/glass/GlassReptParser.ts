@@ -1,15 +1,15 @@
 import { extractMnemonicOf, extractOperandsOf } from "../../utils/utils";
 import NumericExpressionParser from "../NumericExpressionParser";
 
-export default class SjasmplusDupParser {
+export default class GlassReptParser {
 
     // Singleton
-    static instance = new SjasmplusDupParser();
+    static instance = new GlassReptParser();
 
-	parseDupOrRept(instruction: string): number | undefined {
+	parseRept(instruction: string): number | undefined {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		if ([ "DUP", "REPT" ].indexOf(mnemonic) === -1) {
+		if (mnemonic !== "REPT") {
 			return undefined;
 		}
 
@@ -23,9 +23,9 @@ export default class SjasmplusDupParser {
         return repetitions && repetitions > 0 ? repetitions : 1;
 	}
 
-	parseEdupOrEndr(instruction: string): boolean {
+	parseEndm(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		return [ "EDUP", "ENDR" ].indexOf(mnemonic) !== -1;
+		return mnemonic === "ENDM";
 	}
 }
