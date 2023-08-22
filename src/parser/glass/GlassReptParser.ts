@@ -3,10 +3,7 @@ import NumericExpressionParser from "../NumericExpressionParser";
 
 export default class GlassReptParser {
 
-    // Singleton
-    static instance = new GlassReptParser();
-
-	parseRept(instruction: string): number | undefined {
+	static parseRept(instruction: string): number | undefined {
 
 		const mnemonic = extractMnemonicOf(instruction);
 		if (mnemonic !== "REPT") {
@@ -20,10 +17,10 @@ export default class GlassReptParser {
 		}
 
         const repetitions = NumericExpressionParser.parse(operands[0]);
-        return repetitions && repetitions > 0 ? repetitions : 1;
+        return repetitions !== undefined && repetitions >= 0 ? repetitions : 1;
 	}
 
-	parseEndm(instruction: string): boolean {
+	static parseEndm(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
 		return mnemonic === "ENDM";

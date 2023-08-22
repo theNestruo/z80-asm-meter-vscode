@@ -4,13 +4,7 @@ import Z80InstructionParser from "../z80/Z80InstructionParser";
 
 export default class SjasmplusRegisterListInstructionParser {
 
-    // Singleton
-    static instance = new SjasmplusRegisterListInstructionParser();
-
-    private constructor() {
-    }
-
-    parse(instruction: string, instructionSets: string[]): MeterableCollection | undefined {
+    static parse(instruction: string, instructionSets: string[]): MeterableCollection | undefined {
 
         // Register lists instructions
         const mnemonic = extractMnemonicOf(instruction);
@@ -19,7 +13,6 @@ export default class SjasmplusRegisterListInstructionParser {
         }
 
         const collection = new MeterableCollection();
-
         for (const operand of extractOperandsOf(instruction)) {
             if (operand === "") {
                 continue;

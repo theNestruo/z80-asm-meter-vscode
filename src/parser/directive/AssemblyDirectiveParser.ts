@@ -8,13 +8,7 @@ import MeterableRepetition from "../../model/MeterableRepetition";
 
 export default class AssemblyDirectiveParser {
 
-    // Singleton
-    static instance = new AssemblyDirectiveParser();
-
-    private constructor() {
-    }
-
-    parse(instruction: string): Meterable | undefined {
+    static parse(instruction: string): Meterable | undefined {
 
         // Locates defb/defw/defs directives
         const mnemonic = extractMnemonicOf(instruction);
@@ -32,7 +26,7 @@ export default class AssemblyDirectiveParser {
         return undefined;
     }
 
-    private parseDefbDirective(instruction: string): AssemblyDirective | undefined {
+    private static parseDefbDirective(instruction: string): AssemblyDirective | undefined {
 
         const operands = extractOperandsOfQuotesAware(instruction);
         if (operands.length < 1) {
@@ -63,7 +57,7 @@ export default class AssemblyDirectiveParser {
         return new AssemblyDirective("DEFB", bytes, bytes.length);
     }
 
-    private parseDefwDirective(pInstruction: string): AssemblyDirective | undefined {
+    private static parseDefwDirective(pInstruction: string): AssemblyDirective | undefined {
 
         const operands = extractOperandsOfQuotesAware(pInstruction);
         if (operands.length < 1) {
@@ -89,7 +83,7 @@ export default class AssemblyDirectiveParser {
         return new AssemblyDirective("DEFW", bytes, bytes.length * 2);
     }
 
-    private parseDefsDirective(pInstruction: string): Meterable | undefined {
+    private static parseDefsDirective(pInstruction: string): Meterable | undefined {
 
         const operands = extractOperandsOf(pInstruction);
         if ((operands.length < 1) || (operands.length > 2)) {

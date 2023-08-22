@@ -23,9 +23,9 @@ export default class ExtensionController {
 
         // subscribe to selection change and editor activation events
         const subscriptions: Disposable[] = [];
-        workspace.onDidChangeConfiguration(this.onConfigurationChange, this, subscriptions);
         window.onDidChangeTextEditorSelection(this.onEvent, this, subscriptions);
         window.onDidChangeActiveTextEditor(this.onEvent, this, subscriptions);
+        workspace.onDidChangeConfiguration(this.onConfigurationChange, this, subscriptions);
 
         // create a command to copy timing and size to clipboard
         const command = commands.registerCommand(ExtensionController.commandId, this.onCommand, this);
@@ -35,12 +35,6 @@ export default class ExtensionController {
 
         // First execution
         this.onEvent();
-    }
-
-    private onConfigurationChange() {
-
-        // Reloads caches for "heavy" configurations
-        MacroParser.instance.reload();
     }
 
     private onEvent() {
@@ -78,6 +72,17 @@ export default class ExtensionController {
             this.updateStatusBar();
             this.isLeadingEvent = true;
         }, debounce);
+    }
+
+    private onConfigurationChange() {
+
+        // Reloads caches for "heavy" configurations
+        MacroParser.instance.reload();
+    }
+
+    private onCommand() {
+
+        this.copyToClipboard();
     }
 
     private updateStatusBar() {
@@ -145,7 +150,7 @@ export default class ExtensionController {
         this.statusBarItem.show();
     }
 
-    private onCommand() {
+    private copyToClipboard() {
 
         // Reads the source code
         const sourceCode = this.readFromSelection();

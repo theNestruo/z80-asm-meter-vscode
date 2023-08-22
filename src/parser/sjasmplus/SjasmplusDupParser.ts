@@ -3,10 +3,7 @@ import NumericExpressionParser from "../NumericExpressionParser";
 
 export default class SjasmplusDupParser {
 
-    // Singleton
-    static instance = new SjasmplusDupParser();
-
-	parseDupOrRept(instruction: string): number | undefined {
+	static parseDupOrRept(instruction: string): number | undefined {
 
 		const mnemonic = extractMnemonicOf(instruction);
 		if ([ "DUP", "REPT" ].indexOf(mnemonic) === -1) {
@@ -20,10 +17,10 @@ export default class SjasmplusDupParser {
 		}
 
         const repetitions = NumericExpressionParser.parse(operands[0]);
-        return repetitions && repetitions > 0 ? repetitions : 1;
+        return repetitions !== undefined && repetitions >= 0 ? repetitions : 1;
 	}
 
-	parseEdupOrEndr(instruction: string): boolean {
+	static parseEdupOrEndr(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
 		return [ "EDUP", "ENDR" ].indexOf(mnemonic) !== -1;

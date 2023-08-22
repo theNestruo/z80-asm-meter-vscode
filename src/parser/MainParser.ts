@@ -100,8 +100,8 @@ export default class MainParser {
                 const rawPart = sourceCodePart.getPart();
 
                 const newRepetitions =
-                    this.syntaxConfiguration === "sjasmplus" ? SjasmplusDupParser.instance.parseDupOrRept(rawPart)
-                        : this.syntaxConfiguration === "glass" ? GlassReptParser.instance.parseRept(rawPart)
+                    this.syntaxConfiguration === "sjasmplus" ? SjasmplusDupParser.parseDupOrRept(rawPart)
+                        : this.syntaxConfiguration === "glass" ? GlassReptParser.parseRept(rawPart)
                             : undefined;
                 if (newRepetitions !== undefined) {
                     const previousMeterables = meterables;
@@ -114,8 +114,8 @@ export default class MainParser {
                 }
 
                 const endRepetitions =
-                    this.syntaxConfiguration === "sjasmplus" ? SjasmplusDupParser.instance.parseEdupOrEndr(rawPart)
-                        : this.syntaxConfiguration === "glass" ? GlassReptParser.instance.parseEndm(rawPart)
+                    this.syntaxConfiguration === "sjasmplus" ? SjasmplusDupParser.parseEdupOrEndr(rawPart)
+                        : this.syntaxConfiguration === "glass" ? GlassReptParser.parseEndm(rawPart)
                             : false;
                 if (endRepetitions) {
                     meterables = meterablesStack.pop() || ret;
@@ -163,7 +163,7 @@ export default class MainParser {
         }
 
         // Parses and applies the optional repeat pseudo-op
-        return MeterableRepetition.of(meterable, this.extractrepetitions(rawPart));
+        return MeterableRepetition.of(meterable, this.extractRepetitions(rawPart));
     }
 
     private extractRawInstruction(s: string): string {
@@ -179,7 +179,7 @@ export default class MainParser {
         return hasRepeatInstruction ? matches[2] : s;
     }
 
-    private extractrepetitions(s: string): number {
+    private extractRepetitions(s: string): number {
 
         // Determines syntax
         if (!this.repeatRegExp) {
@@ -212,13 +212,13 @@ export default class MainParser {
                 return sjasmplusFakeInstruction;
             }
             const sjasmplusRegisterListInstruction =
-                SjasmplusRegisterListInstructionParser.instance.parse(s, this.instructionSets);
+                SjasmplusRegisterListInstructionParser.parse(s, this.instructionSets);
             if (sjasmplusRegisterListInstruction) {
                 return sjasmplusRegisterListInstruction;
             }
         } else if (this.syntaxConfiguration === "glass") {
             const glassFakeInstruction =
-                GlassFakeInstructionParser.instance.parse(s, this.instructionSets);
+                GlassFakeInstructionParser.parse(s, this.instructionSets);
             if (glassFakeInstruction) {
                 return glassFakeInstruction;
             }
@@ -231,7 +231,7 @@ export default class MainParser {
         }
 
         // Tries to parse assembly directives
-        const assemblyDirective = AssemblyDirectiveParser.instance.parse(s);
+        const assemblyDirective = AssemblyDirectiveParser.parse(s);
         if (assemblyDirective) {
             return assemblyDirective;
         }
