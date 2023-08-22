@@ -11,14 +11,7 @@ export default class AssemblyDirectiveParser {
     // Singleton
     static instance = new AssemblyDirectiveParser();
 
-    // Configuration
-    private directivesAsInstructions: string;
-
     private constructor() {
-
-        // Saves configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        this.directivesAsInstructions = configuration.get("directivesAsInstructions", "defs");
     }
 
     parse(instruction: string): Meterable | undefined {
@@ -113,7 +106,9 @@ export default class AssemblyDirectiveParser {
             : undefined;
 
         // Determines instruction
-        if (this.directivesAsInstructions === "defs") {
+        const configuration = workspace.getConfiguration("z80-asm-meter");
+        const directivesAsInstructions: string = configuration.get("directivesAsInstructions", "none");
+        if (directivesAsInstructions === "defs") {
             const opcode = value !== undefined ? value : 0x00; // (defaults to NOP)
             const instruction = Z80InstructionParser.instance.parseOpcode(opcode);
             if (instruction) {

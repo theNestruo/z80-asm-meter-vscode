@@ -43,7 +43,7 @@
 		"onLanguage:zeus-asm",
 		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
 	],
-	"main": "./dist/bundle.js",
+	"main": "./out/extension.js",
 	"contributes": {
 		"languages": [
 			{
@@ -101,7 +101,7 @@
 						"None; directives will be parsed as bytes",
 						"Tries to parse DEFS directive bytes as single byte instructions"
 					],
-					"default": "defs"
+					"default": "none"
 				},
 				"z80-asm-meter.viewBytes": {
 					"type": "boolean",
