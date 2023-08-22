@@ -4,6 +4,7 @@ import MainParser from "./parser/MainParser";
 import AtExitDecorator from "./timing/AtExitDecorator";
 import { hashCode } from "./utils/utils";
 import MeterableViewer from "./viewer/MeterableViewer";
+import MacroParser from "./parser/macro/MacroParser";
 
 export default class ExtensionController {
 
@@ -22,6 +23,7 @@ export default class ExtensionController {
 
         // subscribe to selection change and editor activation events
         const subscriptions: Disposable[] = [];
+        workspace.onDidChangeConfiguration(this.onConfigurationChange, this, subscriptions);
         window.onDidChangeTextEditorSelection(this.onEvent, this, subscriptions);
         window.onDidChangeActiveTextEditor(this.onEvent, this, subscriptions);
 
@@ -33,6 +35,12 @@ export default class ExtensionController {
 
         // First execution
         this.onEvent();
+    }
+
+    private onConfigurationChange() {
+
+        // Reloads caches for "heavy" configurations
+        MacroParser.instance.reload();
     }
 
     private onEvent() {
