@@ -43,7 +43,7 @@
 		"onLanguage:zeus-asm",
 		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/bundle.js",
 	"contributes": {
 		"languages": [
 			{
