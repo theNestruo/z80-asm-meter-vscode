@@ -1,6 +1,8 @@
 ## 4.2.0
 
 - Glass Z80 assembler syntax support. #123
+- Fixes `directivesAsInstructions` configuration property. #125
+- Reloadable user-defined macros
 
 ## 4.1.0
 
