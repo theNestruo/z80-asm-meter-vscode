@@ -25,6 +25,7 @@ export default class ExtensionController {
         const subscriptions: Disposable[] = [];
         window.onDidChangeTextEditorSelection(this.onEvent, this, subscriptions);
         window.onDidChangeActiveTextEditor(this.onEvent, this, subscriptions);
+        workspace.onDidChangeTextDocument(this.onEvent, this, subscriptions);
         workspace.onDidChangeConfiguration(this.onConfigurationChange, this, subscriptions);
 
         // create a command to copy timing and size to clipboard
