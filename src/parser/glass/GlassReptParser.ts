@@ -1,4 +1,4 @@
-import { extractMnemonicOf, extractOperandsOf } from "../../utils/utils";
+import { extractMnemonicOf, extractOperandsOf } from "../../utils/AssemblyUtils";
 import NumericExpressionParser from "../NumericExpressionParser";
 
 export default class GlassReptParser {

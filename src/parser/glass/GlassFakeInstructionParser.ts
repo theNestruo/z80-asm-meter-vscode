@@ -1,4 +1,4 @@
-import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/utils";
+import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
 import Z80InstructionParser from "../z80/Z80InstructionParser";
 import Z80Instruction from "../z80/model/Z80Instruction";
 

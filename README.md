@@ -87,7 +87,15 @@ This extension contributes the following settings:
 
 ### Timing related settings
 
-* `z80-asm-meter.timings.atExit`: When enabled, if the selection ends with a `JP`, `JR` or `RET` operation, measures the timings of any previous conditional `JP`, `JR` or `RET` operation as _not taken_ and, if the last operation is a conditonal operation, measures its timing as _taken_. Therefore, timings shown will be the worst and best case scenarios of the code flow to the selected exit point. See [timing "at exit"](#timing-at-exit). Disabled by default.
+* ~~`z80-asm-meter.timings.atExit`~~: Deprecated. Set `"z80-asm-meter.timings.mode"` to `"atExit"` instead.
+
+* `z80-asm-meter.timings.mode`: Enables alternative total timing calculation modes. See [timing modes](#timing-modes).
+
+    * `default` (default): The total timing will be the raw addition of the timings of the instructions.
+    * `flow`: When the selection is a single subroutine, the total timing will show the timing of the execution flow through the selection. Measures the timings of any selected `DJNZ` or conditional `JP`, `JR` or `RET` instruction as _not taken_.
+    * `atExit`: When the selection is a single subroutine and the selection ends at an exit point, the total timing will show the execution flow to the selected exit point. Measures the timings of any selected `DJNZ` or conditional `JP`, `JR` or `RET` instruction as _not taken_ but for the last instruction, which is measured as _taken_ if it is a conditional instruction.
+    * `smart`: Same as `atExit`, but reverts to `flow` when the selection does not end at an exit point.
+    * `all`: Shows both `flow` and `atExit` alternative total timings when applicable.
 
 * `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment. See [timing hints](#timing-hints).
 
@@ -107,8 +115,9 @@ This extension contributes the following settings:
 
 ## Advanced usage
 
-### Timing "at exit"
+### Timing modes
 
+<!--
 Let's use a routine with two exit points as an example.
 
 With `z80-asm-meter.timings.atExit` disabled (default behaviour), when the entire routine is selected, two timings are shown:
@@ -124,6 +133,7 @@ When `z80-asm-meter.timings.atExit` is enabled, meterings use a best effort to m
 It is also possible to meter the execution time of other execution flows. When the selection finishes in the `ret nc` exit point, the `ret nc` conditional instruction will be considered as _taken_ (because it is the last instruction of the code block), and the execution path is correcly metered as 22 clock cycles:
 
 ![z80-asm-meter.timings.atExit: true](doc/images/timings.atExit=true.2.png)
+-->
 
 ### Timing hints
 

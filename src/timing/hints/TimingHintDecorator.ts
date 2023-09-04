@@ -1,8 +1,8 @@
-import Meterable from "../model/Meterable";
-import MeterableHint from "../model/MeterableHint";
-import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../utils/utils";
+import Meterable from "../../model/Meterable";
+import { isConditionalJumpOrCall, isJumpOrCall } from "../../utils/AssemblyUtils";
+import MeterableHint from "./model/MeterableHint";
 
-export default class TimingHintDecorator implements Meterable {
+export default class TimingHintsDecorator implements Meterable {
 
 	/**
 	 * Conditionaly builds an instance of a repetition of Meterables
@@ -15,11 +15,11 @@ export default class TimingHintDecorator implements Meterable {
 	static of(meterable: Meterable, meterableHint: MeterableHint, subroutines: boolean): Meterable {
 
 		// Checks instruction
-		if (subroutines && (!this.isSubroutineInstruction(meterable.getInstruction()))) {
+		if (subroutines && (!isJumpOrCall(meterable.getInstruction()))) {
 			return meterable;
 		}
 
-		return new TimingHintDecorator(meterable, meterableHint);
+		return new TimingHintsDecorator(meterable, meterableHint);
 	}
 
 	// The meterable instance
@@ -36,7 +36,7 @@ export default class TimingHintDecorator implements Meterable {
 		this.meterable = meterable;
 		this.meterableHint = meterableHint;
 
-		this.conditional = TimingHintDecorator.isConditionalSubroutineInstruction(meterable.getInstruction());
+		this.conditional = isConditionalJumpOrCall(meterable.getInstruction());
 	}
 
 	getInstruction(): string {
@@ -87,32 +87,5 @@ export default class TimingHintDecorator implements Meterable {
 		return this.conditional
 			? [ timing[0] + addend[0], timing[1] ]
 			: [ timing[0] + addend[0], timing[1] + addend[1] ];
-	}
-
-	private static isSubroutineInstruction(instruction: string): boolean {
-
-		const mnemonic = extractMnemonicOf(instruction);
-		return [ "CALL", "DJNZ", "JP", "JR", "RET", "RETI", "RETN", "RST" ].indexOf(mnemonic) !== -1;
-	}
-
-	private static isConditionalSubroutineInstruction(instruction: string): boolean {
-
-		const mnemonic = extractMnemonicOf(instruction);
-		const operands = extractOperandsOf(instruction);
-
-		if (!operands.length) {
-			return mnemonic === "DJNZ";
-		}
-
-		switch (mnemonic) {
-		case "CALL":
-		case "JP":
-		case "RET":
-			return isAnyCondition(operands[0]);
-		case "JR":
-			return isJrCondition(operands[0]);
-		default:
-			return false;
-		}
 	}
 }

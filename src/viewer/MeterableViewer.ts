@@ -1,7 +1,9 @@
 import { MarkdownString, workspace } from 'vscode';
 import Meterable from '../model/Meterable';
-import AtExitDecorator from '../timing/AtExitDecorator';
-import { formatTiming } from '../utils/utils';
+import AtExitDecorator from '../timing/modes/AtExitDecorator';
+import { formatTiming } from '../utils/NumberUtils';
+import FlowDecorator from '../timing/modes/FlowDecorator';
+import { viewSize } from './ViewBytesUtils';
 
 /**
  * Print human-readble information from a Meterable instance
@@ -23,27 +25,6 @@ export default class MeterableViewer {
         const configuration = workspace.getConfiguration("z80-asm-meter");
         this.platformConfiguration = configuration.get("platform", "z80");
         this.timingsHintsConfiguration = configuration.get("timings.hints", "none");
-    }
-
-    getStatusBarInstructions(): string | undefined {
-
-        const queue = this.queue();
-        const firstInstruction = this.firstInstruction(queue);
-
-        // (empty)
-        if (!firstInstruction) {
-            return undefined;
-        }
-
-        const lastInstruction = this.lastInstruction(queue);
-        let text = firstInstruction;
-        if (lastInstruction) {
-            if (queue.length) {
-                text += " ...";
-            }
-            text += ` ${lastInstruction}`;
-        }
-        return text;
     }
 
     getStatusBarTiming(): string | undefined {
@@ -71,54 +52,18 @@ export default class MeterableViewer {
     private getBasicTiming(): string | undefined {
 
         const timing = this.platformConfiguration === "msx" ? this.metered.getMsxTiming()
-                : this.platformConfiguration === "cpc" ? this.metered.getCpcTiming()
+            : this.platformConfiguration === "cpc" ? this.metered.getCpcTiming()
                 : this.metered.getZ80Timing();
 
         // (no data)
         if ((!timing)
-                || (timing.length < 2)
-                || ((timing[0] === 0) && (timing[1] === 0))) {
+            || (timing.length < 2)
+            || ((timing[0] === 0) && (timing[1] === 0))) {
             return undefined;
         }
 
         // As text
         return formatTiming(timing);
-    }
-
-    getStatusBarSize(): string | undefined {
-
-        const size = this.metered.getSize();
-        switch (size) {
-            case 0: return undefined;
-            case 1: return size + " byte";
-            default: return size + " bytes";
-        }
-    }
-
-    getCommandSize(): string | undefined {
-
-        return this.getStatusBarSize();
-    }
-
-    getStatusBarBytes(): string | undefined {
-
-        const queue = this.queue();
-        const firstBytes = this.firstBytes(queue);
-
-        // (empty)
-        if (!firstBytes) {
-            return undefined;
-        }
-
-        const lastBytes = this.lastBytes(queue);
-        let text = firstBytes.join(" ");
-        if (lastBytes) {
-            if (queue.length) {
-                text += " ...";
-            }
-            text += " " + lastBytes.join(" ");
-        }
-        return text;
     }
 
     getTooltip(): MarkdownString | undefined {
@@ -130,8 +75,10 @@ export default class MeterableViewer {
             return undefined;
         }
 
-        const decorated = this.metered instanceof AtExitDecorator;
-        const decoration = decorated ? "<sup>*</sup>" : "";
+        const legend = this.metered instanceof AtExitDecorator ? "at exit"
+            : this.metered instanceof FlowDecorator ? "execution flow"
+                : "";
+        const decoration = legend ? "<sup>*</sup>" : "";
 
         const tooltip = new MarkdownString();
 
@@ -151,10 +98,10 @@ export default class MeterableViewer {
             const m1Text = formatTiming(this.metered.getMsxTiming());
             tooltip.appendMarkdown(`|**Z80+M1**|${m1Text} clock cycles${decoration}|\n`);
         }
-        if (decorated) {
-            tooltip.appendMarkdown("||<sup>*</sup>at exit|\n");
+        if (legend) {
+            tooltip.appendMarkdown(`||<sup>*</sup>${legend}|\n`);
         }
-        const sizeText = this.getStatusBarSize();
+        const sizeText = viewSize(this.metered);
         if (sizeText) {
             tooltip.appendMarkdown(`|**Size**|${sizeText}|\n\n`);
         }
@@ -169,7 +116,7 @@ export default class MeterableViewer {
 
     getCommand(): string | undefined {
 
-        const isTimingsHintsEnabled = [ "subroutines", "any" ].indexOf(this.timingsHintsConfiguration) !== -1;
+        const isTimingsHintsEnabled = ["subroutines", "any"].indexOf(this.timingsHintsConfiguration) !== -1;
 
         return isTimingsHintsEnabled
             ? this.getTimingHintsCommand()
@@ -179,7 +126,7 @@ export default class MeterableViewer {
     private getDefaultCommand(): string | undefined {
 
         const timing = this.getCommandTiming();
-        const size = this.getCommandSize();
+        const size = viewSize(this.metered);
 
         return timing
             ? (size
@@ -207,60 +154,5 @@ export default class MeterableViewer {
             text += ` [m1=${m1Text}]`;
         }
         return text;
-    }
-
-    /**
-     * @return the flattened array of the finer-grained meterables,
-     * as a queue to be used in first*() and last*() methods
-     */
-    private queue(): Meterable[] {
-
-        return this.metered.isComposed()
-                ? [ ...this.metered.getFlattenedMeterables() ]
-                : [ this.metered ];
-    }
-
-    private firstInstruction(queue: Meterable[]): string | undefined {
-
-        while (queue.length) {
-            const instruction = queue.shift()?.getInstruction();
-            if (instruction) {
-                return instruction;
-            }
-        }
-        return undefined;
-    }
-
-    private lastInstruction(queue: Meterable[]): string | undefined {
-
-        while (queue.length) {
-            const instruction = queue.pop()?.getInstruction();
-            if (instruction) {
-                return instruction;
-            }
-        }
-        return undefined;
-    }
-
-    private firstBytes(queue: Meterable[]): string[] | undefined {
-
-        while (queue.length) {
-            const bytes = queue.shift()?.getBytes();
-            if (bytes && bytes.length) {
-                return bytes;
-            }
-        }
-        return undefined;
-    }
-
-    private lastBytes(queue: Meterable[]): string[] | undefined {
-
-        while (queue.length) {
-            const bytes = queue.pop()?.getBytes();
-            if (bytes && bytes.length) {
-                return bytes;
-            }
-        }
-        return undefined;
     }
 }

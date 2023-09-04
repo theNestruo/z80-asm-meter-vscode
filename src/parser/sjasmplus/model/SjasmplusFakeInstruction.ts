@@ -1,5 +1,6 @@
 import MeterableCollection from "../../../model/MeterableCollection";
-import { extractRawInstruction, extractIndirection, extractMnemonicOf, extractOperandsOf, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "../../../utils/utils";
+import { extractIndirection, extractMnemonicOf, extractOperandsOf, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../../utils/AssemblyUtils";
+import { extractRawInstruction } from "../../../utils/SourceCodeUtils";
 import Z80InstructionParser from "../../z80/Z80InstructionParser";
 
 /**
@@ -109,7 +110,7 @@ export default class SjasmplusFakeInstruction extends MeterableCollection {
                     return;
                 }
                 const instruction =
-                        Z80InstructionParser.instance.parseInstruction(rawInstruction, [this.instructionSet]);
+                    Z80InstructionParser.instance.parseInstruction(rawInstruction, [this.instructionSet]);
                 this.add(instruction);
             });
             this.ready = true;

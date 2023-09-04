@@ -1,92 +1,4 @@
-import SourceCodeLine from "../model/SourceCodeLine";
-
-export function hashCode(s: string): number {
-
-    if (!s || !s.length) {
-        return 0;
-    }
-
-    const n = s.length;
-    let hash = 0;
-    for (let i = 0; i < n; i++) {
-        hash = ((hash << 5) - hash) + s.charCodeAt(i);
-        hash |= 0; // (as 32 bit integer)
-    }
-    return hash;
-}
-
-export function extractRawInstruction(rawPart: string): string | undefined {
-
-    return normalizeAndSplitQuotesAware(rawPart, undefined).getParts().shift()?.getPart();
-}
-
-export function normalizeAndSplitQuotesAware(s: string, separator: string | undefined): SourceCodeLine {
-
-    var sourceCodeLine: SourceCodeLine = new SourceCodeLine();
-
-    const n = s.length;
-    for (let i = 0; i < n; i++) {
-
-        // For every part
-        let currentPart = "";
-        let quoted = null;
-        let whitespace = -1;
-        for (; i < n; i++) {
-            const c = s.charAt(i);
-
-            // Inside quotes
-            if (quoted) {
-                currentPart += c;
-                if (c === quoted) {
-                    quoted = null;
-                }
-                continue;
-            }
-
-            // Comment?
-            const isCommentStart = (c === ";")
-                || (c === "/") && (i + 1 < n) && (s.charAt(i + 1) === "/")
-                ? c
-                : undefined;
-            if (isCommentStart) {
-                sourceCodeLine.addPart(currentPart);
-                sourceCodeLine.setComment(s.substring(isCommentStart === ";" ? i + 1 : i + 2).trim());
-                return sourceCodeLine;
-            }
-
-            // Separator?
-            if (separator && c === separator) {
-                break;
-            }
-
-            // Whitespace?
-            if (/\s/.test(c)) {
-                whitespace = whitespace < 0 ? -1 : 1;
-                continue;
-            }
-
-            // Not whitespace
-            if (whitespace > 0) {
-                currentPart += " ";
-            }
-            whitespace = 0;
-
-            // Quote?
-            if ((c === "\"")
-                // Prevents considering "'" as a quote
-                // when parsing the instruction "ex af,af'"
-                || ((c === "'") && (!/^ex\s*af\s*,\s*af$/i.test(currentPart)))) {
-                quoted = c;
-            }
-
-            currentPart += c.toUpperCase();
-        }
-
-        sourceCodeLine.addPart(currentPart);
-    }
-
-    return sourceCodeLine;
-}
+import { normalizeAndSplitQuotesAware } from "./SourceCodeUtils";
 
 export function extractMnemonicOf(s: string): string {
 
@@ -302,38 +214,84 @@ export function anySymbolOperandScore(candidateOperand: string): number {
         : 0.75;
 }
 
-export function parseTimingsLenient(o: unknown): number[] | undefined {
+/**
+ * @param instruction the instruction
+ * @returns true if the instruction is a conditional jump (DJNZ, JP, JR, or RET)
+ */
+export function isConditionalJump(instruction: string): boolean {
 
-    return (typeof o === "number") ? [o, o]
-        : (typeof o === "string") ? parseTimings(o)
-            : undefined;
+    return isConditionalJumpOrCall(instruction, false);
 }
 
-export function parseTimings(s: string): number[] {
+/**
+ * @param instruction the instruction
+ * @param callIncluded true to also consider CALL instructions
+ * @returns true if the instruction is a conditional jump (DJNZ, JP, JR, or RET)
+ */
+export function isConditionalJumpOrCall(instruction: string,
+    callIncluded: boolean = true): boolean {
 
-    const ss = s.split("/");
-    const t0 = parseInt(ss[0], 10);
-    return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1], 10)];
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    switch (mnemonic) {
+        case "CALL":
+            return callIncluded && (operands.length === 2) && isAnyCondition(operands[0]);
+        case "DJNZ":
+            return (operands.length === 1);
+        case "JP":
+            return (operands.length === 2) && isAnyCondition(operands[0]);
+        case "JR":
+            return (operands.length === 2) && isJrCondition(operands[0]);
+        case "RET":
+            return (operands.length === 1) && isAnyCondition(operands[0]);
+        default:
+            return false;
+    }
 }
 
-export function formatTiming(t: number[]): string {
-    return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
+/**
+ * @param instruction the instruction
+ * @returns true if the instruction is an unconditional jump (JP, JR, RET, RETI, or RETN)
+ */
+export function isUnconditionalJump(instruction: string) {
+
+    return isUnconditionalJumpOrCall(instruction, false);
 }
 
-export function parteIntLenient(o: unknown): number {
+/**
+ * @param instruction the instruction
+ * @param callAndRstIncluded true to also consider CALL and RST instructions
+ * @returns true if the instruction is an unconditional jump (JP, JR, RET, RETI, or RETN)
+ */
+export function isUnconditionalJumpOrCall(instruction: string,
+    callAndRstIncluded: boolean = true): boolean {
 
-    return (typeof o === "number") ? o
-        : (typeof o === "string") ? parseInt(o, 10)
-            : NaN;
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    switch (mnemonic) {
+        case "CALL":
+        case "RST":
+            return callAndRstIncluded && (operands.length === 1);
+        case "JP":
+        case "JR":
+            return (operands.length === 1);
+        case "RET":
+        case "RETI":
+        case "RETN":
+            return (operands.length === 0);
+        default:
+            return false;
+    }
 }
 
-export function undefinedIfNaN(n: number): number | undefined {
+/**
+ * @param instruction the instruction
+ * @returns true if the instruction is a conditional or unconditional jump or call
+ */
+export function isJumpOrCall(instruction: string) {
 
-    return isNaN(n) ? undefined : n;
-}
-
-export function formatHexadecimalByte(n: number): string {
-
-    const s = "00" + ((n & 0xff).toString(16).toUpperCase());
-    return s.substring(s.length - 2);
+    return isConditionalJumpOrCall(instruction)
+        || isUnconditionalJumpOrCall(instruction);
 }

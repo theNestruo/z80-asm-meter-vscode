@@ -1,4 +1,4 @@
-import { extractMnemonicOf } from "../../utils/utils";
+import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { sjasmplusFakeInstructionSet } from "./data/SjasmplusFakeInstructionSet";
 import SjasmplusFakeInstruction from "./model/SjasmplusFakeInstruction";
 

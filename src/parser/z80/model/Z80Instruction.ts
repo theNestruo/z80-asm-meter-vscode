@@ -1,6 +1,7 @@
 import Meterable from '../../../model/Meterable';
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from '../../../utils/AssemblyUtils';
+import { formatHexadecimalByte, formatTiming, parseTimings } from '../../../utils/NumberUtils';
 import NumericExpressionParser from '../../NumericExpressionParser';
-import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, formatHexadecimalByte, formatTiming, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, parseTimings, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from '../../../utils/utils';
 
 /**
  * A Z80 instruction

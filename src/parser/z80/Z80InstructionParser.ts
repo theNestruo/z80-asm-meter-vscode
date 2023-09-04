@@ -1,4 +1,5 @@
-import { extractMnemonicOf, formatHexadecimalByte } from "../../utils/utils";
+import { extractMnemonicOf } from "../../utils/AssemblyUtils";
+import { formatHexadecimalByte } from "../../utils/NumberUtils";
 import { z80InstructionSet } from "./data/Z80InstructionSet";
 import Z80Instruction from "./model/Z80Instruction";
 

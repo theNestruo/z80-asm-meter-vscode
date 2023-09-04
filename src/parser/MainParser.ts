@@ -1,11 +1,11 @@
 import { workspace } from 'vscode';
 import Meterable from '../model/Meterable';
 import MeterableCollection from '../model/MeterableCollection';
-import MeterableHint from '../model/MeterableHint';
+import MeterableHint from '../timing/hints/model/MeterableHint';
 import MeterableRepetition from '../model/MeterableRepetition';
 import SourceCodePart from '../model/SourceCodePart';
-import TimingHintDecorator from '../timing/TimingHintDecorator';
-import { normalizeAndSplitQuotesAware } from '../utils/utils';
+import TimingHintsDecorator from '../timing/hints/TimingHintDecorator';
+import { normalizeAndSplitQuotesAware } from '../utils/SourceCodeUtils';
 import NumericExpressionParser from "./NumericExpressionParser";
 import AssemblyDirectiveParser from './directive/AssemblyDirectiveParser';
 import GlassReptParser from './glass/GlassReptParser';
@@ -45,7 +45,7 @@ export default class MainParser {
             : /(^\s*[^\s:]+:)/;
 
         const syntaxLineSeparatorConfiguration: string = configuration.get("syntax.lineSeparator", "none");
-        const lineSeparator =
+        this.lineSeparator =
             syntaxLineSeparatorConfiguration === "colon" ? ":"
                 : syntaxLineSeparatorConfiguration === "pipe" ? "|"
                     : undefined;
@@ -57,8 +57,6 @@ export default class MainParser {
                     : undefined;
 
         this.timingsHintsConfiguration = configuration.get("timings.hints", "none");
-
-        // Determines syntax
     }
 
     parse(rawSourceCode: string): MeterableCollection {
@@ -159,7 +157,7 @@ export default class MainParser {
 
         // Decorates source code with the optional timing hints (if any)
         if (timingHints) {
-            meterable = TimingHintDecorator.of(meterable, timingHints, isTimingsHintsSubroutines);
+            meterable = TimingHintsDecorator.of(meterable, timingHints, isTimingsHintsSubroutines);
         }
 
         // Parses and applies the optional repeat pseudo-op

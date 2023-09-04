@@ -1,5 +1,5 @@
 import { workspace } from "vscode";
-import { extractMnemonicOf } from "../../utils/utils";
+import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import Macro from "./model/Macro";
 import MacroDefinition from "./model/MacroDefinition";
 

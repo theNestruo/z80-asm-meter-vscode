@@ -1,5 +1,5 @@
-import { parseTimingsLenient } from "../utils/utils";
-import Meterable from "./Meterable";
+import Meterable from "../../../model/Meterable";
+import { parseTimingsLenient } from "../../../utils/NumberUtils";
 
 export default class MeterableHint implements Meterable {
 
