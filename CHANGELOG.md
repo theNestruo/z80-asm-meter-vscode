@@ -1,3 +1,7 @@
+## 4.3.0
+
+- Improvements in the advanced timing modes. #114
+
 ## 4.2.0
 
 - Glass Z80 assembler syntax support. #123
