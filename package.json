@@ -186,7 +186,7 @@
 					"type": "boolean",
 					"description": "When enabled, if the selection ends with a jump or return operation, measures any previous conditional jump or return operation as not taken",
 					"default": false,
-					"deprecationMessage": "Deprecated. Set \"z80-asm-meter.timings.mode\" to \"atExit\" instead"
+					"deprecationMessage": "Deprecated. Set \"z80-asm-meter.timings.mode\" to \"smart\" or \"all\" instead"
 				},
 				"z80-asm-meter.timings.mode": {
 					"type": "string",
@@ -194,7 +194,12 @@
 					"enum": [
 						"none",
 						"smart",
-						"combined"
+						"all"
+					],
+					"enumDescriptions": [
+						"Disables alternative total timing calculation modes",
+						"Shows the alternative total timing calculation mode that best fits the selection",
+						"Shows all the alternative total timing calculation modes that apply to the selection"
 					],
 					"default": "none"
 				},

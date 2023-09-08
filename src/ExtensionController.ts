@@ -196,7 +196,7 @@ export default class ExtensionController {
 
         // Parses the source code
         const metering = new MainParser().parse(sourceCode);
-        return metering.isEmpty() ? undefined: metering;
+        return metering.isEmpty() ? undefined : metering;
     }
 
     private decorateForStatusBar(metering: Meterable): Meterable[] {
@@ -204,16 +204,17 @@ export default class ExtensionController {
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const timingMode: string = configuration.get("timings.mode",
-        configuration.get("timings.atExit", false) ? "smart" : "default");
+            configuration.get("timings.atExit", false) ? "smart" : "default");
 
         // Applies special timing modes
         switch (timingMode) {
-            case "smart":
-                return this.applyDecorations(metering, true);
-            case "combined":
-                return this.applyDecorations(metering, false);
+            case "default":
             default:
                 return [metering];
+            case "smart":
+                return this.applyDecorations(metering, true);
+            case "all":
+                return this.applyDecorations(metering, false);
         }
     }
 
@@ -222,15 +223,16 @@ export default class ExtensionController {
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const timingMode: string = configuration.get("timings.mode",
-        configuration.get("timings.atExit", false) ? "smart" : "default");
+            configuration.get("timings.atExit", false) ? "smart" : "default");
 
         // Applies special timing modes
         switch (timingMode) {
-            case "smart":
-            case "combined":
-                return this.applyDecorations(metering);
+            case "default":
             default:
                 return [metering];
+            case "smart":
+            case "all":
+                return this.applyDecorations(metering);
         }
     }
 
@@ -239,15 +241,16 @@ export default class ExtensionController {
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const timingMode: string = configuration.get("timings.mode",
-        configuration.get("timings.atExit", false) ? "smart" : "default");
+            configuration.get("timings.atExit", false) ? "smart" : "default");
 
         // Applies special timing modes
         switch (timingMode) {
-            case "smart":
-            case "combined":
-                return this.applyDecorations(metering, true);
+            case "default":
             default:
                 return [metering];
+            case "smart":
+            case "all":
+                return this.applyDecorations(metering, true);
         }
     }
 
@@ -274,7 +277,7 @@ export default class ExtensionController {
             decoratedMeterings.push(AtExitDecorator.of(metering));
         }
         return decoratedMeterings;
-}
+    }
 
     private buildStatusBarText(meterings: Meterable[]): string {
 
