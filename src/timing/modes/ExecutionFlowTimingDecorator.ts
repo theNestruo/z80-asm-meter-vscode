@@ -1,9 +1,9 @@
 import Meterable from "../../model/Meterable";
+import { isConditionalJump, isUnconditionalJump } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
-import { isConditionalJump, isJumpOrCall, isUnconditionalJump } from "../../utils/AssemblyUtils";
-import FlowDecorator from "./FlowDecorator";
+import TimingDecorator from "./TimingDecorator";
 
-export default class AtExitDecorator extends FlowDecorator {
+export default class FlowDecorator extends TimingDecorator {
 
 	static canDecorate(meterable: Meterable): boolean {
 
@@ -18,13 +18,8 @@ export default class AtExitDecorator extends FlowDecorator {
 		for (let i = 0, n = meterables.length; i < n; i++) {
 			const instruction = meterables[i].getInstruction();
 
-			// No unconditional jumps before the last instruction
-			if ((i < n - 1) && isUnconditionalJump(instruction)) {
-				return false;
-			}
-
-			// Last instruction must be jump or call
-			if ((i === n - 1) && (!isJumpOrCall(instruction))) {
+			// No unconditional jumps
+			if (isUnconditionalJump(instruction)) {
 				return false;
 			}
 
@@ -44,7 +39,7 @@ export default class AtExitDecorator extends FlowDecorator {
 
 		// Builds the "last condition met" decorator
 		return this.canDecorate(meterable)
-			? new AtExitDecorator(meterable)
+			? new FlowDecorator(meterable)
 			: meterable;
 	}
 
@@ -52,16 +47,19 @@ export default class AtExitDecorator extends FlowDecorator {
 		super(meterable);
 	}
 
+	getDescription(): string {
+		return "Flow";
+	}
+
+	getIcon(): string {
+		return "$(debug-step-over)";
+	}
+
 	protected modifiedTimingsOf(timing: number[],
 		i: number, n: number, instruction: string): number[] {
 
-		if (!isConditionalJump(instruction)) {
-			return timing;
-		}
-
-		// Last instruction?
-		return (i === n - 1)
-			? [timing[0], timing[0]]	// "Taken" timings
-			: [timing[1], timing[1]];	// "Not taken" timings
+		return isConditionalJump(instruction)
+			? [timing[1], timing[1]]	// "Not taken" timings
+			: timing;
 	}
 }

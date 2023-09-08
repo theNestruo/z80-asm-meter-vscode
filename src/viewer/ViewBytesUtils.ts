@@ -1,9 +1,9 @@
 import Meterable from "../model/Meterable";
 import { flatten } from "../utils/MeterableUtils";
 
-export function viewSize(metered: Meterable): string | undefined {
+export function viewStatusBarSize(meterable: Meterable): string | undefined {
 
-	const size = metered.getSize();
+	const size = meterable.getSize();
 	switch (size) {
 		case 0: return undefined;
 		case 1: return size + " byte";
@@ -11,9 +11,17 @@ export function viewSize(metered: Meterable): string | undefined {
 	}
 }
 
-export function viewBytes(metered: Meterable): string | undefined {
+export function viewTooptipSize(meterable: Meterable): string {
 
-	const flattenedMeterables = flatten(metered);
+	const size = viewStatusBarSize(meterable);
+	return size
+			? `|||\n|:---|:---:|\n|**Size**|${size}|\n`
+			: "";
+}
+
+export function viewBytes(meterable: Meterable): string | undefined {
+
+	const flattenedMeterables = flatten(meterable);
 	const firstBytes = shiftFirstBytes(flattenedMeterables);
 
 	// (empty)

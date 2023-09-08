@@ -1,13 +1,13 @@
-import { commands, ConfigurationChangeEvent, Disposable, env, StatusBarItem, window, workspace } from "vscode";
+import { commands, ConfigurationChangeEvent, Disposable, env, MarkdownString, StatusBarItem, window, workspace } from "vscode";
 import Meterable from "./model/Meterable";
 import MacroParser from "./parser/macro/MacroParser";
 import MainParser from "./parser/MainParser";
-import AtExitDecorator from "./timing/modes/AtExitDecorator";
-import MeterableViewer from "./viewer/MeterableViewer";
-import FlowDecorator from "./timing/modes/FlowDecorator";
+import AtExitDecorator from "./timing/modes/AtExitTimingDecorator";
+import FlowDecorator from "./timing/modes/ExecutionFlowTimingDecorator";
 import { hashCode } from "./utils/SourceCodeUtils";
-import { viewBytes, viewSize } from "./viewer/ViewBytesUtils";
+import { viewBytes, viewStatusBarSize, viewTooptipSize } from "./viewer/ViewBytesUtils";
 import { viewInstructions } from "./viewer/ViewInstructionsUtils";
+import { viewStatusBarTimings, viewTimingsToCopy, viewTimingsToCopyAsHints, viewTooltipTimings } from "./viewer/ViewTimingsUtils";
 
 export default class ExtensionController {
 
@@ -110,28 +110,20 @@ export default class ExtensionController {
         this.previousHashCode = currentHashCode;
 
         // Parses the source code
-        const metereds = this.meterFromSourceCode(sourceCode);
-        if (!metereds) {
+        const metering = this.meterFromSourceCode(sourceCode);
+        if (!metering) {
             this.previousHashCode = undefined;
             this.hideStatusBar();
             return;
         }
-        const metered = metereds[metereds.length - 1];
-        if (!metered) {
-            // (should never happen)
-            return;
-        }
-        const viewer = new MeterableViewer(metered);
 
         // Builds the statur bar text
-        const text = (this.buildStatusBarInstructions(metered)
-            + " " + this.buildStatusBarTiming(metereds)
-            + " " + this.buildStatusBarSizeAndBytes(metered))
+        const text = this.buildStatusBarText(this.decorateForStatusBar(metering))
             .replace(/\s+/, " ")
             .trim();
 
         // Builds the tooltip text
-        const tooltip = viewer.getTooltip();
+        const tooltip = this.buildTooltipMarkdown(this.decorateForTooltip(metering));
 
         // Builds the status bar item
         if (!this.statusBarItem) {
@@ -153,14 +145,14 @@ export default class ExtensionController {
         }
 
         // Parses the source code
-        const metered = this.meterFromSourceCode(sourceCode)?.pop();
-        if (!metered) {
+        const metering = this.meterFromSourceCode(sourceCode);
+        if (!metering) {
             // (should never happen)
             return;
         }
 
         // Builds the text to copy to clipboard
-        const textToCopy = new MeterableViewer(metered).getCommand();
+        const textToCopy = this.buildCommandText(this.decorateForCommand(metering));
         if (!textToCopy) {
             // (should never happen)
             return;
@@ -200,111 +192,165 @@ export default class ExtensionController {
         return languageIds.indexOf(languageId) !== -1;
     }
 
-    private meterFromSourceCode(sourceCode: string): Meterable[] | undefined {
+    private meterFromSourceCode(sourceCode: string): Meterable | undefined {
 
         // Parses the source code
-        const metered = new MainParser().parse(sourceCode);
-        if (metered.isEmpty()) {
-            return undefined;
-        }
+        const metering = new MainParser().parse(sourceCode);
+        return metering.isEmpty() ? undefined: metering;
+    }
 
-        // Applies special timing modes
+    private decorateForStatusBar(metering: Meterable): Meterable[] {
+
+        // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const timingMode: string = configuration.get("timings.mode",
-            configuration.get("timings.atExit", false) ? "smart" : "default");
+        configuration.get("timings.atExit", false) ? "smart" : "default");
+
+        // Applies special timing modes
         switch (timingMode) {
             case "smart":
-                if (AtExitDecorator.canDecorate(metered)) {
-                    return [AtExitDecorator.of(metered)];
-                }
-                if (FlowDecorator.canDecorate(metered)) {
-                    return [FlowDecorator.of(metered)];
-                }
-                return [metered];
+                return this.applyDecorations(metering, true);
             case "combined":
-                const decoratedMeterables: Meterable[] = [metered];
-                if (FlowDecorator.canDecorate(metered)) {
-                    decoratedMeterables.push(FlowDecorator.of(metered));
-                }
-                if (AtExitDecorator.canDecorate(metered)) {
-                    decoratedMeterables.push(AtExitDecorator.of(metered));
-                }
-                return decoratedMeterables;
+                return this.applyDecorations(metering, false);
             default:
-                return [metered];
+                return [metering];
         }
     }
 
+    private decorateForTooltip(metering: Meterable): Meterable[] {
 
-    private buildStatusBarInstructions(metered: Meterable): string {
+        // Reads relevant configuration
+        const configuration = workspace.getConfiguration("z80-asm-meter");
+        const timingMode: string = configuration.get("timings.mode",
+        configuration.get("timings.atExit", false) ? "smart" : "default");
 
-        // (sanity check)
-        const instruction = viewInstructions(metered);
-        if (!instruction) {
-            return "";
+        // Applies special timing modes
+        switch (timingMode) {
+            case "smart":
+            case "combined":
+                return this.applyDecorations(metering);
+            default:
+                return [metering];
         }
+    }
+
+    private decorateForCommand(metering: Meterable): Meterable[] {
+
+        // Reads relevant configuration
+        const configuration = workspace.getConfiguration("z80-asm-meter");
+        const timingMode: string = configuration.get("timings.mode",
+        configuration.get("timings.atExit", false) ? "smart" : "default");
+
+        // Applies special timing modes
+        switch (timingMode) {
+            case "smart":
+            case "combined":
+                return this.applyDecorations(metering, true);
+            default:
+                return [metering];
+        }
+    }
+
+    private applyDecorations(metering: Meterable, smart?: boolean): Meterable[] {
+
+        const canDecorateAtExit = AtExitDecorator.canDecorate(metering);
+        const canDecorateFlow = FlowDecorator.canDecorate(metering);
+
+        if (smart) {
+            if (canDecorateAtExit) {
+                return [AtExitDecorator.of(metering)];
+            }
+            if (canDecorateFlow) {
+                return [FlowDecorator.of(metering)];
+            }
+            return [metering];
+        }
+
+        const decoratedMeterings: Meterable[] = [metering];
+        if (canDecorateFlow) {
+            decoratedMeterings.push(FlowDecorator.of(metering));
+        }
+        if (canDecorateAtExit) {
+            decoratedMeterings.push(AtExitDecorator.of(metering));
+        }
+        return decoratedMeterings;
+}
+
+    private buildStatusBarText(meterings: Meterable[]): string {
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
         const viewInstructionConfiguration = configuration.get("viewInstruction") || false;
+        const viewBytesConfiguration = configuration.get("viewBytes") || false;
 
-        return viewInstructionConfiguration
-            ? `$(code) ${instruction}`
-            : "";
-    }
-
-    private buildStatusBarTiming(metereds: Meterable[]): string {
-
+        // Builds the statur bar text
+        const metering = meterings[0];
         let text = "";
 
-        // Combines the decorated timings when they have the same values
-        let currentDecoration = "";
-        let currentTiming = "";
-        for (let i = 0, n = metereds.length; i < n; i++) {
-            const metered = metereds[i];
-            const decoration = metered instanceof AtExitDecorator ? "$(debug-step-out)"
-                : metered instanceof FlowDecorator ? "$(debug-step-over)"
-                    : "";
-            const timing = new MeterableViewer(metered).getStatusBarTiming() || "0";
-
-            // Same as previous timing?
-            if (currentTiming === timing) {
-                // Combines the decoration
-                currentDecoration += decoration;
-
-            } else {
-                // Aggregates a new timing entry
-                if (currentDecoration || currentTiming) {
-                    text += `${currentDecoration}${currentTiming} `;
-                }
-                currentDecoration = decoration;
-                currentTiming = timing;
+        if (viewInstructionConfiguration) {
+            const instruction = viewInstructions(metering);
+            if (instruction) {
+                text += `$(code) ${instruction}`;
             }
         }
-        text += `${currentDecoration}${currentTiming} `;
-        return `$(watch) ${text}`;
+
+        const timings = viewStatusBarTimings(meterings);
+        if (timings) {
+            text += ` $(watch) ${timings}`;
+        }
+
+        const size = viewStatusBarSize(metering);
+        if (size !== undefined) {
+            text += `$(file-binary) ${size} `;
+            if (viewBytesConfiguration) {
+                const bytes = viewBytes(metering);
+                if (bytes) {
+                    text += `(${bytes}) `;
+                }
+            }
+        }
+
+        return text;
     }
 
-    private buildStatusBarSizeAndBytes(metered: Meterable): string {
+    private buildTooltipMarkdown(meterings: Meterable[]): MarkdownString {
 
-        // (sanity check)
-        const size = viewSize(metered);
-        if (size === undefined) {
-            return "";
-        }
+        // Builds the tooltip text
+        const metering = meterings[0];
+        const command = this.buildCommandText(meterings);
+        return new MarkdownString()
+            .appendMarkdown(viewTooltipTimings(meterings))
+            .appendMarkdown("\n---\n\n")
+            .appendMarkdown(viewTooptipSize(metering))
+            .appendMarkdown("\n---\n\n")
+            .appendMarkdown(`Copy "${command}" to clipboard\n`);
+    }
+
+    private buildCommandText(meterings: Meterable[]): string | undefined {
 
         // Reads relevant configuration
         const configuration = workspace.getConfiguration("z80-asm-meter");
-        const viewBytesConfiguration = configuration.get("viewBytes") || false;
+        const timingsHintsConfiguration: string = configuration.get("timings.hints", "none");
+        const isTimingsHintsEnabled = ["subroutines", "any"].indexOf(timingsHintsConfiguration) !== -1;
 
-        let text = `$(file-binary) ${size} `;
-        if (viewBytesConfiguration) {
-            const bytes = viewBytes(metered);
-            if (bytes) {
-                text += `(${bytes}) `;
-            }
+        // (prefers most specific algorithm)
+        const metering = meterings[meterings.length - 1];
+
+        // Builds the command text
+        if (isTimingsHintsEnabled) {
+            return viewTimingsToCopyAsHints(metering);
         }
-        return text;
+
+        const timing = viewTimingsToCopy(metering);
+        const size = viewStatusBarSize(metering);
+
+        return timing
+            ? (size
+                ? `${timing}, ${size}`
+                : `${timing}`)
+            : (size
+                ? `${size}`
+                : undefined);
     }
 
     private hideStatusBar() {

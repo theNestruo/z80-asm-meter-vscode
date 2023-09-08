@@ -1,9 +1,9 @@
 import Meterable from "../model/Meterable";
 import { flatten } from "../utils/MeterableUtils";
 
-export function viewInstructions(metered: Meterable): string | undefined {
+export function viewInstructions(meterable: Meterable): string | undefined {
 
-	const flattenedMeterables = flatten(metered);
+	const flattenedMeterables = flatten(meterable);
 	const firstInstruction = shiftFirstInstruction(flattenedMeterables);
 
 	// (empty)

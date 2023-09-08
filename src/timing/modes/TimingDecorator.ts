@@ -95,6 +95,10 @@ export default abstract class TimingDecorator implements Meterable {
 		return this.cachedMeterables;
 	}
 
+	abstract getDescription(): string;
+
+	abstract getIcon(): string;
+
 	protected abstract modifiedTimingsOf(timing: number[],
 		i: number, n: number, instruction: string): number[];
 }
