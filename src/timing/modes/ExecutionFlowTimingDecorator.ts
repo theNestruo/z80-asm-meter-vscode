@@ -1,10 +1,15 @@
 import Meterable from "../../model/Meterable";
-import { isConditionalJump, isUnconditionalJump } from "../../utils/AssemblyUtils";
+import { isConditionalJump, isConditionalJumpOrCall, isUnconditionalJump } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
 import TimingDecorator from "./TimingDecorator";
 
 export default class FlowDecorator extends TimingDecorator {
 
+	/**
+	 * Checks if "execution flow timings" decorator can apply to the meterable
+	 * @param meterable The meterable instance to be decorated
+	 * @return The "execution flow timings" decorator, or the original meterable
+	 */
 	static canDecorate(meterable: Meterable): boolean {
 
 		// Length check
@@ -23,21 +28,22 @@ export default class FlowDecorator extends TimingDecorator {
 				return false;
 			}
 
-			anyConditionalJump ||= isConditionalJump(instruction);
+			const lastInstruction = i === n-1;
+			anyConditionalJump ||= isConditionalJumpOrCall(instruction, lastInstruction);
 		}
 
-		// At least one conditional jump
+		// At least one conditional jump (or call, for the last instruction)
 		return anyConditionalJump;
 	}
 
 	/**
-	 * Conditionaly builds an instance of the "last condition met" decorator
+	 * Conditionaly builds an instance of the "execution flow timings" decorator
 	 * @param meterable The meterable instance to be decorated
-	 * @return The "last condition met" decorator, or the original meterable
+	 * @return The "execution flow timings" decorator, or the original meterable
 	 */
 	static of(meterable: Meterable): Meterable {
 
-		// Builds the "last condition met" decorator
+		// Builds the "execution flow timings" decorator
 		return this.canDecorate(meterable)
 			? new FlowDecorator(meterable)
 			: meterable;

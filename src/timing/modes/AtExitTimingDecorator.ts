@@ -1,10 +1,15 @@
 import Meterable from "../../model/Meterable";
-import { isConditionalJump, isJumpOrCall, isUnconditionalJump } from "../../utils/AssemblyUtils";
+import { isConditionalJump, isConditionalJumpOrCall, isJumpOrCall, isUnconditionalJump } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
 import TimingDecorator from "./TimingDecorator";
 
 export default class AtExitDecorator extends TimingDecorator {
 
+	/**
+	 * Checks if "timings at exit" decorator can apply to the meterable
+	 * @param meterable The meterable instance to be decorated
+	 * @return The "timings at exit" decorator, or the original meterable
+	 */
 	static canDecorate(meterable: Meterable): boolean {
 
 		// Length check
@@ -24,25 +29,26 @@ export default class AtExitDecorator extends TimingDecorator {
 			}
 
 			// Last instruction must be jump or call
-			if ((i === n - 1) && (!isJumpOrCall(instruction))) {
+			const lastInstruction = i === n-1;
+			if (lastInstruction && (!isJumpOrCall(instruction))) {
 				return false;
 			}
 
-			anyConditionalJump ||= isConditionalJump(instruction);
+			anyConditionalJump ||= isConditionalJumpOrCall(instruction, lastInstruction);
 		}
 
-		// At least one conditional jump
+		// At least one conditional jump (or call, for the last instruction)
 		return anyConditionalJump;
 	}
 
 	/**
-	 * Conditionaly builds an instance of the "last condition met" decorator
+	 * Conditionaly builds an instance of the "timings at exit" decorator
 	 * @param meterable The meterable instance to be decorated
-	 * @return The "last condition met" decorator, or the original meterable
+	 * @return The "timings at exit" decorator, or the original meterable
 	 */
 	static of(meterable: Meterable): Meterable {
 
-		// Builds the "last condition met" decorator
+		// Builds the "timings at exit" decorator
 		return this.canDecorate(meterable)
 			? new AtExitDecorator(meterable)
 			: meterable;
@@ -63,13 +69,16 @@ export default class AtExitDecorator extends TimingDecorator {
 	protected modifiedTimingsOf(timing: number[],
 		i: number, n: number, instruction: string): number[] {
 
-		if (!isConditionalJump(instruction)) {
-			return timing;
+		// Last instruction?
+		if (i === n - 1) {
+			return isConditionalJumpOrCall(instruction)
+				? [timing[0], timing[0]]	// "Taken" timings
+				: timing;
 		}
 
-		// Last instruction?
-		return (i === n - 1)
-			? [timing[0], timing[0]]	// "Taken" timings
-			: [timing[1], timing[1]];	// "Not taken" timings
+		// Previous instruction
+		return isConditionalJump(instruction)
+				? [timing[1], timing[1]]	// "Not taken" timings
+				: timing;
 	}
 }
