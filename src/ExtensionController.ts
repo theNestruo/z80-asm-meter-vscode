@@ -201,79 +201,91 @@ export default class ExtensionController {
 
     private decorateForStatusBar(metering: Meterable): Meterable[] {
 
-        // Reads relevant configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        const timingMode: string = configuration.get("timings.mode",
-            configuration.get("timings.atExit", false) ? "smart" : "default");
-
         // Applies special timing modes
-        switch (timingMode) {
+        switch (this.timingMode()) {
             case "default":
             default:
                 return [metering];
+            case "best":
+                return this.applyBestDecoration(metering);
             case "smart":
-                return this.applyDecorations(metering, true);
+                return this.applySmartDecorations(metering);
             case "all":
-                return this.applyDecorations(metering, false);
+                return this.applyAllDecorations(metering);
         }
     }
 
     private decorateForTooltip(metering: Meterable): Meterable[] {
 
-        // Reads relevant configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        const timingMode: string = configuration.get("timings.mode",
-            configuration.get("timings.atExit", false) ? "smart" : "default");
-
         // Applies special timing modes
-        switch (timingMode) {
+        switch (this.timingMode()) {
             case "default":
             default:
                 return [metering];
+            case "best":
             case "smart":
             case "all":
-                return this.applyDecorations(metering);
+                return this.applyAllDecorations(metering);
         }
     }
 
     private decorateForCommand(metering: Meterable): Meterable[] {
 
-        // Reads relevant configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        const timingMode: string = configuration.get("timings.mode",
-            configuration.get("timings.atExit", false) ? "smart" : "default");
-
         // Applies special timing modes
-        switch (timingMode) {
+        switch (this.timingMode()) {
             case "default":
             default:
                 return [metering];
+            case "best":
             case "smart":
             case "all":
-                return this.applyDecorations(metering, true);
+                return this.applyBestDecoration(metering);
         }
     }
 
-    private applyDecorations(metering: Meterable, smart?: boolean): Meterable[] {
+    private timingMode(): string {
 
-        const canDecorateAtExit = AtExitDecorator.canDecorate(metering);
-        const canDecorateFlow = FlowDecorator.canDecorate(metering);
+        // Reads relevant configuration
+        const configuration = workspace.getConfiguration("z80-asm-meter");
+        return configuration.get("timings.mode",
+            configuration.get("timings.atExit", false) ? "best" : "default");
+    }
 
-        if (smart) {
-            if (canDecorateAtExit) {
-                return [AtExitDecorator.of(metering)];
-            }
-            if (canDecorateFlow) {
-                return [FlowDecorator.of(metering)];
-            }
-            return [metering];
+    private applyBestDecoration(metering: Meterable): Meterable[] {
+
+        if (AtExitDecorator.canDecorate(metering)) {
+            return [AtExitDecorator.of(metering)];
         }
+
+        if (FlowDecorator.canDecorate(metering)) {
+            return [FlowDecorator.of(metering)];
+        }
+
+        return [metering];
+    }
+
+    private applySmartDecorations(metering: Meterable): Meterable[] {
+
+        const canDecorateFlow = FlowDecorator.canDecorate(metering);
+        const canDecorateAtExit = AtExitDecorator.canDecorate(metering);
+        if (canDecorateFlow) {
+            return canDecorateAtExit
+                ? [FlowDecorator.of(metering), AtExitDecorator.of(metering)]
+                : [FlowDecorator.of(metering)];
+        } else {
+            return canDecorateAtExit
+                ? [AtExitDecorator.of(metering)]
+                : [metering];
+        }
+    }
+
+    private applyAllDecorations(metering: Meterable): Meterable[] {
 
         const decoratedMeterings: Meterable[] = [metering];
-        if (canDecorateFlow) {
+        if (FlowDecorator.canDecorate(metering)) {
             decoratedMeterings.push(FlowDecorator.of(metering));
         }
-        if (canDecorateAtExit) {
+        if (AtExitDecorator.canDecorate(metering)) {
             decoratedMeterings.push(AtExitDecorator.of(metering));
         }
         return decoratedMeterings;

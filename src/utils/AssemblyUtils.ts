@@ -215,83 +215,132 @@ export function anySymbolOperandScore(candidateOperand: string): number {
 }
 
 /**
- * @param instruction the instruction
- * @returns true if the instruction is a conditional jump (DJNZ, JP, JR, or RET)
+ * @returns if the instruction is a conditional instruction
  */
-export function isConditionalJump(instruction: string): boolean {
-
-    return isConditionalJumpOrCall(instruction, false);
-}
-
-/**
- * @param instruction the instruction
- * @param callIncluded true to also consider CALL instructions
- * @returns true if the instruction is a conditional jump (DJNZ, JP, JR, or RET)
- */
-export function isConditionalJumpOrCall(instruction: string,
-    callIncluded: boolean = true): boolean {
+export function isJumpCallOrRetInstruction(instruction: string) {
 
     const mnemonic = extractMnemonicOf(instruction);
     const operands = extractOperandsOf(instruction);
 
+    return isUnconditionalJump(mnemonic, operands)
+        || isConditionalJump(mnemonic, operands)
+        || isUnconditionalCall(mnemonic, operands)
+        || isConditionalCall(mnemonic, operands)
+        || isUnconditionalRet(mnemonic, operands)
+        || isConditionalRet(mnemonic, operands);
+}
+
+/**
+ * @returns if the instruction is a conditional instruction
+ */
+export function isConditionalInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isConditionalJump(mnemonic, operands)
+        || isConditionalCall(mnemonic, operands)
+        || isConditionalRet(mnemonic, operands);
+}
+
+/**
+ * @returns if the instruction is a jump or a call instruction
+ */
+export function isJumpOrCallInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isUnconditionalJump(mnemonic, operands)
+        || isConditionalJump(mnemonic, operands)
+        || isUnconditionalCall(mnemonic, operands)
+        || isConditionalCall(mnemonic, operands);
+}
+
+/**
+ * @returns if the instruction is an unconditional jump or return instruction
+ */
+export function isUnconditionalJumpOrRetInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isUnconditionalJump(mnemonic, operands)
+        || isUnconditionalRet(mnemonic, operands);
+}
+
+/**
+ * @returns if the instruction is a conditional jump or return instruction
+ */
+export function isConditionalJumpOrRetInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isConditionalJump(mnemonic, operands)
+        || isConditionalRet(mnemonic, operands);
+}
+
+/**
+ * @returns if the instruction is an unconditional jump (JP, JR)
+ */
+export function isUnconditionalJump(mnemonic: string, operands: string[]): boolean {
+
+    return (["JP", "JR"].indexOf(mnemonic) !== -1)
+        && (operands.length === 1);
+}
+
+/**
+ * @returns if the instruction is a conditional jump (DJNZ, JP or JR)
+ */
+export function isConditionalJump(mnemonic: string, operands: string[]): boolean {
+
     switch (mnemonic) {
-        case "CALL":
-            return callIncluded && (operands.length === 2) && isAnyCondition(operands[0]);
         case "DJNZ":
             return (operands.length === 1);
         case "JP":
             return (operands.length === 2) && isAnyCondition(operands[0]);
         case "JR":
             return (operands.length === 2) && isJrCondition(operands[0]);
-        case "RET":
-            return (operands.length === 1) && isAnyCondition(operands[0]);
         default:
             return false;
     }
 }
 
 /**
- * @param instruction the instruction
- * @returns true if the instruction is an unconditional jump (JP, JR, RET, RETI, or RETN)
+ * @returns if the instruction is an unconditional call (CALL or RST)
  */
-export function isUnconditionalJump(instruction: string) {
+export function isUnconditionalCall(mnemonic: string, operands: string[]): boolean {
 
-    return isUnconditionalJumpOrCall(instruction, false);
+    return (["CALL", "RST"].indexOf(mnemonic) !== -1)
+        && (operands.length === 1);
 }
 
 /**
- * @param instruction the instruction
- * @param callAndRstIncluded true to also consider CALL and RST instructions
- * @returns true if the instruction is an unconditional jump (JP, JR, RET, RETI, or RETN)
+ * @returns if the instruction is a conditional call (CALL)
  */
-export function isUnconditionalJumpOrCall(instruction: string,
-    callAndRstIncluded: boolean = true): boolean {
+export function isConditionalCall(mnemonic: string, operands: string[]): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
-
-    switch (mnemonic) {
-        case "CALL":
-        case "RST":
-            return callAndRstIncluded && (operands.length === 1);
-        case "JP":
-        case "JR":
-            return (operands.length === 1);
-        case "RET":
-        case "RETI":
-        case "RETN":
-            return (operands.length === 0);
-        default:
-            return false;
-    }
+    return (mnemonic === "CALL")
+        && (operands.length === 2)
+        && isAnyCondition(operands[0]);
 }
 
 /**
- * @param instruction the instruction
- * @returns true if the instruction is a conditional or unconditional jump or call
+ * @returns if the instruction is an unconditional return (RET, RETI, or RETN)
  */
-export function isJumpOrCall(instruction: string) {
+export function isUnconditionalRet(mnemonic: string, operands: string[]): boolean {
 
-    return isConditionalJumpOrCall(instruction)
-        || isUnconditionalJumpOrCall(instruction);
+    return (["RET", "RETI", "RETN"].indexOf(mnemonic) !== -1)
+        && (operands.length === 0);
+}
+
+/**
+ * @returns if the instruction is a conditional return (RET, RETI, or RETN)
+ */
+export function isConditionalRet(mnemonic: string, operands: string[]): boolean {
+
+    return (mnemonic === "RET")
+        && (operands.length === 1)
+        && isAnyCondition(operands[0]);
 }

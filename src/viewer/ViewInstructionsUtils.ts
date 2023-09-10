@@ -22,6 +22,19 @@ export function viewInstructions(meterable: Meterable): string | undefined {
 	return text;
 }
 
+export function viewLastInstruction(meterable: Meterable): string | undefined {
+
+	const flattenedMeterables = flatten(meterable);
+
+	// (consumes first instruction)
+	const firstInstruction = shiftFirstInstruction(flattenedMeterables);
+	if (!firstInstruction) {
+		return undefined;
+	}
+
+	return popLastInstruction(flattenedMeterables);
+}
+
 function shiftFirstInstruction(flattenedMeterables: Meterable[]): string | undefined {
 
 	while (flattenedMeterables.length) {

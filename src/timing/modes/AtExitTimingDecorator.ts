@@ -1,5 +1,5 @@
 import Meterable from "../../model/Meterable";
-import { isConditionalJump, isConditionalJumpOrCall, isJumpOrCall, isUnconditionalJump } from "../../utils/AssemblyUtils";
+import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpCallOrRetInstruction, isJumpOrCallInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
 import TimingDecorator from "./TimingDecorator";
 
@@ -23,18 +23,20 @@ export default class AtExitDecorator extends TimingDecorator {
 		for (let i = 0, n = meterables.length; i < n; i++) {
 			const instruction = meterables[i].getInstruction();
 
-			// No unconditional jumps before the last instruction
-			if ((i < n - 1) && isUnconditionalJump(instruction)) {
+			// No unconditional jump/ret before the last instruction
+			if ((i < n - 1) && isUnconditionalJumpOrRetInstruction(instruction)) {
 				return false;
 			}
 
-			// Last instruction must be jump or call
-			const lastInstruction = i === n-1;
-			if (lastInstruction && (!isJumpOrCall(instruction))) {
+			// Last instruction must be jump/ret or call
+			const lastInstruction = i === n - 1;
+			if (lastInstruction && (!isJumpCallOrRetInstruction(instruction))) {
 				return false;
 			}
 
-			anyConditionalJump ||= isConditionalJumpOrCall(instruction, lastInstruction);
+			anyConditionalJump ||= lastInstruction
+				? isConditionalInstruction(instruction)
+				: isConditionalJumpOrRetInstruction(instruction);
 		}
 
 		// At least one conditional jump (or call, for the last instruction)
@@ -54,16 +56,21 @@ export default class AtExitDecorator extends TimingDecorator {
 			: meterable;
 	}
 
+	private isLastInstructionJumpOrCall: boolean;
+
 	private constructor(meterable: Meterable) {
 		super(meterable);
+
+		const meterables: Meterable[] = flatten(meterable);
+		this.isLastInstructionJumpOrCall = isJumpOrCallInstruction(meterables[meterables.length - 1].getInstruction());
 	}
 
 	getDescription(): string {
-		return "At exit";
+		return "At exit point";
 	}
 
 	getIcon(): string {
-		return "$(debug-step-out)";
+		return this.isLastInstructionJumpOrCall ? "$(debug-step-out)" : "$(debug-step-into)";
 	}
 
 	protected modifiedTimingsOf(timing: number[],
@@ -71,14 +78,14 @@ export default class AtExitDecorator extends TimingDecorator {
 
 		// Last instruction?
 		if (i === n - 1) {
-			return isConditionalJumpOrCall(instruction)
+			return isConditionalInstruction(instruction)
 				? [timing[0], timing[0]]	// "Taken" timings
 				: timing;
 		}
 
 		// Previous instruction
-		return isConditionalJump(instruction)
-				? [timing[1], timing[1]]	// "Not taken" timings
-				: timing;
+		return isConditionalJumpOrRetInstruction(instruction)
+			? [timing[1], timing[1]]	// "Not taken" timings
+			: timing;
 	}
 }

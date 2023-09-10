@@ -193,13 +193,15 @@
 					"description": "Enables alternative total timing calculation modes",
 					"enum": [
 						"none",
+						"best",
 						"smart",
 						"all"
 					],
 					"enumDescriptions": [
 						"Disables alternative total timing calculation modes",
-						"Shows the alternative total timing calculation mode that best fits the selection",
-						"Shows all the alternative total timing calculation modes that apply to the selection"
+						"Shows the total timing calculation mode that best fits the selection",
+						"Shows total timing calculation modes that are relevant to the selection",
+						"Shows all the total timing calculation modes that apply to the selection"
 					],
 					"default": "none"
 				},

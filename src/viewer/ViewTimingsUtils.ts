@@ -46,7 +46,7 @@ export function viewTooltipTimings(meterables: Meterable[]): string {
 		const meterable = meterables[i];
 		const description = meterable instanceof TimingDecorator
 			? meterable.getDescription()
-			: "Default";
+			: "Total timing";
 		header += `|${description}`;
 		separator += "|:---:";
 	}

@@ -4,7 +4,7 @@ import { flatten } from "../../utils/MeterableUtils";
 export default abstract class TimingDecorator implements Meterable {
 
 	// The meterable instance to be decorated
-	private decoratedMeterable: Meterable;
+	protected decoratedMeterable: Meterable;
 
 	// Derived information (will be cached for performance reasons)
 	private cachedZ80Timing: number[] | undefined;

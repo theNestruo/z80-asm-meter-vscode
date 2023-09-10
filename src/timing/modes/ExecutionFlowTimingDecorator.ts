@@ -1,6 +1,7 @@
 import Meterable from "../../model/Meterable";
-import { isConditionalJump, isConditionalJumpOrCall, isUnconditionalJump } from "../../utils/AssemblyUtils";
+import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
+import { viewInstructions } from "../../viewer/ViewInstructionsUtils";
 import TimingDecorator from "./TimingDecorator";
 
 export default class FlowDecorator extends TimingDecorator {
@@ -24,15 +25,17 @@ export default class FlowDecorator extends TimingDecorator {
 			const instruction = meterables[i].getInstruction();
 
 			// No unconditional jumps
-			if (isUnconditionalJump(instruction)) {
+			if (isUnconditionalJumpOrRetInstruction(instruction)) {
 				return false;
 			}
 
-			const lastInstruction = i === n-1;
-			anyConditionalJump ||= isConditionalJumpOrCall(instruction, lastInstruction);
+			const lastInstruction = i === n - 1;
+			anyConditionalJump ||= lastInstruction
+				? isConditionalInstruction(instruction)
+				: isConditionalJumpOrRetInstruction(instruction);
 		}
 
-		// At least one conditional jump (or call, for the last instruction)
+		// At least one conditional jump/ret (or call, for the last instruction)
 		return anyConditionalJump;
 	}
 
@@ -54,7 +57,9 @@ export default class FlowDecorator extends TimingDecorator {
 	}
 
 	getDescription(): string {
-		return "Flow";
+
+		const instructions = viewInstructions(this.decoratedMeterable);
+		return "Execution flow";
 	}
 
 	getIcon(): string {
@@ -64,7 +69,7 @@ export default class FlowDecorator extends TimingDecorator {
 	protected modifiedTimingsOf(timing: number[],
 		i: number, n: number, instruction: string): number[] {
 
-		return isConditionalJump(instruction)
+		return isConditionalJumpOrRetInstruction(instruction)
 			? [timing[1], timing[1]]	// "Not taken" timings
 			: timing;
 	}

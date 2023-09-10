@@ -1,5 +1,5 @@
 import Meterable from "../../model/Meterable";
-import { isConditionalJumpOrCall, isJumpOrCall } from "../../utils/AssemblyUtils";
+import { isConditionalInstruction, isJumpOrCallInstruction } from "../../utils/AssemblyUtils";
 import MeterableHint from "./model/MeterableHint";
 
 export default class TimingHintsDecorator implements Meterable {
@@ -15,7 +15,7 @@ export default class TimingHintsDecorator implements Meterable {
 	static of(meterable: Meterable, meterableHint: MeterableHint, subroutines: boolean): Meterable {
 
 		// Checks instruction
-		if (subroutines && (!isJumpOrCall(meterable.getInstruction()))) {
+		if (subroutines && (!isJumpOrCallInstruction(meterable.getInstruction()))) {
 			return meterable;
 		}
 
@@ -36,7 +36,7 @@ export default class TimingHintsDecorator implements Meterable {
 		this.meterable = meterable;
 		this.meterableHint = meterableHint;
 
-		this.conditional = isConditionalJumpOrCall(meterable.getInstruction());
+		this.conditional = isConditionalInstruction(meterable.getInstruction());
 	}
 
 	getInstruction(): string {

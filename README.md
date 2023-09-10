@@ -92,8 +92,9 @@ This extension contributes the following settings:
 * `z80-asm-meter.timings.mode`: Enables alternative total timing calculation modes. See [timing modes](#timing-modes).
 
     * `default` (default): Disables alternative total timing calculation modes.
-    * `smart`: Shows the alternative total timing calculation mode that best fits the selection.
-    * `all`: Shows all the alternative total timing calculation modes that apply to the selection.
+    * `best`: Shows the total timing calculation mode that best fits the selection.
+    * `smart`: Shows total timing calculation modes that are relevant to the selection.
+    * `all`: Shows all the total timing calculation modes that apply to the selection.
 
 * `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment. See [timing hints](#timing-hints).
 
@@ -123,7 +124,7 @@ There are three total timing calculation modes available:
 
 2. **execution flow**: When the selection is a single subroutine (i.e.: there are no unconditional `JP`, `JR` or `RET` instructions in the selection), the _execution flow_ total timing calculation mode measures the timing of the execution flow through the selection (i.e.: to the next, non selected, instruction) by considering any `DJNZ` or conditional `JP`, `JR` or `RET` instruction as _not taken_.
 
-3. **at exit**: When the selection is a single subroutine and the selection ends at an exit point (a conditional or unconditional `JP`, `JR` or `RET` instruction), the _at exit_ total timing calculation mode measures the timing of the execution flow to the selected exit point, by considering the last instruction as _taken_ if it is a conditional instruction.
+3. **at exit**: When the selection is a single subroutine and the selection ends at an exit point (a conditional or unconditional `JP`, `JR` or `RET` instruction) or calls a subroutine (a conditional or unconditional `CALL`), the _at exit_ total timing calculation mode measures the timing of the execution flow to the selected exit point, by considering the last instruction as _taken_ if it is a conditional instruction.
 
 ### Timing hints
 
