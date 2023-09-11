@@ -188,23 +188,6 @@
 					"default": false,
 					"deprecationMessage": "Deprecated. Set \"z80-asm-meter.timings.mode\" to \"smart\" or \"all\" instead"
 				},
-				"z80-asm-meter.timings.mode": {
-					"type": "string",
-					"description": "Enables alternative total timing calculation modes",
-					"enum": [
-						"none",
-						"best",
-						"smart",
-						"all"
-					],
-					"enumDescriptions": [
-						"Disables alternative total timing calculation modes",
-						"Shows the total timing calculation mode that best fits the selection",
-						"Shows total timing calculation modes that are relevant to the selection",
-						"Shows all the total timing calculation modes that apply to the selection"
-					],
-					"default": "none"
-				},
 				"z80-asm-meter.timings.hints": {
 					"type": "string",
 					"description": "Enables timing hints read from the line comment",
@@ -219,6 +202,28 @@
 						"Any timing hint will be added"
 					],
 					"default": "none"
+				},
+				"z80-asm-meter.timings.mode": {
+					"type": "string",
+					"description": "Enables alternative total timing calculation modes on selection",
+					"enum": [
+						"none",
+						"best",
+						"smart",
+						"all"
+					],
+					"enumDescriptions": [
+						"Disables alternative total timing calculation modes",
+						"Shows the total timing calculation mode that best fits the selection",
+						"Shows total timing calculation modes that are relevant to the selection",
+						"Shows all the total timing calculation modes that apply to the selection"
+					],
+					"default": "none"
+				},
+				"z80-asm-meter.timings.threshold": {
+					"type": "number",
+					"description": "Number of instructions to be selected to apply alternative total timing calculation modes",
+					"default": 2
 				},
 				"z80-asm-meter.macros": {
 					"type": [

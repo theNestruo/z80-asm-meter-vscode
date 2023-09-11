@@ -46,8 +46,7 @@ export default class ExtensionController {
     private onEvent() {
 
         // Checks debounce configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        const debounce = configuration.get("debounce", 100);
+        const debounce = workspace.getConfiguration("z80-asm-meter").get("debounce", 100);
         if (debounce <= 0) {
             // No debounce: immediate execution
             this.updateStatusBar();
@@ -344,8 +343,8 @@ export default class ExtensionController {
     private buildCommandText(meterings: Meterable[]): string | undefined {
 
         // Reads relevant configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        const timingsHintsConfiguration: string = configuration.get("timings.hints", "none");
+        const timingsHintsConfiguration: string =
+            workspace.getConfiguration("z80-asm-meter").get("timings.hints", "none");
         const isTimingsHintsEnabled = ["subroutines", "any"].indexOf(timingsHintsConfiguration) !== -1;
 
         // (prefers most specific algorithm)

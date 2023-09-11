@@ -1,3 +1,4 @@
+import { workspace } from "vscode";
 import Meterable from "../../model/Meterable";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpCallOrRetInstruction, isJumpOrCallInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
@@ -12,9 +13,12 @@ export default class AtExitDecorator extends TimingDecorator {
 	 */
 	static canDecorate(meterable: Meterable): boolean {
 
+		// Reads relevant configuration
+		const threshold = workspace.getConfiguration("z80-asm-meter").get("timings.threshold", 2);
+
 		// Length check
 		const meterables: Meterable[] = flatten(meterable);
-		if (meterables.length < 2) {
+		if ((threshold > 0) && (meterables.length < threshold)) {
 			return false;
 		}
 

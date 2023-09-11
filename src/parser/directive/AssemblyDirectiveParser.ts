@@ -101,10 +101,12 @@ export default class AssemblyDirectiveParser {
             : undefined;
 
         // Determines instruction
-        const configuration = workspace.getConfiguration("z80-asm-meter");
-        const directivesAsInstructions: string = configuration.get("directivesAsInstructions", "none");
+        const directivesAsInstructions: string =
+            workspace.getConfiguration("z80-asm-meter").get("directivesAsInstructions", "none");
         if (directivesAsInstructions === "defs") {
-            const opcode = value !== undefined ? value : 0x00; // (defaults to NOP)
+            const opcode = value !== undefined
+                ? value
+                : 0x00; // (defaults to NOP)
             const instruction = Z80InstructionParser.instance.parseOpcode(opcode);
             if (instruction) {
                 return MeterableRepetition.of(instruction, count);

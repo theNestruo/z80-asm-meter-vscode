@@ -36,8 +36,8 @@ export function viewStatusBarTimings(meterables: Meterable[]): string {
 export function viewTooltipTimings(meterables: Meterable[]): string {
 
 	// Reads relevant configuration
-	const configuration = workspace.getConfiguration("z80-asm-meter");
-	const platformConfiguration: string = configuration.get("platform", "z80");
+	const platformConfiguration: string =
+		workspace.getConfiguration("z80-asm-meter").get("platform", "z80");
 
 	// Header
 	let header = "|";
@@ -95,8 +95,8 @@ export function viewTimingsToCopy(meterable: Meterable): string | undefined {
 	}
 
 	// Reads relevant configuration
-	const configuration = workspace.getConfiguration("z80-asm-meter");
-	const platformConfiguration: string = configuration.get("platform", "z80");
+	const platformConfiguration: string =
+		workspace.getConfiguration("z80-asm-meter").get("platform", "z80");
 
 	// As text, with suffix
 	return text + ((platformConfiguration === "cpc") ? " NOPs" : " clock cycles");
@@ -105,8 +105,8 @@ export function viewTimingsToCopy(meterable: Meterable): string | undefined {
 export function viewTimingsToCopyAsHints(meterable: Meterable): string {
 
 	// Reads relevant configuration
-	const configuration = workspace.getConfiguration("z80-asm-meter");
-	const platformConfiguration: string = configuration.get("platform", "z80");
+	const platformConfiguration: string =
+		workspace.getConfiguration("z80-asm-meter").get("platform", "z80");
 
 	if (platformConfiguration === "msx") {
 		const msxText = formatTiming(meterable.getMsxTiming());
@@ -133,8 +133,8 @@ function buildStatusBarTiming(meterable: Meterable): string | undefined {
 	}
 
 	// Reads relevant configuration
-	const configuration = workspace.getConfiguration("z80-asm-meter");
-	const platformConfiguration: string = configuration.get("platform", "z80");
+	const platformConfiguration: string =
+		workspace.getConfiguration("z80-asm-meter").get("platform", "z80");
 
 	if (platformConfiguration !== "pc8000") {
 		return text;
@@ -147,8 +147,8 @@ function buildStatusBarTiming(meterable: Meterable): string | undefined {
 function buildBasicTiming(meterable: Meterable): string | undefined {
 
 	// Reads relevant configuration
-	const configuration = workspace.getConfiguration("z80-asm-meter");
-	const platformConfiguration: string = configuration.get("platform", "z80");
+	const platformConfiguration: string =
+		workspace.getConfiguration("z80-asm-meter").get("platform", "z80");
 
 	const timing = platformConfiguration === "msx" ? meterable.getMsxTiming()
 		: platformConfiguration === "cpc" ? meterable.getCpcTiming()

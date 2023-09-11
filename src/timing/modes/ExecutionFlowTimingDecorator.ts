@@ -1,7 +1,7 @@
+import { workspace } from "vscode";
 import Meterable from "../../model/Meterable";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
 import { flatten } from "../../utils/MeterableUtils";
-import { viewInstructions } from "../../viewer/ViewInstructionsUtils";
 import TimingDecorator from "./TimingDecorator";
 
 export default class FlowDecorator extends TimingDecorator {
@@ -13,9 +13,12 @@ export default class FlowDecorator extends TimingDecorator {
 	 */
 	static canDecorate(meterable: Meterable): boolean {
 
+		// Reads relevant configuration
+		const threshold = workspace.getConfiguration("z80-asm-meter").get("timings.threshold", 2);
+
 		// Length check
 		const meterables: Meterable[] = flatten(meterable);
-		if (meterables.length < 2) {
+		if ((threshold > 0) && (meterables.length < threshold)) {
 			return false;
 		}
 
@@ -57,8 +60,6 @@ export default class FlowDecorator extends TimingDecorator {
 	}
 
 	getDescription(): string {
-
-		const instructions = viewInstructions(this.decoratedMeterable);
 		return "Execution flow";
 	}
 

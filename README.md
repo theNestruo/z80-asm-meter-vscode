@@ -96,6 +96,8 @@ This extension contributes the following settings:
     * `smart`: Shows total timing calculation modes that are relevant to the selection.
     * `all`: Shows all the total timing calculation modes that apply to the selection.
 
+* `z80-asm-meter.timings.threshold`: Number of instructions to be selected to apply alternative total timing calculation modes. Defaults to: `2` (2 instructions).
+
 * `z80-asm-meter.timings.hints`: Enables timing hints, read from the line comment. See [timing hints](#timing-hints).
 
     * `none` (default): Disables timing hints.
@@ -249,3 +251,4 @@ Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https
 * ZX Spectrum Next [Extended Z80 Instruction Set](https://wiki.specnext.dev/Extended_Z80_instruction_set) from [Sinclair ZX Spectrum Next Official Developer Wiki](https://wiki.specnext.dev).
 * SDCC syntax from _Z80 Instruction Set_ section from [ASZ80 Assembler](https://shop-pdp.net/ashtml/asz80.htm) documentation.
 * SjASMPlus fake instructions from _Fake instructions_ section from [SjASMPlus documentation](https://z00m128.github.io/sjasmplus/documentation.html).
+* Glass Z80 assembler syntax from _Directives_ and _Release notes_ sections from [Glass Z80 assembler](http://www.grauw.nl/projects/glass/).
