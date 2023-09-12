@@ -15,7 +15,7 @@ export function viewTooptipSize(meterable: Meterable): string {
 
 	const size = viewStatusBarSize(meterable);
 	return size
-			? `|||\n|:---|:---:|\n|**Size**|${size}|\n`
+			? `|||\n|:---|:---:|\n|Size|**${size}**|\n`
 			: "";
 }
 

@@ -60,7 +60,7 @@ export default class FlowDecorator extends TimingDecorator {
 	}
 
 	getDescription(): string {
-		return "Execution flow";
+		return "Execution flow timings";
 	}
 
 	getIcon(): string {

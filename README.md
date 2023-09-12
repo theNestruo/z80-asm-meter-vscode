@@ -87,7 +87,7 @@ This extension contributes the following settings:
 
 ### Timing related settings
 
-* ~~`z80-asm-meter.timings.atExit`~~: Deprecated. Set `"z80-asm-meter.timings.mode"` to `"smart"` or `"all"` instead.
+* ~~`z80-asm-meter.timings.atExit`~~: Deprecated. Set `"z80-asm-meter.timings.mode"` to `"best"`, `"smart"`, or `"all"` instead.
 
 * `z80-asm-meter.timings.mode`: Enables alternative total timing calculation modes. See [timing modes](#timing-modes).
 

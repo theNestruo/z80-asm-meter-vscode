@@ -70,7 +70,7 @@ export default class AtExitDecorator extends TimingDecorator {
 	}
 
 	getDescription(): string {
-		return "At exit point";
+		return "Timings at exit point";
 	}
 
 	getIcon(): string {

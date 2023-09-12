@@ -40,50 +40,33 @@ export function viewTooltipTimings(meterables: Meterable[]): string {
 		workspace.getConfiguration("z80-asm-meter").get("platform", "z80");
 
 	// Header
-	let header = "|";
-	let separator = "|:---";
-	for (let i = 0, n = meterables.length; i < n; i++) {
-		const meterable = meterables[i];
-		const description = meterable instanceof TimingDecorator
-			? meterable.getDescription()
-			: "Total timing";
-		header += `|${description}`;
-		separator += "|:---:";
-	}
-
-	let text = `${header}||\n${separator}|---|\n`;
+	let text =
+		platformConfiguration === "msx" ? "||MSX (Z80+M1)|Z80||\n|:---|:---:|:---:|:---|\n"
+		: platformConfiguration === "cpc" ? "||Amstrad CPC|Z80|\n|:---|:---:|:---:|\n"
+		: platformConfiguration === "pc8000" ? "||Z80|Z80+M1||\n|:---|:---:|:---:|:---|\n"
+		: "||Z80||\n|:---|:---:|:---|\n";
 
 	// Rows
-	if (platformConfiguration === "msx") {
-		text += "|**MSX (Z80+M1)**";
-		meterables.forEach(meterable => {
-			const msxText = formatTiming(meterable.getMsxTiming());
-			text += `|${msxText}`;
-		});
-		text += "|clock cycles|\n";
-	}
-	if (platformConfiguration === "cpc") {
-		text += "|**Amstrad CPC**";
-		meterables.forEach(meterable => {
-			const cpcText = formatTiming(meterable.getCpcTiming());
-			text += `|${cpcText}`;
-		});
-		text += "|NOPs|\n";
-	}
-	text += "|**Z80**";
 	meterables.forEach(meterable => {
+		const description = meterable instanceof TimingDecorator
+			? meterable.getDescription()
+			: "Total timings";
+		text += `|${description}`;
 		const z80text = formatTiming(meterable.getZ80Timing());
-		text += `|${z80text}`;
-	});
-	text += "|clock cycles|\n";
-	if (platformConfiguration === "pc8000") {
-		text += "|**Z80+M1**";
-		meterables.forEach(meterable => {
+		if (platformConfiguration === "msx") {
+			const msxText = formatTiming(meterable.getMsxTiming());
+			text += `|**${msxText}**|${z80text}|clock cycles|\n`;
+		} else if (platformConfiguration === "cpc") {
+			const cpcText = formatTiming(meterable.getCpcTiming());
+			text += `|**${cpcText} NOPs**|${z80text} clock cycles|\n`;
+		} else if (platformConfiguration === "pc8000") {
 			const m1Text = formatTiming(meterable.getMsxTiming());
-			text += `|${m1Text}`;
-		});
-		text += "|clock cycles|\n";
-	}
+			text += `|**${z80text}**|${m1Text}|clock cycles|\n`;
+		} else {
+			text += `|**${z80text}**|clock cycles|\n`;
+		}
+	});
+
 	return text;
 }
 
