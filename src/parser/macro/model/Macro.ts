@@ -1,6 +1,6 @@
 import MeterableCollection from "../../../model/MeterableCollection";
 import { parseTimingsLenient, parteIntLenient, undefinedIfNaN } from "../../../utils/NumberUtils";
-import { extractRawInstruction } from "../../../utils/SourceCodeUtils";
+import { extractRawInstruction } from "../../utils/SourceCodeUtils";
 import Z80InstructionParser from "../../z80/Z80InstructionParser";
 import MacroDefinition from "./MacroDefinition";
 

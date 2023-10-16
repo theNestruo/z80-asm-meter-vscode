@@ -1,4 +1,4 @@
-import { normalizeAndSplitQuotesAware } from "./SourceCodeUtils";
+import { normalizeAndSplitQuotesAware } from "../parser/utils/SourceCodeUtils";
 
 export function extractMnemonicOf(s: string): string {
 

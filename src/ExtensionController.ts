@@ -4,7 +4,7 @@ import MacroParser from "./parser/macro/MacroParser";
 import MainParser from "./parser/MainParser";
 import AtExitDecorator from "./timing/modes/AtExitTimingDecorator";
 import FlowDecorator from "./timing/modes/ExecutionFlowTimingDecorator";
-import { hashCode } from "./utils/SourceCodeUtils";
+import { hashCode } from "./utils/TextUtils";
 import { viewBytes, viewStatusBarSize, viewTooptipSize } from "./viewer/ViewBytesUtils";
 import { viewInstructions } from "./viewer/ViewInstructionsUtils";
 import { viewStatusBarTimings, viewTimingsToCopy, viewTimingsToCopyAsHints, viewTooltipTimings } from "./viewer/ViewTimingsUtils";

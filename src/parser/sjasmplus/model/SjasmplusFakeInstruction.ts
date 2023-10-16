@@ -1,6 +1,6 @@
 import MeterableCollection from "../../../model/MeterableCollection";
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../../utils/AssemblyUtils";
-import { extractRawInstruction } from "../../../utils/SourceCodeUtils";
+import { extractRawInstruction } from "../../utils/SourceCodeUtils";
 import Z80InstructionParser from "../../z80/Z80InstructionParser";
 
 /**
