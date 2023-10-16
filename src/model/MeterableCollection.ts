@@ -1,10 +1,9 @@
-import AggregatedMeterable from "./AggregatedMeterable";
-import Meterable from "./Meterable";
+import { AbstractAggregatedMeterable, Meterable } from "./Meterable";
 
 /**
  * A meterable collection of Meterables
  */
-export default class MeterableCollection extends AggregatedMeterable {
+export class MeterableCollection extends AbstractAggregatedMeterable {
 
 	// The collection of meterable instances
 	protected meterables: Meterable[] = [];
@@ -41,16 +40,16 @@ export default class MeterableCollection extends AggregatedMeterable {
 		return true;
 	}
 
-	getInstruction(): string {
+	get instruction(): string {
 		return "";
 	}
 
-	getZ80Timing(): number[] {
+	get z80Timing(): number[] {
 
 		if (!this.cachedZ80Timing) {
 			var totalZ80Timing: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
-				const z80Timing = meterable.getZ80Timing();
+				const z80Timing = meterable.z80Timing;
 				totalZ80Timing[0] += z80Timing[0];
 				totalZ80Timing[1] += z80Timing[1];
 			});
@@ -59,12 +58,12 @@ export default class MeterableCollection extends AggregatedMeterable {
 		return this.cachedZ80Timing;
 	}
 
-	getMsxTiming(): number[] {
+	get msxTiming(): number[] {
 
 		if (!this.cachedMsxTiming) {
 			var totalMsxTiming: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
-				const msxTiming = meterable.getMsxTiming();
+				const msxTiming = meterable.msxTiming;
 				totalMsxTiming[0] += msxTiming[0];
 				totalMsxTiming[1] += msxTiming[1];
 			});
@@ -73,12 +72,12 @@ export default class MeterableCollection extends AggregatedMeterable {
 		return this.cachedMsxTiming;
 	}
 
-	getCpcTiming(): number[] {
+	get cpcTiming(): number[] {
 
 		if (!this.cachedCpcTiming) {
 			var totalCpcTiming: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
-				const cpcTiming = meterable.getCpcTiming();
+				const cpcTiming = meterable.cpcTiming;
 				totalCpcTiming[0] += cpcTiming[0];
 				totalCpcTiming[1] += cpcTiming[1];
 			});
@@ -87,43 +86,43 @@ export default class MeterableCollection extends AggregatedMeterable {
 		return this.cachedCpcTiming;
 	}
 
-	getBytes(): string[] {
+	get bytes(): string[] {
 
 		if (!this.cachedBytes) {
 			var bytes: string[] = [];
-			this.meterables.forEach(meterable => bytes.push(...meterable.getBytes()));
+			this.meterables.forEach(meterable => bytes.push(...meterable.bytes));
 			this.cachedBytes = bytes;
 		}
 		return this.cachedBytes;
 	}
 
-	getSize(): number {
+	get size(): number {
 
 		if (!this.cachedSize) {
 			var size: number = 0;
-			this.meterables.forEach(meterable => size += meterable.getSize());
+			this.meterables.forEach(meterable => size += meterable.size);
 			this.cachedSize = size;
 		}
 		return this.cachedSize;
 	}
 
-	getFlattenedMeterables(): Meterable[] {
+	flatten(): Meterable[] {
 
 		if (!this.cachedMeterables?.length) {
-			var flattenedMeterables: Meterable[] = [];
+			var meterables: Meterable[] = [];
 			this.meterables.forEach(meterable => {
-				if (meterable.isComposed()) {
-					flattenedMeterables.push(...meterable.getFlattenedMeterables());
+				if (meterable.composed) {
+					meterables.push(...meterable.flatten());
 				} else {
-					flattenedMeterables.push(meterable);
+					meterables.push(meterable);
 				}
 			});
-			this.cachedMeterables = flattenedMeterables;
+			this.cachedMeterables = meterables;
 		}
 		return this.cachedMeterables;
 	}
 
 	isEmpty(): boolean {
-		return !this.getFlattenedMeterables().length;
+		return !this.flatten().length;
 	}
 }

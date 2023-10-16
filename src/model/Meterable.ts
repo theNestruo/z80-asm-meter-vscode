@@ -1,46 +1,73 @@
 /**
  * Anything that can be metered: Z80 Instructions, ASM directives, sjasmplus fake instructions...
  */
-export default interface Meterable {
+export interface Meterable {
 
     /**
      * @returns the normalized Z80 instruction, ASM directive, sjasmplus fake instruction...
      */
-    getInstruction(): string;
+    get instruction(): string;
 
     /**
      * @returns the Z80 timing, in time (T) cycles
      */
-    getZ80Timing(): number[];
+    get z80Timing(): number[];
 
     /**
      * @returns the Z80 timing with the M1 wait cycles required by the MSX standard
      */
-    getMsxTiming(): number[];
+    get msxTiming(): number[];
 
     /**
      * @returns the CPC timing, in NOPS
      */
-    getCpcTiming(): number[];
+    get cpcTiming(): number[];
 
     /**
      * @returns the bytes, logically grouped
      */
-    getBytes(): string[];
+    get bytes(): string[];
 
     /**
      * @returns the size in bytes
      */
-    getSize(): number;
+    get size(): number;
+
+    /**
+     * @returns the flattened array of the finer-grained meterables
+	 * that compose this meterable (when the meterable is composed);
+	 * an array with this meterable otherwise
+     */
+    flatten(): Meterable[];
 
     /**
      * @returns if the meterable is composed of finer-grained meterables
      */
-    isComposed(): boolean;
+    get composed(): boolean;
+}
 
-    /**
-     * @returns the flattened array of the finer-grained meterables that compose this meterable
-     * (when the meterable is composed); empty array otherwise
-     */
-    getFlattenedMeterables(): Meterable[];
+/**
+ * Anything that can be metered by aggregation of meterables
+ */
+export abstract class AbstractAggregatedMeterable implements Meterable {
+
+	abstract get instruction(): string;
+
+	abstract get z80Timing(): number[];
+
+	abstract get msxTiming(): number[];
+
+	abstract get cpcTiming(): number[];
+
+	abstract get bytes(): string[];
+
+	abstract get size(): number;
+
+	/**
+	 * @returns the flattened array of the finer-grained meterables that compose this meterable
+	 */
+	abstract flatten(): Meterable[];
+
+	/** true; this meterable is composed */
+	readonly composed = true;
 }

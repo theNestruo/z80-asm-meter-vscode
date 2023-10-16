@@ -1,35 +1,58 @@
-export function parteIntLenient(o: unknown): number {
+export class NumericExpressionParser {
 
-    return (typeof o === "number") ? o
-        : (typeof o === "string") ? parseInt(o, 10)
-            : NaN;
-}
+    static parse(s: string, includeNegatives: boolean = true): number | undefined {
 
-export function undefinedIfNaN(n: number): number | undefined {
+        for (const numericParser of NumericExpressionParser.numericParsers) {
+            const value = numericParser.parse(s);
+            if ((value !== undefined)
+                && (!isNaN(value))
+                && ((value > 0) || includeNegatives)) {
+                return value;
+            }
+        }
 
-    return isNaN(n) ? undefined : n;
-}
+        return undefined;
+    }
 
-export function parseTimingsLenient(o: unknown): number[] | undefined {
+    // Instances
+    private static numericParsers: NumericExpressionParser[] = [
+        new NumericExpressionParser(/^0x([0-9a-f]+)$/i, 16),
+        new NumericExpressionParser(/^[#$&]([0-9a-f]+)$/i, 16),
+        new NumericExpressionParser(/^([0-9a-f]+)h$/i, 16),
+        new NumericExpressionParser(/^[0@]([0-7]+)$/, 8),
+        new NumericExpressionParser(/^([0-7]+)o$/i, 8),
+        new NumericExpressionParser(/^%([0-1]+)$/i, 2),
+        new NumericExpressionParser(/^([0-1]+)b$/i, 2),
+        new NumericExpressionParser(/^(\d+)$/, 10)
+    ];
 
-    return (typeof o === "number") ? [o, o]
-        : (typeof o === "string") ? parseTimings(o)
+    private regex: RegExp;
+    private radix: number;
+
+    private constructor(regex: RegExp, radix: number) {
+        this.regex = regex;
+        this.radix = radix;
+    }
+
+    private parse(s: string): number | undefined {
+        const negative = s.startsWith("-");
+        const us = negative ? s.substring(1) : s;
+        const matches = this.regex.exec(us);
+        return matches && matches.length >= 1
+            ? (negative ? -1 : 1) * parseInt(matches[1], this.radix)
             : undefined;
+    }
 }
 
-export function parseTimings(s: string): number[] {
+export function parteIntLenient(o: unknown): number | undefined {
 
-    const ss = s.split("/");
-    const t0 = parseInt(ss[0], 10);
-    return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1], 10)];
-}
+    if (typeof o === "number") {
+        return isNaN(o) ? undefined : o;
+    }
 
-export function formatTiming(t: number[]): string {
-    return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
-}
+    if (typeof o === "string") {
+        return NumericExpressionParser.parse(o);
+    }
 
-export function formatHexadecimalByte(n: number): string {
-
-    const s = "00" + ((n & 0xff).toString(16).toUpperCase());
-    return s.substring(s.length - 2);
+    return undefined;
 }

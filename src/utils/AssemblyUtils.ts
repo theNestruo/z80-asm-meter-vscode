@@ -1,4 +1,4 @@
-import { normalizeAndSplitQuotesAware } from "../parser/utils/SourceCodeUtils";
+import { extractSourceCode } from "../model/SourceCode";
 
 export function extractMnemonicOf(s: string): string {
 
@@ -17,7 +17,8 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
     const i = s.indexOf(" ");
     return i === -1
         ? []
-        : normalizeAndSplitQuotesAware(s.substring(i + 1), ",").getPartsAsString();
+        : extractSourceCode(s.substring(i + 1), ",")
+            .map(fragment => fragment.instruction);
 }
 
 /**

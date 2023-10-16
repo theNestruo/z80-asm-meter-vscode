@@ -1,82 +1,104 @@
-import { workspace } from 'vscode';
-import Meterable from '../model/Meterable';
-import MeterableCollection from '../model/MeterableCollection';
-import MeterableHint from '../timing/hints/model/MeterableHint';
-import MeterableRepetition from '../model/MeterableRepetition';
-import SourceCodePart from './model/SourceCodePart';
-import TimingHintsDecorator from '../timing/hints/TimingHintDecorator';
-import { normalizeAndSplitQuotesAware } from './utils/SourceCodeUtils';
-import NumericExpressionParser from "./NumericExpressionParser";
-import AssemblyDirectiveParser from './directive/AssemblyDirectiveParser';
-import GlassReptParser from './glass/GlassReptParser';
-import MacroParser from './macro/MacroParser';
-import SjasmplusDupParser from './sjasmplus/SjasmplusDupParser';
-import SjasmplusFakeInstructionParser from './sjasmplus/SjasmplusFakeInstructionParser';
-import SjasmplusRegisterListInstructionParser from './sjasmplus/SjasmplusRegisterListInstructionParser';
-import Z80InstructionParser from './z80/Z80InstructionParser';
-import GlassFakeInstructionParser from './glass/GlassFakeInstructionParser';
+import * as vscode from 'vscode';
+import { config } from '../config';
+import { Meterable } from '../model/Meterable';
+import { MeterableCollection } from '../model/MeterableCollection';
+import { RepeatedMeterable } from '../model/RepeatedMeterable';
+import { SourceCode, extractSourceCode } from '../model/SourceCode';
+import { TimingHintedMeterable } from '../model/TimingHintedMeterable';
+import { TimingHints } from '../model/TimingHints';
+import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
+import { AssemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
+import { DefaultTimingHintsParser } from './impl/DefaultTimingHintsParser';
+import { GlassFakeInstructionParser, GlassReptRepetitionParser } from './impl/GlassParser';
+import { MacroParser } from './impl/MacroParser';
+import { SjasmplusDupRepetitionParser, SjasmplusFakeInstructionParser, SjasmplusRegisterListInstructionParser, SjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
+import { Z80InstructionParser } from './impl/Z80InstructionParser';
 
-export default class MainParser {
+export class MainParser {
 
-    // Configuration
-    private instructionSets: string[];
-    private syntaxConfiguration: string;
-    private labelRegExp: RegExp;
-    private lineSeparator: string | undefined;
-    private repeatRegExp: RegExp | undefined;
-    private timingsHintsConfiguration: string;
+    private static readonly allInstructionParsers = [
+        Z80InstructionParser.instance,
+        SjasmplusFakeInstructionParser.instance,
+        SjasmplusRegisterListInstructionParser.instance,
+        GlassFakeInstructionParser.instance,
+        MacroParser.instance,
+        AssemblyDirectiveParser.instance
+    ];
 
-    constructor() {
+    private static readonly noMacroInstructionParsers = [
+        Z80InstructionParser.instance,
+        SjasmplusFakeInstructionParser.instance,
+        SjasmplusRegisterListInstructionParser.instance,
+        GlassFakeInstructionParser.instance,
+        AssemblyDirectiveParser.instance
+    ];
 
-        // Saves configuration
-        const configuration = workspace.getConfiguration("z80-asm-meter");
+    private static readonly allRepetitionParsers = [
+        SjasmplusDupRepetitionParser.instance,
+        SjasmplusReptRepetitionParser.instance,
+        GlassReptRepetitionParser.instance
+    ];
 
-        const platformConfiguration: string = configuration.get("platform", "z80");
-        this.instructionSets = platformConfiguration === "z80n"
-            ? ["S", "N"]
-            : ["S"];
+    private static readonly allTimingHintsParsers = [
+        DefaultTimingHintsParser.instance
+    ];
 
-        this.syntaxConfiguration = configuration.get("syntax",
-            configuration.get("sjasmplus", false) ? "sjasmplus" : "default");
+    // Singleton
+    static instance = new MainParser(
+        this.allInstructionParsers,
+        this.allRepetitionParsers,
+        this.allTimingHintsParsers);
 
-        const syntaxLabelConfiguration: string = configuration.get("syntax.label", "default");
-        this.labelRegExp = syntaxLabelConfiguration === "colonOptional"
-            ? /(^[^\s:]+([\s:]|$))/
-            : /(^\s*[^\s:]+:)/;
+    // Singleton
+    static noMacroInstance = new MainParser(
+        this.noMacroInstructionParsers,
+        this.allRepetitionParsers,
+        this.allTimingHintsParsers);
 
-        const syntaxLineSeparatorConfiguration: string = configuration.get("syntax.lineSeparator", "none");
-        this.lineSeparator =
-            syntaxLineSeparatorConfiguration === "colon" ? ":"
-                : syntaxLineSeparatorConfiguration === "pipe" ? "|"
-                    : undefined;
+    // Available parsers for this instance
+    private readonly instructionParsers: InstructionParser[];
+    private readonly repetitionParsers: RepetitionParser[];
+    private readonly timingHintsParsers: TimingHintsParser[];
 
-        const syntaxRepeatConfiguration: string = configuration.get("syntax.repeat", "none");
-        this.repeatRegExp =
-            syntaxRepeatConfiguration === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-                : syntaxRepeatConfiguration === "dot" ? /^(?:\.(\S+)\s)(.+)$/
-                    : undefined;
+    // Enabled parsers for this instance
+    private enabledInstructionParsers: InstructionParser[] = [];
+    private enabledRepetitionParsers: RepetitionParser[] = [];
+    private enabledTimingHintsParsers: TimingHintsParser[] = [];
 
-        this.timingsHintsConfiguration = configuration.get("timings.hints", "none");
+    private constructor(
+        instructionParsers: InstructionParser[],
+        repetitionParsers: RepetitionParser[],
+        timingHintsParsers: TimingHintsParser[]) {
+
+        this.instructionParsers = instructionParsers;
+        this.repetitionParsers = repetitionParsers;
+        this.timingHintsParsers = timingHintsParsers;
+
+        this.initializeParsers();
     }
 
-    parse(rawSourceCode: string): MeterableCollection {
+    onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
-        const emptyMeterablesCollection = new MeterableCollection();
+        // Re-initializes parsers
+        this.initializeParsers();
+    }
 
-        // (sanity checks)
-        if (!rawSourceCode) {
-            return emptyMeterablesCollection;
-        }
-        const rawSourceCodeLines = rawSourceCode.split(/[\r\n]+/);
-        if (rawSourceCodeLines.length === 0) {
-            return emptyMeterablesCollection;
-        }
-        if (rawSourceCodeLines[rawSourceCodeLines.length - 1].trim() === "") {
-            // (removes possible spurious empty line at the end of the selection)
-            rawSourceCodeLines.pop();
-            if (rawSourceCodeLines.length === 0) {
-                return emptyMeterablesCollection;
-            }
+    private initializeParsers() {
+
+        // Enables/disables parsers
+        this.enabledInstructionParsers = this.instructionParsers
+            .filter(instructionParser => instructionParser.isEnabled);
+        this.enabledRepetitionParsers = this.repetitionParsers
+            .filter(repetitionParser => repetitionParser.isEnabled);
+        this.enabledTimingHintsParsers = this.timingHintsParsers
+            .filter(timingHintsParser => timingHintsParser.isEnabled);
+    }
+
+    parse(s: string): MeterableCollection | undefined {
+
+        const sourceCodes = this.extractSourceCode(s);
+        if (!sourceCodes || !sourceCodes.length) {
+            return undefined;
         }
 
         // Actual parsing
@@ -87,154 +109,126 @@ export default class MainParser {
         const meterablesStack: MeterableCollection[] = [];
         const repetitionsStack: number[] = [];
 
-        // Extracts the source code parts for every line
-        rawSourceCodeLines.forEach(rawSourceCodeLine => {
-            const sourceCodeParts =
-                this.extractSourceCodePartsFrom(rawSourceCodeLine);
+        // Parses the source code parts
+        sourceCodes.forEach(sourceCode => {
 
-            // Parses the source code parts
-            sourceCodeParts.forEach(sourceCodePart => {
+            // Handles repetition start
+            const newRepetitions = this.parseRepetition(sourceCode.instruction);
+            if (newRepetitions !== undefined) {
+                const previousMeterables = meterables;
+                meterablesStack.push(meterables);
+                meterables = new MeterableCollection();
+                previousMeterables.add(RepeatedMeterable.of(meterables, newRepetitions));
+                repetitionsStack.push(repetitions);
+                repetitions *= newRepetitions;
+                return;
+            }
 
-                const rawPart = sourceCodePart.getPart();
+            // Handles repetition end
+            if (this.parseRepetitionEnd(sourceCode.instruction)) {
+                meterables = meterablesStack.pop() || ret;
+                repetitions = repetitionsStack.pop() || 1;
+                return;
+            }
 
-                const newRepetitions =
-                    this.syntaxConfiguration === "sjasmplus" ? SjasmplusDupParser.parseDupOrRept(rawPart)
-                        : this.syntaxConfiguration === "glass" ? GlassReptParser.parseRept(rawPart)
-                            : undefined;
-                if (newRepetitions !== undefined) {
-                    const previousMeterables = meterables;
-                    meterablesStack.push(meterables);
-                    meterables = new MeterableCollection();
-                    previousMeterables.add(MeterableRepetition.of(meterables, newRepetitions));
-                    repetitionsStack.push(repetitions);
-                    repetitions *= newRepetitions;
-                    return;
-                }
+            // Parses the actual meterable, and optional timing hints and repetitions
+            const meterable = TimingHintedMeterable.of(
+                this.parseInstruction(sourceCode), this.parseTimingHints(sourceCode));
+            if (!meterable) {
+                return;
+            }
 
-                const endRepetitions =
-                    this.syntaxConfiguration === "sjasmplus" ? SjasmplusDupParser.parseEdupOrEndr(rawPart)
-                        : this.syntaxConfiguration === "glass" ? GlassReptParser.parseEndm(rawPart)
-                            : false;
-                if (endRepetitions) {
-                    meterables = meterablesStack.pop() || ret;
-                    repetitions = repetitionsStack.pop() || 1;
-                    return;
-                }
-
-                meterables.add(this.parseSourceCodePart(sourceCodePart));
-            });
+            meterables.add(RepeatedMeterable.of(meterable, sourceCode.repetitions));
         });
 
-        return ret;
+        return ret.isEmpty() ? undefined : ret;
     }
 
-    private extractSourceCodePartsFrom(rawSourceCodeLine: string): SourceCodePart[] {
+    private extractSourceCode(s: string): SourceCode[] | undefined {
 
-        // Removes surrounding label and whitespace
-        const cleanRawSourceCodeLine = rawSourceCodeLine.replace(this.labelRegExp, "").trim();
-
-        // Splits the line and extracts trailing comment
-        return normalizeAndSplitQuotesAware(cleanRawSourceCodeLine, this.lineSeparator).getParts();
-    }
-
-    private parseSourceCodePart(sourceCodePart: SourceCodePart): Meterable | undefined {
-
-        const rawPart = sourceCodePart.getPart();
-
-        // Tries to parse timing hints from the comment
-        const isTimingsHintsSubroutines = this.timingsHintsConfiguration === "subroutines";
-        const isTimingsHintsAny = this.timingsHintsConfiguration === "any";
-        const timingHints = isTimingsHintsSubroutines || isTimingsHintsAny
-            ? MeterableHint.of(sourceCodePart.getComment())
-            : undefined;
-
-        // Actually parses the source code part
-        var meterable = this.parseRawInstruction(this.extractRawInstruction(rawPart));
-        if (!meterable) {
-            // No source code; returns timing hints (if any)
-            return isTimingsHintsAny ? timingHints : undefined;
+        // (sanity checks)
+        if (!s) {
+            return undefined;
         }
-
-        // Decorates source code with the optional timing hints (if any)
-        if (timingHints) {
-            meterable = TimingHintsDecorator.of(meterable, timingHints, isTimingsHintsSubroutines);
+        const rawLines = s.split(/[\r\n]+/);
+        if (!rawLines.length) {
+            return undefined;
         }
-
-        // Parses and applies the optional repeat pseudo-op
-        return MeterableRepetition.of(meterable, this.extractRepetitions(rawPart));
-    }
-
-    private extractRawInstruction(s: string): string {
-
-        // Determines syntax
-        if (!this.repeatRegExp) {
-            return s;
-        }
-
-        // Tries to parse beyond the repeat pseudo-op
-        const matches = this.repeatRegExp.exec(s);
-        const hasRepeatInstruction = matches && matches.length >= 2 && matches[2];
-        return hasRepeatInstruction ? matches[2] : s;
-    }
-
-    private extractRepetitions(s: string): number {
-
-        // Determines syntax
-        if (!this.repeatRegExp) {
-            return 1;
-        }
-
-        // Tries to parse repeat pseudo-op
-        const matches = this.repeatRegExp.exec(s);
-        const hasrepetitions = matches && matches.length >= 1 && matches[1];
-        if (!hasrepetitions) {
-            return 1;
-        }
-        const repetitionsCandidate = NumericExpressionParser.parse(matches[1]);
-        return repetitionsCandidate && repetitionsCandidate > 0 ? repetitionsCandidate : 1;
-    }
-
-    private parseRawInstruction(s: string): Meterable | undefined {
-
-        // Tries to parse Z80 instructions
-        const z80Instruction = Z80InstructionParser.instance.parseInstruction(s, this.instructionSets);
-        if (z80Instruction) {
-            return z80Instruction;
-        }
-
-        // Tries to parse sjasmplus alternative syntax and fake instructions
-        if (this.syntaxConfiguration === "sjasmplus") {
-            const sjasmplusFakeInstruction =
-                SjasmplusFakeInstructionParser.instance.parse(s, this.instructionSets);
-            if (sjasmplusFakeInstruction) {
-                return sjasmplusFakeInstruction;
-            }
-            const sjasmplusRegisterListInstruction =
-                SjasmplusRegisterListInstructionParser.parse(s, this.instructionSets);
-            if (sjasmplusRegisterListInstruction) {
-                return sjasmplusRegisterListInstruction;
-            }
-        } else if (this.syntaxConfiguration === "glass") {
-            const glassFakeInstruction =
-                GlassFakeInstructionParser.parse(s, this.instructionSets);
-            if (glassFakeInstruction) {
-                return glassFakeInstruction;
+        if (rawLines[rawLines.length - 1].trim() === "") {
+            // (removes possible spurious empty line at the end of the selection)
+            rawLines.pop();
+            if (!rawLines.length) {
+                return undefined;
             }
         }
 
-        // Tries to parse user-defined macro
-        const macro = MacroParser.instance.parse(s, this.instructionSets);
-        if (macro) {
-            return macro;
+        // Splits the lines and extracts repetition counter and trailing comments
+        var sourceCode: SourceCode[] = [];
+        rawLines.forEach(rawLine => {
+            sourceCode.push(...extractSourceCode(rawLine,
+                config.syntax.lineSeparator,
+                config.syntax.labelRegExp,
+                config.syntax.repeatRegExp));
+        });
+        return (!sourceCode.length) ? undefined : sourceCode;
+    }
+
+    private parseInstruction(s: SourceCode): Meterable | undefined {
+
+        // Tries to parse as an instruction
+        for (let i = 0, n = this.enabledInstructionParsers.length; i < n; i++) {
+            const parser = this.enabledInstructionParsers[i];
+            const instruction = parser.parse(s);
+            if (instruction) {
+                return instruction;
+            }
         }
 
-        // Tries to parse assembly directives
-        const assemblyDirective = AssemblyDirectiveParser.parse(s);
-        if (assemblyDirective) {
-            return assemblyDirective;
+        // (not an instruction)
+        return undefined;
+    }
+
+    private parseRepetition(s: string): number | undefined {
+
+        // Tries to parse as a repetition instruction
+        for (let i = 0, n = this.enabledRepetitionParsers.length; i < n; i++) {
+            const repetitionParser = this.enabledRepetitionParsers[i];
+            const count = repetitionParser.parse(s);
+            if (count !== undefined) {
+                return count;
+            }
         }
 
-        // (could not parse raw instruction)
+        // (not a repetition instruction)
+        return undefined;
+    }
+
+    private parseRepetitionEnd(s: string): boolean {
+
+        // Tries to parse as a repetition end instruction
+        for (let i = 0, n = this.enabledRepetitionParsers.length; i < n; i++) {
+            const repetitionParser = this.enabledRepetitionParsers[i];
+            if (repetitionParser.parseEnd(s)) {
+                return true;
+            }
+        }
+
+        // (not a repetition end instruction)
+        return false;
+    }
+
+    private parseTimingHints(s: SourceCode): TimingHints | undefined {
+
+        // Tries to parse timing hints
+        for (let i = 0, n = this.enabledTimingHintsParsers.length; i < n; i++) {
+            const parser = this.enabledTimingHintsParsers[i];
+            const timingHints = parser.parse(s);
+            if (timingHints) {
+                return timingHints;
+            }
+        }
+
+        // (no timing hints)
         return undefined;
     }
 }
