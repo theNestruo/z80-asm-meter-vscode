@@ -1,12 +1,18 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"displayName": "Z80 Assembly meter",
-	"icon": "doc/images/icon.128.png",
-	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"version": "4.3.0",
+	"version": "5.0.0",
+	"preview": true,
 	"engines": {
 		"vscode": "^1.81.0"
+	},
+
+	"displayName": "Z80 Assembly meter",
+	"description": "Z80 Assembly clock cycles and bytecode size meter",
+	"icon": "doc/images/icon.128.png",
+	"galleryBanner": {
+		"color": "#191919",
+		"theme": "dark"
 	},
 	"categories": [
 		"Programming Languages"
@@ -25,6 +31,8 @@
 		"ZX Spectrum",
 		"ZX Spectrum Next"
 	],
+
+	"license": "LGPL-3.0",
 	"homepage": "https://github.com/theNestruo/z80-asm-meter-vscode",
 	"bugs": {
 		"url": "https://github.com/theNestruo/z80-asm-meter-vscode/issues"
@@ -33,7 +41,12 @@
 		"type": "git",
 		"url": "https://github.com/theNestruo/z80-asm-meter-vscode.git"
 	},
-	"license": "LGPL-3.0",
+	"author": {
+		"email": "theNestruo@gmail.com",
+		"name": "Néstor Sancho",
+		"url": "https://thenestruo.github.io/"
+	},
+
 	"activationEvents": [
 		"onLanguage:asm-collection",
 		"onLanguage:pasmo",
@@ -43,7 +56,6 @@
 		"onLanguage:zeus-asm",
 		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
 	],
-	"main": "./dist/bundle.js",
 	"contributes": {
 		"languages": [
 			{
@@ -292,6 +304,8 @@
 			}
 		}
 	},
+
+	"main": "./out/extension.js",
 	"scripts": {
 		"vscode:prepublish": "npm run esbuild-base -- --minify",
 		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/bundle.js --external:vscode --format=cjs --platform=node",
