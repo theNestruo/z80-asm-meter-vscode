@@ -89,7 +89,7 @@ class RepeatedMeterable extends AbstractAggregatedMeterable {
 	get bytes(): string[] {
 
 		if (!this.cachedBytes) {
-			var bytes: string[] = [];
+			let bytes: string[] = [];
 			for (let i = 0; i < this.repetitions; i++) {
 				bytes.push(...this.meterable.bytes);
 			}

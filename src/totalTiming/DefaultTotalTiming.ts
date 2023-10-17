@@ -3,16 +3,16 @@ import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
 
 class DefaultTotalTimingsMeterable extends TotalTimingMeterable {
 
-	constructor(meterable: Meterable) {
+	private isAtLeastTwoInstructions: boolean;
+
+	constructor(meterable: Meterable, isAtLeastTwoInstructions: boolean) {
 		super(meterable);
+
+		this.isAtLeastTwoInstructions = isAtLeastTwoInstructions;
 	}
 
 	get name(): string {
-		return "Total timing";
-	}
-
-	get description(): string {
-		return "Total timing";
+		return this.isAtLeastTwoInstructions ? "Aggregated timing" : "Timing";
 	}
 
 	get statusBarIcon(): string {
@@ -28,7 +28,10 @@ class DefaultTotalTiming implements TotalTiming {
 
 	applyTo(meterable: Meterable): TotalTimingMeterable {
 
-		return new DefaultTotalTimingsMeterable(meterable);
+		// (for performance reasons)
+		const meterables = meterable.flatten();
+
+		return new DefaultTotalTimingsMeterable(meterable, meterables.length >= 2);
 	}
 }
 

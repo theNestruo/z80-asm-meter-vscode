@@ -22,8 +22,14 @@ function readIgnoreDefault<T>(section: string): T | undefined {
 function readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
 
 	const config = vscode.workspace.getConfiguration("z80-asm-meter");
+	const info = config.inspect(section);
+	if ((info?.defaultValue !== undefined)
+		&& (info?.defaultValue !== "default")) {
+		const a = actualDefaultValue;
+	}
+
 	if (actualDefaultValue === undefined) {
-		return <T>config.get(section);
+		return read(section);
 	}
 	const value = <T>readIgnoreDefault(section);
 	return (value !== undefined) ? value : actualDefaultValue;
@@ -169,30 +175,19 @@ class ParserConfiguration {
 
 class TimingConfiguration {
 
-	readonly hints = new TimingHintsConfiguration();
+	get hints(): "subroutines" | "any" | "none" {
+
+		return read("timing.hints");
+	}
+
+	get hintsEnabled(): boolean {
+
+		return ["subroutines", "any"].indexOf(this.hints) !== -1;
+	}
 
 	readonly executionFlow = new ExecutionFlowTotalTimingConfiguration();
 
 	readonly atExit = new AtExitTotalTimingConfiguration();
-}
-
-class TimingHintsConfiguration {
-
-	get enabled(): boolean {
-
-		const deprecatedValue = <string>readIgnoreDefault("timing.hints");
-		return readWithDefaultValue("timing.hints.enabled",
-			(deprecatedValue !== undefined) ? (deprecatedValue !== "none") // (deprecated)
-			: undefined);
-	}
-
-	get lenient(): boolean {
-
-		const deprecatedValue = <string>readIgnoreDefault("timing.hints");
-		return readWithDefaultValue("timing.hints.enabled",
-			(deprecatedValue === "any") ? "lenient" // (deprecated)
-			: undefined) === "lenient";
-	}
 }
 
 class ExecutionFlowTotalTimingConfiguration {
@@ -262,25 +257,30 @@ class StatusBarConfiguration {
 			readIgnoreDefault("viewBytes")); // (deprecated)
 	}
 
+	get copyTimingsAsHints(): boolean {
+
+		return read("statusBar.copyTimingsAsHints");
+	}
+
 	get compactSize(): boolean {
 
 		return read("statusBar.compactSize");
 	}
 
-	get totalTimings(): boolean | "best" | "combine" | "combineSmart" | "smart" {
+	get totalTimings(): "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default" {
 
 		const deprecatedValue = readIgnoreDefault("timing.mode");
 		return readWithDefaultValue("statusBar.totalTimings",
-			deprecatedValue === "none" ? false // (deprecated)
+			deprecatedValue === "none" ? "default" // (deprecated)
 			: deprecatedValue === "best" ? "best" // (deprecated)
 			: deprecatedValue === "smart" ? "combineSmart" // (deprecated)
-			: deprecatedValue === "all" ? "combine" // (deprecated)
+			: deprecatedValue === "all" ? "combineAll" // (deprecated)
 			: undefined);
 	}
 
 	get totalTimingsCombined() {
 
-		return this.totalTimings === "combine"
+		return this.totalTimings === "combineAll"
 			|| this.totalTimings === "combineSmart";
 	}
 

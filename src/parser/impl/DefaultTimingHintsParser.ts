@@ -7,17 +7,9 @@ import { TimingHintsParser } from "../Parsers";
 class DefaultTimingHintsParser implements TimingHintsParser {
 
 	get isEnabled(): boolean {
-		return config.timing.hints.enabled;
+		return config.timing.hintsEnabled;
 	}
 
-	/**
-	 * FIXME DESCRIPTION
-	 * Conditionaly builds an instance of a repetition of Meterables
-	 * @param meterable The meterable instance
-	 * @param rawComment The line comment; can contain timing hints
-	 * @return The meterable instance, or a hinted meterable instance,
-	 * depending on the contents of the line comment
-	 */
 	parse(s: SourceCode): TimingHints | undefined {
 
 		const rawComment = s.lineComment;
@@ -34,40 +26,38 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		}
 
 		// Parses timing hint comment
-		var z80TimingHint: number[] | undefined;
-		var msxTimingHint: number[] | undefined;
-		var cpcTimingHint: number[] | undefined;
-		var timingHint: number[] | undefined;
+		const timingHints = new Map<string, number[]>;
 		for (const match of matches) {
 			const parsedTimingHint = parseTimingLenient(match[2]);
-			if (!parsedTimingHint) {
-				continue;
-			}
-
-			switch (match[1]) {
-				case "z80":
-					z80TimingHint = parsedTimingHint;
-					break;
-				case "msx":
-				case "m1":
-					msxTimingHint = parsedTimingHint;
-					break;
-				case "cpc":
-					cpcTimingHint = parsedTimingHint;
-					break;
-				case "t":
-				case "ts":
-					timingHint = parsedTimingHint;
-					break;
+			if (parsedTimingHint) {
+				timingHints.set(match[1], parsedTimingHint);
 			}
 		}
 
 		// Validates timing hint comment
-		if (!z80TimingHint && !msxTimingHint && !cpcTimingHint && !timingHint) {
+		if (!timingHints.size) {
 			return undefined;
 		}
 
-		return new TimingHints(z80TimingHint, msxTimingHint, cpcTimingHint, timingHint);
+		const z80TimingHint =
+			timingHints.get("z80")
+			|| timingHints.get("ts")
+			|| timingHints.get("t");
+		const msxTimingHint = config.platform === "msx"
+			? (timingHints.get("msx")
+				|| timingHints.get("m1")
+				|| timingHints.get("ts")
+				|| timingHints.get("t"))
+			: (timingHints.get("m1")
+				|| timingHints.get("msx")
+				|| timingHints.get("ts")
+				|| timingHints.get("t"));
+		const cpcTimingHint =
+			timingHints.get("cpc")
+			|| timingHints.get("ts")
+			|| timingHints.get("t");
+
+		return new TimingHints(z80TimingHint, msxTimingHint, cpcTimingHint);
 	}
 }
 

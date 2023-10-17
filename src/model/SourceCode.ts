@@ -8,7 +8,7 @@ export function extractFirstInstruction(s: string): string | undefined {
 export function extractSourceCode(rawLine: string, separator?: string,
     labelRegExp?: RegExp, repeatRegExp?: RegExp | undefined): SourceCode[] {
 
-    var s = rawLine.trim();
+    let s = rawLine.trim();
 
     // Removes surrounding label
     if (labelRegExp) {
@@ -16,7 +16,7 @@ export function extractSourceCode(rawLine: string, separator?: string,
     }
 
     // Parses and removes repeat pseudo-op
-    var repetitions = 1;
+    let repetitions = 1;
     if (repeatRegExp) {
         const matches = repeatRegExp.exec(s);
         if (matches && matches.length >= 2 && matches[1] && matches[2]) {
@@ -28,7 +28,7 @@ export function extractSourceCode(rawLine: string, separator?: string,
         }
     }
 
-    var fragments: SourceCode[] = [];
+    let fragments: SourceCode[] = [];
     const n = s.length;
     for (let i = 0; i < n; i++) {
 

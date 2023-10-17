@@ -14,11 +14,7 @@ class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
 	}
 
 	get name(): string {
-		return "At exit";
-	}
-
-	get description(): string {
-		return "At exit";
+		return "Timing to exit point";
 	}
 
 	get statusBarIcon(): string {

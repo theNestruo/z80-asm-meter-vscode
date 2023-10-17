@@ -10,11 +10,7 @@ class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
 	}
 
 	get name(): string {
-		return "Execution flow";
-	}
-
-	get description(): string {
-		return "Execution flow";
+		return "Execution flow timing";
 	}
 
 	get statusBarIcon(): string {

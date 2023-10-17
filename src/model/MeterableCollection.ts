@@ -47,7 +47,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get z80Timing(): number[] {
 
 		if (!this.cachedZ80Timing) {
-			var totalZ80Timing: number[] = [0, 0];
+			let totalZ80Timing: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
 				const z80Timing = meterable.z80Timing;
 				totalZ80Timing[0] += z80Timing[0];
@@ -61,7 +61,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get msxTiming(): number[] {
 
 		if (!this.cachedMsxTiming) {
-			var totalMsxTiming: number[] = [0, 0];
+			let totalMsxTiming: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
 				const msxTiming = meterable.msxTiming;
 				totalMsxTiming[0] += msxTiming[0];
@@ -75,7 +75,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get cpcTiming(): number[] {
 
 		if (!this.cachedCpcTiming) {
-			var totalCpcTiming: number[] = [0, 0];
+			let totalCpcTiming: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
 				const cpcTiming = meterable.cpcTiming;
 				totalCpcTiming[0] += cpcTiming[0];
@@ -89,7 +89,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get bytes(): string[] {
 
 		if (!this.cachedBytes) {
-			var bytes: string[] = [];
+			let bytes: string[] = [];
 			this.meterables.forEach(meterable => bytes.push(...meterable.bytes));
 			this.cachedBytes = bytes;
 		}
@@ -99,7 +99,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get size(): number {
 
 		if (!this.cachedSize) {
-			var size: number = 0;
+			let size: number = 0;
 			this.meterables.forEach(meterable => size += meterable.size);
 			this.cachedSize = size;
 		}
@@ -109,7 +109,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	flatten(): Meterable[] {
 
 		if (!this.cachedMeterables?.length) {
-			var meterables: Meterable[] = [];
+			let meterables: Meterable[] = [];
 			this.meterables.forEach(meterable => {
 				if (meterable.composed) {
 					meterables.push(...meterable.flatten());

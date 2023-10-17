@@ -124,7 +124,7 @@ class MainParser {
         }
 
         // Splits the lines and extracts repetition counter and trailing comments
-        var sourceCode: SourceCode[] = [];
+        let sourceCode: SourceCode[] = [];
         rawLines.forEach(rawLine => {
             sourceCode.push(...extractSourceCode(rawLine,
                 config.syntax.lineSeparator,

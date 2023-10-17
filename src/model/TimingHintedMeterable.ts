@@ -13,13 +13,13 @@ export function timingHintedMeterable(meterable: Meterable | undefined, timingHi
 
 	// No meterable (just timing hints if lenient)
 	if (!meterable) {
-		return config.timing.hints.lenient
+		return config.timing.hints === "any"
 			? new TimingHintedMeterable(new MeterableCollection(), timingHints)
 			: undefined;
 	}
 
 	// Meterable
-	return config.timing.hints.lenient || isJumpOrCallInstruction(meterable.instruction)
+	return config.timing.hints === "any" || isJumpOrCallInstruction(meterable.instruction)
 		? new TimingHintedMeterable(meterable, timingHints)
 		: meterable;
 }

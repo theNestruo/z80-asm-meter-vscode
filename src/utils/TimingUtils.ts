@@ -71,8 +71,9 @@ export function humanReadableTiming(meterable: Meterable): string | undefined {
 
     // (no data)
     if ((!timing)
-        || (timing.length < 2)
-        || ((timing[0] === 0) && (timing[1] === 0))) {
+        // || (timing.length < 2)
+        // || ((timing[0] === 0) && (timing[1] === 0))
+        ) {
         return undefined;
     }
 

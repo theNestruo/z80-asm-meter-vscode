@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { Meterable } from "../model/Meterable";
 import { mainParser } from "../parser/MainParser";
-import { humanReadableSize } from '../utils/ByteUtils';
-import { AbstractHandler } from './AbstractHandler';
-import { viewTimingToCopy, viewTimingToCopyAsHints } from "./DeprecatedViewTimingUtils";
+import { atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
+import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
+import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
+import { formatTiming, humanReadableTiming } from '../utils/TimingUtils';
+import { AbstractHandler } from './AbstractHandler';
 
 export class CommandHandler extends AbstractHandler implements vscode.Command {
 
@@ -15,22 +16,23 @@ export class CommandHandler extends AbstractHandler implements vscode.Command {
 
     copy() {
 
-        // Reads the source code
+        // Reads and parses the source code
         const sourceCode = this.readFromSelection();
         if (!sourceCode) {
-            // (should never happen)
+            return;
+        }
+        const metered = mainParser.parse(sourceCode);
+        if (!metered) {
             return;
         }
 
-        // Parses the source code
-        const metering = mainParser.parse(sourceCode);
-        if (!metering) {
-            // (should never happen)
-            return;
-        }
+        // Prepares the total timing
+        const defaultTiming = defaultTotalTiming.applyTo(metered);
+        const flowTiming = executionFlowTotalTiming.applyTo(metered);
+        const atExitTiming = atExitTotalTiming.applyTo(metered);
 
         // Builds the text to copy to clipboard
-        const textToCopy = this.buildCommandText(this.decorateForCommand(metering));
+        const textToCopy = this.buildTextToCopy(defaultTiming, flowTiming, atExitTiming);
         if (!textToCopy) {
             // (should never happen)
             return;
@@ -47,40 +49,44 @@ export class CommandHandler extends AbstractHandler implements vscode.Command {
         }
     }
 
-    private decorateForCommand(metering: Meterable): Meterable[] {
+    buildTextToCopy(
+        defaultTiming: TotalTimingMeterable,
+        flowTiming: TotalTimingMeterable | undefined,
+        atExitTiming: TotalTimingMeterable | undefined): string | undefined {
 
-        return [defaultTotalTiming.applyTo(metering)];
-        // // Applies special timing modes
-        // switch (this.timingMode()) {
-        //     case "default":
-        //     default:
-        //         return [metering];
-        //     case "best":
-        //     case "smart":
-        //     case "all":
-        //         return this.applyBestDecoration(metering);
-        // }
-    }
+        const timing = config.statusBar.totalTimings
+            ? atExitTiming || flowTiming || defaultTiming
+            : defaultTiming;
 
-    buildCommandText(meterings: Meterable[]): string | undefined {
-
-        // (prefers most specific algorithm)
-        const metering = meterings[meterings.length - 1];
-
-        // Builds the command text
-        if (config.timing.hints.enabled) {
-            return viewTimingToCopyAsHints(metering);
+        // Human readable
+        if (!config.statusBar.copyTimingsAsHints) {
+            let text = humanReadableTiming(timing) || "";
+            if (text) {
+                const timingSuffix = config.platform === "cpc" ? "NOPs" : "clock cycles";
+                text += ` ${timingSuffix}`;
+            }
+            const size = timing.size;
+            if (size) {
+                const sizeSuffix = (size === 1) ? "byte" : "bytes";
+                text += `, ${size} ${sizeSuffix}`;
+            }
+            return text;
         }
 
-        const timing = viewTimingToCopy(metering);
-        const size = humanReadableSize(metering);
-
-        return timing
-            ? (size
-                ? `${timing}, ${size}`
-                : `${timing}`)
-            : (size
-                ? `${size}`
-                : undefined);
+        // As timing hint
+        if (config.platform === "cpc") {
+            const cpcText = formatTiming(timing.cpcTiming);
+            return `[cpc=${cpcText}]`;
+        }
+        if (config.platform === "msx") {
+            const msxText = formatTiming(timing.msxTiming);
+            return `[msx=${msxText}]`;
+        }
+        const z80text = formatTiming(timing.z80Timing);
+        if (config.platform === "pc8000") {
+            const m1Text = formatTiming(timing.msxTiming);
+            return `[z80=${z80text}] [m1=${m1Text}]`;
+        }
+        return `[z80=${z80text}]`;
     }
 }

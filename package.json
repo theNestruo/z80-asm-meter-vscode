@@ -162,18 +162,15 @@
 					},
 					"z80-asm-meter.statusBar.totalTimings": {
 						"order": 30,
-						"type": [
-							"boolean",
-							"string"
-						],
+						"type": "string",
 						"description": "Shows total timing calculations in the status bar",
 						"enum": [
-							true,
-							"combine",
+							"all",
+							"combineAll",
 							"smart",
 							"combineSmart",
 							"best",
-							false
+							"default"
 						],
 						"enumDescriptions": [
 							"Shows all the total timing calculations that apply to the selection",
@@ -185,20 +182,26 @@
 						],
 						"default": "smart"
 					},
+					"z80-asm-meter.statusBar.copyTimingsAsHints": {
+						"order": 40,
+						"type": "boolean",
+						"description": "Enable copying timings as timing hints, instead of human readable format",
+						"default": false
+					},
 					"z80-asm-meter.statusBar.compactSize": {
-						"order": 35,
+						"order": 50,
 						"type": "boolean",
 						"description": "Uses a compact suffix (B) for the size in bytes in the status bar",
 						"default": false
 					},
 					"z80-asm-meter.statusBar.showBytes": {
-						"order": 40,
+						"order": 60,
 						"type": "boolean",
 						"description": "Shows the bytes (opcode) in the status bar",
-						"default": true
+						"default": false
 					},
 					"z80-asm-meter.statusBar.debounce": {
-						"order": 50,
+						"order": 70,
 						"type": "integer",
 						"description": "Milliseconds to prevent metering from being called too frequently when the selection changes",
 						"default": 100
@@ -385,32 +388,30 @@
 				"properties": {
 					"z80-asm-meter.timing.hints.enabled": {
 						"order": 10,
-						"type": [
-							"boolean",
-							"string"
-						],
+						"type": "string",
 						"description": "Enables timing hints read from the line comment",
 						"enum": [
-							true,
-							"lenient",
-							false
+							"subroutines",
+							"any",
+							"none"
 						],
 						"enumDescriptions": [
 							"Enables timing hints; subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
 							"Enables lenient timing hints: any timing hint found in the line comment will be added, regardless the instruction",
 							"Disables timing hints"
 						],
-						"default": true
+						"default": "subroutines"
 					},
 					"z80-asm-meter.timing.hints": {
 						"type": "string",
 						"deprecationMessage": "Use \"z80-asm-meter.timing.hints.enabled\" instead",
 						"enum": [
-							"none",
 							"subroutines",
-							"any"
+							"any",
+							"none"
 						]
 					}
+
 				}
 			},
 			{

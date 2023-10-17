@@ -7,15 +7,6 @@ export function formatHexadecimalByte(n: number): string {
     return s.substring(s.length - 2);
 }
 
-export function humanReadableSize(meterable: Meterable): string | undefined {
-
-	const size = meterable.size;
-	return (!size) ? undefined
-		: (config.statusBar.compactSize) ? `${size}B`
-		: (size === 1) ? `${size} byte`
-		: `${size} bytes`;
-}
-
 export function humanReadableBytes(meterable: Meterable): string | undefined {
 
 	const meterables = [...meterable.flatten()];

@@ -81,7 +81,7 @@ class AssemblyDirectiveParser implements InstructionParser {
         operands.forEach(operand => {
             if (operand.match(/^((".*")|('.*'))$/)) {
                 // String
-                var string = operand.substring(1, operand.length - 1);
+                let string = operand.substring(1, operand.length - 1);
                 for (let i = 0; i < string.length; i++) {
                     bytes.push(formatHexadecimalByte(string.charCodeAt(i)));
                 }

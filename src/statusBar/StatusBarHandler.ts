@@ -5,10 +5,10 @@ import { atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
 import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
 import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
-import { humanReadableBytes, humanReadableSize } from '../utils/ByteUtils';
+import { humanReadableBytes } from '../utils/ByteUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
 import { hashCode } from "../utils/TextUtils";
-import { humanReadableTimings } from '../utils/TimingUtils';
+import { humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
 import { AbstractHandler } from "./AbstractHandler";
 import { CommandHandler } from "./CommandHandler";
 
@@ -133,28 +133,22 @@ export class StatusBarHandler extends AbstractHandler {
         this.previousHashCode = currentHashCode;
 
         // Parses the source code
-        const metering = mainParser.parse(sourceCode);
-        if (!metering) {
+        const metered = mainParser.parse(sourceCode);
+        if (!metered) {
             this.previousHashCode = undefined;
             this.hide();
             return;
         }
 
-        // Prepares the total timing
-        const defaultMetering = defaultTotalTiming.applyTo(metering);
-        const flowMetering = executionFlowTotalTiming.applyTo(metering);
-        const atExitMetering = atExitTotalTiming.applyTo(metering);
-
-        // Builds the statur bar text
-        const text = this.buildText(defaultMetering, flowMetering, atExitMetering);
-
-        // // Builds the tooltip text
-        // const tooltip = this.buildTooltipMarkdown(this.decorateForTooltip(metering));
+        // Prepares the total timings
+        const defaultTiming = defaultTotalTiming.applyTo(metered);
+        const flowTiming = executionFlowTotalTiming.applyTo(metered);
+        const atExitTiming = atExitTotalTiming.applyTo(metered);
 
         // Builds the status bar item
         this.create();
-        this.statusBarItem!.text = text;
-        // this.statusBarItem!.tooltip = tooltip;
+        this.statusBarItem!.text = this.buildText(defaultTiming, flowTiming, atExitTiming);
+        this.statusBarItem!.tooltip = this.buildTooltip(defaultTiming, flowTiming, atExitTiming);
         this.statusBarItem!.command = this.commandHandler;
         this.statusBarItem!.show();
     }
@@ -167,88 +161,109 @@ export class StatusBarHandler extends AbstractHandler {
     }
 
     private buildText(
-        defaultMetering: TotalTimingMeterable,
-        flowMetering: TotalTimingMeterable | undefined,
-        atExitMetering: TotalTimingMeterable | undefined): string {
+        defaultTiming: TotalTimingMeterable,
+        flowTiming: TotalTimingMeterable | undefined,
+        atExitTiming: TotalTimingMeterable | undefined): string {
 
         // Builds the statur bar text
         let text = "";
 
         if (config.statusBar.showInstruction) {
-            const instruction = humanReadableInstructions(defaultMetering);
+            const instruction = humanReadableInstructions(defaultTiming);
             if (instruction) {
                 text += `$(code) ${instruction} `;
             }
         }
 
-        const timing = this.buidTimingsText(defaultMetering, flowMetering, atExitMetering);
+        const timing = this.buidTimingsText(defaultTiming, flowTiming, atExitTiming);
         if (timing) {
             text += `$(watch) ${timing}`;
         }
 
-        const size = humanReadableSize(defaultMetering);
-        if (size !== undefined) {
-            text += ` $(file-binary) ${size}`;
+        const size = defaultTiming.size;
+        if (size) {
+            const sizeSuffix = (config.statusBar.compactSize) ? "B"
+                : (size === 1) ? " byte"
+                    : " bytes";
+            text += ` $(file-binary) ${size}${sizeSuffix}`;
             if (config.statusBar.showBytes) {
-                const bytes = humanReadableBytes(defaultMetering);
+                const bytes = humanReadableBytes(defaultTiming);
                 if (bytes) {
                     text += ` (${bytes})`;
                 }
             }
         }
 
-        return text
-            // .replace(/\s+/, " ")
-            // .trim()
-            ;
+        return text;
     }
 
     private buidTimingsText(
-        defaultMetering: TotalTimingMeterable,
-        flowMetering: TotalTimingMeterable | undefined,
-        atExitMetering: TotalTimingMeterable | undefined): string | undefined {
+        defaultTiming: TotalTimingMeterable,
+        flowTiming: TotalTimingMeterable | undefined,
+        atExitTiming: TotalTimingMeterable | undefined): string | undefined {
 
         switch (config.statusBar.totalTimings) {
-            case true:
-            case "combine":
+            case "all":
+            case "combineAll":
                 return humanReadableTimings(
-                    [defaultMetering, flowMetering, atExitMetering],
+                    [defaultTiming, flowTiming, atExitTiming],
                     config.statusBar.totalTimingsCombined);
-
-            case false:
-                return humanReadableTimings([defaultMetering]);
-
-            case "best":
-                return humanReadableTimings(
-                    [atExitMetering || flowMetering || defaultMetering]);
 
             case "smart":
             case "combineSmart":
                 return humanReadableTimings(
-                    [atExitMetering || flowMetering ? undefined : defaultMetering, flowMetering, atExitMetering],
+                    [atExitTiming || flowTiming ? undefined : defaultTiming, flowTiming, atExitTiming],
                     config.statusBar.totalTimingsCombined);
+
+            case "best":
+                return humanReadableTimings(
+                    [atExitTiming || flowTiming || defaultTiming]);
+
+            case "default":
+            default:
+                return humanReadableTimings([defaultTiming]);
         }
     }
 
-    // private buildTooltipMarkdown(meterings: Meterable[]): vscode.MarkdownString {
+    private buildTooltip(
+        defaultTiming: TotalTimingMeterable,
+        flowTiming: TotalTimingMeterable | undefined,
+        atExitTiming: TotalTimingMeterable | undefined): vscode.MarkdownString {
 
-    //     // Builds the tooltip text
-    //     const metering = meterings[0];
-    //     const command = this.commandHandler.buildCommandText(meterings);
-    //     return new vscode.MarkdownString()
-    //         .appendMarkdown(viewTooltipTimings(meterings))
-    //         .appendMarkdown("\n---\n\n")
-    //         // .appendMarkdown(viewTooptipSize(metering))
-    //         // .appendMarkdown("\n---\n\n")
-    //         .appendMarkdown(`Copy "${command}" to clipboard\n`);
-    // }
+        const text = new vscode.MarkdownString("|&nbsp;|&nbsp;|&nbsp;|\n|:---|---:|:---|\n");
 
-    // private function viewTooptipSize(meterable: Meterable): string {
+        const instruction = humanReadableInstructions(defaultTiming);
+        if (instruction) {
+            text.appendMarkdown(`|**Instructions**||${instruction}|\n`);
+        }
 
-    //     const size = viewStatusBarSize(meterable);
-    //     return size
-    //             ? `|||\n|:---|:---:|\n|Size|**${size}**|\n`
-    //             : "";
-    // }
+        const timingSuffix = config.platform === "cpc" ? "NOPs" : "clock cycles";
+        [defaultTiming, flowTiming, atExitTiming].forEach(totalTiming => {
+            if (!totalTiming) {
+                return;
+            }
+            const value = humanReadableTiming(totalTiming);
+            if (!value) {
+                return;
+            }
+            text.appendMarkdown(`|**${totalTiming.name}**|${value}|${timingSuffix}|\n`);
+        });
 
+        const size = defaultTiming.size;
+        if (size) {
+            text.appendMarkdown(`|**Size**|${size}|bytes\n`);
+            const bytes = humanReadableBytes(defaultTiming);
+            if (bytes) {
+                text.appendMarkdown(`|**Bytes**||${bytes}|\n`);
+            }
+        }
+
+        const textToCopy = this.commandHandler.buildTextToCopy(defaultTiming, flowTiming, atExitTiming);
+        if (textToCopy) {
+            text.appendMarkdown("\n---\n\n")
+                .appendMarkdown(`Copy "${textToCopy}" to clipboard\n`);
+        }
+
+        return text;
+    }
 }
