@@ -506,7 +506,7 @@
 			}
 		]
 	},
-	"main": "./out/dist/bundle.js",
+	"main": "./dist/bundle.js",
 	"scripts": {
 		"vscode:prepublish": "npm run esbuild-base -- --minify",
 		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/bundle.js --external:vscode --format=cjs --platform=node",
