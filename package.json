@@ -122,10 +122,10 @@
 						],
 						"enumDescriptions": [
 							"Matches most assemblers",
-							"Matches Glass Z80 assembler syntax and enables negative conditionals support",
+							"Matches Glass Z80 assembler syntax",
 							"Matches Pasmo assembler syntax",
 							"Matches SjASM assembler syntax",
-							"Matches SjASMPlus assembler syntax and enables SjASMPlus fake instructions support",
+							"Matches SjASMPlus assembler syntax",
 							"Matches tniASM assembler syntax"
 						],
 						"default": "default"
@@ -174,10 +174,10 @@
 						],
 						"enumDescriptions": [
 							"Shows all the total timing calculations that apply to the selection",
-							"Shows all the total timing calculations, combined to reduce the status bar item size",
+							"Shows all the total timing calculations combined to reduce the size of the status bar item",
 							"Shows total timing calculations that are relevant to the selection",
-							"Shows total timing calculations that are relevant to the selection, combined to reduce the status bar item size",
-							"Shows the total timing calculations that best fits the selection",
+							"Shows total timing calculations that are relevant to the selection combined to reduce the size of the status bar item",
+							"Shows the total timing calculation that best fits the selection",
 							"Does not show any alternative total timing calculation"
 						],
 						"default": "smart"
@@ -361,7 +361,7 @@
 					"z80-asm-meter.timing.atExit.threshold": {
 						"order": 70,
 						"type": "number",
-						"description": "Minimum number of instructions to be selected for the calculation of total timing at exit",
+						"description": "Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point",
 						"default": 2
 					},
 					"z80-asm-meter.timing.atExit.requireConditional": {
@@ -396,8 +396,8 @@
 							"none"
 						],
 						"enumDescriptions": [
-							"Enables timing hints; subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
-							"Enables lenient timing hints: any timing hint found in the line comment will be added, regardless the instruction",
+							"Subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
+							"Any timing hint found in the line comment will be added, regardless the instruction",
 							"Disables timing hints"
 						],
 						"default": "subroutines"

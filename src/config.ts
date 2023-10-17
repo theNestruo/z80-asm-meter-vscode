@@ -54,13 +54,22 @@ class Configuration {
 			: ["S"];
 	}
 
+	// Status bar
+	readonly statusBar = new StatusBarConfiguration();
+
+	// Assembler syntax
 	readonly syntax = new SyntaxConfiguration();
 
+	// Parser
 	readonly parser = new ParserConfiguration();
 
+	// Total timing calculation and Timing Hints
 	readonly timing = new TimingConfiguration();
 
-	readonly statusBar = new StatusBarConfiguration();
+	get macros(): MacroDefinition[] {
+
+		return read("macros");
+	}
 }
 
 
@@ -289,6 +298,57 @@ class StatusBarConfiguration {
 		return readWithDefaultValue("statusBar.debounce",
 			readIgnoreDefault("debounce")); // (deprecated)
 	}
+}
+
+/**
+ * An user-defined macro, as defined in extension settings
+ */
+export interface MacroDefinition {
+
+	/**
+	 * The name of the macro
+	 */
+	name: string;
+
+	/**
+	 * The macro definition, as instructions for the macro (optional)
+	 */
+	instructions: string[] | undefined;
+
+	/**
+	 * Declares or overrides Z80 default macro timing (optional)
+	 */
+	z80: number | string | undefined;
+
+	/**
+	 * Declares or overrides Z80+M1 macro timing information (MSX standard) (optional)
+	 */
+	msx: number | string | undefined;
+
+	/**
+	 * Declares or overrides Z80+M1 macro timing information (MSX standard) (optional)
+	 */
+	m1: number | string | undefined;
+
+	/**
+	 * Declares or overrides macro timing measured in number of NOPs (optional)
+	 */
+	cpc: number | string | undefined;
+
+	/**
+	 * Declares or overrides default macro timing (optional)
+	 */
+	ts: number | string | undefined;
+
+	/**
+	 * Declares or overrides default macro timing (optional)
+	 */
+	t: number | string | undefined;
+
+	/**
+	 * Declares or overrides macro byte count (optional)
+	 */
+	size: number | string | undefined;
 }
 
 export const config = new Configuration();
