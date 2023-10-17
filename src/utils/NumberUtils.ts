@@ -1,21 +1,7 @@
-export class NumericExpressionParser {
-
-    static parse(s: string, includeNegatives: boolean = true): number | undefined {
-
-        for (const numericParser of NumericExpressionParser.numericParsers) {
-            const value = numericParser.parse(s);
-            if ((value !== undefined)
-                && (!isNaN(value))
-                && ((value > 0) || includeNegatives)) {
-                return value;
-            }
-        }
-
-        return undefined;
-    }
+class NumericExpressionParser {
 
     // Instances
-    private static numericParsers: NumericExpressionParser[] = [
+    static numericParsers: NumericExpressionParser[] = [
         new NumericExpressionParser(/^0x([0-9a-f]+)$/i, 16),
         new NumericExpressionParser(/^[#$&]([0-9a-f]+)$/i, 16),
         new NumericExpressionParser(/^([0-9a-f]+)h$/i, 16),
@@ -34,7 +20,7 @@ export class NumericExpressionParser {
         this.radix = radix;
     }
 
-    private parse(s: string): number | undefined {
+    parse(s: string): number | undefined {
         const negative = s.startsWith("-");
         const us = negative ? s.substring(1) : s;
         const matches = this.regex.exec(us);
@@ -44,6 +30,20 @@ export class NumericExpressionParser {
     }
 }
 
+export function parseNumericExpression(s: string, includeNegatives: boolean = true): number | undefined {
+
+    for (const numericParser of NumericExpressionParser.numericParsers) {
+        const value = numericParser.parse(s);
+        if ((value !== undefined)
+            && (!isNaN(value))
+            && ((value > 0) || includeNegatives)) {
+            return value;
+        }
+    }
+
+    return undefined;
+}
+
 export function parteIntLenient(o: unknown): number | undefined {
 
     if (typeof o === "number") {
@@ -51,7 +51,7 @@ export function parteIntLenient(o: unknown): number | undefined {
     }
 
     if (typeof o === "string") {
-        return NumericExpressionParser.parse(o);
+        return parseNumericExpression(o);
     }
 
     return undefined;

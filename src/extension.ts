@@ -1,8 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { MainParser } from './parser/MainParser';
-import { MacroParser } from './parser/impl/MacroParser';
+import { mainParser, noMacroMainParser } from './parser/MainParser';
+import { macroParser } from './parser/impl/MacroParser';
 import { CommandHandler } from './statusBar/CommandHandler';
 import { DebouncedStatusBarHandler, StatusBarHandler } from "./statusBar/StatusBarHandler";
 
@@ -36,9 +36,11 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration(
 			statusBarHandler.onConfigurationChange, statusBarHandler),
 		vscode.workspace.onDidChangeConfiguration(
-			MainParser.instance.onConfigurationChange, MainParser.instance),
+			mainParser.onConfigurationChange, mainParser),
 		vscode.workspace.onDidChangeConfiguration(
-			MacroParser.instance.onConfigurationChange, MacroParser.instance)
+			noMacroMainParser.onConfigurationChange, noMacroMainParser),
+		vscode.workspace.onDidChangeConfiguration(
+			macroParser.onConfigurationChange, macroParser)
 
 	);
 	context.subscriptions.push(disposable);

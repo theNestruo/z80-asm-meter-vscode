@@ -1,18 +1,49 @@
-import { workspace } from "vscode";
-import { Meterable } from "../../model/Meterable";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
-import { NumericExpressionParser } from "../../utils/NumberUtils";
-import { InstructionParser } from "../Parsers";
-import { Z80InstructionParser } from "./Z80InstructionParser";
-import { SourceCode } from "../../model/SourceCode";
-import { RepeatedMeterable } from "../../model/RepeatedMeterable";
-import { formatHexadecimalByte } from "../../utils/ByteUtils";
 import { config } from "../../config";
+import { Meterable } from "../../model/Meterable";
+import { repeatedMeterable } from "../../model/RepeatedMeterable";
+import { SourceCode } from "../../model/SourceCode";
+import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
+import { formatHexadecimalByte } from "../../utils/ByteUtils";
+import { parseNumericExpression } from "../../utils/NumberUtils";
+import { InstructionParser } from "../Parsers";
+import { z80InstructionParser } from "./Z80InstructionParser";
 
-export class AssemblyDirectiveParser implements InstructionParser {
+/**
+ * An assembly directive, such as `db`, `dw` or `ds`
+ */
+class AssemblyDirective implements Meterable {
 
-    // Singleton
-    static readonly instance = new AssemblyDirectiveParser();
+    // Information
+    private readonly directive: string;
+    readonly z80Timing = [0, 0];
+    readonly msxTiming = [0, 0];
+    readonly cpcTiming = [0, 0];
+    readonly bytes: string[];
+    readonly size: number;
+
+    constructor(
+        directive: string, bytes: string[], size: number) {
+
+        this.directive = directive;
+        this.bytes = bytes;
+        this.size = size;
+    }
+
+    /**
+     * @returns The directive
+     */
+    get instruction(): string {
+        return this.directive;
+    }
+
+    flatten(): Meterable[] {
+        return [this];
+    }
+
+    readonly composed = false;
+}
+
+class AssemblyDirectiveParser implements InstructionParser {
 
     get isEnabled(): boolean {
         return true;
@@ -56,7 +87,7 @@ export class AssemblyDirectiveParser implements InstructionParser {
                 }
             } else {
                 // Raw values
-                const value = NumericExpressionParser.parse(operand);
+                const value = parseNumericExpression(operand);
                 bytes.push(value !== undefined ? formatHexadecimalByte(value) : "n");
             }
         });
@@ -79,7 +110,7 @@ export class AssemblyDirectiveParser implements InstructionParser {
         // Extracts bytes
         const bytes: string[] = [];
         operands.forEach(operand => {
-            const value = NumericExpressionParser.parse(operand);
+            const value = parseNumericExpression(operand);
             if (value !== undefined) {
                 bytes.push(formatHexadecimalByte(value & 0xff) + " " + formatHexadecimalByte((value & 0xff00) >> 8));
             } else {
@@ -103,12 +134,12 @@ export class AssemblyDirectiveParser implements InstructionParser {
         }
 
         // Extracts count and byte
-        const count = NumericExpressionParser.parse(operands[0]);
+        const count = parseNumericExpression(operands[0]);
         if ((count === undefined) || (count < 0)) {
             return undefined;
         }
         const value = operands.length === 2
-            ? NumericExpressionParser.parse(operands[1])
+            ? parseNumericExpression(operands[1])
             : undefined;
 
         // Determines instruction
@@ -116,9 +147,9 @@ export class AssemblyDirectiveParser implements InstructionParser {
             const opcode = value !== undefined
                 ? value
                 : 0x00; // (defaults to NOP)
-            const instruction = Z80InstructionParser.instance.parseOpcode(opcode);
+            const instruction = z80InstructionParser.parseOpcode(opcode);
             if (instruction) {
-                return RepeatedMeterable.of(instruction, count);
+                return repeatedMeterable(instruction, count);
             }
         }
 
@@ -129,37 +160,5 @@ export class AssemblyDirectiveParser implements InstructionParser {
     }
 }
 
-/**
- * An assembly directive, such as `db`, `dw` or `ds`
- */
-export class AssemblyDirective implements Meterable {
+export const assemblyDirectiveParser = new AssemblyDirectiveParser();
 
-    // Information
-    private readonly directive: string;
-    readonly z80Timing = [0, 0];
-    readonly msxTiming = [0, 0];
-    readonly cpcTiming = [0, 0];
-    readonly bytes: string[];
-    readonly size: number;
-
-    constructor(
-        directive: string, bytes: string[], size: number) {
-
-        this.directive = directive;
-        this.bytes = bytes;
-        this.size = size;
-    }
-
-    /**
-     * @returns The directive
-     */
-    get instruction(): string {
-        return this.directive;
-    }
-
-    flatten(): Meterable[] {
-        return [this];
-    }
-
-    readonly composed = false;
-}

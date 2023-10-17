@@ -1,11 +1,11 @@
 import { config } from "../../config";
+import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
 import { Meterable } from "../../model/Meterable";
-import { SourceCode, extractFirstInstruction } from "../../model/SourceCode";
+import { MeterableCollection } from "../../model/MeterableCollection";
+import { SourceCode } from "../../model/SourceCode";
 import { extractIndirection, extractMnemonicOf, extractOperandsOf, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
-import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
-import { Z80InstructionParser } from "./Z80InstructionParser";
-import { MeterableCollection } from "../../model/MeterableCollection";
+import { z80InstructionParser } from "./Z80InstructionParser";
 
 
 /**
@@ -109,8 +109,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 
         if (!this.ready) {
             this.rawInstructions.forEach(rawInstruction => {
-                const instruction =
-                    Z80InstructionParser.instance.parseInstruction(rawInstruction);
+                const instruction = z80InstructionParser.parseInstruction(rawInstruction);
                 this.add(instruction);
             });
             this.ready = true;
@@ -222,15 +221,12 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     }
 }
 
-export class SjasmplusFakeInstructionParser implements InstructionParser {
-
-    // Singleton
-    static instance = new SjasmplusFakeInstructionParser();
+class SjasmplusFakeInstructionParser implements InstructionParser {
 
     // Instruction maps
     private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
 
-    private constructor() {
+    constructor() {
 
         // Initializes instruction maps
         this.instructionByMnemonic = {};
@@ -295,10 +291,7 @@ export class SjasmplusFakeInstructionParser implements InstructionParser {
     }
 }
 
-export class SjasmplusRegisterListInstructionParser implements InstructionParser {
-
-    // Singleton
-    static instance = new SjasmplusRegisterListInstructionParser();
+class SjasmplusRegisterListInstructionParser implements InstructionParser {
 
     get isEnabled(): boolean {
         return config.syntax.sjasmplusRegisterListInstructionEnabled;
@@ -321,8 +314,7 @@ export class SjasmplusRegisterListInstructionParser implements InstructionParser
             const partialInstruction = `${mnemonic} ${operand}`;
 
             // Tries to parse Z80 instruction
-            const z80Instruction =
-                Z80InstructionParser.instance.parseInstruction(partialInstruction);
+            const z80Instruction = z80InstructionParser.parseInstruction(partialInstruction);
             if (!z80Instruction) {
                 // (unknown mnemonic/instruction)
                 return undefined;
@@ -334,10 +326,7 @@ export class SjasmplusRegisterListInstructionParser implements InstructionParser
     }
 }
 
-export class SjasmplusDupRepetitionParser extends AbstractRepetitionParser {
-
-    // Singleton
-    static instance = new SjasmplusDupRepetitionParser();
+class SjasmplusDupRepetitionParser extends AbstractRepetitionParser {
 
     constructor() {
         super("DUP", "EDUP");
@@ -348,10 +337,7 @@ export class SjasmplusDupRepetitionParser extends AbstractRepetitionParser {
     }
 }
 
-export class SjasmplusReptRepetitionParser extends AbstractRepetitionParser {
-
-    // Singleton
-    static instance = new SjasmplusDupRepetitionParser();
+class SjasmplusReptRepetitionParser extends AbstractRepetitionParser {
 
     constructor() {
         super("REPT", "ENDR");
@@ -361,3 +347,9 @@ export class SjasmplusReptRepetitionParser extends AbstractRepetitionParser {
         return config.syntax.sjasmplusReptEndrEnabled;
     }
 }
+
+export const sjasmplusFakeInstructionParser = new SjasmplusFakeInstructionParser();
+export const sjasmplusRegisterListInstructionParser = new SjasmplusRegisterListInstructionParser();
+export const sjasmplusDupRepetitionParser = new SjasmplusDupRepetitionParser();
+export const sjasmplusReptRepetitionParser = new SjasmplusReptRepetitionParser();
+

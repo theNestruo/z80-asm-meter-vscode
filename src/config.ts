@@ -291,5 +291,4 @@ class StatusBarConfiguration {
 	}
 }
 
-const instance = new Configuration();
-export { instance as config };
+export const config = new Configuration();

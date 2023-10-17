@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import { config } from "../config";
-import { MainParser } from "../parser/MainParser";
-import { AtExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
-import { DefaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
-import { ExecutionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
+import { mainParser } from "../parser/MainParser";
+import { atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
+import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
+import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
 import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
 import { humanReadableBytes, humanReadableSize } from '../utils/ByteUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
@@ -133,7 +133,7 @@ export class StatusBarHandler extends AbstractHandler {
         this.previousHashCode = currentHashCode;
 
         // Parses the source code
-        const metering = MainParser.instance.parse(sourceCode);
+        const metering = mainParser.parse(sourceCode);
         if (!metering) {
             this.previousHashCode = undefined;
             this.hide();
@@ -141,9 +141,9 @@ export class StatusBarHandler extends AbstractHandler {
         }
 
         // Prepares the total timing
-        const defaultMetering = DefaultTotalTiming.instance.applyTo(metering);
-        const flowMetering = ExecutionFlowTotalTiming.instance.applyTo(metering);
-        const atExitMetering = AtExitTotalTiming.instance.applyTo(metering);
+        const defaultMetering = defaultTotalTiming.applyTo(metering);
+        const flowMetering = executionFlowTotalTiming.applyTo(metering);
+        const atExitMetering = atExitTotalTiming.applyTo(metering);
 
         // Builds the statur bar text
         const text = this.buildText(defaultMetering, flowMetering, atExitMetering);

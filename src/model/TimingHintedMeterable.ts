@@ -4,27 +4,27 @@ import { Meterable } from "./Meterable";
 import { MeterableCollection } from "./MeterableCollection";
 import { TimingHints } from "./TimingHints";
 
-export class TimingHintedMeterable implements Meterable {
+export function timingHintedMeterable(meterable: Meterable | undefined, timingHints: TimingHints | undefined): Meterable | undefined {
 
-	static of(meterable: Meterable | undefined, timingHints: TimingHints | undefined): Meterable | undefined {
-
-		// No timing hints
-		if (!timingHints) {
-			return meterable;
-		}
-
-		// No meterable (just timing hints if lenient)
-		if (!meterable) {
-			return config.timing.hints.lenient
-				? new TimingHintedMeterable(new MeterableCollection(), timingHints)
-				: undefined;
-		}
-
-		// Meterable
-		return config.timing.hints.lenient || isJumpOrCallInstruction(meterable.instruction)
-			? new TimingHintedMeterable(meterable, timingHints)
-			: meterable;
+	// No timing hints
+	if (!timingHints) {
+		return meterable;
 	}
+
+	// No meterable (just timing hints if lenient)
+	if (!meterable) {
+		return config.timing.hints.lenient
+			? new TimingHintedMeterable(new MeterableCollection(), timingHints)
+			: undefined;
+	}
+
+	// Meterable
+	return config.timing.hints.lenient || isJumpOrCallInstruction(meterable.instruction)
+		? new TimingHintedMeterable(meterable, timingHints)
+		: meterable;
+}
+
+class TimingHintedMeterable implements Meterable {
 
 	// The meterable instance
 	private meterable: Meterable;

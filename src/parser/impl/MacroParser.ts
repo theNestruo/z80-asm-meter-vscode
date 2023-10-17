@@ -6,68 +6,14 @@ import { SourceCode } from "../../model/SourceCode";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { parteIntLenient } from "../../utils/NumberUtils";
 import { parseTimingLenient } from "../../utils/TimingUtils";
-import { MainParser } from "../MainParser";
+import { noMacroMainParser } from "../MainParser";
 import { InstructionParser } from "../Parsers";
 
-export class MacroParser implements InstructionParser {
-
-	// Singleton
-	static instance = new MacroParser();
-
-	// Macro maps
-	private definitionByMnemonic: Record<string, MacroDefinition>;
-
-	private constructor() {
-		this.definitionByMnemonic = this.reloadDefinitions();
-	}
-
-	onConfigurationChange(e: ConfigurationChangeEvent) {
-
-		// Reloads caches for "heavy" configurations
-		if (e.affectsConfiguration("z80-asm-meter.macros")) {
-			this.definitionByMnemonic = this.reloadDefinitions();
-		}
-	}
-
-	private reloadDefinitions(): Record<string, MacroDefinition> {
-
-		// Initializes macro maps
-		const macroDefinitionByMnemonic: Record<string, MacroDefinition> = {};
-
-		// Locates macro definitions
-		const configuration = workspace.getConfiguration("z80-asm-meter");
-		const macroDefinitions: MacroDefinition[] = configuration.get("macros", []);
-		macroDefinitions.forEach(macroDefinition => {
-
-			// Prepares a map by mnemonic for performance reasons
-			const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
-			macroDefinitionByMnemonic[mnemonic] = macroDefinition;
-		});
-
-		return macroDefinitionByMnemonic;
-	}
-
-	get isEnabled(): boolean {
-		return Object.keys(this.definitionByMnemonic).length !== 0;
-	}
-
-	parse(s: SourceCode): Meterable | undefined {
-
-		// Locates macro definition
-		const mnemonic = extractMnemonicOf(s.instruction);
-		const macroDefinition = this.definitionByMnemonic[mnemonic];
-		if (!macroDefinition) {
-			return undefined;
-		}
-
-		return new Macro(macroDefinition);
-	}
-}
 
 /**
  * An user-defined macro, as defined in extension settings
  */
-export interface MacroDefinition {
+interface MacroDefinition {
 
 	/**
 	 * The name of the macro
@@ -115,7 +61,7 @@ export interface MacroDefinition {
 	size: number | string | undefined;
 }
 
-export class Macro extends MeterableCollection {
+class Macro extends MeterableCollection {
 
 	// User-provided information
 	private providedName: string;
@@ -234,10 +180,65 @@ export class Macro extends MeterableCollection {
 		}
 
 		if (this.providedSourceCode) {
-			const meterable = MainParser.noMacroInstance.parse(this.providedSourceCode);
+			const meterable = noMacroMainParser.parse(this.providedSourceCode);
 			this.add(meterable);
 		}
 
 		this.ready = true;
 	}
 }
+
+class MacroParser implements InstructionParser {
+
+	// Macro maps
+	private definitionByMnemonic: Record<string, MacroDefinition>;
+
+	constructor() {
+		this.definitionByMnemonic = this.reloadDefinitions();
+	}
+
+	onConfigurationChange(e: ConfigurationChangeEvent) {
+
+		// Reloads caches for "heavy" configurations
+		if (e.affectsConfiguration("z80-asm-meter.macros")) {
+			this.definitionByMnemonic = this.reloadDefinitions();
+		}
+	}
+
+	private reloadDefinitions(): Record<string, MacroDefinition> {
+
+		// Initializes macro maps
+		const macroDefinitionByMnemonic: Record<string, MacroDefinition> = {};
+
+		// Locates macro definitions
+		const configuration = workspace.getConfiguration("z80-asm-meter");
+		const macroDefinitions: MacroDefinition[] = configuration.get("macros", []);
+		macroDefinitions.forEach(macroDefinition => {
+
+			// Prepares a map by mnemonic for performance reasons
+			const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
+			macroDefinitionByMnemonic[mnemonic] = macroDefinition;
+		});
+
+		return macroDefinitionByMnemonic;
+	}
+
+	get isEnabled(): boolean {
+		return Object.keys(this.definitionByMnemonic).length !== 0;
+	}
+
+	parse(s: SourceCode): Meterable | undefined {
+
+		// Locates macro definition
+		const mnemonic = extractMnemonicOf(s.instruction);
+		const macroDefinition = this.definitionByMnemonic[mnemonic];
+		if (!macroDefinition) {
+			return undefined;
+		}
+
+		return new Macro(macroDefinition);
+	}
+}
+
+export const macroParser = new MacroParser();
+

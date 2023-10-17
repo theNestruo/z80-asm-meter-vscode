@@ -3,12 +3,9 @@ import { Meterable } from "../../model/Meterable";
 import { SourceCode } from "../../model/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
-import { Z80InstructionParser } from "./Z80InstructionParser";
+import { z80InstructionParser } from "./Z80InstructionParser";
 
-export class GlassFakeInstructionParser implements InstructionParser {
-
-    // Singleton
-    static instance = new GlassFakeInstructionParser();
+class GlassFakeInstructionParser implements InstructionParser {
 
     get isEnabled(): boolean {
         return config.syntax.glassNegativeConditionsEnabled;
@@ -23,20 +20,20 @@ export class GlassFakeInstructionParser implements InstructionParser {
 
         // Is conditional instruction with valid negated condition?
         const negatedCondition = this.isNegatedConditionalInstruction(mnemonic, operands);
-		if (!negatedCondition) {
+        if (!negatedCondition) {
             return undefined;
         }
 
         // Replaces with non-negated condition equivalent instruction
         operands[0] = this.not(negatedCondition);
         const equivalentInstruction = mnemonic + " " + operands.join(",");
-        return Z80InstructionParser.instance.parseInstruction(equivalentInstruction);
+        return z80InstructionParser.parseInstruction(equivalentInstruction);
     }
 
     private isNegatedConditionalInstruction(mnemonic: string, operands: string[]): string | undefined {
 
         // Is conditional instruction with negated condition?
-		if ([ "CALL", "JP", "JR", "RET" ].indexOf(mnemonic) === -1
+        if (["CALL", "JP", "JR", "RET"].indexOf(mnemonic) === -1
             || !operands
             || operands.length < (mnemonic === "RET" ? 1 : 2)
             || operands[0].charAt(0) !== '!') {
@@ -45,15 +42,15 @@ export class GlassFakeInstructionParser implements InstructionParser {
 
         // Is valid negated condition?
         const negatedCondition = operands[0].substring(1).trimStart();
-		switch (mnemonic) {
-        case "CALL":
-        case "JP":
-        case "RET":
-            return isAnyCondition(negatedCondition) ? negatedCondition : undefined;
-        case "JR":
-            return isJrCondition(negatedCondition) ? negatedCondition : undefined;
-        default:
-            return undefined;
+        switch (mnemonic) {
+            case "CALL":
+            case "JP":
+            case "RET":
+                return isAnyCondition(negatedCondition) ? negatedCondition : undefined;
+            case "JR":
+                return isJrCondition(negatedCondition) ? negatedCondition : undefined;
+            default:
+                return undefined;
         }
     }
 
@@ -66,10 +63,7 @@ export class GlassFakeInstructionParser implements InstructionParser {
     }
 }
 
-export class GlassReptRepetitionParser extends AbstractRepetitionParser {
-
-    // Singleton
-    static instance = new GlassReptRepetitionParser();
+class GlassReptRepetitionParser extends AbstractRepetitionParser {
 
     constructor() {
         super("REPT", "ENDM");
@@ -79,3 +73,7 @@ export class GlassReptRepetitionParser extends AbstractRepetitionParser {
         return config.syntax.glassReptEndmEnabled;
     }
 }
+
+export const glassFakeInstructionParser = new GlassFakeInstructionParser();
+export const glassReptRepetitionParser = new GlassReptRepetitionParser();
+

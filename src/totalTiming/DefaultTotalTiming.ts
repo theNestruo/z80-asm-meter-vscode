@@ -1,19 +1,6 @@
 import { Meterable } from "../model/Meterable";
 import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
 
-export class DefaultTotalTiming implements TotalTiming {
-
-    // Singleton
-    static instance = new DefaultTotalTiming();
-
-	private constructor() {}
-
-	applyTo(meterable: Meterable): TotalTimingMeterable {
-
-		return new DefaultTotalTimingsMeterable(meterable);
-	}
-}
-
 class DefaultTotalTimingsMeterable extends TotalTimingMeterable {
 
 	constructor(meterable: Meterable) {
@@ -36,3 +23,13 @@ class DefaultTotalTimingsMeterable extends TotalTimingMeterable {
 		return timing;
 	}
 }
+
+class DefaultTotalTiming implements TotalTiming {
+
+	applyTo(meterable: Meterable): TotalTimingMeterable {
+
+		return new DefaultTotalTimingsMeterable(meterable);
+	}
+}
+
+export const defaultTotalTiming = new DefaultTotalTiming();

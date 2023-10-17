@@ -1,4 +1,4 @@
-import { NumericExpressionParser } from "../utils/NumberUtils";
+import { parseNumericExpression } from "../utils/NumberUtils";
 
 export function extractFirstInstruction(s: string): string | undefined {
 
@@ -20,7 +20,7 @@ export function extractSourceCode(rawLine: string, separator?: string,
     if (repeatRegExp) {
         const matches = repeatRegExp.exec(s);
         if (matches && matches.length >= 2 && matches[1] && matches[2]) {
-            const parsedRepetitions = NumericExpressionParser.parse(matches[1]) || 1;
+            const parsedRepetitions = parseNumericExpression(matches[1]) || 1;
             if (parsedRepetitions && parsedRepetitions > 0) {
                 repetitions = parsedRepetitions;
             }

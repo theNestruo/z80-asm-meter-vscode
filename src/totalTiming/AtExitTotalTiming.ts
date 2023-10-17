@@ -3,12 +3,46 @@ import { Meterable } from "../model/Meterable";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpCallOrRetInstruction, isJumpOrCallInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
 import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
 
-export class AtExitTotalTiming implements TotalTiming {
+class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
 
-    // Singleton
-    static instance = new AtExitTotalTiming();
+	private isLastInstructionJumpOrCall: boolean;
 
-	private constructor() {}
+	constructor(meterable: Meterable, isLastInstructionJumpOrCall: boolean) {
+		super(meterable);
+
+		this.isLastInstructionJumpOrCall = isLastInstructionJumpOrCall;
+	}
+
+	get name(): string {
+		return "At exit";
+	}
+
+	get description(): string {
+		return "At exit";
+	}
+
+	get statusBarIcon(): string {
+		return this.isLastInstructionJumpOrCall ? "$(debug-step-out)" : "$(debug-step-into)";
+	}
+
+	protected modifiedTimingsOf(timing: number[],
+		i: number, n: number, instruction: string): number[] {
+
+		// Last instruction?
+		if (i === n - 1) {
+			return isConditionalInstruction(instruction)
+				? [timing[0], timing[0]]	// "Taken" timing
+				: timing;
+		}
+
+		// Previous instruction
+		return isConditionalJumpOrRetInstruction(instruction)
+			? [timing[1], timing[1]]	// "Not taken" timing
+			: timing;
+	}
+}
+
+class AtExitTotalTiming implements TotalTiming {
 
 	/**
 	 * Conditionaly builds an instance of the "timing at exit" decorator
@@ -78,41 +112,5 @@ export class AtExitTotalTiming implements TotalTiming {
 	}
 }
 
-class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
+export const atExitTotalTiming = new AtExitTotalTiming();
 
-	private isLastInstructionJumpOrCall: boolean;
-
-	constructor(meterable: Meterable, isLastInstructionJumpOrCall: boolean) {
-		super(meterable);
-
-		this.isLastInstructionJumpOrCall = isLastInstructionJumpOrCall;
-	}
-
-	get name(): string {
-		return "At exit";
-	}
-
-	get description(): string {
-		return "At exit";
-	}
-
-	get statusBarIcon(): string {
-		return this.isLastInstructionJumpOrCall ? "$(debug-step-out)" : "$(debug-step-into)";
-	}
-
-	protected modifiedTimingsOf(timing: number[],
-		i: number, n: number, instruction: string): number[] {
-
-		// Last instruction?
-		if (i === n - 1) {
-			return isConditionalInstruction(instruction)
-				? [timing[0], timing[0]]	// "Taken" timing
-				: timing;
-		}
-
-		// Previous instruction
-		return isConditionalJumpOrRetInstruction(instruction)
-			? [timing[1], timing[1]]	// "Not taken" timing
-			: timing;
-	}
-}

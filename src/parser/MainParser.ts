@@ -2,58 +2,19 @@ import * as vscode from 'vscode';
 import { config } from '../config';
 import { Meterable } from '../model/Meterable';
 import { MeterableCollection } from '../model/MeterableCollection';
-import { RepeatedMeterable } from '../model/RepeatedMeterable';
+import { repeatedMeterable } from '../model/RepeatedMeterable';
 import { SourceCode, extractSourceCode } from '../model/SourceCode';
-import { TimingHintedMeterable } from '../model/TimingHintedMeterable';
+import { timingHintedMeterable } from '../model/TimingHintedMeterable';
 import { TimingHints } from '../model/TimingHints';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
-import { AssemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
-import { DefaultTimingHintsParser } from './impl/DefaultTimingHintsParser';
-import { GlassFakeInstructionParser, GlassReptRepetitionParser } from './impl/GlassParser';
-import { MacroParser } from './impl/MacroParser';
-import { SjasmplusDupRepetitionParser, SjasmplusFakeInstructionParser, SjasmplusRegisterListInstructionParser, SjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
-import { Z80InstructionParser } from './impl/Z80InstructionParser';
+import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
+import { defaultTimingHintsParser } from './impl/DefaultTimingHintsParser';
+import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
+import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
+import { z80InstructionParser } from './impl/Z80InstructionParser';
+import { macroParser } from './impl/MacroParser';
 
-export class MainParser {
-
-    private static readonly allInstructionParsers = [
-        Z80InstructionParser.instance,
-        SjasmplusFakeInstructionParser.instance,
-        SjasmplusRegisterListInstructionParser.instance,
-        GlassFakeInstructionParser.instance,
-        MacroParser.instance,
-        AssemblyDirectiveParser.instance
-    ];
-
-    private static readonly noMacroInstructionParsers = [
-        Z80InstructionParser.instance,
-        SjasmplusFakeInstructionParser.instance,
-        SjasmplusRegisterListInstructionParser.instance,
-        GlassFakeInstructionParser.instance,
-        AssemblyDirectiveParser.instance
-    ];
-
-    private static readonly allRepetitionParsers = [
-        SjasmplusDupRepetitionParser.instance,
-        SjasmplusReptRepetitionParser.instance,
-        GlassReptRepetitionParser.instance
-    ];
-
-    private static readonly allTimingHintsParsers = [
-        DefaultTimingHintsParser.instance
-    ];
-
-    // Singleton
-    static instance = new MainParser(
-        this.allInstructionParsers,
-        this.allRepetitionParsers,
-        this.allTimingHintsParsers);
-
-    // Singleton
-    static noMacroInstance = new MainParser(
-        this.noMacroInstructionParsers,
-        this.allRepetitionParsers,
-        this.allTimingHintsParsers);
+class MainParser {
 
     // Available parsers for this instance
     private readonly instructionParsers: InstructionParser[];
@@ -65,7 +26,7 @@ export class MainParser {
     private enabledRepetitionParsers: RepetitionParser[] = [];
     private enabledTimingHintsParsers: TimingHintsParser[] = [];
 
-    private constructor(
+    constructor(
         instructionParsers: InstructionParser[],
         repetitionParsers: RepetitionParser[],
         timingHintsParsers: TimingHintsParser[]) {
@@ -118,7 +79,7 @@ export class MainParser {
                 const previousMeterables = meterables;
                 meterablesStack.push(meterables);
                 meterables = new MeterableCollection();
-                previousMeterables.add(RepeatedMeterable.of(meterables, newRepetitions));
+                previousMeterables.add(repeatedMeterable(meterables, newRepetitions));
                 repetitionsStack.push(repetitions);
                 repetitions *= newRepetitions;
                 return;
@@ -132,13 +93,13 @@ export class MainParser {
             }
 
             // Parses the actual meterable, and optional timing hints and repetitions
-            const meterable = TimingHintedMeterable.of(
+            const meterable = timingHintedMeterable(
                 this.parseInstruction(sourceCode), this.parseTimingHints(sourceCode));
             if (!meterable) {
                 return;
             }
 
-            meterables.add(RepeatedMeterable.of(meterable, sourceCode.repetitions));
+            meterables.add(repeatedMeterable(meterable, sourceCode.repetitions));
         });
 
         return ret.isEmpty() ? undefined : ret;
@@ -232,3 +193,36 @@ export class MainParser {
         return undefined;
     }
 }
+
+const allInstructionParsers = [
+    z80InstructionParser,
+    sjasmplusFakeInstructionParser,
+    sjasmplusRegisterListInstructionParser,
+    glassFakeInstructionParser,
+    macroParser,
+    assemblyDirectiveParser
+];
+
+const allButMacroInstructionParsers = [
+    z80InstructionParser,
+    sjasmplusFakeInstructionParser,
+    sjasmplusRegisterListInstructionParser,
+    glassFakeInstructionParser,
+    assemblyDirectiveParser
+];
+
+const allRepetitionParsers = [
+    sjasmplusDupRepetitionParser,
+    sjasmplusReptRepetitionParser,
+    glassReptRepetitionParser
+];
+
+const allTimingHintsParsers = [
+    defaultTimingHintsParser
+];
+
+export const mainParser = new MainParser(
+    allInstructionParsers, allRepetitionParsers, allTimingHintsParsers);
+
+export const noMacroMainParser = new MainParser(
+    allButMacroInstructionParsers, allRepetitionParsers, allTimingHintsParsers);

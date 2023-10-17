@@ -4,10 +4,7 @@ import { TimingHints } from "../../model/TimingHints";
 import { parseTimingLenient } from "../../utils/TimingUtils";
 import { TimingHintsParser } from "../Parsers";
 
-export class DefaultTimingHintsParser implements TimingHintsParser {
-
-	// Singleton
-	static instance = new DefaultTimingHintsParser();
+class DefaultTimingHintsParser implements TimingHintsParser {
 
 	get isEnabled(): boolean {
 		return config.timing.hints.enabled;
@@ -73,3 +70,5 @@ export class DefaultTimingHintsParser implements TimingHintsParser {
 		return new TimingHints(z80TimingHint, msxTimingHint, cpcTimingHint, timingHint);
 	}
 }
+
+export const defaultTimingHintsParser = new DefaultTimingHintsParser();

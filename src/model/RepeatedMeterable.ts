@@ -1,23 +1,23 @@
 import { AbstractAggregatedMeterable, Meterable } from "./Meterable";
 
 /**
+ * Conditionaly builds an instance of a repetition of Meterables
+ * @param meterable The repeated meterable instance
+ * @param repetitions The number of times the meterable instance is repeated
+ * @return The repeated meterable instance, or a repetition of that Meterable,
+ * depending on the value of repetitions
+ */
+export function repeatedMeterable(meterable: Meterable, repetitions: number): Meterable {
+
+	return repetitions <= 1
+			? meterable
+			: new RepeatedMeterable(meterable, repetitions);
+}
+
+/**
  * A repetition of a Meterables
  */
-export class RepeatedMeterable extends AbstractAggregatedMeterable {
-
-	/**
-	 * Conditionaly builds an instance of a repetition of Meterables
-	 * @param meterable The repeated meterable instance
-	 * @param repetitions The number of times the meterable instance is repeated
-	 * @return The repeated meterable instance, or a repetition of that Meterable,
-	 * depending on the value of repetitions
-	 */
-	static of(meterable: Meterable, repetitions: number): Meterable {
-
-		return repetitions <= 1
-				? meterable
-				: new RepeatedMeterable(meterable, repetitions);
-	}
+class RepeatedMeterable extends AbstractAggregatedMeterable {
 
 	// The repeated meterable instance
 	private meterable: Meterable;
@@ -38,7 +38,7 @@ export class RepeatedMeterable extends AbstractAggregatedMeterable {
 	 * @param meterable The repeated meterable instance
 	 * @param repetitions The number of times the meterable instance is repeated
 	 */
-	private constructor(meterable: Meterable, repetitions: number) {
+	constructor(meterable: Meterable, repetitions: number) {
 		super();
 
 		this.meterable = meterable;

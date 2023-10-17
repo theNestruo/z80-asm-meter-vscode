@@ -2,7 +2,7 @@ import { Meterable } from "../model/Meterable";
 import { SourceCode } from "../model/SourceCode";
 import { TimingHints } from "../model/TimingHints";
 import { extractMnemonicOf, extractOperandsOf } from "../utils/AssemblyUtils";
-import { NumericExpressionParser } from "../utils/NumberUtils";
+import { parseNumericExpression } from "../utils/NumberUtils";
 
 export interface InstructionParser {
 
@@ -53,7 +53,7 @@ export abstract class AbstractRepetitionParser implements RepetitionParser {
 			return undefined;
 		}
 
-        const repetitions = NumericExpressionParser.parse(operands[0]);
+        const repetitions = parseNumericExpression(operands[0]);
         return repetitions !== undefined && repetitions >= 0 ? repetitions : 1;
 	}
 

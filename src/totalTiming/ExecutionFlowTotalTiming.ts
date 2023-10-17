@@ -3,12 +3,34 @@ import { Meterable } from "../model/Meterable";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
 import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
 
-export class ExecutionFlowTotalTiming implements TotalTiming {
+class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
 
-    // Singleton
-    static instance = new ExecutionFlowTotalTiming();
+	constructor(meterable: Meterable) {
+		super(meterable);
+	}
 
-	private constructor() {}
+	get name(): string {
+		return "Execution flow";
+	}
+
+	get description(): string {
+		return "Execution flow";
+	}
+
+	get statusBarIcon(): string {
+		return "$(debug-step-over)";
+	}
+
+	protected modifiedTimingsOf(timing: number[],
+		i: number, n: number, instruction: string): number[] {
+
+		return isConditionalJumpOrRetInstruction(instruction)
+			? [timing[1], timing[1]]	// "Not taken" timing
+			: timing;
+	}
+}
+
+class ExecutionFlowTotalTiming implements TotalTiming {
 
 	/**
 	 * Conditionaly builds an instance of the "execution flow timing" decorator
@@ -67,29 +89,5 @@ export class ExecutionFlowTotalTiming implements TotalTiming {
 	}
 }
 
-class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
+export const executionFlowTotalTiming = new ExecutionFlowTotalTiming();
 
-	constructor(meterable: Meterable) {
-		super(meterable);
-	}
-
-	get name(): string {
-		return "Execution flow";
-	}
-
-	get description(): string {
-		return "Execution flow";
-	}
-
-	get statusBarIcon(): string {
-		return "$(debug-step-over)";
-	}
-
-	protected modifiedTimingsOf(timing: number[],
-		i: number, n: number, instruction: string): number[] {
-
-		return isConditionalJumpOrRetInstruction(instruction)
-			? [timing[1], timing[1]]	// "Not taken" timing
-			: timing;
-	}
-}

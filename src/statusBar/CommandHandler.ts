@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
 import { Meterable } from "../model/Meterable";
-import { MainParser } from "../parser/MainParser";
+import { mainParser } from "../parser/MainParser";
 import { humanReadableSize } from '../utils/ByteUtils';
 import { AbstractHandler } from './AbstractHandler';
 import { viewTimingToCopy, viewTimingToCopyAsHints } from "./DeprecatedViewTimingUtils";
-import { DefaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
+import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
 
 export class CommandHandler extends AbstractHandler implements vscode.Command {
 
@@ -23,7 +23,7 @@ export class CommandHandler extends AbstractHandler implements vscode.Command {
         }
 
         // Parses the source code
-        const metering = MainParser.instance.parse(sourceCode);
+        const metering = mainParser.parse(sourceCode);
         if (!metering) {
             // (should never happen)
             return;
@@ -49,7 +49,7 @@ export class CommandHandler extends AbstractHandler implements vscode.Command {
 
     private decorateForCommand(metering: Meterable): Meterable[] {
 
-        return [DefaultTotalTiming.instance.applyTo(metering)];
+        return [defaultTotalTiming.applyTo(metering)];
         // // Applies special timing modes
         // switch (this.timingMode()) {
         //     case "default":

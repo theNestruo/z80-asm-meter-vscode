@@ -4,7 +4,7 @@ import { Meterable } from "../../model/Meterable";
 import { SourceCode } from "../../model/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/ByteUtils";
-import { NumericExpressionParser } from "../../utils/NumberUtils";
+import { parseNumericExpression } from "../../utils/NumberUtils";
 import { formatTiming, parseTiming } from "../../utils/TimingUtils";
 import { InstructionParser } from "../Parsers";
 
@@ -405,9 +405,9 @@ class Z80Instruction implements Meterable {
     private numericOperandScore(expectedOperand: string, candidateOperand: string): number {
 
         // Compares as numeric expressions
-        const candidateNumber = NumericExpressionParser.parse(candidateOperand);
+        const candidateNumber = parseNumericExpression(candidateOperand);
         if (candidateNumber !== undefined) {
-            return (candidateNumber === NumericExpressionParser.parse(expectedOperand))
+            return (candidateNumber === parseNumericExpression(expectedOperand))
                 ? 1 // (exact match)
                 : 0; // (discards match; will default to unexpanded instruction if exists)
         }
@@ -423,16 +423,13 @@ class Z80Instruction implements Meterable {
     }
 }
 
-export class Z80InstructionParser implements InstructionParser {
-
-    // Singleton
-    static instance = new Z80InstructionParser();
+class Z80InstructionParser implements InstructionParser {
 
     // Instruction maps
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
     private instructionByOpcode: Record<string, Z80Instruction>;
 
-    private constructor() {
+    constructor() {
 
         // Initializes instruction maps
         this.instructionByMnemonic = {};
@@ -518,3 +515,6 @@ export class Z80InstructionParser implements InstructionParser {
         return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
     }
 }
+
+export const z80InstructionParser = new Z80InstructionParser();
+
