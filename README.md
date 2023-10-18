@@ -51,9 +51,17 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 >
 > Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
 >
-> When migration from any previous version to version 5.0.0, many of your existing _Z80 Assembly meter_ settings have been moved or renamed, or have changed its default value. Please update your settings accordingly by following the deprecation messages.
+> If you are migrating from any previous version to version 5.0.0, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the deprecation messages.
 
 This extension contributes the following settings:
+
+- [Main settings](#main-settings)
+- [Status bar settings](#status-bar-settings)
+- [Assembler syntax settings](#assembler-syntax-settings)
+- [Parser settings](#parser-settings)
+- [Total timing calculation settings](#total-timing-calculation-settings)
+- [Timing hints settings](#timing-hints-settings)
+- [Macros settings](#macros-settings)
 
 ### Main settings
 
@@ -185,7 +193,7 @@ See [timing hints](#timing-hints) in the _Advanced usage_ section.
 ### Macros settings
 
 * `z80-asm-meter.macros`: An array of [user-defined macros](#user-defined-macros):
-    * `name`: The name of the macro.
+    * `name`: The name of the macro; will be matched against the mnemonic of the source code.
     * `z80`: Declares or overrides Z80 default macro timing. Optional.
     * `msx`: Declares or overrides Z80+M1 macro timing information (MSX standard). Optional.
     * `m1`: Declares or overrides Z80+M1 macro timing information. Optional.

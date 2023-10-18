@@ -503,7 +503,7 @@
 							"properties": {
 								"name": {
 									"type": "string",
-									"description": "The name of the macro"
+									"description": "The name of the macro; will be matched against the mnemonic of the source code."
 								},
 								"z80": {
 									"type": [
