@@ -13,6 +13,7 @@ import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/Gl
 import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
 import { z80InstructionParser } from './impl/Z80InstructionParser';
 import { macroParser } from './impl/MacroParser';
+import { regExpTimingHintsParser } from './impl/RegExpTimingHintsParser';
 
 class MainParser {
 
@@ -220,7 +221,8 @@ const allRepetitionParsers = [
 ];
 
 const allTimingHintsParsers = [
-    defaultTimingHintsParser
+    defaultTimingHintsParser,
+    regExpTimingHintsParser
 ];
 
 export const mainParser = new MainParser(

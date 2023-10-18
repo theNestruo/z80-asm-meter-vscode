@@ -184,19 +184,29 @@ class ParserConfiguration {
 
 class TimingConfiguration {
 
-	get hints(): "none" | "subroutines" | "any" | "ignoreCommentedOut" {
-
-		return read("timing.hints.enabled");
-	}
-
-	get hintsEnabled(): boolean {
-
-		return ["subroutines", "any", "ignoreCommentedOut"].indexOf(this.hints) !== -1;
-	}
+	readonly hints = new TimingHintsConfiguration();
 
 	readonly executionFlow = new ExecutionFlowTotalTimingConfiguration();
 
 	readonly atExit = new AtExitTotalTimingConfiguration();
+}
+
+class TimingHintsConfiguration {
+
+	get enabledValue(): "none" | "subroutines" | "any" | "ignoreCommentedOut" {
+
+		return read("timing.hints.enabled");
+	}
+
+	get enabled(): boolean {
+
+		return ["subroutines", "any", "ignoreCommentedOut"].indexOf(this.enabledValue) !== -1;
+	}
+
+	get regexps(): TimingHintsDefinition[] {
+
+		return read("timing.hints.regexps");
+	}
 }
 
 class ExecutionFlowTotalTimingConfiguration {
@@ -301,7 +311,7 @@ class StatusBarConfiguration {
 }
 
 /**
- * An user-defined macro, as defined in extension settings
+ * User-defined macro
  */
 export interface MacroDefinition {
 
@@ -349,6 +359,52 @@ export interface MacroDefinition {
 	 * Declares or overrides macro byte count (optional)
 	 */
 	size: number | string | undefined;
+}
+
+/**
+ * RegExp-based user-defined timing hints
+ */
+export interface TimingHintsDefinition {
+
+	/**
+	 * The pattern of the regular expression to match against the line comment
+	 */
+	pattern: RegExp;
+
+	/**
+	 * The string indicating the flags of the regular expression
+	 */
+	flags: string | undefined;
+
+	/**
+	 * Declares or overrides Z80 default macro timing (optional)
+	 */
+	z80: number | string | undefined;
+
+	/**
+	 * Declares or overrides Z80+M1 macro timing information (MSX standard) (optional)
+	 */
+	msx: number | string | undefined;
+
+	/**
+	 * Declares or overrides Z80+M1 macro timing information (MSX standard) (optional)
+	 */
+	m1: number | string | undefined;
+
+	/**
+	 * Declares or overrides macro timing measured in number of NOPs (optional)
+	 */
+	cpc: number | string | undefined;
+
+	/**
+	 * Declares or overrides default macro timing (optional)
+	 */
+	ts: number | string | undefined;
+
+	/**
+	 * Declares or overrides default macro timing (optional)
+	 */
+	t: number | string | undefined;
 }
 
 export const config = new Configuration();

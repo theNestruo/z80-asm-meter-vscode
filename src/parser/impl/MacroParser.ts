@@ -1,4 +1,4 @@
-import { ConfigurationChangeEvent, workspace } from "vscode";
+import * as vscode from 'vscode';
 import { MacroDefinition, config } from "../../config";
 import { Meterable } from "../../model/Meterable";
 import { MeterableCollection } from "../../model/MeterableCollection";
@@ -60,7 +60,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The Z80 timing, in time (T) cycles
 	 */
-	getZ80Timing(): number[] {
+	get z80Timing(): number[] {
 
 		if (this.providedZ80Timing) {
 			return this.providedZ80Timing;
@@ -72,7 +72,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
 	 */
-	getMsxTiming(): number[] {
+	get msxTiming(): number[] {
 
 		if (this.providedMsxTiming) {
 			return this.providedMsxTiming;
@@ -84,7 +84,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The CPC timing, in NOPS
 	 */
-	getCpcTiming(): number[] {
+	get cpcTiming(): number[] {
 
 		if (this.providedCpcTiming) {
 			return this.providedCpcTiming;
@@ -96,7 +96,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The bytes
 	 */
-	getBytes(): string[] {
+	get bytes(): string[] {
 
 		this.init();
 		const bytes = super.bytes;
@@ -112,7 +112,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The size in bytes
 	 */
-	getSize(): number {
+	get size(): number {
 
 		if (this.providedSize) {
 			return this.providedSize;
@@ -145,9 +145,8 @@ class MacroParser implements InstructionParser {
 		this.definitionByMnemonic = this.reloadDefinitions();
 	}
 
-	onConfigurationChange(e: ConfigurationChangeEvent) {
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
-		// Reloads caches for "heavy" configurations
 		if (e.affectsConfiguration("z80-asm-meter.macros")) {
 			this.definitionByMnemonic = this.reloadDefinitions();
 		}
@@ -156,17 +155,17 @@ class MacroParser implements InstructionParser {
 	private reloadDefinitions(): Record<string, MacroDefinition> {
 
 		// Initializes macro maps
-		const macroDefinitionByMnemonic: Record<string, MacroDefinition> = {};
+		const map: Record<string, MacroDefinition> = {};
 
 		// Locates macro definitions
-		config.macros.forEach(macroDefinition => {
+		config.macros?.forEach(macroDefinition => {
 
 			// Prepares a map by mnemonic for performance reasons
 			const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
-			macroDefinitionByMnemonic[mnemonic] = macroDefinition;
+			map[mnemonic] = macroDefinition;
 		});
 
-		return macroDefinitionByMnemonic;
+		return map;
 	}
 
 	get isEnabled(): boolean {

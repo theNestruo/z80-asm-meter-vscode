@@ -404,6 +404,76 @@
 						],
 						"default": "subroutines"
 					},
+					"z80-asm-meter.timing.hints.regexps": {
+						"order": 20,
+						"type": [
+							"array",
+							"null"
+						],
+						"description": "An array of regexp-based user-defined timing hints",
+						"default": [],
+						"items": {
+							"type": "object",
+							"properties": {
+								"pattern": {
+									"type": "string",
+									"description": "The pattern of the regular expression to match against the line comment"
+								},
+								"flags": {
+									"type": [ "string", "undefined" ],
+									"description": "The string indicating the flags of the regular expression"
+								},
+								"z80": {
+									"type": [
+										"number",
+										"string",
+										"undefined"
+									],
+									"description": "Declares or overrides Z80 default timing hint"
+								},
+								"msx": {
+									"type": [
+										"number",
+										"string",
+										"undefined"
+									],
+									"description": "Declares or overrides Z80+M1 timing hint (MSX standard)"
+								},
+								"m1": {
+									"type": [
+										"number",
+										"string",
+										"undefined"
+									],
+									"description": "Declares or overrides Z80+M1 timing hint"
+								},
+								"cpc": {
+									"type": [
+										"number",
+										"string",
+										"undefined"
+									],
+									"description": "Declares or overrides timing hint measured in number of NOPs"
+								},
+								"t": {
+									"type": [
+										"number",
+										"string",
+										"undefined"
+									],
+									"description": "Declares or overrides default timing hint"
+								},
+								"ts": {
+									"type": [
+										"number",
+										"string",
+										"undefined"
+									],
+									"description": "Declares or overrides default timing hint"
+								}
+							}
+						}
+					},
 					"z80-asm-meter.timing.hints": {
 						"type": "string",
 						"deprecationMessage": "Use \"z80-asm-meter.timing.hints.enabled\" instead",
@@ -441,7 +511,7 @@
 										"string",
 										"undefined"
 									],
-									"description": "Declares or overrides Z80 default macro timing for the macro"
+									"description": "Declares or overrides Z80 default timing hint"
 								},
 								"msx": {
 									"type": [

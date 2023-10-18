@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { mainParser, noMacroMainParser, noTimingHintsMainParser } from './parser/MainParser';
 import { macroParser } from './parser/impl/MacroParser';
+import { regExpTimingHintsParser } from './parser/impl/RegExpTimingHintsParser';
 import { CommandHandler } from './statusBar/CommandHandler';
 import { DebouncedStatusBarHandler, StatusBarHandler } from "./statusBar/StatusBarHandler";
 
@@ -44,8 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
 			noTimingHintsMainParser.onConfigurationChange, noTimingHintsMainParser),
 
 		vscode.workspace.onDidChangeConfiguration(
-			macroParser.onConfigurationChange, macroParser)
+			macroParser.onConfigurationChange, macroParser),
 
+		vscode.workspace.onDidChangeConfiguration(
+			regExpTimingHintsParser.onConfigurationChange, regExpTimingHintsParser),
 	);
 	context.subscriptions.push(disposable);
 

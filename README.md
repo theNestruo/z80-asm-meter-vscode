@@ -164,12 +164,23 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 
 See [timing hints](#timing-hints) in the _Advanced usage_ section.
 
-* `z80-asm-meter.timing.hints.enabled`: Enables [timing hints](#timing-hints), read from the line comment.
+* `z80-asm-meter.timing.hints.enabled`: Enables [timing hints](#timing-hints), read from the line comment:
 
     * `none`: Disables timing hints.
     * `subroutine` (default): Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
     * `any`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines.
     * `ignoreCommentedOut`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines, but ignores empty lines that look like commented out source code.
+
+* `z80-asm-meter.timing.hints.regexps`: An array of regexp-based user-defined timing hints. The line comment will be matched agains the regular expression and the timing hint values will be read from this configuration object.
+
+    * `pattern`: The pattern of the regular expression to match against the line comment.
+    * `flags`: The string indicating the flags of the regular expression to match against the line comment. Optional.
+    * `z80`: Declares or overrides Z80 default timing hint. Optional.
+    * `msx`: Declares or overrides Z80+M1 timing hint (MSX standard). Optional.
+    * `m1`: Declares or overrides Z80+M1 timing hint. Optional.
+    * `cpc`: Declares or overrides timing hint measured in number of NOPs. Optional.
+    * `t`: Declares or overrides default timing hint. Optional.
+    * `ts`: Declares or overrides default timing hint. Optional.
 
 ### Macros settings
 

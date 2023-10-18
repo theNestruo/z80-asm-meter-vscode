@@ -10,7 +10,7 @@ export function timingHintedMeterable(
 	meterable: Meterable | undefined, timingHints: TimingHints, sourceCode: SourceCode):
 	Meterable | undefined {
 
-	switch (config.timing.hints) {
+	switch (config.timing.hints.enabledValue) {
 		case "none":
 			// (should never happen)
 			return meterable;

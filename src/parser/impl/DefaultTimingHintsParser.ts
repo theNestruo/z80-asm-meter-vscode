@@ -7,7 +7,7 @@ import { TimingHintsParser } from "../Parsers";
 class DefaultTimingHintsParser implements TimingHintsParser {
 
 	get isEnabled(): boolean {
-		return config.timing.hintsEnabled;
+		return config.timing.hints.enabled;
 	}
 
 	parse(s: SourceCode): TimingHints | undefined {
