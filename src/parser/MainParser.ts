@@ -57,6 +57,7 @@ class MainParser {
 
     parse(s: string): MeterableCollection | undefined {
 
+        // Extracts actual source code, single line repetitions, and line comments
         const sourceCodes = this.extractSourceCode(s);
         if (!sourceCodes || !sourceCodes.length) {
             return undefined;
@@ -66,6 +67,7 @@ class MainParser {
         const ret = new MeterableCollection();
         let meterables = ret;
         let repetitions = 1;
+        let isEmpty = true;
 
         const meterablesStack: MeterableCollection[] = [];
         const repetitionsStack: number[] = [];
@@ -92,17 +94,21 @@ class MainParser {
                 return;
             }
 
-            // Parses the actual meterable, and optional timing hints and repetitions
-            const meterable = timingHintedMeterable(
-                this.parseInstruction(sourceCode), this.parseTimingHints(sourceCode));
+            // Parses the actual meterable and optional timing hints
+            let meterable = this.parseInstruction(sourceCode);
+            let timingHints = this.parseTimingHints(sourceCode);
+            if (timingHints) {
+                meterable = timingHintedMeterable(meterable, timingHints, sourceCode);
+            }
             if (!meterable) {
                 return;
             }
 
             meterables.add(repeatedMeterable(meterable, sourceCode.repetitions));
+            isEmpty = false;
         });
 
-        return ret.isEmpty() ? undefined : ret;
+        return isEmpty ? undefined : ret;
     }
 
     private extractSourceCode(s: string): SourceCode[] | undefined {
@@ -226,3 +232,6 @@ export const mainParser = new MainParser(
 
 export const noMacroMainParser = new MainParser(
     allButMacroInstructionParsers, allRepetitionParsers, allTimingHintsParsers);
+
+export const noTimingHintsMainParser = new MainParser(
+    allInstructionParsers, allRepetitionParsers, []);

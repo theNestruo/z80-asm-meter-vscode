@@ -391,14 +391,16 @@
 						"type": "string",
 						"description": "Enables timing hints read from the line comment",
 						"enum": [
+							"none",
 							"subroutines",
 							"any",
-							"none"
+							"ignoreCommentedOut"
 						],
 						"enumDescriptions": [
-							"Subroutine timing hints will be added to CALL, JP, JR, or RST instructions",
-							"Any timing hint found in the line comment will be added, regardless the instruction",
-							"Disables timing hints"
+							"Disables timing hints",
+							"Subroutine timing hint will be added to CALL, DJNZ, JP, JR, RET or RST instructions only",
+							"Any timing hint found, regardless the instruction. This includes empty lines",
+							"Any timing hint found, regardless the instruction, but trying to exclude empty lines that look like commented out source code"
 						],
 						"default": "subroutines"
 					},

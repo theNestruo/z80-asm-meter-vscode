@@ -95,7 +95,9 @@ export abstract class TotalTimingMeterable implements Meterable {
 		return this.decoratedMeterable.flatten();
 	}
 
-	readonly composed = true;
+	get composed(): boolean {
+		return this.decoratedMeterable.composed;
+	}
 
 	protected abstract modifiedTimingsOf(timing: number[],
 		i: number, n: number, instruction: string): number[];

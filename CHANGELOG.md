@@ -1,3 +1,13 @@
+## 5.0.0
+
+- Code refactor
+- Extension settings reorganized for clarity, easiness of setup, and additional customizations
+- Performance improvements
+- Improved instruction support within macro definitions. #134
+- TBD Better macro matchers. #134
+- New `z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump` and `z80-asm-meter.timing.atExit.stopOnUnconditionalJump` settings. #143
+- Timing hints can now ignore empty lines with commented out source code. #144
+
 ## 4.3.0
 
 - Improvements in the advanced timing modes. #114

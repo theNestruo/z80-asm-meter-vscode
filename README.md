@@ -45,11 +45,19 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
 ## Extension Settings
 
+> ### Migration to version 5.x
+>
+> The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
+>
+> Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
+>
+> When migration from any previous version to version 5.0.0, many of your existing _Z80 Assembly meter_ settings have been moved or renamed, or have changed its default value. Please update your settings accordingly by following the deprecation messages.
+
 This extension contributes the following settings:
 
 ### Main settings
 
-* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `"asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"`.
+* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly). Defaults to: `["asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"]`.
 
 * `z80-asm-meter.platform`: Controls the instruction set to use and the timing information to display:
 
@@ -81,7 +89,7 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.statusBar.showInstruction`: Shows the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Disabled by default.
 
-* `z80-asm-meter.statusBar.totalTimings`: Shows total timing calculations in the status bar. See [total timing calculations](#total-timing-calculations) in the _Advanced usage_ section.
+* `z80-asm-meter.statusBar.totalTimings`: Shows [total timing calculations](#total-timing-calculations) in the status bar.
 
     * `all`: Shows all the total timing calculation that apply to the selection.
     * `combineAll`: Shows all the total timing calculation that apply to the selection, but combined to reduce the size of the status bar item.
@@ -156,11 +164,12 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 
 See [timing hints](#timing-hints) in the _Advanced usage_ section.
 
-* `z80-asm-meter.timing.hints.enabled`: Enables timing hints, read from the line comment. See [timing hints](#timing-hints).
+* `z80-asm-meter.timing.hints.enabled`: Enables [timing hints](#timing-hints), read from the line comment.
 
-    * `subroutine` (default): Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
-    * `any`: Any timing hint will be added. This includes empty (i.e.: no actual source code) lines.
     * `none`: Disables timing hints.
+    * `subroutine` (default): Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
+    * `any`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines.
+    * `ignoreCommentedOut`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines, but ignores empty lines that look like commented out source code.
 
 ### Macros settings
 
@@ -231,7 +240,7 @@ Negative timings are supported. This may seem unintuitive, but serves very parti
         ret     ; [msx=100] remaining code in the caller
     ```
 
-See [timing hints settings](#timing-hints-settings).
+See [timing hints settings](#timing-hints-settings), and the [status bar setting](#status-bar-settings) `z80-asm-meter.statusBar.copyTimingsAsHints`.
 
 ### User-defined macros
 

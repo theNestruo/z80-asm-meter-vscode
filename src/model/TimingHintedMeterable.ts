@@ -1,27 +1,47 @@
 import { config } from "../config";
+import { noTimingHintsMainParser } from "../parser/MainParser";
 import { isConditionalInstruction, isJumpOrCallInstruction } from "../utils/AssemblyUtils";
 import { Meterable } from "./Meterable";
 import { MeterableCollection } from "./MeterableCollection";
+import { SourceCode } from "./SourceCode";
 import { TimingHints } from "./TimingHints";
 
-export function timingHintedMeterable(meterable: Meterable | undefined, timingHints: TimingHints | undefined): Meterable | undefined {
+export function timingHintedMeterable(
+	meterable: Meterable | undefined, timingHints: TimingHints, sourceCode: SourceCode):
+	Meterable | undefined {
 
-	// No timing hints
-	if (!timingHints) {
-		return meterable;
-	}
+	switch (config.timing.hints) {
+		case "none":
+			// (should never happen)
+			return meterable;
 
-	// No meterable (just timing hints if lenient)
-	if (!meterable) {
-		return config.timing.hints === "any"
-			? new TimingHintedMeterable(new MeterableCollection(), timingHints)
-			: undefined;
-	}
+		case "subroutines":
+			// Applies to CALL, DJNZ, JP, JR, RET or RST instructions only
+			return meterable && isJumpOrCallInstruction(meterable.instruction)
+				? new TimingHintedMeterable(meterable, timingHints)
+				: meterable;
 
-	// Meterable
-	return config.timing.hints === "any" || isJumpOrCallInstruction(meterable.instruction)
-		? new TimingHintedMeterable(meterable, timingHints)
-		: meterable;
+		case "any":
+			// Allows no meterable (timing hint on empty line)
+			return meterable
+				? new TimingHintedMeterable(meterable, timingHints)
+				: new TimingHintedMeterable(new MeterableCollection(), timingHints);
+
+		case "ignoreCommentedOut":
+			return meterable
+				? new TimingHintedMeterable(meterable, timingHints)
+				// Excludes commented out code
+				: isCommentedOutSourceCode(sourceCode)
+					? undefined
+					: new TimingHintedMeterable(new MeterableCollection(), timingHints);
+		}
+}
+
+function isCommentedOutSourceCode(sourceCode: SourceCode): boolean {
+
+	return !sourceCode.instruction // non empty line (should never happen)
+		&& !!sourceCode.lineComment // no comment (should never happen)
+		&& !!noTimingHintsMainParser.parse(sourceCode.lineComment);
 }
 
 class TimingHintedMeterable implements Meterable {
@@ -73,11 +93,11 @@ class TimingHintedMeterable implements Meterable {
 	}
 
 	flatten(): Meterable[] {
-		return this.meterable.flatten();
+		return [this];
 	}
 
 	get composed(): boolean {
-		return this.meterable.composed;
+		return false;
 	}
 
 	private modifiedTimingOf(timing: number[], addend: number[] | undefined): number[] {

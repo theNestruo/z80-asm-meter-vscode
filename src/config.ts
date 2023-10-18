@@ -184,14 +184,14 @@ class ParserConfiguration {
 
 class TimingConfiguration {
 
-	get hints(): "subroutines" | "any" | "none" {
+	get hints(): "none" | "subroutines" | "any" | "ignoreCommentedOut" {
 
-		return read("timing.hints");
+		return read("timing.hints.enabled");
 	}
 
 	get hintsEnabled(): boolean {
 
-		return ["subroutines", "any"].indexOf(this.hints) !== -1;
+		return ["subroutines", "any", "ignoreCommentedOut"].indexOf(this.hints) !== -1;
 	}
 
 	readonly executionFlow = new ExecutionFlowTotalTimingConfiguration();

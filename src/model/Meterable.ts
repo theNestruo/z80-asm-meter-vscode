@@ -36,7 +36,8 @@ export interface Meterable {
     /**
      * @returns the flattened array of the finer-grained meterables
 	 * that compose this meterable (when the meterable is composed);
-	 * an array with this meterable otherwise
+	 * an array with this meterable otherwise.
+     * For displaying instructions and bytes purposes only!
      */
     flatten(): Meterable[];
 
