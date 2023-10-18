@@ -1,21 +1,9 @@
 class NumericExpressionParser {
 
-    // Instances
-    static numericParsers: NumericExpressionParser[] = [
-        new NumericExpressionParser(/^0x([0-9a-f]+)$/i, 16),
-        new NumericExpressionParser(/^[#$&]([0-9a-f]+)$/i, 16),
-        new NumericExpressionParser(/^([0-9a-f]+)h$/i, 16),
-        new NumericExpressionParser(/^[0@]([0-7]+)$/, 8),
-        new NumericExpressionParser(/^([0-7]+)o$/i, 8),
-        new NumericExpressionParser(/^%([0-1]+)$/i, 2),
-        new NumericExpressionParser(/^([0-1]+)b$/i, 2),
-        new NumericExpressionParser(/^(\d+)$/, 10)
-    ];
-
     private regex: RegExp;
     private radix: number;
 
-    private constructor(regex: RegExp, radix: number) {
+    constructor(regex: RegExp, radix: number) {
         this.regex = regex;
         this.radix = radix;
     }
@@ -30,9 +18,20 @@ class NumericExpressionParser {
     }
 }
 
+const numericParsers: NumericExpressionParser[] = [
+    new NumericExpressionParser(/^0x([0-9a-f]+)$/i, 16),
+    new NumericExpressionParser(/^[#$&]([0-9a-f]+)$/i, 16),
+    new NumericExpressionParser(/^([0-9a-f]+)h$/i, 16),
+    new NumericExpressionParser(/^[0@]([0-7]+)$/, 8),
+    new NumericExpressionParser(/^([0-7]+)o$/i, 8),
+    new NumericExpressionParser(/^%([0-1]+)$/i, 2),
+    new NumericExpressionParser(/^([0-1]+)b$/i, 2),
+    new NumericExpressionParser(/^(\d+)$/, 10)
+];
+
 export function parseNumericExpression(s: string, includeNegatives: boolean = true): number | undefined {
 
-    for (const numericParser of NumericExpressionParser.numericParsers) {
+    for (const numericParser of numericParsers) {
         const value = numericParser.parse(s);
         if ((value !== undefined)
             && (!isNaN(value))

@@ -281,8 +281,8 @@ class Z80Instruction implements Meterable {
 
         // Extracts the candidate operands
         const candidateOperands = extractOperandsOf(candidateInstruction);
-        for (let i = 0, n = candidateOperands.length; i < n; i++) {
-            if (candidateOperands[i] === "") {
+        for (const candidateOperand of candidateOperands) {
+            if (candidateOperand === "") {
                 return 0; // (incomplete candidate instruction, such as "LD A,")
             }
         }
@@ -496,8 +496,7 @@ class Z80InstructionParser implements InstructionParser {
         // Locates instruction
         let bestCandidate;
         let bestScore = 0;
-        for (let i = 0, n = candidates.length; i < n; i++) {
-            const candidate = candidates[i];
+        for (const candidate of candidates) {
             if (instructionSets.indexOf(candidate.instructionSet) === -1) {
                 // Invalid instruction set
                 continue;

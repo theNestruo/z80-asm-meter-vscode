@@ -66,6 +66,7 @@ class ExecutionFlowTotalTiming implements TotalTiming {
 		let anyConditionalJump: boolean = false;
 		for (let i = 0, n = meterables.length; i < n; i++) {
 			const instruction = meterables[i].instruction;
+			const lastInstruction = i === n - 1;
 
 			// No unconditional jumps
 			if (isStopOnUnconditionalJump
@@ -73,7 +74,6 @@ class ExecutionFlowTotalTiming implements TotalTiming {
 				return false;
 			}
 
-			const lastInstruction = i === n - 1;
 			anyConditionalJump ||= lastInstruction
 				? isConditionalInstruction(instruction)
 				: isConditionalJumpOrRetInstruction(instruction);

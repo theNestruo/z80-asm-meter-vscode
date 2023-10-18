@@ -143,8 +143,7 @@ class MainParser {
     private parseInstruction(s: SourceCode): Meterable | undefined {
 
         // Tries to parse as an instruction
-        for (let i = 0, n = this.enabledInstructionParsers.length; i < n; i++) {
-            const parser = this.enabledInstructionParsers[i];
+        for (const parser of this.enabledInstructionParsers) {
             const instruction = parser.parse(s);
             if (instruction) {
                 return instruction;
@@ -158,8 +157,7 @@ class MainParser {
     private parseRepetition(s: string): number | undefined {
 
         // Tries to parse as a repetition instruction
-        for (let i = 0, n = this.enabledRepetitionParsers.length; i < n; i++) {
-            const repetitionParser = this.enabledRepetitionParsers[i];
+        for (const repetitionParser of this.enabledRepetitionParsers) {
             const count = repetitionParser.parse(s);
             if (count !== undefined) {
                 return count;
@@ -173,8 +171,7 @@ class MainParser {
     private parseRepetitionEnd(s: string): boolean {
 
         // Tries to parse as a repetition end instruction
-        for (let i = 0, n = this.enabledRepetitionParsers.length; i < n; i++) {
-            const repetitionParser = this.enabledRepetitionParsers[i];
+        for (const repetitionParser of this.enabledRepetitionParsers) {
             if (repetitionParser.parseEnd(s)) {
                 return true;
             }
@@ -187,8 +184,7 @@ class MainParser {
     private parseTimingHints(s: SourceCode): TimingHints | undefined {
 
         // Tries to parse timing hints
-        for (let i = 0, n = this.enabledTimingHintsParsers.length; i < n; i++) {
-            const parser = this.enabledTimingHintsParsers[i];
+        for (const parser of this.enabledTimingHintsParsers) {
             const timingHints = parser.parse(s);
             if (timingHints) {
                 return timingHints;
