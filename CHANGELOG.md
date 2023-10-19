@@ -1,3 +1,8 @@
+## 5.1.0
+
+- Fixes extension activation issue
+- Additional customizations
+
 ## 5.0.0
 
 - Code refactor

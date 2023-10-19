@@ -169,23 +169,26 @@ export class StatusBarHandler extends AbstractHandler {
         let text = "";
 
         if (config.statusBar.showInstruction) {
+            const instructionIcon = config.statusBar.instructionIcon;
             const instruction = humanReadableInstructions(defaultTiming);
             if (instruction) {
-                text += `$(code) ${instruction} `;
+                text += `${instructionIcon} ${instruction} `;
             }
         }
 
         const timing = this.buidTimingsText(defaultTiming, flowTiming, atExitTiming);
         if (timing) {
-            text += `$(watch) ${timing}`;
+            const timingsIcon = config.statusBar.timingsIcon;
+            text += `${timingsIcon} ${timing}`;
         }
 
         const size = defaultTiming.size;
         if (size) {
+            const sizeIcon = config.statusBar.sizeIcon;
             const sizeSuffix = (config.statusBar.compactSize) ? "B"
                 : (size === 1) ? " byte"
                     : " bytes";
-            text += ` $(file-binary) ${size}${sizeSuffix}`;
+            text += ` ${sizeIcon} ${size}${sizeSuffix}`;
             if (config.statusBar.showBytes) {
                 const bytes = humanReadableBytes(defaultTiming);
                 if (bytes) {

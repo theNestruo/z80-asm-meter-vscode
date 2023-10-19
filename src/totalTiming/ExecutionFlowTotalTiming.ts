@@ -14,7 +14,7 @@ class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
 	}
 
 	get statusBarIcon(): string {
-		return "$(debug-step-over)";
+		return config.timing.executionFlow.icon;
 	}
 
 	protected modifiedTimingsOf(timing: number[],

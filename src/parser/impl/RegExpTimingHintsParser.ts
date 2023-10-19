@@ -29,7 +29,7 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 		const array: { regExp: RegExp, timingHints: TimingHints }[] = [];
 
 		// Locates macro definitions
-		config.timing.hints.regexps?.forEach(source => {
+		(config.timing.hints.regexps || []).forEach(source => {
 
 			if (!source.pattern) {
 				return;

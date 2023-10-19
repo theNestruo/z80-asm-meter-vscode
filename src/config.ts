@@ -66,6 +66,7 @@ class Configuration {
 	// Total timing calculation and Timing Hints
 	readonly timing = new TimingConfiguration();
 
+	// User-defined macros
 	get macros(): MacroDefinition[] {
 
 		return read("macros");
@@ -203,6 +204,7 @@ class TimingHintsConfiguration {
 		return ["subroutines", "any", "ignoreCommentedOut"].indexOf(this.enabledValue) !== -1;
 	}
 
+	// RegExp-based user-defined timing hints
 	get regexps(): TimingHintsDefinition[] {
 
 		return read("timing.hints.regexps");
@@ -231,6 +233,11 @@ class ExecutionFlowTotalTimingConfiguration {
 
 		return read("timing.executionFlow.stopOnUnconditionalJump");
 	}
+
+	get icon(): string {
+
+		return read("timing.executionFlow.icon");
+	}
 }
 
 class AtExitTotalTimingConfiguration {
@@ -254,6 +261,16 @@ class AtExitTotalTimingConfiguration {
 	get stopOnUnconditionalJump(): boolean {
 
 		return read("timing.atExit.stopOnUnconditionalJump");
+	}
+
+	get icon(): string {
+
+		return read("timing.atExit.icon");
+	}
+
+	get retIcon(): string {
+
+		return read("timing.atExit.retIcon");
 	}
 }
 
@@ -307,6 +324,21 @@ class StatusBarConfiguration {
 
 		return readWithDefaultValue("statusBar.debounce",
 			readIgnoreDefault("debounce")); // (deprecated)
+	}
+
+	get instructionIcon(): string {
+
+		return read("statusBar.instructionIcon");
+	}
+
+	get timingsIcon(): string {
+
+		return read("statusBar.timingsIcon");
+	}
+
+	get sizeIcon(): string {
+
+		return read("statusBar.sizeIcon");
 	}
 }
 

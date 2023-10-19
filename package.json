@@ -1,8 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.0.0",
-	"preview": true,
+	"version": "5.1.0",
 	"engines": {
 		"vscode": "^1.81.0"
 	},
@@ -206,6 +205,49 @@
 						"description": "Milliseconds to prevent metering from being called too frequently when the selection changes",
 						"default": 100
 					},
+					"z80-asm-meter.statusBar.instructionIcon": {
+						"order": 80,
+						"type": "string",
+						"minLength": 1,
+						"default": "$(code)",
+						"examples": [
+							"$(code)",
+							"$(comment)",
+							"$(file-code)",
+							"$(file-text)",
+							"$(report)",
+							"$(selection)",
+							"$(symbol-keyword)",
+							"$(symbol-snippet)"
+						]
+					},
+					"z80-asm-meter.statusBar.timingsIcon": {
+						"order": 80,
+						"type": "string",
+						"minLength": 1,
+						"default": "$(watch)",
+						"examples": [
+							"$(clock)",
+							"$(dashboard)",
+							"$(watch)",
+							"$(zap)"
+						]
+					},
+					"z80-asm-meter.statusBar.sizeIcon": {
+						"order": 80,
+						"type": "string",
+						"minLength": 1,
+						"default": "$(file-binary)",
+						"examples": [
+							"$(archive)",
+							"$(database)",
+							"$(file-binary)",
+							"$(package)",
+							"$(pie-chart)",
+							"$(preview)",
+							"$(symbol-misc)"
+						]
+					},
 					"z80-asm-meter.viewInstruction": {
 						"type": "boolean",
 						"deprecationMessage": "Use \"z80-asm-meter.statusBar.showInstruction\" instead"
@@ -329,52 +371,107 @@
 				"order": 50,
 				"properties": {
 					"z80-asm-meter.timing.executionFlow.enabled": {
-						"order": 10,
+						"order": 110,
 						"type": "boolean",
 						"mark": "Enables execution flow total timing calculation",
 						"default": true
 					},
 					"z80-asm-meter.timing.executionFlow.threshold": {
-						"order": 20,
+						"order": 120,
 						"type": "number",
 						"description": "Minimum number of instructions to be selected for the calculation of execution flow total timing",
 						"default": 2
 					},
 					"z80-asm-meter.timing.executionFlow.requireConditional": {
-						"order": 30,
+						"order": 130,
 						"type": "boolean",
 						"description": "Requires at least one conditional instruction to enable execution flow total timing calculation",
 						"default": true
 					},
 					"z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump": {
-						"order": 32,
+						"order": 140,
 						"type": "boolean",
 						"description": "Disables execution flow total timing calculation if an unconditional JP, JR or RET instruction is found",
 						"default": true
 					},
+					"z80-asm-meter.timing.executionFlow.icon": {
+						"order": 150,
+						"type": "string",
+						"minLength": 1,
+						"description": "Execution flow total timing calculation icon in the status bar",
+						"default": "$(debug-step-over)",
+						"examples": [
+							"$(arrow-down)",
+							"$(chevron-down)",
+							"$(debug-step-into)",
+							"$(debug-step-over)",
+							"$(kebab-horizontal)",
+							"$(kebab-vertical)",
+							"$(run-below)",
+							"$(triangle-down)"
+						]
+					},
 					"z80-asm-meter.timing.atExit.enabled": {
-						"order": 60,
+						"order": 210,
 						"type": "boolean",
 						"description": "Enables total timing calculation of the execution flow to the selected exit point",
 						"default": true
 					},
 					"z80-asm-meter.timing.atExit.threshold": {
-						"order": 70,
+						"order": 220,
 						"type": "number",
 						"description": "Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point",
 						"default": 2
 					},
 					"z80-asm-meter.timing.atExit.requireConditional": {
-						"order": 80,
+						"order": 230,
 						"type": "boolean",
 						"description": "Requires at least one conditional instruction to enable total timing calculation of the execution flow to the selected exit point",
 						"default": true
 					},
 					"z80-asm-meter.timing.atExit.stopOnUnconditionalJump": {
-						"order": 82,
+						"order": 240,
 						"type": "boolean",
 						"description": "Disables total timing calculation of the execution flow to the selected exit point if an unconditional JP, JR or RET instruction is found",
 						"default": true
+					},
+					"z80-asm-meter.timing.atExit.icon": {
+						"order": 250,
+						"type": "string",
+						"minLength": 1,
+						"description": "Total timing calculation of the execution flow to the selected exit point (jump or CALL) icon in the status bar",
+						"default": "$(debug-step-out)",
+						"examples": [
+							"$(arrow-right)",
+							"$(chevron-right)",
+							"$(debug-step-into)",
+							"$(debug-step-out)",
+							"$(indent)",
+							"$(redo)",
+							"$(triangle-right)"
+						]
+					},
+					"z80-asm-meter.timing.atExit.retIcon": {
+						"order": 255,
+						"type": "string",
+						"minLength": 1,
+						"description": "Total timing calculation of the execution flow to the selected exit point (RET) icon in the status bar",
+						"default": "$(debug-step-back)",
+						"examples": [
+							"$(arrow-left)",
+							"$(arrow-up)",
+							"$(chevron-left)",
+							"$(chevron-up)",
+							"$(debug-restart)",
+							"$(debug-step-back)",
+							"$(debug-step-into)",
+							"$(debug-step-out)",
+							"$(discard)",
+							"$(newline)",
+							"$(reply)",
+							"$(triangle-left)",
+							"$(triangle-up)"
+						]
 					},
 					"z80-asm-meter.timing.threshold": {
 						"type": "number",
@@ -420,7 +517,10 @@
 									"description": "The pattern of the regular expression to match against the line comment"
 								},
 								"flags": {
-									"type": [ "string", "undefined" ],
+									"type": [
+										"string",
+										"undefined"
+									],
 									"description": "The string indicating the flags of the regular expression"
 								},
 								"z80": {
@@ -483,7 +583,6 @@
 							"none"
 						]
 					}
-
 				}
 			},
 			{

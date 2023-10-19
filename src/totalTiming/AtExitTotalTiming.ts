@@ -18,7 +18,9 @@ class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
 	}
 
 	get statusBarIcon(): string {
-		return this.isLastInstructionJumpOrCall ? "$(debug-step-out)" : "$(debug-step-into)";
+		return this.isLastInstructionJumpOrCall
+			? config.timing.atExit.icon // "$(debug-step-out)"
+			: config.timing.atExit.retIcon; // "$(debug-step-into)"
 	}
 
 	protected modifiedTimingsOf(timing: number[],

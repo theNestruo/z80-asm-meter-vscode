@@ -39,7 +39,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 * [MSX Z80](https://marketplace.visualstudio.com/items?itemName=sharksym.asm-msx) by Yeoungman Seo
 * [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) by BouKiChi
 * [DeZog - Z80 Debugger](https://marketplace.visualstudio.com/items?itemName=maziac.dezog) by Maziac
-* (and probably others; please check the `z80-asm-meter.languageIds` setting)
+* (and probably others; please check the `z80-asm-meter.languageIds` [setting](#main-settings))
 
 <br/>
 
@@ -52,6 +52,8 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 > Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
 >
 > If you are migrating from any previous version to version 5.0.0, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the deprecation messages.
+>
+> &nbsp;
 
 This extension contributes the following settings:
 
