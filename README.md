@@ -116,6 +116,12 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.statusBar.debounce`: Milliseconds to prevent metering from being called too frequently when the selection changes. Defaults to: `100` (100&nbsp;ms).
 
+* `z80-asm-meter.statusBar.instructionIcon`: The icon to identify the instruction in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(code)`.
+
+* `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(watch)`.
+
+* `z80-asm-meter.statusBar.sizeIcon`: The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(file-binary)`.
+
 ### Assembler syntax settings
 
 * `z80-asm-meter.syntax.label.colonOptional`: Adjusts the label detection to match the syntax of the assembler.
@@ -160,6 +166,8 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 
 * `z80-asm-meter.timing.executionFlow.requireConditional`: Requires at least one conditional instruction to enable execution flow total timing calculation. Enabled by default.
 
+* `z80-asm-meter.timing.executionFlow.icon`: Execution flow total timing calculation icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-over)`.
+
 * `z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump`: Disables execution flow total timing calculation if an unconditional `JP`, `JR` or `RET` instruction is found. Enabled by default.
 
 * `z80-asm-meter.timing.atExit.enabled`: Enables total timing calculation of the execution flow to the selected exit point. Enabled by default.
@@ -169,6 +177,10 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 * `z80-asm-meter.timing.atExit.requireConditional`: Requires at least one conditional instruction to enable total timing calculation of the execution flow to the selected exit point. Enabled by default.
 
 * `z80-asm-meter.timing.atExit.stopOnUnconditionalJump`: Disables total timing calculation of the execution flow to the selected exit point if an unconditional `JP`, `JR` or `RET` instruction is found. Enabled by default.
+
+* `z80-asm-meter.timing.atExit.icon`: Total timing calculation of the execution flow to the selected exit point (jump or `CALL`) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-out)`.
+
+* `z80-asm-meter.timing.atExit.retIcon`: Total timing calculation of the execution flow to the selected exit point (RET) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-back)`.
 
 ### Timing hints settings
 

@@ -1,7 +1,7 @@
 ## 5.1.0
 
 - Fixes extension activation issue
-- Additional customizations
+- Additional customizations, such as the status bar icons
 
 ## 5.0.0
 

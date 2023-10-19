@@ -209,6 +209,7 @@
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
+						"description": "The icon to identify the instruction in the status bar",
 						"default": "$(code)",
 						"examples": [
 							"$(code)",
@@ -225,6 +226,7 @@
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
+						"description": "The icon to identify the timings in the status bar",
 						"default": "$(watch)",
 						"examples": [
 							"$(clock)",
@@ -237,6 +239,7 @@
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
+						"description": "The icon to identify the size and the bytes in the status bar",
 						"default": "$(file-binary)",
 						"examples": [
 							"$(archive)",
