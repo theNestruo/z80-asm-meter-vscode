@@ -51,7 +51,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 >
 > Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
 >
-> If you are migrating from any previous version to version 5.0.0, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the deprecation messages.
+> If you are migrating from any version prior to 5.0.0 to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the deprecation messages.
 >
 > &nbsp;
 
