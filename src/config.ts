@@ -54,6 +54,11 @@ class Configuration {
 			: ["S"];
 	}
 
+	get expandSelectionToLine(): boolean {
+
+		return read("expandSelectionToLine");
+	}
+
 	// Status bar
 	readonly statusBar = new StatusBarConfiguration();
 

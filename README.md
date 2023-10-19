@@ -77,7 +77,7 @@ This extension contributes the following settings:
     * `cpc`: For Amstrad CPC developers. Uses the default Z80 instruction set and shows timing measured in number of NOPs.
     * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
 
-* `z80-asm-meter.syntax`: Adjusts the main syntax of the assembler:
+* `z80-asm-meter.syntax`: Adjusts the main syntax of the assembler. The main syntax of the assembler changes the default value of particular features (such as syntax of the labels, or support for fake instructions) to best suit one particular assembler. See [assembler syntax settings](#assembler-syntax-settings) for details.
 
     * `default` (default): Matches most assemblers.
     * `glass`: Matches [Glass Z80 assembler](http://www.grauw.nl/projects/glass/) syntax.
@@ -86,7 +86,7 @@ This extension contributes the following settings:
     * `sjasmplus`: Matches [SjASMPlus](https://github.com/sjasmplus/sjasmplus) assembler syntax.
     * `tniasm`: Matches [tniASM](http://www.tni.nl/products/tniasm.html) assembler syntax.
 
-    See [assembler syntax settings](#assembler-syntax-settings) for details.
+* `z80-asm-meter.expandSelectionToLine`: When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`). Disabled by default.
 
 ### Status bar settings
 

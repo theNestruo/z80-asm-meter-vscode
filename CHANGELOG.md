@@ -1,3 +1,7 @@
+## 5.2.0
+
+- Ability to expand selection to line
+
 ## 5.1.0
 
 - Fixes extension activation issue
