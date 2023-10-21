@@ -303,9 +303,12 @@ class StatusBarConfiguration {
 		return read("statusBar.copyTimingsAsHints");
 	}
 
-	get compactSize(): boolean {
+	get sizeSuffix(): string {
 
-		return read("statusBar.compactSize");
+		const deprecatedValue = readIgnoreDefault("statusBar.compactSize");
+		return readWithDefaultValue("statusBar.sizeSuffix",
+			deprecatedValue === true ? "B" // (deprecated)
+			: undefined);
 	}
 
 	get totalTimings(): "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default" {

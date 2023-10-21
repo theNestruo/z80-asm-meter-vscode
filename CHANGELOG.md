@@ -1,6 +1,7 @@
 ## 5.2.0
 
 - Ability to expand selection to line
+- More flexible status bar customization
 
 ## 5.1.0
 

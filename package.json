@@ -193,11 +193,15 @@
 						"description": "Enable copying timings as timing hints, instead of human readable format",
 						"default": false
 					},
-					"z80-asm-meter.statusBar.compactSize": {
+					"z80-asm-meter.statusBar.sizeSuffix": {
 						"order": 50,
-						"type": "boolean",
-						"description": "Uses a compact suffix (B) for the size in bytes in the status bar",
-						"default": false
+						"type": "string",
+						"description": "The suffix for the size in bytes in the status bar",
+						"default": " byte| bytes",
+						"examples": [
+							" byte| bytes",
+							" B"
+						]
 					},
 					"z80-asm-meter.statusBar.showBytes": {
 						"order": 60,
@@ -238,7 +242,8 @@
 							"$(clock)",
 							"$(dashboard)",
 							"$(watch)",
-							"$(zap)"
+							"$(zap)",
+							"Ts "
 						]
 					},
 					"z80-asm-meter.statusBar.sizeIcon": {
@@ -254,7 +259,8 @@
 							"$(package)",
 							"$(pie-chart)",
 							"$(preview)",
-							"$(symbol-misc)"
+							"$(symbol-misc)",
+							", Sz "
 						]
 					},
 					"z80-asm-meter.viewInstruction": {
@@ -268,6 +274,10 @@
 					"z80-asm-meter.viewBytes": {
 						"type": "boolean",
 						"deprecationMessage": "Use \"z80-asm-meter.statusBar.showBytes\" instead"
+					},
+					"z80-asm-meter.statusBar.compactSize": {
+						"type": "boolean",
+						"deprecationMessage": "Use \"z80-asm-meter.statusBar.sizeSuffix\" instead"
 					},
 					"z80-asm-meter.debounce": {
 						"type": "integer",

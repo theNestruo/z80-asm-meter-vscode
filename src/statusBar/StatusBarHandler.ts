@@ -7,7 +7,7 @@ import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTimin
 import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
 import { humanReadableBytes } from '../utils/ByteUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
-import { hashCode } from "../utils/TextUtils";
+import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
 import { humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
 import { AbstractHandler } from "./AbstractHandler";
 import { CommandHandler } from "./CommandHandler";
@@ -169,26 +169,24 @@ export class StatusBarHandler extends AbstractHandler {
         let text = "";
 
         if (config.statusBar.showInstruction) {
-            const instructionIcon = config.statusBar.instructionIcon;
             const instruction = humanReadableInstructions(defaultTiming);
             if (instruction) {
-                text += `${instructionIcon} ${instruction} `;
+                const instructionIcon = espaceIfNotInfix(config.statusBar.instructionIcon);
+                text += `${instructionIcon}${instruction}`;
             }
         }
 
         const timing = this.buidTimingsText(defaultTiming, flowTiming, atExitTiming);
         if (timing) {
-            const timingsIcon = config.statusBar.timingsIcon;
-            text += `${timingsIcon} ${timing}`;
+            const timingsIcon = espaceIfNotInfix(config.statusBar.timingsIcon);
+            text += `${timingsIcon}${timing}`;
         }
 
         const size = defaultTiming.size;
         if (size) {
-            const sizeIcon = config.statusBar.sizeIcon;
-            const sizeSuffix = (config.statusBar.compactSize) ? "B"
-                : (size === 1) ? " byte"
-                    : " bytes";
-            text += ` ${sizeIcon} ${size}${sizeSuffix}`;
+            const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
+            const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
+            text += `${sizeIcon}${size}${sizeSuffix}`;
             if (config.statusBar.showBytes) {
                 const bytes = humanReadableBytes(defaultTiming);
                 if (bytes) {
@@ -197,7 +195,7 @@ export class StatusBarHandler extends AbstractHandler {
             }
         }
 
-        return text;
+        return text.trim().replace(/\s+/, " ");
     }
 
     private buidTimingsText(

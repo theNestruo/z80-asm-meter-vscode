@@ -110,7 +110,7 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.statusBar.copyTimingsAsHints`: Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format. Disabled by default.
 
-* `z80-asm-meter.statusBar.compactSize`: Uses a compact suffix (`B`) for the size in bytes in the status bar, instead of the default `byte`/`bytes`. Disabled by default.
+* `z80-asm-meter.statusBar.sizeSuffix`: The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural. Defaults to `" byte| bytes"`.
 
 * `z80-asm-meter.statusBar.showBytes`: Shows the bytes (opcode) in the status bar. Disabled by default.
 

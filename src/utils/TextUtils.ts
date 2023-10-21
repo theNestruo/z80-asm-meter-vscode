@@ -13,3 +13,16 @@ export function hashCode(s: string): number {
     return hash;
 }
 
+export function espaceIfNotInfix(s: string): string {
+
+    return s.trim().indexOf(" ") === -1 ? ` ${s.trim()} ` : s;
+}
+
+export function pluralize(s: string, n: number): string {
+
+    const split = s?.split("|", 2);
+    if (!split || split.length === 1) {
+        return s;
+    }
+    return (n === 1) || (n === -1) ? split[0] : split[1];
+}
