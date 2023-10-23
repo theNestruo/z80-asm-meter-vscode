@@ -369,16 +369,20 @@ See [macros settings](#macros-settings).
 
 Double check the `z80-asm-meter.languageIds` setting in your settings.
 
+<br/>
+
 ### Q: My macros are not recognized
 
-Macro definitions are not read from actual source code, but from user settings. Double check the `z80-asm-meter.macros` setting.
+Macro definitions are not read from actual source code, but from user settings. Double check the [`z80-asm-meter.macros` setting](#macros-settings).
+
+<br/>
 
 ### Q: How can I get clock cycles and bytecode size for in-lined assembly in my C files?
 
 Double check the `z80-asm-meter.languageIds` setting in your settings. It has to include `c`:
 
 ```json
-"z80-asm-meter.languageIds": [ "c" ],
+"z80-asm-meter.languageIds": [ "c" ]
 ```
 
 ### Q: I've added `"z80-asm-meter.languageIds": [ "c", "s", "asm" ]`, but I only get clock cycles for in-lined assembly; now I don't get clock cycles in my assembly files!
@@ -386,7 +390,32 @@ Double check the `z80-asm-meter.languageIds` setting in your settings. It has to
 The `z80-asm-meter.languageIds` setting uses language IDs, not extensions. Check the language ID of your assembly files and replace `"s"` and `"asm"` with that extension ID. Or use the default language IDs, then add `"c"`:
 
 ```json
-"z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ],
+"z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
+```
+
+<br/>
+
+### Q: &lt;some feature&gt; stopped working after updating the extension
+
+Double check your settings for any [deprecated setting](#deprecated-settings) that needs to be replaced.
+
+### Q: But that is your fault! You should support the deprecated settings a few versions!
+
+VS Code API support for deprecated settings does conflict with default values. I did my best to keep the extension backwards compatible, but it ended up being a hard-to-debug mess that failed most of the times.
+
+From version 5.0.0 onwards I'll keep the [deprecated setting](#deprecated-settings) updated.
+
+<br/>
+
+### Q: The extension is too confusing; there are too many things in the status bar now
+
+There are new features, such as [total timing calculations](#total-timing-calculations) and [timing hints](#timing-hints), that are now enabled by default. The default values should be appropriate for the majority of the users, but if you are uncomfortable with the new features, or find them confusing, you can still disable them.
+
+The shortest way to disable the new features is:
+
+```json
+"z80-asm-meter.statusBar.totalTimings": "default",
+"z80-asm-meter.timing.hints.enabled": "none"
 ```
 
 <br/>
