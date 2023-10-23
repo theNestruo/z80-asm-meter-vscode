@@ -262,26 +262,6 @@
 							"$(symbol-misc)",
 							", Sz "
 						]
-					},
-					"z80-asm-meter.viewInstruction": {
-						"type": "boolean",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.showInstruction\" instead"
-					},
-					"z80-asm-meter.timing.mode": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.totalTimings\" instead"
-					},
-					"z80-asm-meter.viewBytes": {
-						"type": "boolean",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.showBytes\" instead"
-					},
-					"z80-asm-meter.statusBar.compactSize": {
-						"type": "boolean",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.sizeSuffix\" instead"
-					},
-					"z80-asm-meter.debounce": {
-						"type": "integer",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.debounce\" instead"
 					}
 				}
 			},
@@ -362,10 +342,6 @@
 						"type": "boolean",
 						"description": "Enables REPT/ENDM repetition blocks",
 						"default": false
-					},
-					"z80-asm-meter.syntax.label": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.syntax.label.colonOptional\" instead"
 					}
 				}
 			},
@@ -378,10 +354,6 @@
 						"type": "boolean",
 						"description": "When enabled, tries to parse DEFS directive bytes as single byte instructions",
 						"default": false
-					},
-					"z80-asm-meter.directivesAsInstructions": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.parser.directives.defsAsInstructions\" instead"
 					}
 				}
 			},
@@ -491,10 +463,6 @@
 							"$(triangle-left)",
 							"$(triangle-up)"
 						]
-					},
-					"z80-asm-meter.timing.threshold": {
-						"type": "number",
-						"deprecationMessage": "Use \"z80-asm-meter.timing.executionFlow.threshold\" and/or \"z80-asm-meter.timing.atExit.threshold\" instead"
 					}
 				}
 			},
@@ -592,15 +560,6 @@
 								}
 							}
 						}
-					},
-					"z80-asm-meter.timing.hints": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.timing.hints.enabled\" instead",
-						"enum": [
-							"subroutines",
-							"any",
-							"none"
-						]
 					}
 				}
 			},

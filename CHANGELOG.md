@@ -2,6 +2,7 @@
 
 - Ability to expand selection to line
 - More flexible status bar customization
+- Fixes settings default values being ignored. #145
 
 ## 5.1.0
 

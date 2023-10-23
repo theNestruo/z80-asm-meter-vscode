@@ -51,7 +51,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 >
 > Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
 >
-> If you are migrating from any version prior to 5.0.0 to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the deprecation messages.
+> If you are migrating from any version prior to 5.0.0 to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the [deprecation messages](#deprecated-settings).
 >
 > &nbsp;
 
@@ -216,6 +216,22 @@ See [timing hints](#timing-hints) in the _Advanced usage_ section.
     * `ts`: Declares or overrides default macro timing. Optional.
     * `size`: Declares or overrides macro byte count. Optional.
     * `instructions`: The macro definition, as instructions. Optional.
+
+### Deprecated settings
+
+Please find the deprecated settings, the last version where setting was available, and the replacement setting or settings in the following table:
+
+| Version | Deprecated setting | Replacement setting(s) |
+| --: | --- | --- |
+| v4.3.0 | `z80-asm-meter.viewInstruction` | `z80-asm-meter.statusBar.showInstruction` |
+| v4.3.0 | `z80-asm-meter.timing.mode` | `z80-asm-meter.statusBar.totalTimings` |
+| v4.3.0 | `z80-asm-meter.viewBytes` | `z80-asm-meter.statusBar.showBytes` |
+| v4.3.0 | `z80-asm-meter.debounce` | `z80-asm-meter.statusBar.debounce` |
+| v4.3.0 | `z80-asm-meter.syntax.label` | `z80-asm-meter.syntax.label.colonOptional` |
+| v4.3.0 | `z80-asm-meter.directivesAsInstructions` | `z80-asm-meter.parser.directives.defsAsInstructions` |
+| v4.3.0 | `z80-asm-meter.timing.threshold` | `z80-asm-meter.timing.executionFlow.threshold`<br>`z80-asm-meter.timing.atExit.threshold` |
+| v4.3.0 | `z80-asm-meter.timing.hints` | `z80-asm-meter.timing.hints.enabled` |
+| v5.1.0 | `z80-asm-meter.statusBar.compactSize` | `z80-asm-meter.statusBar.sizeSuffix` |
 
 <br/>
 

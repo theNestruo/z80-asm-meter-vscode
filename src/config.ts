@@ -38,12 +38,10 @@ function readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefi
 class Configuration {
 
 	get languageIds(): string[] {
-
 		return read("languageIds");
 	}
 
 	get platform(): "z80" | "cpc" | "msx" | "pc8000" | "z80n" {
-
 		return read("platform");
 	}
 
@@ -73,7 +71,6 @@ class Configuration {
 
 	// User-defined macros
 	get macros(): MacroDefinition[] {
-
 		return read("macros");
 	}
 }
@@ -82,33 +79,30 @@ class Configuration {
 class SyntaxConfiguration {
 
 	get syntax(): "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "tniasm" {
-
-		return readWithDefaultValue("syntax",
-			<boolean>read("sjasmplus") ? "sjasmplus" // (deprecated)
-			: undefined);
+		return read("syntax");
 	}
 
 	private get lineSeparatorValue(): "none" | "colon" | "pipe" {
 
 		return readWithDefaultValue("syntax.lineSeparator",
-			(this.syntax === "tniasm") ? "pipe" // (derived)
+			this.syntax === "tniasm" ? "pipe" // (derived)
 			: undefined);
 	}
 
 	get lineSeparator(): string | undefined {
 
-		return this.lineSeparatorValue === "colon" ? ":"
-			: this.lineSeparatorValue === "pipe" ? "|"
+		const value = this.lineSeparatorValue;
+		return value === "colon" ? ":"
+			: value === "pipe" ? "|"
 			: undefined;
 	}
 
 	private get labelColonOptional(): boolean {
 
-		const deprecatedValue = readIgnoreDefault("syntax.label");
+		const value = this.syntax;
 		return readWithDefaultValue("syntax.label.colonOptional",
-			(deprecatedValue !== undefined) ? (deprecatedValue === "colonOptional") // (deprecated)
-			: (this.syntax === "pasmo") ? true // (derived)
-			: (this.syntax === "sjasmplus") ? true // (derived)
+			value === "pasmo" ? true // (derived)
+			: value === "sjasmplus" ? true // (derived)
 			: undefined);
 	}
 
@@ -123,14 +117,15 @@ class SyntaxConfiguration {
 
 		return readWithDefaultValue("syntax.repeat",
 			(this.syntax === "sjasm") ? "brackets" // (derived)
-				: (this.syntax === "sjasmplus") ? "dot" // (derived)
-					: undefined);
+			: (this.syntax === "sjasmplus") ? "dot" // (derived)
+			: undefined);
 	}
 
 	get repeatRegExp(): RegExp | undefined {
 
-		return this.repeat === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-			: this.repeat === "dot" ? /^(?:\.(\S+)\s)(.+)$/
+		const value = this.repeat;
+		return value === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
+			: value === "dot" ? /^(?:\.(\S+)\s)(.+)$/
 			: undefined;
 	}
 
@@ -180,38 +175,33 @@ class SyntaxConfiguration {
 class ParserConfiguration {
 
 	get directivesDefsAsInstructions(): boolean {
-
-		const deprecatedValue = <string>readIgnoreDefault("directivesAsInstructions");
-		return readWithDefaultValue("parser.directives.defsAsInstructions",
-			(deprecatedValue !== undefined) ? (deprecatedValue === "defs") // (deprecated)
-			: undefined);
+		return read("parser.directives.defsAsInstructions");
 	}
 }
 
 class TimingConfiguration {
 
 	readonly hints = new TimingHintsConfiguration();
-
 	readonly executionFlow = new ExecutionFlowTotalTimingConfiguration();
-
 	readonly atExit = new AtExitTotalTimingConfiguration();
 }
 
 class TimingHintsConfiguration {
 
 	get enabledValue(): "none" | "subroutines" | "any" | "ignoreCommentedOut" {
-
 		return read("timing.hints.enabled");
 	}
 
 	get enabled(): boolean {
 
-		return ["subroutines", "any", "ignoreCommentedOut"].indexOf(this.enabledValue) !== -1;
+		const value = this.enabledValue;
+		return value === "subroutines"
+			|| value === "any"
+			|| value === "ignoreCommentedOut";
 	}
 
 	// RegExp-based user-defined timing hints
 	get regexps(): TimingHintsDefinition[] {
-
 		return read("timing.hints.regexps");
 	}
 }
@@ -219,28 +209,22 @@ class TimingHintsConfiguration {
 class ExecutionFlowTotalTimingConfiguration {
 
 	get enabled(): boolean {
-
 		return read("timing.executionFlow.enabled");
 	}
 
 	get threshold(): number {
-
-		return readWithDefaultValue("timing.executionFlow.threshold",
-			readIgnoreDefault("timing.threshold")); // (deprecated)
+		return read("timing.executionFlow.threshold");
 	}
 
 	get requireConditional(): boolean {
-
 		return read("timing.executionFlow.requireConditional");
 	}
 
 	get stopOnUnconditionalJump(): boolean {
-
 		return read("timing.executionFlow.stopOnUnconditionalJump");
 	}
 
 	get icon(): string {
-
 		return read("timing.executionFlow.icon");
 	}
 }
@@ -248,33 +232,26 @@ class ExecutionFlowTotalTimingConfiguration {
 class AtExitTotalTimingConfiguration {
 
 	get enabled(): boolean {
-
 		return read("timing.atExit.enabled");
 	}
 
 	get threshold(): number {
-
-		return readWithDefaultValue("timing.atExit.threshold",
-			readIgnoreDefault("timing.threshold")); // (deprecated)
+		return read("timing.atExit.threshold");
 	}
 
 	get requireConditional(): boolean {
-
 		return read("timing.atExit.requireConditional");
 	}
 
 	get stopOnUnconditionalJump(): boolean {
-
 		return read("timing.atExit.stopOnUnconditionalJump");
 	}
 
 	get icon(): string {
-
 		return read("timing.atExit.icon");
 	}
 
 	get retIcon(): string {
-
 		return read("timing.atExit.retIcon");
 	}
 }
@@ -282,70 +259,49 @@ class AtExitTotalTimingConfiguration {
 class StatusBarConfiguration {
 
 	get alignment(): "leftmost" | "left" | "right" | "rightmost" {
-
 		return read("statusBar.alignment");
 	}
 
 	get showInstruction(): boolean {
-
-		return readWithDefaultValue("statusBar.showInstruction",
-			readIgnoreDefault("viewInstruction")); // (deprecated)
+		return read("statusBar.showInstruction");
 	}
 
 	get showBytes(): boolean {
-
-		return readWithDefaultValue("statusBar.showBytes",
-			readIgnoreDefault("viewBytes")); // (deprecated)
+		return read("statusBar.showBytes");
 	}
 
 	get copyTimingsAsHints(): boolean {
-
 		return read("statusBar.copyTimingsAsHints");
 	}
 
 	get sizeSuffix(): string {
-
-		const deprecatedValue = readIgnoreDefault("statusBar.compactSize");
-		return readWithDefaultValue("statusBar.sizeSuffix",
-			deprecatedValue === true ? "B" // (deprecated)
-			: undefined);
+		return read("statusBar.sizeSuffix");
 	}
 
 	get totalTimings(): "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default" {
-
-		const deprecatedValue = readIgnoreDefault("timing.mode");
-		return readWithDefaultValue("statusBar.totalTimings",
-			deprecatedValue === "none" ? "default" // (deprecated)
-			: deprecatedValue === "best" ? "best" // (deprecated)
-			: deprecatedValue === "smart" ? "combineSmart" // (deprecated)
-			: deprecatedValue === "all" ? "combineAll" // (deprecated)
-			: undefined);
+		return read("statusBar.totalTimings");
 	}
 
 	get totalTimingsCombined() {
 
-		return this.totalTimings === "combineAll"
-			|| this.totalTimings === "combineSmart";
+		const value = this.totalTimings;
+		return value === "combineAll"
+			|| value === "combineSmart";
 	}
 
 	get debounce(): number {
-
-		return readWithDefaultValue("statusBar.debounce",
-			readIgnoreDefault("debounce")); // (deprecated)
+		return read("statusBar.debounce");
 	}
 
 	get instructionIcon(): string {
-
 		return read("statusBar.instructionIcon");
 	}
 
 	get timingsIcon(): string {
-
 		return read("statusBar.timingsIcon");
 	}
 
 	get sizeIcon(): string {
-
 		return read("statusBar.sizeIcon");
 	}
 }
