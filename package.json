@@ -434,7 +434,7 @@
 						"order": 212,
 						"type": "boolean",
 						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a CALL or RST instruction",
-						"default": true
+						"default": false
 					},
 					"z80-asm-meter.timing.atExit.threshold": {
 						"order": 220,

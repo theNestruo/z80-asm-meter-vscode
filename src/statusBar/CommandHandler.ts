@@ -54,7 +54,7 @@ export class CommandHandler extends AbstractHandler implements vscode.Command {
         flowTiming: TotalTimingMeterable | undefined,
         atExitTiming: TotalTimingMeterable | undefined): string | undefined {
 
-        const timing = config.statusBar.totalTimings
+        const timing = config.statusBar.totalTimingsEnabled
             ? atExitTiming || flowTiming || defaultTiming
             : defaultTiming;
 

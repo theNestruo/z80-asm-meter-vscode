@@ -48,7 +48,7 @@ class ExecutionFlowTotalTiming implements TotalTiming {
 	 */
 	private canDecorate(meterable: Meterable): boolean {
 
-		if (!config.statusBar.totalTimings
+		if (!config.statusBar.totalTimingsEnabled
 			|| !config.timing.executionFlow.enabled) {
 			return false;
 		}

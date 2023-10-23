@@ -73,7 +73,7 @@ class AtExitTotalTiming implements TotalTiming {
 	 */
 	private canDecorate(meterables: Meterable[]): boolean {
 
-		if (!config.statusBar.totalTimings
+		if (!config.statusBar.totalTimingsEnabled
 			|| !(config.timing.atExit.retEnabled
 				|| config.timing.atExit.jumpEnabled
 				|| config.timing.atExit.callEnabled)) {

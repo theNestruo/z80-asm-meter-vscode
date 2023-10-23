@@ -294,6 +294,10 @@ class StatusBarConfiguration {
 		return read("statusBar.totalTimings");
 	}
 
+	get totalTimingsEnabled(): boolean {
+		return this.totalTimings !== "default";
+	}
+
 	get totalTimingsCombined() {
 
 		const value = this.totalTimings;
