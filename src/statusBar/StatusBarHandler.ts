@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { config } from "../config";
 import { mainParser } from "../parser/MainParser";
-import { atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
+import { AtExitTotalTiminsMeterable, atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
 import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
 import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
@@ -163,7 +163,7 @@ export class StatusBarHandler extends AbstractHandler {
     private buildText(
         defaultTiming: TotalTimingMeterable,
         flowTiming: TotalTimingMeterable | undefined,
-        atExitTiming: TotalTimingMeterable | undefined): string {
+        atExitTiming: AtExitTotalTiminsMeterable | undefined): string {
 
         // Builds the statur bar text
         let text = "";
@@ -201,24 +201,33 @@ export class StatusBarHandler extends AbstractHandler {
     private buidTimingsText(
         defaultTiming: TotalTimingMeterable,
         flowTiming: TotalTimingMeterable | undefined,
-        atExitTiming: TotalTimingMeterable | undefined): string | undefined {
+        atExitTiming: AtExitTotalTiminsMeterable | undefined): string | undefined {
+
+        // Applies requested order
+        const totalTimingsOrder = config.statusBar.totalTimingsOrder;
+        const [retTiming, jumpCallTiming] = atExitTiming?.isLastInstructionRet
+            ? [atExitTiming, undefined]
+            : [undefined, atExitTiming];
+        const [b, c, d] =
+            totalTimingsOrder === "retFlowJumpCall" ? [retTiming, flowTiming, jumpCallTiming]
+            : totalTimingsOrder === "flowRetJumpCall" ? [flowTiming, retTiming, jumpCallTiming]
+            : totalTimingsOrder === "retJumpCallFlow" ? [retTiming, jumpCallTiming, flowTiming]
+            : [undefined, undefined, undefined]; // (should never happen)
 
         switch (config.statusBar.totalTimings) {
             case "all":
             case "combineAll":
                 return humanReadableTimings(
-                    [defaultTiming, flowTiming, atExitTiming],
-                    config.statusBar.totalTimingsCombined);
+                    [defaultTiming, b, c, d], config.statusBar.totalTimingsCombined);
 
             case "smart":
             case "combineSmart":
-                return humanReadableTimings(
-                    [atExitTiming || flowTiming ? undefined : defaultTiming, flowTiming, atExitTiming],
-                    config.statusBar.totalTimingsCombined);
+                return flowTiming || atExitTiming
+                    ? humanReadableTimings([b, c, d], config.statusBar.totalTimingsCombined)
+                    : humanReadableTimings([defaultTiming]);
 
             case "best":
-                return humanReadableTimings(
-                    [atExitTiming || flowTiming || defaultTiming]);
+                return humanReadableTimings([atExitTiming || flowTiming || defaultTiming]);
 
             case "default":
             default:

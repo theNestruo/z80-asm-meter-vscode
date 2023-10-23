@@ -231,8 +231,16 @@ class ExecutionFlowTotalTimingConfiguration {
 
 class AtExitTotalTimingConfiguration {
 
-	get enabled(): boolean {
-		return read("timing.atExit.enabled");
+	get retEnabled(): boolean {
+		return read("timing.atExit.retEnabled");
+	}
+
+	get jumpEnabled(): boolean {
+		return read("timing.atExit.jumpEnabled");
+	}
+
+	get callEnabled(): boolean {
+		return read("timing.atExit.callEnabled");
 	}
 
 	get threshold(): number {
@@ -247,12 +255,16 @@ class AtExitTotalTimingConfiguration {
 		return read("timing.atExit.stopOnUnconditionalJump");
 	}
 
-	get icon(): string {
-		return read("timing.atExit.icon");
-	}
-
 	get retIcon(): string {
 		return read("timing.atExit.retIcon");
+	}
+
+	get jumpIcon(): string {
+		return read("timing.atExit.jumpIcon");
+	}
+
+	get callIcon(): string {
+		return read("timing.atExit.callIcon");
 	}
 }
 
@@ -287,6 +299,10 @@ class StatusBarConfiguration {
 		const value = this.totalTimings;
 		return value === "combineAll"
 			|| value === "combineSmart";
+	}
+
+	get totalTimingsOrder(): "retFlowJumpCall" | "flowRetJumpCall" | "retJumpCallFlow" {
+		return read("statusBar.totalTimingsOrder");
 	}
 
 	get debounce(): number {

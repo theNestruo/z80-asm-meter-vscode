@@ -187,6 +187,22 @@
 						],
 						"default": "smart"
 					},
+					"z80-asm-meter.statusBar.totalTimingsOrder": {
+						"order": 35,
+						"type": "string",
+						"description": "Determines the order of the total timing calculations in the status bar when more than one total timing calculation is visible",
+						"enum": [
+							"retFlowJumpCall",
+							"flowRetJumpCall",
+							"retJumpCallFlow"
+						],
+						"enumDescriptions": [
+							"At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last",
+							"Execution flow first. Any exit points (returns, jumps and calls) last",
+							"Any exit point (returns, jumps and calls) first, execution flow last"
+						],
+						"default": "retFlowJumpCall"
+					},
 					"z80-asm-meter.statusBar.copyTimingsAsHints": {
 						"order": 40,
 						"type": "boolean",
@@ -402,10 +418,22 @@
 							"$(triangle-down)"
 						]
 					},
-					"z80-asm-meter.timing.atExit.enabled": {
+					"z80-asm-meter.timing.atExit.retEnabled": {
 						"order": 210,
 						"type": "boolean",
-						"description": "Enables total timing calculation of the execution flow to the selected exit point",
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a RET, RETI or RETN instruction",
+						"default": true
+					},
+					"z80-asm-meter.timing.atExit.jumpEnabled": {
+						"order": 211,
+						"type": "boolean",
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a DJNZ, JP or JR instruction",
+						"default": true
+					},
+					"z80-asm-meter.timing.atExit.callEnabled": {
+						"order": 212,
+						"type": "boolean",
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a CALL or RST instruction",
 						"default": true
 					},
 					"z80-asm-meter.timing.atExit.threshold": {
@@ -426,27 +454,11 @@
 						"description": "Disables total timing calculation of the execution flow to the selected exit point if an unconditional JP, JR or RET instruction is found",
 						"default": true
 					},
-					"z80-asm-meter.timing.atExit.icon": {
+					"z80-asm-meter.timing.atExit.retIcon": {
 						"order": 250,
 						"type": "string",
 						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (jump or CALL) icon in the status bar",
-						"default": "$(debug-step-out)",
-						"examples": [
-							"$(arrow-right)",
-							"$(chevron-right)",
-							"$(debug-step-into)",
-							"$(debug-step-out)",
-							"$(indent)",
-							"$(redo)",
-							"$(triangle-right)"
-						]
-					},
-					"z80-asm-meter.timing.atExit.retIcon": {
-						"order": 255,
-						"type": "string",
-						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (RET) icon in the status bar",
+						"description": "Total timing calculation of the execution flow to the selected exit point (RET, RETI or RETN instruction) icon in the status bar",
 						"default": "$(debug-step-back)",
 						"examples": [
 							"$(arrow-left)",
@@ -462,6 +474,38 @@
 							"$(reply)",
 							"$(triangle-left)",
 							"$(triangle-up)"
+						]
+					},
+					"z80-asm-meter.timing.atExit.jumpIcon": {
+						"order": 251,
+						"type": "string",
+						"minLength": 1,
+						"description": "Total timing calculation of the execution flow to the selected exit point (DJNZ, JP or JR instruction) icon in the status bar",
+						"default": "$(debug-step-out)",
+						"examples": [
+							"$(arrow-right)",
+							"$(chevron-right)",
+							"$(debug-step-into)",
+							"$(debug-step-out)",
+							"$(indent)",
+							"$(redo)",
+							"$(triangle-right)"
+						]
+					},
+					"z80-asm-meter.timing.atExit.callIcon": {
+						"order": 252,
+						"type": "string",
+						"minLength": 1,
+						"description": "Total timing calculation of the execution flow to the selected exit point (CALL or RST instruction) icon in the status bar",
+						"default": "$(debug-step-into)",
+						"examples": [
+							"$(arrow-right)",
+							"$(chevron-right)",
+							"$(debug-step-into)",
+							"$(debug-step-out)",
+							"$(indent)",
+							"$(redo)",
+							"$(triangle-right)"
 						]
 					}
 				}

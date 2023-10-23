@@ -3,6 +3,7 @@
 - Ability to expand selection to line
 - More flexible status bar customization
 - Fixes settings default values being ignored. #145
+- Further division of total timing at exit based on the last instruction. #146
 
 ## 5.1.0
 

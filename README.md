@@ -108,6 +108,13 @@ This extension contributes the following settings:
     * `best`: Shows the total timing calculation that best fits the selection.
     * `default`: Does not show any alternative total timing calculation.
 
+* `z80-asm-meter.statusBar.totalTimingsOrder`: Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
+
+    * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
+    * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
+    * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
+
+
 * `z80-asm-meter.statusBar.copyTimingsAsHints`: Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format. Disabled by default.
 
 * `z80-asm-meter.statusBar.sizeSuffix`: The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural. Defaults to `" byte| bytes"`.
@@ -160,6 +167,8 @@ This extension contributes the following settings:
 
 See [total timing calculations](#total-timing-calculations) in the _Advanced usage_ section.
 
+#### Execution flow total timing calculation
+
 * `z80-asm-meter.timing.executionFlow.enabled`: Enables execution flow total timing calculation. Enabled by default.
 
 * `z80-asm-meter.timing.executionFlow.threshold`: Minimum number of instructions to be selected for the calculation of execution flow total timing. Defaults to: `2` (2 instructions).
@@ -170,7 +179,13 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 
 * `z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump`: Disables execution flow total timing calculation if an unconditional `JP`, `JR` or `RET` instruction is found. Enabled by default.
 
-* `z80-asm-meter.timing.atExit.enabled`: Enables total timing calculation of the execution flow to the selected exit point. Enabled by default.
+#### Total timing calculation of the execution flow to the selected exit point
+
+* `z80-asm-meter.timing.atExit.retEnabled`: Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `RET`, `RETI` or `RETN` instruction. Enabled by default.
+
+* `z80-asm-meter.timing.atExit.jumpEnabled`: Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `DJNZ`, `JP` or `JR` instruction. Enabled by default.
+
+* `z80-asm-meter.timing.atExit.callEnabled`: Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `CALL` or `RST` instruction. Enabled by default.
 
 * `z80-asm-meter.timing.atExit.threshold`: Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point. Defaults to: `2` (2 instructions).
 
@@ -178,9 +193,11 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 
 * `z80-asm-meter.timing.atExit.stopOnUnconditionalJump`: Disables total timing calculation of the execution flow to the selected exit point if an unconditional `JP`, `JR` or `RET` instruction is found. Enabled by default.
 
-* `z80-asm-meter.timing.atExit.icon`: Total timing calculation of the execution flow to the selected exit point (jump or `CALL`) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-out)`.
+* `z80-asm-meter.timing.atExit.retIcon`: Total timing calculation of the execution flow to the selected exit point (`RET`, `RETI` or `RETN` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-back)`.
 
-* `z80-asm-meter.timing.atExit.retIcon`: Total timing calculation of the execution flow to the selected exit point (RET) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-back)`.
+* `z80-asm-meter.timing.atExit.jumpIcon`: Total timing calculation of the execution flow to the selected exit point (`DJNZ`, `JP` or `JR` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-out)`.
+
+* `z80-asm-meter.timing.atExit.callIcon`: Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-into)`.
 
 ### Timing hints settings
 
@@ -232,6 +249,8 @@ Please find the deprecated settings, the last version where setting was availabl
 | v4.3.0 | `z80-asm-meter.timing.threshold` | `z80-asm-meter.timing.executionFlow.threshold`<br>`z80-asm-meter.timing.atExit.threshold` |
 | v4.3.0 | `z80-asm-meter.timing.hints` | `z80-asm-meter.timing.hints.enabled` |
 | v5.1.0 | `z80-asm-meter.statusBar.compactSize` | `z80-asm-meter.statusBar.sizeSuffix` |
+| v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | `z80-asm-meter.timing.atExit.retEnabled`<br>`z80-asm-meter.timing.atExit.jumpEnabled`<br>`z80-asm-meter.timing.atExit.callEnabled` |
+| v5.1.0 | `z80-asm-meter.timing.atExit.icon` | `z80-asm-meter.timing.atExit.jumpIcon`<br>`z80-asm-meter.timing.atExit.callIcon` |
 
 <br/>
 
