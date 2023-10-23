@@ -215,21 +215,21 @@ export function anySymbolOperandScore(candidateOperand: string): number {
         : 0.75;
 }
 
-/**
- * @returns if the instruction is a conditional instruction
- */
-export function isJumpCallOrRetInstruction(instruction: string) {
+// /**
+//  * @returns if the instruction is a conditional instruction
+//  */
+// export function isJumpCallOrRetInstruction(instruction: string) {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+//     const mnemonic = extractMnemonicOf(instruction);
+//     const operands = extractOperandsOf(instruction);
 
-    return isUnconditionalJump(mnemonic, operands)
-        || isConditionalJump(mnemonic, operands)
-        || isUnconditionalCall(mnemonic, operands)
-        || isConditionalCall(mnemonic, operands)
-        || isUnconditionalRet(mnemonic, operands)
-        || isConditionalRet(mnemonic, operands);
-}
+//     return isUnconditionalJump(mnemonic, operands)
+//         || isConditionalJump(mnemonic, operands)
+//         || isUnconditionalCall(mnemonic, operands)
+//         || isConditionalCall(mnemonic, operands)
+//         || isUnconditionalRet(mnemonic, operands)
+//         || isConditionalRet(mnemonic, operands);
+// }
 
 /**
  * @returns if the instruction is a conditional instruction
@@ -283,6 +283,18 @@ export function isConditionalJumpOrRetInstruction(instruction: string) {
 }
 
 /**
+ * @returns if the instruction is a jump instruction (DJNZ, JP or JR)
+ */
+export function isJumpInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isUnconditionalJump(mnemonic, operands)
+        || isConditionalJump(mnemonic, operands);
+}
+
+/**
  * @returns if the instruction is an unconditional jump (JP, JR)
  */
 export function isUnconditionalJump(mnemonic: string, operands: string[]): boolean {
@@ -309,6 +321,18 @@ export function isConditionalJump(mnemonic: string, operands: string[]): boolean
 }
 
 /**
+ * @returns if the instruction is a call instruction (CALL or RST)
+ */
+export function isCallInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isUnconditionalCall(mnemonic, operands)
+        || isConditionalCall(mnemonic, operands);
+}
+
+/**
  * @returns if the instruction is an unconditional call (CALL or RST)
  */
 export function isUnconditionalCall(mnemonic: string, operands: string[]): boolean {
@@ -328,6 +352,18 @@ export function isConditionalCall(mnemonic: string, operands: string[]): boolean
 }
 
 /**
+ * @returns if the instruction is a ret instruction (RET, RETI, or RETN)
+ */
+export function isRetInstruction(instruction: string) {
+
+    const mnemonic = extractMnemonicOf(instruction);
+    const operands = extractOperandsOf(instruction);
+
+    return isUnconditionalRet(mnemonic, operands)
+        || isConditionalRet(mnemonic, operands);
+}
+
+/**
  * @returns if the instruction is an unconditional return (RET, RETI, or RETN)
  */
 export function isUnconditionalRet(mnemonic: string, operands: string[]): boolean {
@@ -337,7 +373,7 @@ export function isUnconditionalRet(mnemonic: string, operands: string[]): boolea
 }
 
 /**
- * @returns if the instruction is a conditional return (RET, RETI, or RETN)
+ * @returns if the instruction is a conditional return (RET)
  */
 export function isConditionalRet(mnemonic: string, operands: string[]): boolean {
 

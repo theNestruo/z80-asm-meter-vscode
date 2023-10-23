@@ -70,10 +70,7 @@ export function humanReadableTiming(meterable: Meterable): string | undefined {
             : meterable.z80Timing;
 
     // (no data)
-    if ((!timing)
-        // || (timing.length < 2)
-        // || ((timing[0] === 0) && (timing[1] === 0))
-        ) {
+    if (!timing) {
         return undefined;
     }
 

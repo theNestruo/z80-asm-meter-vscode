@@ -1,7 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.1.0",
+	"version": "5.2.0",
 	"engines": {
 		"vscode": "^1.81.0"
 	},
@@ -128,6 +128,12 @@
 							"Matches tniASM assembler syntax"
 						],
 						"default": "default"
+					},
+					"z80-asm-meter.expandSelectionToLine": {
+						"order": 40,
+						"type": "boolean",
+						"description": "When enabled, expands the selection to cover entire lines",
+						"default": false
 					}
 				}
 			},
@@ -181,17 +187,37 @@
 						],
 						"default": "smart"
 					},
+					"z80-asm-meter.statusBar.totalTimingsOrder": {
+						"order": 35,
+						"type": "string",
+						"description": "Determines the order of the total timing calculations in the status bar when more than one total timing calculation is visible",
+						"enum": [
+							"retFlowJumpCall",
+							"flowRetJumpCall",
+							"retJumpCallFlow"
+						],
+						"enumDescriptions": [
+							"At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last",
+							"Execution flow first. Any exit points (returns, jumps and calls) last",
+							"Any exit point (returns, jumps and calls) first, execution flow last"
+						],
+						"default": "retFlowJumpCall"
+					},
 					"z80-asm-meter.statusBar.copyTimingsAsHints": {
 						"order": 40,
 						"type": "boolean",
 						"description": "Enable copying timings as timing hints, instead of human readable format",
 						"default": false
 					},
-					"z80-asm-meter.statusBar.compactSize": {
+					"z80-asm-meter.statusBar.sizeSuffix": {
 						"order": 50,
-						"type": "boolean",
-						"description": "Uses a compact suffix (B) for the size in bytes in the status bar",
-						"default": false
+						"type": "string",
+						"description": "The suffix for the size in bytes in the status bar",
+						"default": " byte| bytes",
+						"examples": [
+							" byte| bytes",
+							" B"
+						]
 					},
 					"z80-asm-meter.statusBar.showBytes": {
 						"order": 60,
@@ -232,7 +258,8 @@
 							"$(clock)",
 							"$(dashboard)",
 							"$(watch)",
-							"$(zap)"
+							"$(zap)",
+							"Ts "
 						]
 					},
 					"z80-asm-meter.statusBar.sizeIcon": {
@@ -248,24 +275,9 @@
 							"$(package)",
 							"$(pie-chart)",
 							"$(preview)",
-							"$(symbol-misc)"
+							"$(symbol-misc)",
+							", Sz "
 						]
-					},
-					"z80-asm-meter.viewInstruction": {
-						"type": "boolean",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.showInstruction\" instead"
-					},
-					"z80-asm-meter.timing.mode": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.totalTimings\" instead"
-					},
-					"z80-asm-meter.viewBytes": {
-						"type": "boolean",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.showBytes\" instead"
-					},
-					"z80-asm-meter.debounce": {
-						"type": "integer",
-						"deprecationMessage": "Use \"z80-asm-meter.statusBar.debounce\" instead"
 					}
 				}
 			},
@@ -346,10 +358,6 @@
 						"type": "boolean",
 						"description": "Enables REPT/ENDM repetition blocks",
 						"default": false
-					},
-					"z80-asm-meter.syntax.label": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.syntax.label.colonOptional\" instead"
 					}
 				}
 			},
@@ -362,10 +370,6 @@
 						"type": "boolean",
 						"description": "When enabled, tries to parse DEFS directive bytes as single byte instructions",
 						"default": false
-					},
-					"z80-asm-meter.directivesAsInstructions": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.parser.directives.defsAsInstructions\" instead"
 					}
 				}
 			},
@@ -414,10 +418,22 @@
 							"$(triangle-down)"
 						]
 					},
-					"z80-asm-meter.timing.atExit.enabled": {
+					"z80-asm-meter.timing.atExit.retEnabled": {
 						"order": 210,
 						"type": "boolean",
-						"description": "Enables total timing calculation of the execution flow to the selected exit point",
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a RET, RETI or RETN instruction",
+						"default": true
+					},
+					"z80-asm-meter.timing.atExit.jumpEnabled": {
+						"order": 211,
+						"type": "boolean",
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a DJNZ, JP or JR instruction",
+						"default": true
+					},
+					"z80-asm-meter.timing.atExit.callEnabled": {
+						"order": 212,
+						"type": "boolean",
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a CALL or RST instruction",
 						"default": true
 					},
 					"z80-asm-meter.timing.atExit.threshold": {
@@ -438,27 +454,11 @@
 						"description": "Disables total timing calculation of the execution flow to the selected exit point if an unconditional JP, JR or RET instruction is found",
 						"default": true
 					},
-					"z80-asm-meter.timing.atExit.icon": {
+					"z80-asm-meter.timing.atExit.retIcon": {
 						"order": 250,
 						"type": "string",
 						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (jump or CALL) icon in the status bar",
-						"default": "$(debug-step-out)",
-						"examples": [
-							"$(arrow-right)",
-							"$(chevron-right)",
-							"$(debug-step-into)",
-							"$(debug-step-out)",
-							"$(indent)",
-							"$(redo)",
-							"$(triangle-right)"
-						]
-					},
-					"z80-asm-meter.timing.atExit.retIcon": {
-						"order": 255,
-						"type": "string",
-						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (RET) icon in the status bar",
+						"description": "Total timing calculation of the execution flow to the selected exit point (RET, RETI or RETN instruction) icon in the status bar",
 						"default": "$(debug-step-back)",
 						"examples": [
 							"$(arrow-left)",
@@ -476,9 +476,37 @@
 							"$(triangle-up)"
 						]
 					},
-					"z80-asm-meter.timing.threshold": {
-						"type": "number",
-						"deprecationMessage": "Use \"z80-asm-meter.timing.executionFlow.threshold\" and/or \"z80-asm-meter.timing.atExit.threshold\" instead"
+					"z80-asm-meter.timing.atExit.jumpIcon": {
+						"order": 251,
+						"type": "string",
+						"minLength": 1,
+						"description": "Total timing calculation of the execution flow to the selected exit point (DJNZ, JP or JR instruction) icon in the status bar",
+						"default": "$(debug-step-out)",
+						"examples": [
+							"$(arrow-right)",
+							"$(chevron-right)",
+							"$(debug-step-into)",
+							"$(debug-step-out)",
+							"$(indent)",
+							"$(redo)",
+							"$(triangle-right)"
+						]
+					},
+					"z80-asm-meter.timing.atExit.callIcon": {
+						"order": 252,
+						"type": "string",
+						"minLength": 1,
+						"description": "Total timing calculation of the execution flow to the selected exit point (CALL or RST instruction) icon in the status bar",
+						"default": "$(debug-step-into)",
+						"examples": [
+							"$(arrow-right)",
+							"$(chevron-right)",
+							"$(debug-step-into)",
+							"$(debug-step-out)",
+							"$(indent)",
+							"$(redo)",
+							"$(triangle-right)"
+						]
 					}
 				}
 			},
@@ -576,15 +604,6 @@
 								}
 							}
 						}
-					},
-					"z80-asm-meter.timing.hints": {
-						"type": "string",
-						"deprecationMessage": "Use \"z80-asm-meter.timing.hints.enabled\" instead",
-						"enum": [
-							"subroutines",
-							"any",
-							"none"
-						]
 					}
 				}
 			},

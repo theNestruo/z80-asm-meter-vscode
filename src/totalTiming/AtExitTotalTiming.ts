@@ -1,16 +1,20 @@
 import { config } from "../config";
 import { Meterable } from "../model/Meterable";
-import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpCallOrRetInstruction, isJumpOrCallInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
+import { isCallInstruction, isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpInstruction, isRetInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
 import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
 
-class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
+export class AtExitTotalTiminsMeterable extends TotalTimingMeterable {
 
-	private isLastInstructionJumpOrCall: boolean;
+	readonly isLastInstructionRet: boolean;
+	readonly isLastInstructionJump: boolean;
+	readonly isLastInstructionCall: boolean;
 
-	constructor(meterable: Meterable, isLastInstructionJumpOrCall: boolean) {
+	constructor(meterable: Meterable, lastInstruction: string) {
 		super(meterable);
 
-		this.isLastInstructionJumpOrCall = isLastInstructionJumpOrCall;
+		this.isLastInstructionRet = isRetInstruction(lastInstruction);
+		this.isLastInstructionJump = isJumpInstruction(lastInstruction);
+		this.isLastInstructionCall = isCallInstruction(lastInstruction);
 	}
 
 	get name(): string {
@@ -18,9 +22,10 @@ class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
 	}
 
 	get statusBarIcon(): string {
-		return this.isLastInstructionJumpOrCall
-			? config.timing.atExit.icon // "$(debug-step-out)"
-			: config.timing.atExit.retIcon; // "$(debug-step-into)"
+		return this.isLastInstructionRet ? config.timing.atExit.retIcon
+			: this.isLastInstructionJump ? config.timing.atExit.jumpIcon
+			: this.isLastInstructionCall ? config.timing.atExit.callIcon
+			: ""; // (should never happen)
 	}
 
 	protected modifiedTimingsOf(timing: number[],
@@ -47,7 +52,7 @@ class AtExitTotalTiming implements TotalTiming {
 	 * @param meterable The meterable instance to be decorated
 	 * @return The "timing at exit" decorator, or undefined
 	 */
-	applyTo(meterable: Meterable): TotalTimingMeterable | undefined {
+	applyTo(meterable: Meterable): AtExitTotalTiminsMeterable | undefined {
 
 		// (for performance reasons)
 		const meterables = meterable.flatten();
@@ -57,8 +62,8 @@ class AtExitTotalTiming implements TotalTiming {
 		}
 
 		// Builds the "timing at exit" decorator
-		const isLastInstructionJumpOrCall = isJumpOrCallInstruction(meterables[meterables.length - 1].instruction);
-		return new AtExitTotalTimingsMeterable(meterable, isLastInstructionJumpOrCall);
+		const lastInstruction = meterables[meterables.length - 1].instruction;
+		return new AtExitTotalTiminsMeterable(meterable, lastInstruction);
 	}
 
 	/**
@@ -69,7 +74,9 @@ class AtExitTotalTiming implements TotalTiming {
 	private canDecorate(meterables: Meterable[]): boolean {
 
 		if (!config.statusBar.totalTimings
-			|| !config.timing.atExit.enabled) {
+			|| !(config.timing.atExit.retEnabled
+				|| config.timing.atExit.jumpEnabled
+				|| config.timing.atExit.callEnabled)) {
 			return false;
 		}
 
@@ -83,25 +90,34 @@ class AtExitTotalTiming implements TotalTiming {
 
 		// Checks the instructions
 		let anyConditionalJump: boolean = false;
-		for (let i = 0, n = meterables.length; i < n; i++) {
+		// (reverse order for performance reasons: check last instruction first)
+		for (let n = meterables.length, i = n - 1; i >= 0; i--) {
 			const instruction = meterables[i].instruction;
 			const lastInstruction = i === n - 1;
 
-			// No unconditional jump/ret before the last instruction
-			if (stopOnUnconditionalJump
-				&& !lastInstruction
-				&& isUnconditionalJumpOrRetInstruction(instruction)) {
-				return false;
-			}
+			if (lastInstruction) {
 
-			// Last instruction must be jump/ret or call
-			if (lastInstruction && (!isJumpCallOrRetInstruction(instruction))) {
-				return false;
-			}
+				// Last instruction must be ret/jump/call
+				if (!(
+					(config.timing.atExit.retEnabled && isRetInstruction(instruction))
+					|| (config.timing.atExit.jumpEnabled && isJumpInstruction(instruction))
+					|| (config.timing.atExit.callEnabled && isCallInstruction(instruction))
+				)) {
+					return false;
+				}
 
-			anyConditionalJump ||= lastInstruction
-				? isConditionalInstruction(instruction)
-				: isConditionalJumpOrRetInstruction(instruction);
+				anyConditionalJump ||= isConditionalInstruction(instruction);
+
+			} else {
+
+				// No unconditional jump/ret before the last instruction
+				if (stopOnUnconditionalJump
+					&& isUnconditionalJumpOrRetInstruction(instruction)) {
+					return false;
+				}
+
+				anyConditionalJump ||= isConditionalJumpOrRetInstruction(instruction);
+			}
 		}
 
 		// At least one conditional jump (or call, for the last instruction)
