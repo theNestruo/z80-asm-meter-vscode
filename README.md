@@ -9,13 +9,24 @@ The **Z80 Assembly meter** extension for Visual Studio Code meters clock cycles 
 
 This extension meters timing in Z80 clock periods, referred to as T (time) cycles.
 
-As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
-In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&nbsp;&micro;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
 
-ZX Spectrum Next Extended Z80 Instruction Set is supported.
+## Index
 
-<br/>
+- [Getting Started](#getting-started)
+    - [Main settings](#main-settings)
+    - [Status bar settings](#status-bar-settings)
+    - [Assembler syntax settings](#assembler-syntax-settings)
+    - [Parser settings](#parser-settings)
+- [Advanced usage](#advanced-usage)
+    - [Total timing calculations](#total-timing-calculations)
+    - [Timing hints](#timing-hints)
+    - [User-defined macros](#user-defined-macros)
+- [Deprecated settings](#deprecated-settings)
+- [F.A.Q.](#faq)
+- [Credits](#credits)
+
+
 
 ## Features
 
@@ -26,9 +37,25 @@ Select Z80 assembly source code to view clock cycles, mnemonic of the instructio
 
 If there is no selection, the current line will be used.
 
-<br/>
+As the MSX standard requires so-called M1 wait cycles, this extension also meters M1 wait cycles for Z80 timing calculations on MSX. For a good explanation on how to do Z80 timing calculations on MSX, please read [Wait States](http://map.grauw.nl/resources/z80instr.php#waits) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 
-## Recommendations
+In Amstrad CPC architecture, all instruction timings are stretched so that they are all multiples of a microsecond (1&nbsp;&micro;s), which is approximatively equivalent to the duration of a NOP instruction. This extension can meter duration in "number of NOPs" for timing calculations on Amstrad CPC.
+
+ZX Spectrum Next Extended Z80 Instruction Set is supported.
+
+> ### Migration to version 5.x
+>
+> The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
+>
+> Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
+>
+> If you are migrating from any version prior to 5.0.0 to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the [deprecation messages](#deprecated-settings).
+>
+> &nbsp;
+
+
+
+## Getting started
 
 This extension can be installed standalone, but does not contribute any problem matcher, symbol provider, definition provider, or completion proproser for Z80 assembly.
 
@@ -41,29 +68,6 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 * [DeZog - Z80 Debugger](https://marketplace.visualstudio.com/items?itemName=maziac.dezog) by Maziac
 * (and probably others; please check the `z80-asm-meter.languageIds` [setting](#main-settings))
 
-<br/>
-
-## Extension Settings
-
-> ### Migration to version 5.x
->
-> The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
->
-> Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
->
-> If you are migrating from any version prior to 5.0.0 to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the [deprecation messages](#deprecated-settings).
->
-> &nbsp;
-
-This extension contributes the following settings:
-
-- [Main settings](#main-settings)
-- [Status bar settings](#status-bar-settings)
-- [Assembler syntax settings](#assembler-syntax-settings)
-- [Parser settings](#parser-settings)
-- [Total timing calculation settings](#total-timing-calculation-settings)
-- [Timing hints settings](#timing-hints-settings)
-- [Macros settings](#macros-settings)
 
 ### Main settings
 
@@ -88,6 +92,7 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.expandSelectionToLine`: When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`). Disabled by default.
 
+
 ### Status bar settings
 
 * `z80-asm-meter.statusBar.alignment`: Controls the status bar item position:
@@ -97,7 +102,15 @@ This extension contributes the following settings:
     * `right` (default): Right side of the status bar.
     * `rightmost`: Rightmost position of the status bar.
 
+#### Instructions
+
 * `z80-asm-meter.statusBar.showInstruction`: Shows the processed instruction in the status bar. Useful to check if the extension is mistaking instructions. Disabled by default.
+
+* `z80-asm-meter.statusBar.instructionIcon`: The icon to identify the instruction in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(code)`.
+
+#### Timings
+
+* `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(watch)`.
 
 * `z80-asm-meter.statusBar.totalTimings`: Shows [total timing calculations](#total-timing-calculations) in the status bar.
 
@@ -114,20 +127,20 @@ This extension contributes the following settings:
     * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
     * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
 
+#### Size
 
-* `z80-asm-meter.statusBar.copyTimingsAsHints`: Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format. Disabled by default.
+* `z80-asm-meter.statusBar.sizeIcon`: The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(file-binary)`.
 
 * `z80-asm-meter.statusBar.sizeSuffix`: The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural. Defaults to `" byte| bytes"`.
 
 * `z80-asm-meter.statusBar.showBytes`: Shows the bytes (opcode) in the status bar. Disabled by default.
 
+#### Behaviour
+
+* `z80-asm-meter.statusBar.copyTimingsAsHints`: Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format. Disabled by default.
+
 * `z80-asm-meter.statusBar.debounce`: Milliseconds to prevent metering from being called too frequently when the selection changes. Defaults to: `100` (100&nbsp;ms).
 
-* `z80-asm-meter.statusBar.instructionIcon`: The icon to identify the instruction in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(code)`.
-
-* `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(watch)`.
-
-* `z80-asm-meter.statusBar.sizeIcon`: The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(file-binary)`.
 
 ### Assembler syntax settings
 
@@ -159,13 +172,27 @@ This extension contributes the following settings:
 
 * `z80-asm-meter.syntax.enable.reptEndm`: Enables `REPT`/`ENDM` repetition blocks. Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
 
+
 ### Parser settings
 
 * `z80-asm-meter.parser.directives.defsAsInstructions`: Tries to parse `DEFS` directive bytes as single byte instructions. Disabled by default.
 
-### Total timing calculation settings
 
-See [total timing calculations](#total-timing-calculations) in the _Advanced usage_ section.
+
+## Advanced usage
+
+
+### Total timing calculations
+
+There are three total timing calculation available:
+
+![Total timing calculations](doc/images/total-timing-calculation.png)
+
+1. **default**: The _default_ total timing calculation mode is the raw addition of the timings of the individual instructions.
+
+2. **execution flow**: When the selection is a single subroutine (i.e.: there are no unconditional `JP`, `JR` or `RET` instructions in the selection), the _execution flow_ total timing calculation measures the timing of the execution flow through the selection (i.e.: to the next, non selected, instruction) by considering any `DJNZ` or conditional `JP`, `JR` or `RET` instruction as _not taken_.
+
+3. **execution flow to the selected exit point**: When the selection is a single subroutine and the selection ends at an exit point (a conditional or unconditional `JP`, `JR` or `RET` instruction) or calls a subroutine (a conditional or unconditional `CALL`), the _execution flow to the selected exit point_ total timing calculation mode measures the timing of the execution flow to the selected exit point, by considering the last instruction as _taken_ if it is a conditional instruction.
 
 #### Execution flow total timing calculation
 
@@ -199,76 +226,6 @@ See [total timing calculations](#total-timing-calculations) in the _Advanced usa
 
 * `z80-asm-meter.timing.atExit.callIcon`: Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-into)`.
 
-### Timing hints settings
-
-See [timing hints](#timing-hints) in the _Advanced usage_ section.
-
-* `z80-asm-meter.timing.hints.enabled`: Enables [timing hints](#timing-hints), read from the line comment:
-
-    * `none`: Disables timing hints.
-    * `subroutine` (default): Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
-    * `any`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines.
-    * `ignoreCommentedOut`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines, but ignores empty lines that look like commented out source code.
-
-* `z80-asm-meter.timing.hints.regexps`: An array of regexp-based user-defined timing hints. The line comment will be matched agains the regular expression and the timing hint values will be read from this configuration object.
-
-    * `pattern`: The pattern of the regular expression to match against the line comment.
-    * `flags`: The string indicating the flags of the regular expression to match against the line comment. Optional.
-    * `z80`: Declares or overrides Z80 default timing hint. Optional.
-    * `msx`: Declares or overrides Z80+M1 timing hint (MSX standard). Optional.
-    * `m1`: Declares or overrides Z80+M1 timing hint. Optional.
-    * `cpc`: Declares or overrides timing hint measured in number of NOPs. Optional.
-    * `t`: Declares or overrides default timing hint. Optional.
-    * `ts`: Declares or overrides default timing hint. Optional.
-
-### Macros settings
-
-* `z80-asm-meter.macros`: An array of [user-defined macros](#user-defined-macros):
-    * `name`: The name of the macro; will be matched against the mnemonic of the source code.
-    * `z80`: Declares or overrides Z80 default macro timing. Optional.
-    * `msx`: Declares or overrides Z80+M1 macro timing information (MSX standard). Optional.
-    * `m1`: Declares or overrides Z80+M1 macro timing information. Optional.
-    * `cpc`: Declares or overrides macro timing measured in number of NOPs. Optional.
-    * `t`: Declares or overrides default macro timing. Optional.
-    * `ts`: Declares or overrides default macro timing. Optional.
-    * `size`: Declares or overrides macro byte count. Optional.
-    * `instructions`: The macro definition, as instructions. Optional.
-
-### Deprecated settings
-
-Please find the deprecated settings, the last version where setting was available, and the replacement setting or settings in the following table:
-
-| Version | Deprecated setting | Replacement setting(s) |
-| --: | --- | --- |
-| v4.3.0 | `z80-asm-meter.viewInstruction` | `z80-asm-meter.statusBar.showInstruction` |
-| v4.3.0 | `z80-asm-meter.timing.mode` | `z80-asm-meter.statusBar.totalTimings` |
-| v4.3.0 | `z80-asm-meter.viewBytes` | `z80-asm-meter.statusBar.showBytes` |
-| v4.3.0 | `z80-asm-meter.debounce` | `z80-asm-meter.statusBar.debounce` |
-| v4.3.0 | `z80-asm-meter.syntax.label` | `z80-asm-meter.syntax.label.colonOptional` |
-| v4.3.0 | `z80-asm-meter.directivesAsInstructions` | `z80-asm-meter.parser.directives.defsAsInstructions` |
-| v4.3.0 | `z80-asm-meter.timing.threshold` | `z80-asm-meter.timing.executionFlow.threshold`<br>`z80-asm-meter.timing.atExit.threshold` |
-| v4.3.0 | `z80-asm-meter.timing.hints` | `z80-asm-meter.timing.hints.enabled` |
-| v5.1.0 | `z80-asm-meter.statusBar.compactSize` | `z80-asm-meter.statusBar.sizeSuffix` |
-| v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | `z80-asm-meter.timing.atExit.retEnabled`<br>`z80-asm-meter.timing.atExit.jumpEnabled`<br>`z80-asm-meter.timing.atExit.callEnabled` |
-| v5.1.0 | `z80-asm-meter.timing.atExit.icon` | `z80-asm-meter.timing.atExit.jumpIcon`<br>`z80-asm-meter.timing.atExit.callIcon` |
-
-<br/>
-
-## Advanced usage
-
-### Total timing calculations
-
-There are three total timing calculation available:
-
-![Total timing calculations](doc/images/total-timing-calculation.png)
-
-1. **default**: The _default_ total timing calculation mode is the raw addition of the timings of the individual instructions.
-
-2. **execution flow**: When the selection is a single subroutine (i.e.: there are no unconditional `JP`, `JR` or `RET` instructions in the selection), the _execution flow_ total timing calculation measures the timing of the execution flow through the selection (i.e.: to the next, non selected, instruction) by considering any `DJNZ` or conditional `JP`, `JR` or `RET` instruction as _not taken_.
-
-3. **execution flow to the selected exit point**: When the selection is a single subroutine and the selection ends at an exit point (a conditional or unconditional `JP`, `JR` or `RET` instruction) or calls a subroutine (a conditional or unconditional `CALL`), the _execution flow to the selected exit point_ total timing calculation mode measures the timing of the execution flow to the selected exit point, by considering the last instruction as _taken_ if it is a conditional instruction.
-
-See [total timing calculation settings](#total-timing-calculation-settings).
 
 ### Timing hints
 
@@ -308,7 +265,27 @@ Negative timings are supported. This may seem unintuitive, but serves very parti
         ret     ; [msx=100] remaining code in the caller
     ```
 
-See [timing hints settings](#timing-hints-settings), and the [status bar setting](#status-bar-settings) `z80-asm-meter.statusBar.copyTimingsAsHints`.
+#### Timing hints settings
+
+* `z80-asm-meter.timing.hints.enabled`: Enables [timing hints](#timing-hints), read from the line comment:
+
+    * `none`: Disables timing hints.
+    * `subroutine` (default): Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
+    * `any`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines.
+    * `ignoreCommentedOut`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines, but ignores empty lines that look like commented out source code.
+
+* `z80-asm-meter.timing.hints.regexps`: An array of regexp-based user-defined timing hints. The line comment will be matched agains the regular expression and the timing hint values will be read from this configuration object.
+
+    * `pattern`: The pattern of the regular expression to match against the line comment.
+    * `flags`: The string indicating the flags of the regular expression to match against the line comment. Optional.
+    * `z80`: Declares or overrides Z80 default timing hint. Optional.
+    * `msx`: Declares or overrides Z80+M1 timing hint (MSX standard). Optional.
+    * `m1`: Declares or overrides Z80+M1 timing hint. Optional.
+    * `cpc`: Declares or overrides timing hint measured in number of NOPs. Optional.
+    * `t`: Declares or overrides default timing hint. Optional.
+    * `ts`: Declares or overrides default timing hint. Optional.
+
+
 
 ### User-defined macros
 
@@ -359,23 +336,53 @@ As most of the macro definition fields are optional, this extension uses a best-
     ]
     ```
 
-See [macros settings](#macros-settings).
+#### Macros settings
 
-<br/>
+* `z80-asm-meter.macros`: An array of [user-defined macros](#user-defined-macros):
+    * `name`: The name of the macro; will be matched against the mnemonic of the source code.
+    * `z80`: Declares or overrides Z80 default macro timing. Optional.
+    * `msx`: Declares or overrides Z80+M1 macro timing information (MSX standard). Optional.
+    * `m1`: Declares or overrides Z80+M1 macro timing information. Optional.
+    * `cpc`: Declares or overrides macro timing measured in number of NOPs. Optional.
+    * `t`: Declares or overrides default macro timing. Optional.
+    * `ts`: Declares or overrides default macro timing. Optional.
+    * `size`: Declares or overrides macro byte count. Optional.
+    * `instructions`: The macro definition, as instructions. Optional.
+
+
+
+## Deprecated settings
+
+Please find the deprecated settings, the last version where setting was available, and the replacement setting or settings in the following table:
+
+| Version | Deprecated setting | Replacement setting(s) |
+| --: | --- | --- |
+| v4.3.0 | `z80-asm-meter.viewInstruction` | `z80-asm-meter.statusBar.showInstruction` |
+| v4.3.0 | `z80-asm-meter.timing.mode` | `z80-asm-meter.statusBar.totalTimings` |
+| v4.3.0 | `z80-asm-meter.viewBytes` | `z80-asm-meter.statusBar.showBytes` |
+| v4.3.0 | `z80-asm-meter.debounce` | `z80-asm-meter.statusBar.debounce` |
+| v4.3.0 | `z80-asm-meter.syntax.label` | `z80-asm-meter.syntax.label.colonOptional` |
+| v4.3.0 | `z80-asm-meter.directivesAsInstructions` | `z80-asm-meter.parser.directives.defsAsInstructions` |
+| v4.3.0 | `z80-asm-meter.timing.threshold` | `z80-asm-meter.timing.executionFlow.threshold`<br>`z80-asm-meter.timing.atExit.threshold` |
+| v4.3.0 | `z80-asm-meter.timing.hints` | `z80-asm-meter.timing.hints.enabled` |
+| v5.1.0 | `z80-asm-meter.statusBar.compactSize` | `z80-asm-meter.statusBar.sizeSuffix` |
+| v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | `z80-asm-meter.timing.atExit.retEnabled`<br>`z80-asm-meter.timing.atExit.jumpEnabled`<br>`z80-asm-meter.timing.atExit.callEnabled` |
+| v5.1.0 | `z80-asm-meter.timing.atExit.icon` | `z80-asm-meter.timing.atExit.jumpIcon`<br>`z80-asm-meter.timing.atExit.callIcon` |
+
+
 
 ## F.A.Q.
+
 
 ### Q: The status bar does not display any information. I don't get clock cycles and bytecode size!
 
 Double check the `z80-asm-meter.languageIds` setting in your settings.
 
-<br/>
 
 ### Q: My macros are not recognized
 
 Macro definitions are not read from actual source code, but from user settings. Double check the [`z80-asm-meter.macros` setting](#macros-settings).
 
-<br/>
 
 ### Q: How can I get clock cycles and bytecode size for in-lined assembly in my C files?
 
@@ -385,6 +392,7 @@ Double check the `z80-asm-meter.languageIds` setting in your settings. It has to
 "z80-asm-meter.languageIds": [ "c" ]
 ```
 
+
 ### Q: I've added `"z80-asm-meter.languageIds": [ "c", "s", "asm" ]`, but I only get clock cycles for in-lined assembly; now I don't get clock cycles in my assembly files!
 
 The `z80-asm-meter.languageIds` setting uses language IDs, not extensions. Check the language ID of your assembly files and replace `"s"` and `"asm"` with that extension ID. Or use the default language IDs, then add `"c"`:
@@ -393,11 +401,11 @@ The `z80-asm-meter.languageIds` setting uses language IDs, not extensions. Check
 "z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
 ```
 
-<br/>
 
 ### Q: &lt;some feature&gt; stopped working after updating the extension
 
 Double check your settings for any [deprecated setting](#deprecated-settings) that needs to be replaced.
+
 
 ### Q: But that is your fault! You should support the deprecated settings a few versions!
 
@@ -405,7 +413,6 @@ VS Code API support for deprecated settings does conflict with default values. I
 
 From version 5.0.0 onwards I'll keep the [deprecated setting](#deprecated-settings) updated.
 
-<br/>
 
 ### Q: The extension is too confusing; there are too many things in the status bar now
 
@@ -418,7 +425,7 @@ The shortest way to disable the new features is:
 "z80-asm-meter.timing.hints.enabled": "none"
 ```
 
-<br/>
+
 
 ## Credits
 
