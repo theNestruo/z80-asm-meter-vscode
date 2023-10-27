@@ -2,6 +2,17 @@ import { config } from "../config";
 import { Meterable } from "../model/Meterable";
 import { TotalTimingMeterable } from "../totalTiming/TotalTiming";
 
+export function parseTimingsLenient(...array: unknown[]): number[] | undefined {
+
+    for (const o of array) {
+        const t = parseTimingLenient(o);
+        if (t !== undefined) {
+            return t;
+        }
+    }
+    return undefined;
+}
+
 export function parseTimingLenient(o: unknown): number[] | undefined {
 
     return (typeof o === "number") ? [o, o]

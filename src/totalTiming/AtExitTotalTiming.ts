@@ -28,8 +28,8 @@ export class AtExitTotalTiminsMeterable extends TotalTimingMeterable {
 	get statusBarIcon(): string {
 		return this.isLastInstructionRet ? config.timing.atExit.retIcon
 			: this.isLastInstructionJump ? config.timing.atExit.jumpIcon
-			: this.isLastInstructionCall ? config.timing.atExit.callIcon
-			: ""; // (should never happen)
+				: this.isLastInstructionCall ? config.timing.atExit.callIcon
+					: ""; // (should never happen)
 	}
 
 	protected modifiedTimingsOf(timing: number[],
@@ -77,10 +77,11 @@ class AtExitTotalTiming implements TotalTiming {
 	 */
 	private canDecorate(meterables: Meterable[]): boolean {
 
-		if (!config.statusBar.totalTimingsEnabled
-			|| !(config.timing.atExit.retEnabled
-				|| config.timing.atExit.jumpEnabled
-				|| config.timing.atExit.callEnabled)) {
+		const retEnabled = config.timing.atExit.retEnabled;
+		const jumpEnabled = config.timing.atExit.jumpEnabled;
+		const callEnabled = config.timing.atExit.callEnabled;
+		const anyEnabled = retEnabled || jumpEnabled || callEnabled;
+		if (!(config.statusBar.totalTimingsEnabled && anyEnabled)) {
 			return false;
 		}
 
@@ -102,11 +103,7 @@ class AtExitTotalTiming implements TotalTiming {
 			if (lastInstruction) {
 
 				// Last instruction must be ret/jump/call
-				if (!(
-					(config.timing.atExit.retEnabled && isRetInstruction(instruction))
-					|| (config.timing.atExit.jumpEnabled && isJumpInstruction(instruction))
-					|| (config.timing.atExit.callEnabled && isCallInstruction(instruction))
-				)) {
+				if (!this.isValidLastInstruction(instruction, retEnabled, jumpEnabled, callEnabled)) {
 					return false;
 				}
 
@@ -115,8 +112,7 @@ class AtExitTotalTiming implements TotalTiming {
 			} else {
 
 				// No unconditional jump/ret before the last instruction
-				if (stopOnUnconditionalJump
-					&& isUnconditionalJumpOrRetInstruction(instruction)) {
+				if (this.isInvalidInstruction(instruction, stopOnUnconditionalJump)) {
 					return false;
 				}
 
@@ -127,6 +123,20 @@ class AtExitTotalTiming implements TotalTiming {
 		// At least one conditional jump (or call, for the last instruction)
 		return anyConditionalJump
 			|| !config.timing.atExit.requireConditional;
+	}
+
+	private isValidLastInstruction(instruction: string,
+		retEnabled: boolean, jumpEnabled: boolean, callEnabled: boolean): boolean {
+
+		return (retEnabled && isRetInstruction(instruction))
+			|| (jumpEnabled && isJumpInstruction(instruction))
+			|| (callEnabled && isCallInstruction(instruction));
+	}
+
+	private isInvalidInstruction(instruction: string, stopOnUnconditionalJump: boolean): boolean {
+
+		return stopOnUnconditionalJump
+			&& isUnconditionalJumpOrRetInstruction(instruction);
 	}
 }
 

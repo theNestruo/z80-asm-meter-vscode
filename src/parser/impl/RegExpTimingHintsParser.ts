@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { config } from "../../config";
 import { SourceCode } from "../../model/SourceCode";
 import { TimingHints } from "../../model/TimingHints";
-import { parseTimingLenient } from '../../utils/TimingUtils';
+import { parseTimingLenient, parseTimingsLenient } from '../../utils/TimingUtils';
 import { TimingHintsParser } from "../Parsers";
 
 const emptyRegExp = new RegExp("");
@@ -45,22 +45,12 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 			}
 
 			const z80Timing =
-				parseTimingLenient(source.z80)
-				|| parseTimingLenient(source.ts)
-				|| parseTimingLenient(source.t);
+				parseTimingsLenient(source.z80, source.ts, source.t);
 			const msxTiming = config.platform === "msx"
-				? (parseTimingLenient(source.msx)
-					|| parseTimingLenient(source.m1)
-					|| parseTimingLenient(source.ts)
-					|| parseTimingLenient(source.t))
-				: (parseTimingLenient(source.m1)
-					|| parseTimingLenient(source.msx)
-					|| parseTimingLenient(source.ts)
-					|| parseTimingLenient(source.t));
+				? (parseTimingsLenient(source.msx, source.m1, source.ts, source.t))
+				: (parseTimingsLenient(source.m1, source.msx, source.ts, source.t));
 			const cpcTiming =
-				parseTimingLenient(source.cpc)
-				|| parseTimingLenient(source.ts)
-				|| parseTimingLenient(source.t);
+				parseTimingsLenient(source.cpc, source.ts, source.t);
 
 			if (regExp && (z80Timing || msxTiming || cpcTiming)) {
 				array.push({
