@@ -65,9 +65,10 @@ export function humanReadableTimings(
 export function humanReadableTiming(meterable: Meterable): string | undefined {
 
     // timing depending on the platform
-    const timing = config.platform === "msx" ? meterable.msxTiming
+    const timing =
+        config.platform === "msx" ? meterable.msxTiming
         : config.platform === "cpc" ? meterable.cpcTiming
-            : meterable.z80Timing;
+        : meterable.z80Timing;
 
     // (no data)
     if (!timing) {

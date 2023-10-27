@@ -8,272 +8,347 @@ import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
 import { humanReadableBytes } from '../utils/ByteUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
-import { humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
+import { formatTiming, humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
 import { AbstractHandler } from "./AbstractHandler";
 import { CommandHandler } from "./CommandHandler";
 
 export class DebouncedStatusBarHandler {
 
-    private readonly delegate: StatusBarHandler;
+	private readonly delegate: StatusBarHandler;
 
-    private isLeadingEvent: boolean = true;
-    private previousEventTimestamp: number | undefined = undefined;
-    private updateStatusBarTimeout: NodeJS.Timeout | undefined;
+	private isLeadingEvent: boolean = true;
+	private previousEventTimestamp: number | undefined = undefined;
+	private updateStatusBarTimeout: NodeJS.Timeout | undefined;
 
-    constructor(statusBarHandler: StatusBarHandler) {
-        this.delegate = statusBarHandler;
-    }
+	constructor(statusBarHandler: StatusBarHandler) {
+		this.delegate = statusBarHandler;
+	}
 
-    update() {
+	update() {
 
-        // Checks debounce configuration
-        const debounce = config.statusBar.debounce;
-        if (debounce <= 0) {
-            // No debounce: immediate execution
-            this.delegate.update();
-            return;
-        }
+		// Checks debounce configuration
+		const debounce = config.statusBar.debounce;
+		if (debounce <= 0) {
+			// No debounce: immediate execution
+			this.delegate.update();
+			return;
+		}
 
-        // Cancels any pending execution
-        clearTimeout(this.updateStatusBarTimeout);
+		// Cancels any pending execution
+		clearTimeout(this.updateStatusBarTimeout);
 
-        // Detect leading events
-        const now = new Date().getTime();
-        if (!this.isLeadingEvent
-            && this.previousEventTimestamp
-            && (this.previousEventTimestamp + debounce < now)) {
-            this.isLeadingEvent = true;
-        }
-        this.previousEventTimestamp = now;
+		// Detect leading events
+		const now = new Date().getTime();
+		if (!this.isLeadingEvent
+			&& this.previousEventTimestamp
+			&& (this.previousEventTimestamp + debounce < now)) {
+			this.isLeadingEvent = true;
+		}
+		this.previousEventTimestamp = now;
 
-        // Leading event?
-        if (this.isLeadingEvent) {
-            // Immediate execution
-            this.delegate.update();
-            this.isLeadingEvent = false;
-            return;
-        }
+		// Leading event?
+		if (this.isLeadingEvent) {
+			// Immediate execution
+			this.delegate.update();
+			this.isLeadingEvent = false;
+			return;
+		}
 
-        // Debounced execution
-        this.updateStatusBarTimeout = setTimeout(() => {
-            this.delegate.update();
-            this.isLeadingEvent = true;
-        }, debounce);
-    }
+		// Debounced execution
+		this.updateStatusBarTimeout = setTimeout(() => {
+			this.delegate.update();
+			this.isLeadingEvent = true;
+		}, debounce);
+	}
 }
 
 export class StatusBarHandler extends AbstractHandler {
 
-    private readonly commandHandler: CommandHandler;
+	private readonly commandHandler: CommandHandler;
 
-    private previousHashCode: number | undefined = undefined;
+	private previousHashCode: number | undefined = undefined;
 
-    private statusBarItem: vscode.StatusBarItem | undefined;
+	private statusBarItem: vscode.StatusBarItem | undefined;
 
-    constructor(commandHandler: CommandHandler) {
-        super();
+	constructor(commandHandler: CommandHandler) {
+		super();
 
-        this.commandHandler = commandHandler;
-        this.create();
-    }
+		this.commandHandler = commandHandler;
+		this.create();
+	}
 
-    dispose() {
-        this.destroy();
-    }
+	dispose() {
+		this.destroy();
+	}
 
-    onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
-        // Reloads caches for "heavy" configurations
-        if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
-            this.destroy();
-            this.create();
-        }
-    }
+		// Reloads caches for "heavy" configurations
+		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
+			this.destroy();
+			this.create();
+		}
+	}
 
-    private create() {
+	private create() {
 
-        if (this.statusBarItem) {
-            return;
-        }
+		if (this.statusBarItem) {
+			return;
+		}
 
-        const alignment = config.statusBar.alignment;
-        this.statusBarItem = vscode.window.createStatusBarItem(
-            ["leftmost", "left"].indexOf(alignment) !== -1
-                ? vscode.StatusBarAlignment.Left
-                : vscode.StatusBarAlignment.Right,
-            ["leftmost", "right"].indexOf(alignment) !== -1
-                ? Number.MAX_SAFE_INTEGER
-                : Number.MIN_SAFE_INTEGER);
-    }
+		const alignment = config.statusBar.alignment;
+		this.statusBarItem = vscode.window.createStatusBarItem(
+			["leftmost", "left"].indexOf(alignment) !== -1
+				? vscode.StatusBarAlignment.Left
+				: vscode.StatusBarAlignment.Right,
+			["leftmost", "right"].indexOf(alignment) !== -1
+				? Number.MAX_SAFE_INTEGER
+				: Number.MIN_SAFE_INTEGER);
+	}
 
-    private destroy() {
+	private destroy() {
 
-        if (!this.statusBarItem) {
-            return;
-        }
+		if (!this.statusBarItem) {
+			return;
+		}
 
-        this.statusBarItem.dispose();
-        this.statusBarItem = undefined;
-    }
+		this.statusBarItem.dispose();
+		this.statusBarItem = undefined;
+	}
 
-    update() {
+	update() {
 
-        // Reads the source code
-        const sourceCode = this.readFromSelection();
-        if (!sourceCode) {
-            this.previousHashCode = undefined;
-            this.hide();
-            return;
-        }
-        const currentHashCode = hashCode(sourceCode);
-        if (currentHashCode === this.previousHashCode) {
-            // (no changes)
-            return;
-        }
-        this.previousHashCode = currentHashCode;
+		// Reads the source code
+		const sourceCode = this.readFromSelection();
+		if (!sourceCode) {
+			this.previousHashCode = undefined;
+			this.hide();
+			return;
+		}
+		const currentHashCode = hashCode(sourceCode);
+		if (currentHashCode === this.previousHashCode) {
+			// (no changes)
+			return;
+		}
+		this.previousHashCode = currentHashCode;
 
-        // Parses the source code
-        const metered = mainParser.parse(sourceCode);
-        if (!metered) {
-            this.previousHashCode = undefined;
-            this.hide();
-            return;
-        }
+		// Parses the source code
+		const metered = mainParser.parse(sourceCode);
+		if (!metered) {
+			this.previousHashCode = undefined;
+			this.hide();
+			return;
+		}
 
-        // Prepares the total timings
-        const defaultTiming = defaultTotalTiming.applyTo(metered);
-        const flowTiming = executionFlowTotalTiming.applyTo(metered);
-        const atExitTiming = atExitTotalTiming.applyTo(metered);
+		// Prepares the total timings
+		const defaultTiming = defaultTotalTiming.applyTo(metered);
+		const flowTiming = executionFlowTotalTiming.applyTo(metered);
+		const atExitTiming = atExitTotalTiming.applyTo(metered);
 
-        // Builds the status bar item
-        this.create();
-        this.statusBarItem!.text = this.buildText(defaultTiming, flowTiming, atExitTiming);
-        this.statusBarItem!.tooltip = this.buildTooltip(defaultTiming, flowTiming, atExitTiming);
-        this.statusBarItem!.command = this.commandHandler;
-        this.statusBarItem!.show();
-    }
+		// Builds the status bar item
+		this.create();
+		this.statusBarItem!.text = this.buildText(defaultTiming, flowTiming, atExitTiming);
+		this.statusBarItem!.tooltip = this.buildTooltip(defaultTiming, flowTiming, atExitTiming);
+		this.statusBarItem!.command = this.commandHandler;
+		this.statusBarItem!.show();
+	}
 
-    private hide() {
+	private hide() {
 
-        if (this.statusBarItem) {
-            this.statusBarItem.hide();
-        }
-    }
+		if (this.statusBarItem) {
+			this.statusBarItem.hide();
+		}
+	}
 
-    private buildText(
-        defaultTiming: TotalTimingMeterable,
-        flowTiming: TotalTimingMeterable | undefined,
-        atExitTiming: AtExitTotalTiminsMeterable | undefined): string {
+	private buildText(
+		defaultTiming: TotalTimingMeterable,
+		flowTiming: TotalTimingMeterable | undefined,
+		atExitTiming: AtExitTotalTiminsMeterable | undefined): string {
 
-        // Builds the statur bar text
-        let text = "";
+		// Builds the statur bar text
+		let text = "";
 
-        if (config.statusBar.showInstruction) {
-            const instruction = humanReadableInstructions(defaultTiming);
-            if (instruction) {
-                const instructionIcon = espaceIfNotInfix(config.statusBar.instructionIcon);
-                text += `${instructionIcon}${instruction}`;
-            }
-        }
+		if (config.statusBar.showInstruction) {
+			const instruction = humanReadableInstructions(defaultTiming);
+			if (instruction) {
+				const instructionIcon = espaceIfNotInfix(config.statusBar.instructionIcon);
+				text += `${instructionIcon}${instruction}`;
+			}
+		}
 
-        const timing = this.buidTimingsText(defaultTiming, flowTiming, atExitTiming);
-        if (timing) {
-            const timingsIcon = espaceIfNotInfix(config.statusBar.timingsIcon);
-            text += `${timingsIcon}${timing}`;
-        }
+		const timing = this.buidTimingsText(defaultTiming, flowTiming, atExitTiming);
+		if (timing) {
+			const timingsIcon = espaceIfNotInfix(config.statusBar.timingsIcon);
+			text += `${timingsIcon}${timing}`;
+		}
 
-        const size = defaultTiming.size;
-        if (size) {
-            const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
-            const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
-            text += `${sizeIcon}${size}${sizeSuffix}`;
-            if (config.statusBar.showBytes) {
-                const bytes = humanReadableBytes(defaultTiming);
-                if (bytes) {
-                    text += ` (${bytes})`;
-                }
-            }
-        }
+		const size = defaultTiming.size;
+		if (size) {
+			const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
+			const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
+			text += `${sizeIcon}${size}${sizeSuffix}`;
+			if (config.statusBar.showBytes) {
+				const bytes = humanReadableBytes(defaultTiming);
+				if (bytes) {
+					text += ` (${bytes})`;
+				}
+			}
+		}
 
-        return text.trim().replace(/\s+/, " ");
-    }
+		return text.trim().replace(/\s+/, " ");
+	}
 
-    private buidTimingsText(
-        defaultTiming: TotalTimingMeterable,
-        flowTiming: TotalTimingMeterable | undefined,
-        atExitTiming: AtExitTotalTiminsMeterable | undefined): string | undefined {
+	private buidTimingsText(
+		defaultTiming: TotalTimingMeterable,
+		flowTiming: TotalTimingMeterable | undefined,
+		atExitTiming: AtExitTotalTiminsMeterable | undefined): string | undefined {
 
-        // Applies requested order
-        const totalTimingsOrder = config.statusBar.totalTimingsOrder;
-        const [retTiming, jumpCallTiming] = atExitTiming?.isLastInstructionRet
-            ? [atExitTiming, undefined]
-            : [undefined, atExitTiming];
-        const [b, c, d] =
-            totalTimingsOrder === "retFlowJumpCall" ? [retTiming, flowTiming, jumpCallTiming]
-            : totalTimingsOrder === "flowRetJumpCall" ? [flowTiming, retTiming, jumpCallTiming]
-            : totalTimingsOrder === "retJumpCallFlow" ? [retTiming, jumpCallTiming, flowTiming]
-            : [undefined, undefined, undefined]; // (should never happen)
+		const [b, c, d] = this.reorder(flowTiming, atExitTiming);
 
-        switch (config.statusBar.totalTimings) {
-            case "all":
-            case "combineAll":
-                return humanReadableTimings(
-                    [defaultTiming, b, c, d], config.statusBar.totalTimingsCombined);
+		switch (config.statusBar.totalTimings) {
+			case "all":
+			case "combineAll":
+				return humanReadableTimings(
+					[defaultTiming, b, c, d], config.statusBar.totalTimingsCombined);
 
-            case "smart":
-            case "combineSmart":
-                return flowTiming || atExitTiming
-                    ? humanReadableTimings([b, c, d], config.statusBar.totalTimingsCombined)
-                    : humanReadableTimings([defaultTiming]);
+			case "smart":
+			case "combineSmart":
+				return flowTiming || atExitTiming
+					? humanReadableTimings([b, c, d], config.statusBar.totalTimingsCombined)
+					: humanReadableTimings([defaultTiming]);
 
-            case "best":
-                return humanReadableTimings([atExitTiming || flowTiming || defaultTiming]);
+			case "best":
+				return humanReadableTimings([atExitTiming || flowTiming || defaultTiming]);
 
-            case "default":
-            default:
-                return humanReadableTimings([defaultTiming]);
-        }
-    }
+			case "default":
+			default:
+				return humanReadableTimings([defaultTiming]);
+		}
+	}
 
-    private buildTooltip(
-        defaultTiming: TotalTimingMeterable,
-        flowTiming: TotalTimingMeterable | undefined,
-        atExitTiming: TotalTimingMeterable | undefined): vscode.MarkdownString {
+	private reorder(
+		flowTiming: TotalTimingMeterable | undefined,
+		atExitTiming: AtExitTotalTiminsMeterable | undefined): (TotalTimingMeterable | undefined)[] {
 
-        const text = new vscode.MarkdownString("|&nbsp;|&nbsp;|&nbsp;|\n|:---|---:|:---|\n");
+		// Applies requested order
+		const totalTimingsOrder = config.statusBar.totalTimingsOrder;
+		const [retTiming, jumpCallTiming] = atExitTiming?.isLastInstructionRet
+			? [atExitTiming, undefined]
+			: [undefined, atExitTiming];
+		return totalTimingsOrder === "retFlowJumpCall" ? [retTiming, flowTiming, jumpCallTiming]
+			: totalTimingsOrder === "flowRetJumpCall" ? [flowTiming, retTiming, jumpCallTiming]
+			: totalTimingsOrder === "retJumpCallFlow" ? [retTiming, jumpCallTiming, flowTiming]
+			: [undefined, undefined, undefined]; // (should never happen)
+	}
 
-        const instruction = humanReadableInstructions(defaultTiming);
-        if (instruction) {
-            text.appendMarkdown(`|**Instructions**||${instruction}|\n`);
-        }
+	private buildTooltip(
+		defaultTiming: TotalTimingMeterable,
+		flowTiming: TotalTimingMeterable | undefined,
+		atExitTiming: AtExitTotalTiminsMeterable | undefined): vscode.MarkdownString {
 
-        const timingSuffix = config.platform === "cpc" ? "NOPs" : "clock cycles";
-        [defaultTiming, flowTiming, atExitTiming].forEach(totalTiming => {
-            if (!totalTiming) {
-                return;
-            }
-            const value = humanReadableTiming(totalTiming);
-            if (!value) {
-                return;
-            }
-            text.appendMarkdown(`|**${totalTiming.name}**|${value}|${timingSuffix}|\n`);
-        });
+		const instruction = humanReadableInstructions(defaultTiming);
+		const size = defaultTiming.size;
+		const bytes = size ? humanReadableBytes(defaultTiming) : undefined;
 
-        const size = defaultTiming.size;
-        if (size) {
-            text.appendMarkdown(`|**Size**|${size}|bytes\n`);
-            const bytes = humanReadableBytes(defaultTiming);
-            if (bytes) {
-                text.appendMarkdown(`|**Bytes**||${bytes}|\n`);
-            }
-        }
+		const text = new vscode.MarkdownString();
 
-        const textToCopy = this.commandHandler.buildTextToCopy(defaultTiming, flowTiming, atExitTiming);
-        if (textToCopy) {
-            text.appendMarkdown("\n---\n\n")
-                .appendMarkdown(`Copy "${textToCopy}" to clipboard\n`);
-        }
+		if (instruction || size) {
+			text.appendMarkdown(`|||\n|---|---|\n`);
+			if (instruction) {
+				text.appendMarkdown(`|Instructions:|**${instruction}**|\n`);
+			}
+			if (size) {
+				if (bytes) {
+					text.appendMarkdown(`|Bytes:|**${bytes}**|\n`);
+				}
+			}
+			text.appendMarkdown("\n---\n\n");
+		}
 
-        return text;
-    }
+		text.appendMarkdown(this.buildTooltipTiming([defaultTiming, ...this.reorder(flowTiming, atExitTiming)]).value);
+
+		if (size) {
+			const platform = config.platform;
+			const hasM1 = platform === "msx" || platform === "pc8000";
+			text.appendMarkdown(hasM1
+				? `|Size:|**${size}**||bytes|\n`
+				: `|Size:|**${size}**|bytes|\n`);
+		}
+		text.appendMarkdown("\n");
+
+		const textToCopy = this.commandHandler.buildTextToCopy(defaultTiming, flowTiming, atExitTiming);
+		if (textToCopy) {
+			text.appendMarkdown(`---\n\nCopy "${textToCopy}" to clipboard\n`);
+		}
+
+		return text;
+	}
+
+	private buildTooltipTiming(
+		totalTimings: (TotalTimingMeterable | undefined)[]): vscode.MarkdownString {
+
+		const platform = config.platform;
+		const hasM1 = platform === "msx" || platform === "pc8000";
+		const timingSuffix = platform === "cpc" ? "NOPs" : "clock cycles";
+
+		const table = new vscode.MarkdownString(
+			platform === "msx" ? "||MSX|Z80||\n|--:|--:|--:|---|\n"
+				: platform === "pc8000" ? "||Z80|Z80+M1||\n|--:|--:|--:|---|\n"
+					: "||||\n|--:|--:|---|\n"
+		);
+
+		for (const totalTiming of totalTimings) {
+			if (!totalTiming) {
+				continue;
+			}
+
+			const value = formatTiming(totalTiming.z80Timing);
+			const m1Value = formatTiming(totalTiming.msxTiming);
+			if (!value && (!hasM1 || !m1Value)) {
+				continue;
+			}
+
+			switch (platform) {
+				case 'msx':
+					table.appendMarkdown(`|${totalTiming.name}:|**${m1Value}**|${value}|${timingSuffix}|\n`);
+					break;
+				case 'pc8000':
+					table.appendMarkdown(`|${totalTiming.name}:|**${value}**|${m1Value}|${timingSuffix}|\n`);
+					break;
+				default:
+					table.appendMarkdown(`|${totalTiming.name}:|**${value}**|${timingSuffix}|\n`);
+					break;
+			}
+		};
+
+		return table;
+
+		// switch (platform) {
+		// 	case 'msx':
+		// 		return new vscode.MarkdownString("**MSX (Z80+M1)**\n\n")
+		// 			.appendMarkdown(m1Text.value)
+		// 			.appendMarkdown("**Z80**\n\n")
+		// 			.appendMarkdown(text.value);
+		// 	case 'pc8000':
+		// 		return new vscode.MarkdownString("**Z80**\n\n")
+		// 			.appendMarkdown(text.value)
+		// 			.appendMarkdown("**Z80+M1**\n\n")
+		// 			.appendMarkdown(m1Text.value);
+		// 	default:
+		// 		return text;
+		// }
+	}
+
+	private buildTooltipTimingEntry(
+		totalTiming: TotalTimingMeterable, value: string, timingSuffix: string): vscode.MarkdownString {
+
+		const text = new vscode.MarkdownString();
+		text.appendMarkdown(`**${value}** ${timingSuffix}`);
+		const name = totalTiming.name;
+		if (name) {
+			text.appendMarkdown(` (${name})`);
+		}
+		text.appendMarkdown("\n\n");
+		return text;
+	}
 }

@@ -5,6 +5,7 @@ import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
 
 export class AtExitTotalTiminsMeterable extends TotalTimingMeterable {
 
+	private readonly lastInstruction: string;
 	readonly isLastInstructionRet: boolean;
 	readonly isLastInstructionJump: boolean;
 	readonly isLastInstructionCall: boolean;
@@ -12,13 +13,16 @@ export class AtExitTotalTiminsMeterable extends TotalTimingMeterable {
 	constructor(meterable: Meterable, lastInstruction: string) {
 		super(meterable);
 
+		this.lastInstruction = lastInstruction;
 		this.isLastInstructionRet = isRetInstruction(lastInstruction);
 		this.isLastInstructionJump = isJumpInstruction(lastInstruction);
 		this.isLastInstructionCall = isCallInstruction(lastInstruction);
 	}
 
 	get name(): string {
-		return "Timing to exit point";
+		return this.lastInstruction
+			? `Timing to ${this.lastInstruction}`
+			: "Timing to exit point"; // (should never happen)
 	}
 
 	get statusBarIcon(): string {

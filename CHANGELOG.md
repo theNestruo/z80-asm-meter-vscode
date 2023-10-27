@@ -4,6 +4,7 @@
 - More flexible status bar customization
 - Fixes settings default values being ignored. #145
 - Further division of total timing at exit based on the last instruction. #146
+- Restores missing MSX and NEC PC-8000 series timing information in the tooltip. #147
 
 ## 5.1.0
 
