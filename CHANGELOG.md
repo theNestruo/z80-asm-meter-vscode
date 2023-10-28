@@ -1,5 +1,9 @@
 ## 5.2.0
 
+- Support for `RB`/`RW` directives. #149
+
+## 5.2.0
+
 - Ability to expand selection to line
 - More flexible status bar customization
 - Fixes settings default values being ignored. #145
