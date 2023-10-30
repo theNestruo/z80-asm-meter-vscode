@@ -8,23 +8,9 @@ export function extractFirstInstruction(s: string): string | undefined {
 export function extractSourceCode(rawLine: string, separator?: string,
     labelRegExp?: RegExp, repeatRegExp?: RegExp | undefined): SourceCode[] {
 
-    // Removes surrounding label
-    let s = labelRegExp
-        ? rawLine.replace(labelRegExp, "").trim() // (trim after regexp!)
-        : rawLine.trim();
-
-    // Parses and removes repeat pseudo-op
-    let repetitions = 1;
-    if (repeatRegExp) {
-        const matches = repeatRegExp.exec(s);
-        if (matches && matches.length >= 2 && matches[1] && matches[2]) {
-            const parsedRepetitions = parseNumericExpression(matches[1]) || 1;
-            if (parsedRepetitions && parsedRepetitions > 0) {
-                repetitions = parsedRepetitions;
-            }
-            s = matches[2].trim();
-        }
-    }
+    // Removes surrounding label, parses and removes repeat pseudo-op
+    let [ repetitions, s ] = removeSurroundingLabelAndRepetitions(
+        rawLine, labelRegExp, repeatRegExp);
 
     let fragments: SourceCode[] = [];
     const n = s.length;
@@ -90,6 +76,29 @@ export function extractSourceCode(rawLine: string, separator?: string,
     }
 
     return fragments;
+}
+
+function removeSurroundingLabelAndRepetitions(
+    line: string, labelRegExp?: RegExp, repeatRegExp?: RegExp): [number, string] {
+
+    // Removes surrounding label
+    let s = labelRegExp
+        ? line.replace(labelRegExp, "").trim() // (trim after regexp!)
+        : line.trim();
+
+    // Parses and removes repeat pseudo-op
+    let repetitions = 1;
+    if (repeatRegExp) {
+        const matches = repeatRegExp.exec(s);
+        if (matches && matches.length >= 2 && matches[1] && matches[2]) {
+            const parsedRepetitions = parseNumericExpression(matches[1]) || 1;
+            if (parsedRepetitions && parsedRepetitions > 0) {
+                repetitions = parsedRepetitions;
+            }
+            s = matches[2].trim();
+        }
+    }
+    return [repetitions, s];
 }
 
 /**
