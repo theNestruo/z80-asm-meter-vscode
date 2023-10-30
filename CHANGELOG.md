@@ -1,6 +1,7 @@
 ## 5.2.0
 
 - Support for `RB`/`RW` directives. #149
+- Fixes wrong behaviour when `z80-asm-meter.syntax.label.colonOptional` is enabled. #150
 
 ## 5.2.0
 

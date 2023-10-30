@@ -8,12 +8,10 @@ export function extractFirstInstruction(s: string): string | undefined {
 export function extractSourceCode(rawLine: string, separator?: string,
     labelRegExp?: RegExp, repeatRegExp?: RegExp | undefined): SourceCode[] {
 
-    let s = rawLine.trim();
-
     // Removes surrounding label
-    if (labelRegExp) {
-        s = s.replace(labelRegExp, "").trim();
-    }
+    let s = labelRegExp
+        ? rawLine.replace(labelRegExp, "").trim() // (trim after regexp!)
+        : rawLine.trim();
 
     // Parses and removes repeat pseudo-op
     let repetitions = 1;
