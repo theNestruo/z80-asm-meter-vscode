@@ -77,7 +77,6 @@
 							"array",
 							"null"
 						],
-						"description": "Additional language IDs for which the extension is enabled (such as \"c\" for in-lined assembly)",
 						"default": [
 							"asm-collection",
 							"pasmo",
@@ -85,12 +84,12 @@
 							"z80-asm",
 							"z80-macroasm",
 							"zeus-asm"
-						]
+						],
+						"description": "Additional language IDs for which the extension is enabled (such as \"c\" for in-lined assembly)"
 					},
 					"z80-asm-meter.platform": {
 						"order": 20,
 						"type": "string",
-						"description": "Controls the instruction set and the timing information",
 						"enum": [
 							"z80",
 							"msx",
@@ -98,19 +97,19 @@
 							"cpc",
 							"z80n"
 						],
+						"default": "z80",
+						"description": "Controls the instruction set and the timing information",
 						"enumDescriptions": [
 							"Default Z80 instruction set and default timing information",
 							"MSX: default Z80 instruction set and Z80+M1 timing information (MSX standard)",
 							"NEC PC-8000 series: default Z80 instruction set and both default and Z80+M1 timing information",
 							"Amstrad CPC: default Z80 instruction set and timing measured in number of NOPs",
 							"ZX Spectrum Next Extended Z80 instruction set and default timing information"
-						],
-						"default": "z80"
+						]
 					},
 					"z80-asm-meter.syntax": {
 						"order": 30,
 						"type": "string",
-						"description": "Adjusts the main syntax of the assembler",
 						"enum": [
 							"default",
 							"glass",
@@ -119,6 +118,8 @@
 							"sjasmplus",
 							"tniasm"
 						],
+						"default": "default",
+						"description": "Adjusts the main syntax of the assembler",
 						"enumDescriptions": [
 							"Matches most assemblers",
 							"Matches Glass Z80 assembler syntax",
@@ -126,14 +127,13 @@
 							"Matches SjASM assembler syntax",
 							"Matches SjASMPlus assembler syntax",
 							"Matches tniASM assembler syntax"
-						],
-						"default": "default"
+						]
 					},
 					"z80-asm-meter.expandSelectionToLine": {
 						"order": 40,
 						"type": "boolean",
-						"description": "When enabled, expands the selection to cover entire lines",
-						"default": false
+						"default": false,
+						"description": "When enabled, expands the selection to cover entire lines"
 					}
 				}
 			},
@@ -144,31 +144,30 @@
 					"z80-asm-meter.statusBar.alignment": {
 						"order": 10,
 						"type": "string",
-						"description": "Controls the status bar item position",
 						"enum": [
 							"leftmost",
 							"left",
 							"right",
 							"rightmost"
 						],
+						"default": "right",
+						"description": "Controls the status bar item position",
 						"enumDescriptions": [
 							"Leftmost position of the status bar",
 							"Left side of the status bar",
 							"Right side of the status bar",
 							"Rightmost position of the status bar"
-						],
-						"default": "right"
+						]
 					},
 					"z80-asm-meter.statusBar.showInstruction": {
 						"order": 20,
 						"type": "boolean",
-						"description": "Shows the processed instruction in the status bar",
-						"default": false
+						"default": false,
+						"description": "Shows the processed instruction in the status bar"
 					},
 					"z80-asm-meter.statusBar.totalTimings": {
 						"order": 30,
 						"type": "string",
-						"description": "Shows total timing calculations in the status bar",
 						"enum": [
 							"all",
 							"combineAll",
@@ -177,6 +176,8 @@
 							"best",
 							"default"
 						],
+						"default": "smart",
+						"description": "Shows total timing calculations in the status bar",
 						"enumDescriptions": [
 							"Shows all the total timing calculations that apply to the selection",
 							"Shows all the total timing calculations combined to reduce the size of the status bar item",
@@ -184,36 +185,35 @@
 							"Shows total timing calculations that are relevant to the selection combined to reduce the size of the status bar item",
 							"Shows the total timing calculation that best fits the selection",
 							"Does not show any alternative total timing calculation"
-						],
-						"default": "smart"
+						]
 					},
 					"z80-asm-meter.statusBar.totalTimingsOrder": {
 						"order": 35,
 						"type": "string",
-						"description": "Determines the order of the total timing calculations in the status bar when more than one total timing calculation is visible",
 						"enum": [
 							"retFlowJumpCall",
 							"flowRetJumpCall",
 							"retJumpCallFlow"
 						],
+						"default": "retFlowJumpCall",
+						"description": "Determines the order of the total timing calculations in the status bar when more than one total timing calculation is visible",
 						"enumDescriptions": [
 							"At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last",
 							"Execution flow first. Any exit points (returns, jumps and calls) last",
 							"Any exit point (returns, jumps and calls) first, execution flow last"
-						],
-						"default": "retFlowJumpCall"
+						]
 					},
 					"z80-asm-meter.statusBar.copyTimingsAsHints": {
 						"order": 40,
 						"type": "boolean",
-						"description": "Enable copying timings as timing hints, instead of human readable format",
-						"default": false
+						"default": false,
+						"description": "Enable copying timings as timing hints, instead of human readable format"
 					},
 					"z80-asm-meter.statusBar.sizeSuffix": {
 						"order": 50,
 						"type": "string",
-						"description": "The suffix for the size in bytes in the status bar",
 						"default": " byte| bytes",
+						"description": "The suffix for the size in bytes in the status bar",
 						"examples": [
 							" byte| bytes",
 							" B"
@@ -222,21 +222,21 @@
 					"z80-asm-meter.statusBar.showBytes": {
 						"order": 60,
 						"type": "boolean",
-						"description": "Shows the bytes (opcode) in the status bar",
-						"default": false
+						"default": false,
+						"description": "Shows the bytes (opcode) in the status bar"
 					},
 					"z80-asm-meter.statusBar.debounce": {
 						"order": 70,
 						"type": "integer",
-						"description": "Milliseconds to prevent metering from being called too frequently when the selection changes",
-						"default": 100
+						"default": 100,
+						"description": "Milliseconds to prevent metering from being called too frequently when the selection changes"
 					},
 					"z80-asm-meter.statusBar.instructionIcon": {
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
-						"description": "The icon to identify the instruction in the status bar",
 						"default": "$(code)",
+						"description": "The icon to identify the instruction in the status bar",
 						"examples": [
 							"$(code)",
 							"$(comment)",
@@ -252,8 +252,8 @@
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
-						"description": "The icon to identify the timings in the status bar",
 						"default": "$(watch)",
+						"description": "The icon to identify the timings in the status bar",
 						"examples": [
 							"$(clock)",
 							"$(dashboard)",
@@ -266,8 +266,8 @@
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
-						"description": "The icon to identify the size and the bytes in the status bar",
 						"default": "$(file-binary)",
+						"description": "The icon to identify the size and the bytes in the status bar",
 						"examples": [
 							"$(archive)",
 							"$(database)",
@@ -288,76 +288,76 @@
 					"z80-asm-meter.syntax.label.colonOptional": {
 						"order": 10,
 						"type": "boolean",
-						"description": "When enabled, the label trailing colon is optional and the labels must not be indented. When disabled, the labels must be followed by a colon (:) and can be indented",
-						"default": false
+						"default": false,
+						"description": "When enabled, the label trailing colon is optional and the labels must not be indented. When disabled, the labels must be followed by a colon (:) and can be indented"
 					},
 					"z80-asm-meter.syntax.repeat": {
 						"order": 20,
 						"type": "string",
-						"description": "Enables support for parsing single instruction repetitions",
 						"enum": [
 							"none",
 							"brackets",
 							"dot"
 						],
+						"default": "none",
+						"description": "Enables support for parsing single instruction repetitions",
 						"enumDescriptions": [
 							"Disables single instruction reptitions",
 							"The single instruction reptitions are specified within square brackets ([ and ]) before the instruction",
 							"The single instruction reptitions are specified after a dot (.) before the instruction"
-						],
-						"default": "none"
+						]
 					},
 					"z80-asm-meter.syntax.lineSeparator": {
 						"order": 30,
 						"type": "string",
-						"description": "Adjusts the line separator to match the syntax of the assembler",
 						"enum": [
 							"none",
 							"colon",
 							"pipe"
 						],
+						"default": "none",
+						"description": "Adjusts the line separator to match the syntax of the assembler",
 						"enumDescriptions": [
 							"Does not allow multiple instructions on a single line",
 							"Use colon (:) to have more than one instruction on a line",
 							"Use pipe (|) to have more than one instruction on a line. This behaviour matches some assemblers such as tniASM"
-						],
-						"default": "none"
+						]
 					},
 					"z80-asm-meter.syntax.enable.fakeInstructions": {
 						"order": 40,
 						"type": "boolean",
-						"description": "Enables SjASMPlus fake instructions support",
-						"default": false
+						"default": false,
+						"description": "Enables SjASMPlus fake instructions support"
 					},
 					"z80-asm-meter.syntax.enable.registerListInstructions": {
 						"order": 42,
 						"type": "boolean",
-						"description": "Enables SjASMPlus register list instructions support",
-						"default": false
+						"default": false,
+						"description": "Enables SjASMPlus register list instructions support"
 					},
 					"z80-asm-meter.syntax.enable.negativeConditions": {
 						"order": 44,
 						"type": "boolean",
-						"description": "Enables Glass negative conditions support",
-						"default": false
+						"default": false,
+						"description": "Enables Glass negative conditions support"
 					},
 					"z80-asm-meter.syntax.enable.dupEdup": {
 						"order": 46,
 						"type": "boolean",
-						"description": "Enables DUP/EDUP repetition blocks",
-						"default": false
+						"default": false,
+						"description": "Enables DUP/EDUP repetition blocks"
 					},
 					"z80-asm-meter.syntax.enable.reptEndr": {
 						"order": 48,
 						"type": "boolean",
-						"description": "Enables REPT/ENDR repetition blocks",
-						"default": false
+						"default": false,
+						"description": "Enables REPT/ENDR repetition blocks"
 					},
 					"z80-asm-meter.syntax.enable.reptEndm": {
 						"order": 50,
 						"type": "boolean",
-						"description": "Enables REPT/ENDM repetition blocks",
-						"default": false
+						"default": false,
+						"description": "Enables REPT/ENDM repetition blocks"
 					}
 				}
 			},
@@ -368,8 +368,8 @@
 					"z80-asm-meter.parser.directives.defsAsInstructions": {
 						"order": 10,
 						"type": "boolean",
-						"description": "When enabled, tries to parse DEFS directive bytes as single byte instructions",
-						"default": false
+						"default": false,
+						"description": "When enabled, tries to parse DEFS directive bytes as single byte instructions"
 					}
 				}
 			},
@@ -380,33 +380,33 @@
 					"z80-asm-meter.timing.executionFlow.enabled": {
 						"order": 110,
 						"type": "boolean",
-						"mark": "Enables execution flow total timing calculation",
-						"default": true
+						"default": true,
+						"mark": "Enables execution flow total timing calculation"
 					},
 					"z80-asm-meter.timing.executionFlow.threshold": {
 						"order": 120,
 						"type": "number",
-						"description": "Minimum number of instructions to be selected for the calculation of execution flow total timing",
-						"default": 2
+						"default": 2,
+						"description": "Minimum number of instructions to be selected for the calculation of execution flow total timing"
 					},
 					"z80-asm-meter.timing.executionFlow.requireConditional": {
 						"order": 130,
 						"type": "boolean",
-						"description": "Requires at least one conditional instruction to enable execution flow total timing calculation",
-						"default": true
+						"default": true,
+						"description": "Requires at least one conditional instruction to enable execution flow total timing calculation"
 					},
 					"z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump": {
 						"order": 140,
 						"type": "boolean",
-						"description": "Disables execution flow total timing calculation if an unconditional JP, JR or RET instruction is found",
-						"default": true
+						"default": true,
+						"description": "Disables execution flow total timing calculation if an unconditional JP, JR or RET instruction is found"
 					},
 					"z80-asm-meter.timing.executionFlow.icon": {
 						"order": 150,
 						"type": "string",
 						"minLength": 1,
-						"description": "Execution flow total timing calculation icon in the status bar",
 						"default": "$(debug-step-over)",
+						"description": "Execution flow total timing calculation icon in the status bar",
 						"examples": [
 							"$(arrow-down)",
 							"$(chevron-down)",
@@ -421,45 +421,45 @@
 					"z80-asm-meter.timing.atExit.retEnabled": {
 						"order": 210,
 						"type": "boolean",
-						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a RET, RETI or RETN instruction",
-						"default": true
+						"default": true,
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a RET, RETI or RETN instruction"
 					},
 					"z80-asm-meter.timing.atExit.jumpEnabled": {
 						"order": 211,
 						"type": "boolean",
-						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a DJNZ, JP or JR instruction",
-						"default": true
+						"default": true,
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a DJNZ, JP or JR instruction"
 					},
 					"z80-asm-meter.timing.atExit.callEnabled": {
 						"order": 212,
 						"type": "boolean",
-						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a CALL or RST instruction",
-						"default": false
+						"default": false,
+						"description": "Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a CALL or RST instruction"
 					},
 					"z80-asm-meter.timing.atExit.threshold": {
 						"order": 220,
 						"type": "number",
-						"description": "Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point",
-						"default": 2
+						"default": 2,
+						"description": "Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point"
 					},
 					"z80-asm-meter.timing.atExit.requireConditional": {
 						"order": 230,
 						"type": "boolean",
-						"description": "Requires at least one conditional instruction to enable total timing calculation of the execution flow to the selected exit point",
-						"default": true
+						"default": true,
+						"description": "Requires at least one conditional instruction to enable total timing calculation of the execution flow to the selected exit point"
 					},
 					"z80-asm-meter.timing.atExit.stopOnUnconditionalJump": {
 						"order": 240,
 						"type": "boolean",
-						"description": "Disables total timing calculation of the execution flow to the selected exit point if an unconditional JP, JR or RET instruction is found",
-						"default": true
+						"default": true,
+						"description": "Disables total timing calculation of the execution flow to the selected exit point if an unconditional JP, JR or RET instruction is found"
 					},
 					"z80-asm-meter.timing.atExit.retIcon": {
 						"order": 250,
 						"type": "string",
 						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (RET, RETI or RETN instruction) icon in the status bar",
 						"default": "$(debug-step-back)",
+						"description": "Total timing calculation of the execution flow to the selected exit point (RET, RETI or RETN instruction) icon in the status bar",
 						"examples": [
 							"$(arrow-left)",
 							"$(arrow-up)",
@@ -480,8 +480,8 @@
 						"order": 251,
 						"type": "string",
 						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (DJNZ, JP or JR instruction) icon in the status bar",
 						"default": "$(debug-step-out)",
+						"description": "Total timing calculation of the execution flow to the selected exit point (DJNZ, JP or JR instruction) icon in the status bar",
 						"examples": [
 							"$(arrow-right)",
 							"$(chevron-right)",
@@ -496,8 +496,8 @@
 						"order": 252,
 						"type": "string",
 						"minLength": 1,
-						"description": "Total timing calculation of the execution flow to the selected exit point (CALL or RST instruction) icon in the status bar",
 						"default": "$(debug-step-into)",
+						"description": "Total timing calculation of the execution flow to the selected exit point (CALL or RST instruction) icon in the status bar",
 						"examples": [
 							"$(arrow-right)",
 							"$(chevron-right)",
@@ -517,20 +517,20 @@
 					"z80-asm-meter.timing.hints.enabled": {
 						"order": 10,
 						"type": "string",
-						"description": "Enables timing hints read from the line comment",
 						"enum": [
 							"none",
 							"subroutines",
 							"any",
 							"ignoreCommentedOut"
 						],
+						"default": "subroutines",
+						"description": "Enables timing hints read from the line comment",
 						"enumDescriptions": [
 							"Disables timing hints",
 							"Subroutine timing hint will be added to CALL, DJNZ, JP, JR, RET or RST instructions only",
 							"Any timing hint found, regardless the instruction. This includes empty lines",
 							"Any timing hint found, regardless the instruction, but trying to exclude empty lines that look like commented out source code"
-						],
-						"default": "subroutines"
+						]
 					},
 					"z80-asm-meter.timing.hints.regexps": {
 						"order": 20,
@@ -538,8 +538,6 @@
 							"array",
 							"null"
 						],
-						"description": "An array of regexp-based user-defined timing hints",
-						"default": [],
 						"items": {
 							"type": "object",
 							"properties": {
@@ -603,7 +601,9 @@
 									"description": "Declares or overrides default timing hint"
 								}
 							}
-						}
+						},
+						"default": [],
+						"description": "An array of regexp-based user-defined timing hints"
 					}
 				}
 			},
@@ -617,8 +617,6 @@
 							"array",
 							"null"
 						],
-						"description": "An array of user-defined macros",
-						"default": [],
 						"items": {
 							"type": "object",
 							"properties": {
@@ -693,7 +691,9 @@
 									}
 								}
 							}
-						}
+						},
+						"default": [],
+						"description": "An array of user-defined macros"
 					}
 				}
 			}
