@@ -8,7 +8,7 @@ import { z80InstructionParser } from "./Z80InstructionParser";
 class GlassFakeInstructionParser implements InstructionParser {
 
     get isEnabled(): boolean {
-        return config.syntax.glassNegativeConditionsEnabled;
+        return config.syntax.glassNegativeConditions;
     }
 
     parse(s: SourceCode): Meterable | undefined {
@@ -70,7 +70,7 @@ class GlassReptRepetitionParser extends AbstractRepetitionParser {
     }
 
     get isEnabled(): boolean {
-        return config.syntax.glassReptEndmEnabled;
+        return config.syntax.glassReptEndmRepetition;
     }
 }
 

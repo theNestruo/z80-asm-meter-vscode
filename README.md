@@ -49,7 +49,7 @@ ZX Spectrum Next Extended Z80 Instruction Set is supported.
 >
 > Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
 >
-> If you are migrating from any version prior to 5.0.0 to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the [deprecation messages](#deprecated-settings).
+> If you are migrating from any version prior to 5.x to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the [deprecation messages](#deprecated-settings).
 >
 > &nbsp;
 
@@ -144,33 +144,33 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
 ### Assembler syntax settings
 
-* `z80-asm-meter.syntax.label.colonOptional`: Adjusts the label detection to match the syntax of the assembler.
+* `z80-asm-meter.syntaxFeature.labelColonOptional`: Adjusts the label detection to match the syntax of the assembler.
 
     * `true`: the trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as Pasmo and SjASMPlus. This is the default value when the main syntax of the assembler is set to `pasmo` or `sjasmplus`.
     * `false` (default): the labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
 
-* `z80-asm-meter.syntax.repeat`: Enables support for parsing repeat count:
+* `z80-asm-meter.syntaxFeature.repeat`: Enables support for parsing repeat count:
 
     * `none` (default): Disables repeat count.
     * `brackets`: The repeat count is specified within square brackets (`[` and `]`) before the instruction. This behaviour partially matches the [source format](http://www.xl2s.tk/sjasmman2.html#s3) of Sjasm, but multiple repeat counts and iteration count are not supported. This is the default value when the main syntax of the assembler is set to `sjasm`.
     * `dot`: The repeat count is specified after a dot (`.`) before the instruction. This behaviour partially matches the repeat [pseudo-op](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops) of SjASMPlus, but multiple repeat counts and expressions are not supported. This is the default value when the main syntax of the assembler is set to `sjasmplus`.
 
-* `z80-asm-meter.syntax.lineSeparator`: Adjusts the line separator to match the syntax of the assembler:
-    * `none` (default): Does not allow multiple instructions on a single line.
+* `z80-asm-meter.syntaxFeature.lineSeparator`: Adjusts the line separator to match the syntax of the assembler:
+    * `disabled` (default): Does not allow multiple instructions on a single line.
     * `colon`: Use colon (`:`) to have more than one instruction on a line.
     * `pipe`: Use pipe (`|`) to have more than one instruction on a line. This behaviour matches some assemblers such as tniASM. This is the default value when the main syntax of the assembler is set to `tniasm`.
 
-* `z80-asm-meter.syntax.enable.fakeInstructions`: Enables SjASMPlus [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) support. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
+* `z80-asm-meter.syntaxFeature.fakeInstructions`: Enables SjASMPlus [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) support. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntax.enable.registerListInstructions`: Enables SjASMPlus [register list instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) support. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
+* `z80-asm-meter.syntaxFeature.registerListInstructions`: Enables SjASMPlus [register list instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) support. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntax.nenable.egativeConditions`: Enables Glass [negative conditions](http://www.grauw.nl/projects/glass/)) support. Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
+* `z80-asm-meter.syntaxFeature.negativeConditions`: Enables Glass [negative conditions](http://www.grauw.nl/projects/glass/)) support. Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
 
-* `z80-asm-meter.syntax.enable.dupEdup`: Enables `DUP`/`EDUP` repetition blocks. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
+* `z80-asm-meter.syntaxFeature.dupEdup`: Enables `DUP`/`EDUP` repetition blocks. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntax.enable.reptEndr`: Enables `REPT`/`ENDR` repetition blocks. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
+* `z80-asm-meter.syntaxFeature.reptEndr`: Enables `REPT`/`ENDR` repetition blocks. Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntax.enable.reptEndm`: Enables `REPT`/`ENDM` repetition blocks. Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
+* `z80-asm-meter.syntaxFeature.reptEndm`: Enables `REPT`/`ENDM` repetition blocks. Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
 
 
 ### Parser settings
@@ -357,6 +357,7 @@ Please find the deprecated settings, the last version where setting was availabl
 
 | Version | Deprecated setting | Replacement setting(s) |
 | --: | --- | --- |
+| | | |
 | v4.3.0 | `z80-asm-meter.viewInstruction` | `z80-asm-meter.statusBar.showInstruction` |
 | v4.3.0 | `z80-asm-meter.timing.mode` | `z80-asm-meter.statusBar.totalTimings` |
 | v4.3.0 | `z80-asm-meter.viewBytes` | `z80-asm-meter.statusBar.showBytes` |
@@ -365,9 +366,20 @@ Please find the deprecated settings, the last version where setting was availabl
 | v4.3.0 | `z80-asm-meter.directivesAsInstructions` | `z80-asm-meter.parser.directives.defsAsInstructions` |
 | v4.3.0 | `z80-asm-meter.timing.threshold` | `z80-asm-meter.timing.executionFlow.threshold`<br>`z80-asm-meter.timing.atExit.threshold` |
 | v4.3.0 | `z80-asm-meter.timing.hints` | `z80-asm-meter.timing.hints.enabled` |
+| | | |
 | v5.1.0 | `z80-asm-meter.statusBar.compactSize` | `z80-asm-meter.statusBar.sizeSuffix` |
 | v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | `z80-asm-meter.timing.atExit.retEnabled`<br>`z80-asm-meter.timing.atExit.jumpEnabled`<br>`z80-asm-meter.timing.atExit.callEnabled` |
 | v5.1.0 | `z80-asm-meter.timing.atExit.icon` | `z80-asm-meter.timing.atExit.jumpIcon`<br>`z80-asm-meter.timing.atExit.callIcon` |
+| | | |
+| v5.3.0 | `z80-asm-meter.syntax.label.colonOptional` | `z80-asm-meter.syntaxFeature.labelColonOptional` |
+| v5.3.0 | `z80-asm-meter.syntax.repeat` | `z80-asm-meter.syntaxFeature.repeat` |
+| v5.3.0 | `z80-asm-meter.syntax.lineSeparator` | `z80-asm-meter.syntaxFeature.lineSeparator` |
+| v5.3.0 | `z80-asm-meter.syntax.enable.fakeInstructions` | `z80-asm-meter.syntaxFeature.fakeInstructions` |
+| v5.3.0 | `z80-asm-meter.syntax.enable.registerListInstructions` | `z80-asm-meter.syntaxFeature.registerListInstructions` |
+| v5.3.0 | `z80-asm-meter.syntax.enable.negativeConditions` | `z80-asm-meter.syntaxFeature.negativeConditions` |
+| v5.3.0 | `z80-asm-meter.syntax.enable.dupEdup` | `z80-asm-meter.syntaxFeature.dupEdup` |
+| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndr` | `z80-asm-meter.syntaxFeature.reptEndr` |
+| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndm` | `z80-asm-meter.syntaxFeature.reptEndm` |
 
 
 
@@ -422,7 +434,7 @@ The shortest way to disable the new features is:
 
 ```json
 "z80-asm-meter.statusBar.totalTimings": "default",
-"z80-asm-meter.timing.hints.enabled": "none"
+"z80-asm-meter.timing.hints.enabled": "disabled"
 ```
 
 

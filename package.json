@@ -1,7 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.3.0",
+	"version": "5.3.1",
 	"engines": {
 		"vscode": "^1.81.0"
 	},
@@ -285,21 +285,21 @@
 				"title": "Assembler syntax",
 				"order": 30,
 				"properties": {
-					"z80-asm-meter.syntax.label.colonOptional": {
+					"z80-asm-meter.syntaxFeature.labelColonOptional": {
 						"order": 10,
 						"type": "boolean",
 						"default": false,
 						"description": "When enabled, the label trailing colon is optional and the labels must not be indented. When disabled, the labels must be followed by a colon (:) and can be indented"
 					},
-					"z80-asm-meter.syntax.repeat": {
+					"z80-asm-meter.syntaxFeature.repeat": {
 						"order": 20,
 						"type": "string",
 						"enum": [
-							"none",
+							"disabled",
 							"brackets",
 							"dot"
 						],
-						"default": "none",
+						"default": "disabled",
 						"description": "Enables support for parsing single instruction repetitions",
 						"enumDescriptions": [
 							"Disables single instruction reptitions",
@@ -307,15 +307,15 @@
 							"The single instruction reptitions are specified after a dot (.) before the instruction"
 						]
 					},
-					"z80-asm-meter.syntax.lineSeparator": {
+					"z80-asm-meter.syntaxFeature.lineSeparator": {
 						"order": 30,
 						"type": "string",
 						"enum": [
-							"none",
+							"disabled",
 							"colon",
 							"pipe"
 						],
-						"default": "none",
+						"default": "disabled",
 						"description": "Adjusts the line separator to match the syntax of the assembler",
 						"enumDescriptions": [
 							"Does not allow multiple instructions on a single line",
@@ -323,37 +323,37 @@
 							"Use pipe (|) to have more than one instruction on a line. This behaviour matches some assemblers such as tniASM"
 						]
 					},
-					"z80-asm-meter.syntax.enable.fakeInstructions": {
+					"z80-asm-meter.syntaxFeature.fakeInstructions": {
 						"order": 40,
 						"type": "boolean",
 						"default": false,
 						"description": "Enables SjASMPlus fake instructions support"
 					},
-					"z80-asm-meter.syntax.enable.registerListInstructions": {
+					"z80-asm-meter.syntaxFeature.registerListInstructions": {
 						"order": 42,
 						"type": "boolean",
 						"default": false,
 						"description": "Enables SjASMPlus register list instructions support"
 					},
-					"z80-asm-meter.syntax.enable.negativeConditions": {
+					"z80-asm-meter.syntaxFeature.negativeConditions": {
 						"order": 44,
 						"type": "boolean",
 						"default": false,
 						"description": "Enables Glass negative conditions support"
 					},
-					"z80-asm-meter.syntax.enable.dupEdup": {
+					"z80-asm-meter.syntaxFeature.dupEdup": {
 						"order": 46,
 						"type": "boolean",
 						"default": false,
 						"description": "Enables DUP/EDUP repetition blocks"
 					},
-					"z80-asm-meter.syntax.enable.reptEndr": {
+					"z80-asm-meter.syntaxFeature.reptEndr": {
 						"order": 48,
 						"type": "boolean",
 						"default": false,
 						"description": "Enables REPT/ENDR repetition blocks"
 					},
-					"z80-asm-meter.syntax.enable.reptEndm": {
+					"z80-asm-meter.syntaxFeature.reptEndm": {
 						"order": 50,
 						"type": "boolean",
 						"default": false,
@@ -518,7 +518,7 @@
 						"order": 10,
 						"type": "string",
 						"enum": [
-							"none",
+							"disabled",
 							"subroutines",
 							"any",
 							"ignoreCommentedOut"

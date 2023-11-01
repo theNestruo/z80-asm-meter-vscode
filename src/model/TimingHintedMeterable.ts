@@ -11,7 +11,7 @@ export function timingHintedMeterable(
 	Meterable | undefined {
 
 	switch (config.timing.hints.enabledValue) {
-		case "none":
+		case "disabled":
 			// (should never happen)
 			return meterable;
 

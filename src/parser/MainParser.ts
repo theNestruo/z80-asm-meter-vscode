@@ -134,7 +134,7 @@ class MainParser {
         let sourceCode: SourceCode[] = [];
         rawLines.forEach(rawLine => {
             sourceCode.push(...extractSourceCode(rawLine,
-                config.syntax.lineSeparator,
+                config.syntax.lineSeparatorCharacter,
                 config.syntax.labelRegExp,
                 config.syntax.repeatRegExp));
         });

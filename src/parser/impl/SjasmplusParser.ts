@@ -248,7 +248,7 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
     }
 
     get isEnabled(): boolean {
-        return config.syntax.sjasmplusFakeInstructionEnabled;
+        return config.syntax.sjasmplusFakeInstructions;
     }
 
     parse(s: SourceCode): Meterable | undefined {
@@ -293,7 +293,7 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
 class SjasmplusRegisterListInstructionParser implements InstructionParser {
 
     get isEnabled(): boolean {
-        return config.syntax.sjasmplusRegisterListInstructionEnabled;
+        return config.syntax.sjasmplusRegisterListInstructions;
     }
 
     parse(s: SourceCode): Meterable | undefined {
@@ -332,7 +332,7 @@ class SjasmplusDupRepetitionParser extends AbstractRepetitionParser {
     }
 
     get isEnabled(): boolean {
-        return config.syntax.sjasmplusDupEdupRepetitionEnabled;
+        return config.syntax.sjasmplusDupEdupRepetition;
     }
 }
 
@@ -343,7 +343,7 @@ class SjasmplusReptRepetitionParser extends AbstractRepetitionParser {
     }
 
     get isEnabled(): boolean {
-        return config.syntax.sjasmplusReptEndrEnabled;
+        return config.syntax.sjasmplusReptEndrRepetition;
     }
 }
 

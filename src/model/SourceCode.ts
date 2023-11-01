@@ -5,8 +5,9 @@ export function extractFirstInstruction(s: string): string | undefined {
     return extractSourceCode(s).shift()?.instruction;
 }
 
-export function extractSourceCode(rawLine: string, separator?: string,
-    labelRegExp?: RegExp, repeatRegExp?: RegExp | undefined): SourceCode[] {
+export function extractSourceCode(rawLine: string,
+    lineSeparatorCharacter?: string, labelRegExp?: RegExp, repeatRegExp?: RegExp | undefined):
+    SourceCode[] {
 
     // Removes surrounding label, parses and removes repeat pseudo-op
     let [ repetitions, s ] = removeSurroundingLabelAndRepetitions(
@@ -44,7 +45,7 @@ export function extractSourceCode(rawLine: string, separator?: string,
             }
 
             // Separator?
-            if (separator && c === separator) {
+            if (lineSeparatorCharacter && c === lineSeparatorCharacter) {
                 break;
             }
 

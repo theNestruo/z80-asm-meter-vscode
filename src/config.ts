@@ -82,16 +82,16 @@ class SyntaxConfiguration {
 		return read("syntax");
 	}
 
-	private get lineSeparatorValue(): "none" | "colon" | "pipe" {
+	private get lineSeparator(): "disabled" | "colon" | "pipe" {
 
-		return readWithDefaultValue("syntax.lineSeparator",
+		return readWithDefaultValue("syntaxFeature.lineSeparator",
 			this.syntax === "tniasm" ? "pipe" // (derived)
 			: undefined);
 	}
 
-	get lineSeparator(): string | undefined {
+	get lineSeparatorCharacter(): string | undefined {
 
-		const value = this.lineSeparatorValue;
+		const value = this.lineSeparator;
 		return value === "colon" ? ":"
 			: value === "pipe" ? "|"
 			: undefined;
@@ -100,7 +100,7 @@ class SyntaxConfiguration {
 	private get labelColonOptional(): boolean {
 
 		const value = this.syntax;
-		return readWithDefaultValue("syntax.label.colonOptional",
+		return readWithDefaultValue("syntaxFeature.labelColonOptional",
 			value === "pasmo" ? true // (derived)
 			: value === "sjasmplus" ? true // (derived)
 			: undefined);
@@ -113,9 +113,9 @@ class SyntaxConfiguration {
 			: /(^\s*[^\s:]+:)/;
 	}
 
-	private get repeat(): "none" | "brackets" | "dot" {
+	private get repeat(): "disabled" | "brackets" | "dot" {
 
-		return readWithDefaultValue("syntax.repeat",
+		return readWithDefaultValue("syntaxFeature.repeat",
 			(this.syntax === "sjasm") ? "brackets" // (derived)
 			: (this.syntax === "sjasmplus") ? "dot" // (derived)
 			: undefined);
@@ -129,44 +129,44 @@ class SyntaxConfiguration {
 			: undefined;
 	}
 
-	get sjasmplusFakeInstructionEnabled(): boolean {
+	get sjasmplusFakeInstructions(): boolean {
 
-		return readWithDefaultValue("syntax.enable.fakeInstructions",
+		return readWithDefaultValue("syntaxFeature.fakeInstructions",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
-	get sjasmplusRegisterListInstructionEnabled(): boolean {
+	get sjasmplusRegisterListInstructions(): boolean {
 
-		return readWithDefaultValue("syntax.enable.registerListInstructions",
+		return readWithDefaultValue("syntaxFeature.registerListInstructions",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
-	get glassNegativeConditionsEnabled(): boolean {
+	get glassNegativeConditions(): boolean {
 
-		return readWithDefaultValue("syntax.enable.negativeConditions",
+		return readWithDefaultValue("syntaxFeature.negativeConditions",
 			(this.syntax === "glass") ? true // (derived)
 			: undefined);
 	}
 
-	get sjasmplusDupEdupRepetitionEnabled(): boolean {
+	get sjasmplusDupEdupRepetition(): boolean {
 
-		return readWithDefaultValue("syntax.enable.dupEdup",
+		return readWithDefaultValue("syntaxFeature.dupEdup",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
-	get sjasmplusReptEndrEnabled(): boolean {
+	get sjasmplusReptEndrRepetition(): boolean {
 
-		return readWithDefaultValue("syntax.enable.reptEndr",
+		return readWithDefaultValue("syntaxFeature.reptEndr",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
-	get glassReptEndmEnabled(): boolean {
+	get glassReptEndmRepetition(): boolean {
 
-		return readWithDefaultValue("syntax.enable.reptendm",
+		return readWithDefaultValue("syntaxFeature.reptendm",
 			(this.syntax === "glass") ? true // (derived)
 			: undefined);
 	}
@@ -188,7 +188,7 @@ class TimingConfiguration {
 
 class TimingHintsConfiguration {
 
-	get enabledValue(): "none" | "subroutines" | "any" | "ignoreCommentedOut" {
+	get enabledValue(): "disabled" | "subroutines" | "any" | "ignoreCommentedOut" {
 		return read("timing.hints.enabled");
 	}
 
