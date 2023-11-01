@@ -11,11 +11,11 @@ jobs:
       with:
         node-version: 16
     - run: npm install
-    - run: npm install -g vsce
+    - run: npm install --global @vscode/vsce
     - run: vsce package
     - name: get-npm-version
       id: package-version
-      uses: martinbeentjes/npm-get-version-action@master
+      uses: martinbeentjes/npm-get-version-action@main
     - uses: actions/upload-artifact@v3
       with:
         name: z80-asm-meter-${{ steps.package-version.outputs.current-version}}-nightly
