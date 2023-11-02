@@ -65,7 +65,7 @@ export function extractSourceCode(rawLine: string,
             if ((c === "\"")
                 // Prevents considering "'" as a quote
                 // when parsing the instruction "ex af,af'"
-                || ((c === "'") && (!/^ex\s*af\s*,\s*af$/i.test(currentPart)))) {
+                || ((c === "'") && (!/^ex\s+af\s*,\s*af$/i.test(currentPart)))) {
                 quoted = c;
             }
 
