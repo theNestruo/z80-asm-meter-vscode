@@ -1,3 +1,7 @@
+## 5.3.2
+
+- ...
+
 ## 5.3.1
 
 - Fixes settings UI issues (caused by shadowed configuration setting ids). #150

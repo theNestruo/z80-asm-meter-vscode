@@ -1,9 +1,9 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.3.1",
+	"version": "5.3.2",
 	"engines": {
-		"vscode": "^1.81.0"
+		"vscode": "^1.82.0"
 	},
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
@@ -715,7 +715,7 @@
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.2",
 		"@types/node": "20.x",
-		"@types/vscode": "^1.81.0",
+		"@types/vscode": "^1.82.0",
 		"@typescript-eslint/eslint-plugin": "^6.9.1",
 		"@typescript-eslint/parser": "^6.9.1",
 		"@vscode/test-electron": "^2.3.6",
