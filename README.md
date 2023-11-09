@@ -90,7 +90,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
     * `sjasmplus`: Matches [SjASMPlus](https://github.com/sjasmplus/sjasmplus) assembler syntax.
     * `tniasm`: Matches [tniASM](http://www.tni.nl/products/tniasm.html) assembler syntax.
 
-* `z80-asm-meter.expandSelectionToLine`: When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`). Disabled by default.
+* `z80-asm-meter.expandSelectionToLine`: When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`). Enabled by default.
 
 
 ### Status bar settings
@@ -115,17 +115,44 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 * `z80-asm-meter.statusBar.totalTimings`: Shows [total timing calculations](#total-timing-calculations) in the status bar.
 
     * `all`: Shows all the total timing calculation that apply to the selection.
+
+        ![](doc/images/statusBar.totalTimings=all.png)
+
     * `combineAll`: Shows all the total timing calculation that apply to the selection, but combined to reduce the size of the status bar item.
+
+        ![](doc/images/statusBar.totalTimings=combineAll.png)
+
     * `smart` (default): Shows total timing calculation that are relevant to the selection.
+
+        ![](doc/images/statusBar.totalTimings=smart.png)
+
     * `combineSmart`: Shows total timing calculation that are relevant to the selection, but combined to reduce the size of the status bar item.
+
+        ![](doc/images/statusBar.totalTimings=combineSmart.png)
+
     * `best`: Shows the total timing calculation that best fits the selection.
+
+        ![](doc/images/statusBar.totalTimings=best.png)
+
     * `default`: Does not show any alternative total timing calculation.
+
+        ![](doc/images/statusBar.totalTimings=default.png)
 
 * `z80-asm-meter.statusBar.totalTimingsOrder`: Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
 
     * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
+
+        ![](doc/images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
+
     * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
+
+        ![](doc/images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
+
     * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
+
+        ![](doc/images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
+
+* `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(watch)`.
 
 #### Size
 
@@ -225,6 +252,7 @@ There are three total timing calculation available:
 * `z80-asm-meter.timing.atExit.jumpIcon`: Total timing calculation of the execution flow to the selected exit point (`DJNZ`, `JP` or `JR` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-out)`.
 
 * `z80-asm-meter.timing.atExit.callIcon`: Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(debug-step-into)`.
+
 
 
 ### Timing hints
