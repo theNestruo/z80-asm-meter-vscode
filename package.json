@@ -132,7 +132,7 @@
 					"z80-asm-meter.expandSelectionToLine": {
 						"order": 40,
 						"type": "boolean",
-						"default": false,
+						"default": true,
 						"description": "When enabled, expands the selection to cover entire lines"
 					}
 				}
