@@ -1,6 +1,7 @@
 ## 5.3.2
 
-- ...
+- Status bar examples in the documentation.
+- Expand selection to line enabled by default.
 
 ## 5.3.1
 
