@@ -32,8 +32,8 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 
 Select Z80 assembly source code to view clock cycles, mnemonic of the instruction, and/or bytecode size in the status bar. Click on either to copy the clock cycles and the bytecode size information to the clipboard.
 
-![Z80 Assembly meter](doc/images/screenshot.png)
-<br>_Theme: [Dark-](https://marketplace.visualstudio.com/items?itemName=theNestruo.dark-minus-theme)_
+![Z80 Assembly meter](images/screenshot.png)
+<br>_Theme: [Dark- (Visual Studio) (Flat UI)](https://marketplace.visualstudio.com/items?itemName=theNestruo.dark-minus-theme)_
 
 If there is no selection, the current line will be used.
 
@@ -116,41 +116,41 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
     * `all`: Shows all the total timing calculation that apply to the selection.
 
-        ![](doc/images/statusBar.totalTimings=all.png)
+        ![](images/statusBar.totalTimings=all.png)
 
     * `combineAll`: Shows all the total timing calculation that apply to the selection, but combined to reduce the size of the status bar item.
 
-        ![](doc/images/statusBar.totalTimings=combineAll.png)
+        ![](images/statusBar.totalTimings=combineAll.png)
 
     * `smart` (default): Shows total timing calculation that are relevant to the selection.
 
-        ![](doc/images/statusBar.totalTimings=smart.png)
+        ![](images/statusBar.totalTimings=smart.png)
 
     * `combineSmart`: Shows total timing calculation that are relevant to the selection, but combined to reduce the size of the status bar item.
 
-        ![](doc/images/statusBar.totalTimings=combineSmart.png)
+        ![](images/statusBar.totalTimings=combineSmart.png)
 
     * `best`: Shows the total timing calculation that best fits the selection.
 
-        ![](doc/images/statusBar.totalTimings=best.png)
+        ![](images/statusBar.totalTimings=best.png)
 
     * `default`: Does not show any alternative total timing calculation.
 
-        ![](doc/images/statusBar.totalTimings=default.png)
+        ![](images/statusBar.totalTimings=default.png)
 
 * `z80-asm-meter.statusBar.totalTimingsOrder`: Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
 
     * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
 
-        ![](doc/images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
+        ![](images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
 
     * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
 
-        ![](doc/images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
+        ![](images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
 
     * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
 
-        ![](doc/images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
+        ![](images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
 
 * `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used. Defaults to: `$(watch)`.
 
@@ -213,7 +213,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
 There are three total timing calculation available:
 
-![Total timing calculations](doc/images/total-timing-calculation.png)
+![Total timing calculations](images/total-timing-calculation.png)
 
 1. **default**: The _default_ total timing calculation mode is the raw addition of the timings of the individual instructions.
 
@@ -272,7 +272,7 @@ The timing can be either a single value or a pair of values separated by slash (
 
 For example:
 
-![Timing hints](doc/images/timing-hints.png)
+![Timing hints](images/timing-hints.png)
 
 * Of the timing hints of *.OFF_SCREEN* (41/28 clock cycles), the 41 has been added to the timing of conditional `CALL` instruction when the condition is _taken_ (18 clock cycles). Please note the second timing hint (28) has been ignored, as there is only one possible timing for the _taken_ condition path.
 
