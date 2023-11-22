@@ -119,11 +119,15 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
     Defaults to: `$(code)`.
 
+    ![](images/statusBar.instructionIcon.png)
+
 #### Status bar settings: Timings
 
 * `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(watch)`.
+
+    ![](images/statusBar.timingsIcon.png)
 
 * `z80-asm-meter.statusBar.totalTimings`: Shows [total timing calculations](#total-timing-calculations) in the status bar.
 
@@ -174,6 +178,8 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 * `z80-asm-meter.statusBar.sizeIcon`: The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(file-binary)`.
+
+    ![](images/statusBar.sizeIcon.png)
 
 * `z80-asm-meter.statusBar.sizeSuffix`: The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural.
 
@@ -278,6 +284,8 @@ There are three total timing calculation available:
 
     Defaults to: `$(debug-step-over)`.
 
+    ![](images/timing.executionFlow.icon.png)
+
 * `z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump`: Disables execution flow total timing calculation if an unconditional `JP`, `JR` or `RET` instruction is found.
 
     Enabled by default.
@@ -312,13 +320,19 @@ There are three total timing calculation available:
 
     Defaults to: `$(debug-step-back)`.
 
+    ![](images/timing.atExit.retIcon.png)
+
 * `z80-asm-meter.timing.atExit.jumpIcon`: Total timing calculation of the execution flow to the selected exit point (`DJNZ`, `JP` or `JR` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-out)`.
 
+    ![](images/timing.atExit.jumpIcon.png)
+
 * `z80-asm-meter.timing.atExit.callIcon`: Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-into)`.
+
+    ![](images/timing.atExit.callIcon.png)
 
 
 
@@ -550,6 +564,8 @@ It is possible to use text instead of icons via configuration settings:
 "z80-asm-meter.timing.atExit.callIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
 ```
 
+![](images/uxGuildelines.showInstruction=false.png)
+
 Or, when showing the processed instruction in the status bar:
 
 ```json
@@ -562,6 +578,8 @@ Or, when showing the processed instruction in the status bar:
 "z80-asm-meter.timing.atExit.jumpIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
 "z80-asm-meter.timing.atExit.callIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
 ```
+
+![](images/uxGuildelines.showInstruction=true.png)
 
 
 ## Credits
