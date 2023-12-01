@@ -1,9 +1,9 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.3.2",
+	"version": "5.3.3",
 	"engines": {
-		"vscode": "^1.82.0"
+		"vscode": "^1.84.2"
 	},
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
@@ -48,6 +48,7 @@
 		"onLanguage:pasmo",
 		"onLanguage:z80",
 		"onLanguage:z80-asm",
+		"onLanguage:z80-asm-meter",
 		"onLanguage:z80-macroasm",
 		"onLanguage:zeus-asm",
 		"workspaceContains:**/*.{asm,ASM,c,C,inc,INC,s,S,z80,Z80}"
