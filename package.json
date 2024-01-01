@@ -716,14 +716,14 @@
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.6",
 		"@types/node": "20.x",
-		"@types/vscode": "^1.84.2",
-		"@typescript-eslint/eslint-plugin": "^6.13.1",
-		"@typescript-eslint/parser": "^6.13.1",
+		"@types/vscode": "^1.85.0",
+		"@typescript-eslint/eslint-plugin": "^6.16.0",
+		"@typescript-eslint/parser": "^6.16.0",
 		"@vscode/test-electron": "^2.3.8",
-		"esbuild": "^0.19.8",
-		"eslint": "^8.54.0",
+		"esbuild": "^0.19.11",
+		"eslint": "^8.56.0",
 		"glob": "^10.3.10",
 		"mocha": "^10.0.0",
-		"typescript": "^5.3.2"
+		"typescript": "^5.3.3"
 	}
 }
