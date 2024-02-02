@@ -3,7 +3,7 @@
 	"name": "z80-asm-meter",
 	"version": "5.3.3",
 	"engines": {
-		"vscode": "^1.85.0"
+		"vscode": "^1.86.0"
 	},
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
@@ -210,8 +210,8 @@
 						"default": false,
 						"description": "Enable copying timings as timing hints, instead of human readable format"
 					},
-					"z80-asm-meter.statusBar.sizeFormat": {
-						"order": 45,
+					"z80-asm-meter.statusBar.sizeNumericFormat": {
+						"order": 43,
 						"type": "string",
 						"enum": [
 							"decimal",
@@ -219,10 +219,41 @@
 							"both"
 						],
 						"default": "decimal",
+						"description": "The numerical format of the size in bytes in the status bar",
 						"enumDescriptions": [
 							"Size in bytes as a decimal number",
 							"Size in bytes as an hexadecimal number",
 							"Size in bytes as both a decimal and an hexadecimal number"
+						]
+					},
+					"z80-asm-meter.statusBar.sizeHexadecimalFormat": {
+						"order": 46,
+						"type": "string",
+						"enum": [
+							"hash",
+							"motorola",
+							"intel",
+							"intelUppercase",
+							"cStyle",
+							"uppercaseHash",
+							"uppercaseMotorola",
+							"uppercaseIntel",
+							"uppercaseIntelUppercase",
+							"uppercaseCStyle"
+						],
+						"default": "motorola",
+						"description": "The hexadecimal format for the hexadecimal size in bytes in the status bar",
+						"enumDescriptions": [
+							"Hexadecimal size in bytes in hash format (#1fff)",
+							"Hexadecimal size in bytes in Motorola format ($1fff)",
+							"Hexadecimal size in bytes in Intel format (1fffhh)",
+							"Hexadecimal size in bytes in Intel format, uppercase suffix (1fff)",
+							"Hexadecimal size in bytes in C-style format (0x1fff)",
+							"Hexadecimal size in bytes in uppercase, hash format (#B45D)",
+							"Hexadecimal size in bytes in uppercase, Motorola format ($B45D)",
+							"Hexadecimal size in bytes in uppercase, Intel format, lowercase suffix (0B45Dh)",
+							"Hexadecimal size in bytes in uppercase, Intel format (0B45DH)",
+							"Hexadecimal size in bytes in uppercase, C-style format (0xB45D)"
 						]
 					},
 					"z80-asm-meter.statusBar.sizeSuffix": {
@@ -728,17 +759,17 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/glob": "^8.1.0",
-		"@types/mocha": "^10.0.6",
-		"@types/node": "20.x",
-		"@types/vscode": "^1.85.0",
-		"@typescript-eslint/eslint-plugin": "^6.20.0",
-		"@typescript-eslint/parser": "^6.20.0",
-		"@vscode/test-electron": "^2.3.9",
-		"esbuild": "^0.20.0",
-		"eslint": "^8.56.0",
-		"glob": "^10.3.10",
+		"@types/vscode": "^1.86.0",
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "16.x",
+		"@typescript-eslint/eslint-plugin": "^5.31.0",
+		"@typescript-eslint/parser": "^5.31.0",
+		"eslint": "^8.20.0",
+		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
-		"typescript": "^5.3.3"
+		"typescript": "^4.7.4",
+		"@vscode/test-electron": "^2.1.5",
+		"esbuild": "^0.20.0"
 	}
 }

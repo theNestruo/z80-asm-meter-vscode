@@ -286,8 +286,12 @@ class StatusBarConfiguration {
 		return read("statusBar.copyTimingsAsHints");
 	}
 
-	get sizeFormat(): "decimal" | "hexadecimal" | "both" {
-		return read("statusBar.sizeFormat");
+	get sizeNumericFormat(): "decimal" | "hexadecimal" | "both" {
+		return read("statusBar.sizeNumericFormat");
+	}
+
+	get sizeHexadecimalFormat(): "hash" | "motorola" | "intel" | "intelUppercase" | "cStyle" | "uppercaseHash" | "uppercaseMotorola" | "uppercaseIntel" | "uppercaseIntelUppercase" | "uppercaseCStyle" {
+		return read("statusBar.sizeHexadecimalFormat");
 	}
 
 	get sizeSuffix(): string {

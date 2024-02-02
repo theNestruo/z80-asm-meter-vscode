@@ -11,6 +11,7 @@ import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
 import { formatTiming, humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
 import { AbstractHandler } from "./AbstractHandler";
 import { CommandHandler } from "./CommandHandler";
+import { humanReadableSize } from '../utils/SizeUtils';
 
 export class DebouncedStatusBarHandler {
 
@@ -185,12 +186,9 @@ export class StatusBarHandler extends AbstractHandler {
 		const size = defaultTiming.size;
 		if (size) {
 			const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
-			const formattedSize =
-					config.statusBar.sizeFormat === "hexadecimal" ? `${formatHexadecimalByte(size)}h`
-					: config.statusBar.sizeFormat === "both" ? `${size} (${formatHexadecimalByte(size)}h)`
-					: `${size}`;
+			const formattedSize = humanReadableSize(size);
 			const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
-			text += `${sizeIcon}${size}${sizeSuffix}`;
+			text += `${sizeIcon}${formattedSize}${sizeSuffix}`;
 			if (config.statusBar.showBytes) {
 				const bytes = humanReadableBytes(defaultTiming);
 				if (bytes) {
@@ -272,11 +270,12 @@ export class StatusBarHandler extends AbstractHandler {
 		text.appendMarkdown(this.buildTooltipTiming([defaultTiming, ...this.reorder(flowTiming, atExitTiming)]).value);
 
 		if (size) {
+			const formattedSize = humanReadableSize(size);
 			const platform = config.platform;
 			const hasM1 = platform === "msx" || platform === "pc8000";
 			text.appendMarkdown(hasM1
-				? `|Size:|**${size}**||bytes|\n`
-				: `|Size:|**${size}**|bytes|\n`);
+				? `|Size:|**${formattedSize}**||bytes|\n`
+				: `|Size:|**${formattedSize}**|bytes|\n`);
 		}
 		text.appendMarkdown("\n");
 

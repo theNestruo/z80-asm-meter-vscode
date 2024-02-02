@@ -1,3 +1,7 @@
+## 5.3.3
+
+- Ability to show size in bytes in both decimal and hexadecimal in the status bar.
+
 ## 5.3.2
 
 - Status bar examples in the documentation.

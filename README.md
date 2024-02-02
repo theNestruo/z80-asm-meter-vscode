@@ -181,6 +181,25 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
     ![](images/statusBar.sizeIcon.png)
 
+* `z80-asm-meter.statusBar.sizeNumericFormat`: The numerical format of the size in bytes in the status bar.
+
+    * `decimal` (default): Size in bytes as a decimal number.
+    * `hexadecimal`: Size in bytes as an hexadecimal number.
+    * `both`: Size in bytes as both a decimal and an hexadecimal number.
+
+* `z80-asm-meter.statusBar.sizeHexadecimalFormat`: The hexadecimal format for the hexadecimal size in bytes in the status bar.
+
+    * `hash`: Hexadecimal size in bytes in hash format (`#b45d`).
+    * `motorola` (default): Hexadecimal size in bytes in Motorola format (`$b45d`).
+    * `intel`: Hexadecimal size in bytes in Intel format (`0b45dh`).
+    * `intelUppercase`: Hexadecimal size in bytes in Intel format, uppercase suffix (`0b45dH`).
+    * `cStyle`: Hexadecimal size in bytes in C-style format (`0xb45d`).
+    * `uppercaseHash`: Hexadecimal size in bytes in uppercase, hash format (`#B45D`).
+    * `uppercaseMotorola`: Hexadecimal size in bytes in uppercase, Motorola format (`$B45D`).
+    * `uppercaseIntel`: Hexadecimal size in bytes in uppercase, Intel format, lowercase suffix (`0B45Dh`).
+    * `uppercaseIntelUppercase`: Hexadecimal size in bytes in uppercase, Intel format (`0B45DH`).
+    * `uppercaseCStyle`: Hexadecimal size in bytes in uppercase, C-style format (`0xB45D`).
+
 * `z80-asm-meter.statusBar.sizeSuffix`: The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural.
 
     Defaults to `" byte| bytes"`.
