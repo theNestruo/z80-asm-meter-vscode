@@ -5,7 +5,7 @@ import { AtExitTotalTiminsMeterable, atExitTotalTiming } from '../totalTiming/At
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
 import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
 import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
-import { humanReadableBytes } from '../utils/ByteUtils';
+import { formatHexadecimalByte, humanReadableBytes } from '../utils/ByteUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
 import { formatTiming, humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
@@ -185,6 +185,10 @@ export class StatusBarHandler extends AbstractHandler {
 		const size = defaultTiming.size;
 		if (size) {
 			const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
+			const formattedSize =
+					config.statusBar.sizeFormat === "hexadecimal" ? `${formatHexadecimalByte(size)}h`
+					: config.statusBar.sizeFormat === "both" ? `${size} (${formatHexadecimalByte(size)}h)`
+					: `${size}`;
 			const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
 			text += `${sizeIcon}${size}${sizeSuffix}`;
 			if (config.statusBar.showBytes) {
@@ -322,33 +326,5 @@ export class StatusBarHandler extends AbstractHandler {
 		};
 
 		return table;
-
-		// switch (platform) {
-		// 	case 'msx':
-		// 		return new vscode.MarkdownString("**MSX (Z80+M1)**\n\n")
-		// 			.appendMarkdown(m1Text.value)
-		// 			.appendMarkdown("**Z80**\n\n")
-		// 			.appendMarkdown(text.value);
-		// 	case 'pc8000':
-		// 		return new vscode.MarkdownString("**Z80**\n\n")
-		// 			.appendMarkdown(text.value)
-		// 			.appendMarkdown("**Z80+M1**\n\n")
-		// 			.appendMarkdown(m1Text.value);
-		// 	default:
-		// 		return text;
-		// }
-	}
-
-	private buildTooltipTimingEntry(
-		totalTiming: TotalTimingMeterable, value: string, timingSuffix: string): vscode.MarkdownString {
-
-		const text = new vscode.MarkdownString();
-		text.appendMarkdown(`**${value}** ${timingSuffix}`);
-		const name = totalTiming.name;
-		if (name) {
-			text.appendMarkdown(` (${name})`);
-		}
-		text.appendMarkdown("\n\n");
-		return text;
 	}
 }

@@ -286,6 +286,10 @@ class StatusBarConfiguration {
 		return read("statusBar.copyTimingsAsHints");
 	}
 
+	get sizeFormat(): "decimal" | "hexadecimal" | "both" {
+		return read("statusBar.sizeFormat");
+	}
+
 	get sizeSuffix(): string {
 		return read("statusBar.sizeSuffix");
 	}

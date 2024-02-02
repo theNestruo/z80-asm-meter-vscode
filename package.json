@@ -210,6 +210,21 @@
 						"default": false,
 						"description": "Enable copying timings as timing hints, instead of human readable format"
 					},
+					"z80-asm-meter.statusBar.sizeFormat": {
+						"order": 45,
+						"type": "string",
+						"enum": [
+							"decimal",
+							"hexadecimal",
+							"both"
+						],
+						"default": "decimal",
+						"enumDescriptions": [
+							"Size in bytes as a decimal number",
+							"Size in bytes as an hexadecimal number",
+							"Size in bytes as both a decimal and an hexadecimal number"
+						]
+					},
 					"z80-asm-meter.statusBar.sizeSuffix": {
 						"order": 50,
 						"type": "string",

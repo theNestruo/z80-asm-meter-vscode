@@ -1,4 +1,3 @@
-import { config } from "../config";
 import { Meterable } from "../model/Meterable";
 
 export function formatHexadecimalByte(n: number): string {

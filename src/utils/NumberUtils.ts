@@ -55,3 +55,8 @@ export function parteIntLenient(o: unknown): number | undefined {
 
     return undefined;
 }
+
+export function formatHexadecimalNumber(n: number): string {
+
+    return n.toString(16).toUpperCase();
+}
