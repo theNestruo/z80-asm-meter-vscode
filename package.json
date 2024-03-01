@@ -759,17 +759,17 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.86.0",
+		"@types/vscode": "^1.87.0",
 		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.1.1",
-		"@types/node": "16.x",
-		"@typescript-eslint/eslint-plugin": "^5.31.0",
-		"@typescript-eslint/parser": "^5.31.0",
-		"eslint": "^8.20.0",
-		"glob": "^8.0.3",
-		"mocha": "^10.0.0",
-		"typescript": "^4.7.4",
+		"@types/mocha": "^10.0.6",
+		"@types/node": "20.x",
+		"@typescript-eslint/eslint-plugin": "^7.1.0",
+		"@typescript-eslint/parser": "^7.1.0",
+		"eslint": "^8.57.0",
+		"glob": "^10.3.10",
+		"mocha": "^10.3.0",
+		"typescript": "^5.3.3",
 		"@vscode/test-electron": "^2.1.5",
-		"esbuild": "^0.20.0"
+		"esbuild": "^0.20.1"
 	}
 }
