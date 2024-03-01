@@ -5,13 +5,13 @@ import { AtExitTotalTiminsMeterable, atExitTotalTiming } from '../totalTiming/At
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
 import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
 import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
-import { formatHexadecimalByte, humanReadableBytes } from '../utils/ByteUtils';
+import { humanReadableBytes } from '../utils/ByteUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
+import { humanReadableSize } from '../utils/SizeUtils';
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
-import { formatTiming, humanReadableTiming, humanReadableTimings } from '../utils/TimingUtils';
+import { formatTiming, humanReadableTimings } from '../utils/TimingUtils';
 import { AbstractHandler } from "./AbstractHandler";
 import { CommandHandler } from "./CommandHandler";
-import { humanReadableSize } from '../utils/SizeUtils';
 
 export class DebouncedStatusBarHandler {
 
