@@ -1,7 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.3.3",
+	"version": "5.3.4",
 	"engines": {
 		"vscode": "^1.87.0"
 	},

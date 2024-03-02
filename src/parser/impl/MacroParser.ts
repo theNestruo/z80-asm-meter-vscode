@@ -49,6 +49,9 @@ class Macro extends MeterableCollection {
 		this.init();
 	}
 
+	/** false; this meterable is not composed */
+	readonly composed = false;
+
 	/**
 	 * @returns The name of the macro
 	 */

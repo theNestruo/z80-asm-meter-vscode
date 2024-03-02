@@ -70,5 +70,5 @@ export abstract class AbstractAggregatedMeterable implements Meterable {
 	abstract flatten(): Meterable[];
 
 	/** true; this meterable is composed */
-	readonly composed = true;
+	composed = true;
 }

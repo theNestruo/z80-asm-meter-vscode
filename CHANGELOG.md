@@ -1,3 +1,7 @@
+## 5.3.4
+
+- Fixes user-defined macros not working correctly. #156
+
 ## 5.3.3
 
 - Ability to show size in bytes in both decimal and hexadecimal in the status bar.
