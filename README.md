@@ -603,7 +603,7 @@ Or, when showing the processed instruction in the status bar:
 
 ## Credits
 
-Coded by [**theNestruo**](https://github.com/theNestruo) ([Néstor Sancho](https://twitter.com/NestorSancho)).
+Coded by [**theNestruo**](https://github.com/theNestruo) (Néstor Sancho).
 * Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide), [**Kris Borowinski**](https://github.com/kborowinski), [**alexanderk23**](https://github.com/alexanderk23).
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
 * [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
