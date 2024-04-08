@@ -1,3 +1,7 @@
+## 5.3.5
+
+- Fix Amstrad CPC timing of some instructions, by contributor: **RenaudLottiaux**
+
 ## 5.3.4
 
 - Fixes user-defined macros not working correctly. #156
