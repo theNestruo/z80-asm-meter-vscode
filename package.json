@@ -762,14 +762,14 @@
 		"@types/vscode": "^1.90.0",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.7",
-		"@types/node": "20.x",
-		"@typescript-eslint/eslint-plugin": "^7.14.1",
-		"@typescript-eslint/parser": "^7.14.1",
+		"@types/node": "22.x",
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
 		"eslint": "^8.57.0",
-		"glob": "^10.4.2",
+		"glob": "^11.0.0",
 		"mocha": "^10.5.2",
 		"typescript": "^5.5.2",
 		"@vscode/test-electron": "^2.4.0",
-		"esbuild": "^0.22.0"
+		"esbuild": "^0.23.0"
 	}
 }
