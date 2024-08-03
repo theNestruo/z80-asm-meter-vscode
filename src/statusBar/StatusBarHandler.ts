@@ -99,10 +99,10 @@ export class StatusBarHandler extends AbstractHandler {
 
 		const alignment = config.statusBar.alignment;
 		this.statusBarItem = vscode.window.createStatusBarItem(
-			["leftmost", "left"].indexOf(alignment) !== -1
+			["leftmost", "left"].includes(alignment)
 				? vscode.StatusBarAlignment.Left
 				: vscode.StatusBarAlignment.Right,
-			["leftmost", "right"].indexOf(alignment) !== -1
+			["leftmost", "right"].includes(alignment)
 				? Number.MAX_SAFE_INTEGER
 				: Number.MIN_SAFE_INTEGER);
 	}

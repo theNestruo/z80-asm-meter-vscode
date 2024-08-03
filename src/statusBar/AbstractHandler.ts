@@ -38,6 +38,6 @@ export abstract class AbstractHandler {
 
         // Always enabled if it is a Z80 assembly file
         return (languageId === "z80-asm-meter")
-            || (config.languageIds.indexOf(languageId) !== -1);
+            || config.languageIds.includes(languageId);
     }
 }

@@ -33,7 +33,7 @@ class GlassFakeInstructionParser implements InstructionParser {
     private isNegatedConditionalInstruction(mnemonic: string, operands: string[]): string | undefined {
 
         // Is conditional instruction with negated condition?
-        if (["CALL", "JP", "JR", "RET"].indexOf(mnemonic) === -1
+        if (!["CALL", "JP", "JR", "RET"].includes(mnemonic)
             || !operands
             || operands.length < (mnemonic === "RET" ? 1 : 2)
             || operands[0].charAt(0) !== '!') {

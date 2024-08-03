@@ -272,7 +272,7 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (instructionSets.indexOf(candidate.getInstructionSet()) === -1) {
+            if (!instructionSets.includes(candidate.getInstructionSet())) {
                 // Invalid instruction set
                 continue;
             }

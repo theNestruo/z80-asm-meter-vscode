@@ -129,7 +129,7 @@ class Z80Instruction implements Meterable {
         }
 
         // Expands high/low part of the IX register
-        if (this.instruction.indexOf("IXp") !== -1) {
+        if (this.instruction.includes("IXp")) {
             return (expandableExpression.substring(0, 4) === "+8*p")
                 ? [this.expandWithFactorUsing(this, /IXp/, "IXh", "+8*p", 8, 4),
                 this.expandWithFactorUsing(this, /IXp/, "IXl", "+8*p", 8, 5)]
@@ -138,7 +138,7 @@ class Z80Instruction implements Meterable {
         }
 
         // Expands high/low part of the IY register
-        if (this.instruction.indexOf("IYq") !== -1) {
+        if (this.instruction.includes("IYq")) {
             return (expandableExpression.substring(0, 4) === "+8*q")
                 ? [this.expandWithFactorUsing(this, /IYq/, "IYh", "+8*q", 8, 4),
                 this.expandWithFactorUsing(this, /IYq/, "IYl", "+8*q", 8, 5)]
@@ -257,7 +257,7 @@ class Z80Instruction implements Meterable {
             "ADC", "ADD", "AND", "CP", "DEC", "INC", "OR", "RL", "RLC", "RR",
             "RRC", "SBC", "SLA", "SRA", "SRL", "SUB", "XOR"
         ];
-        if (explicitAccumulatorSyntaxMnemonics.indexOf(this.getMnemonic()) === -1) {
+        if (!explicitAccumulatorSyntaxMnemonics.includes(this.getMnemonic())) {
             return this.explicitAccumulatorSyntaxAllowed = false;
         }
 
@@ -497,7 +497,7 @@ class Z80InstructionParser implements InstructionParser {
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (instructionSets.indexOf(candidate.instructionSet) === -1) {
+            if (!instructionSets.includes(candidate.instructionSet)) {
                 // Invalid instruction set
                 continue;
             }

@@ -15,7 +15,7 @@ export function hashCode(s: string): number {
 
 export function espaceIfNotInfix(s: string): string {
 
-    return s.trim().indexOf(" ") === -1 ? ` ${s.trim()} ` : s;
+    return s.trim().includes(" ") ? s : ` ${s.trim()} `;
 }
 
 export function pluralize(s: string, n: number): string {

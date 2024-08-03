@@ -29,7 +29,7 @@ export function isVerbatimOperand(operand: string): boolean {
     return ["A", "AF", "AF'", "B", "BC", "C", "NC",
         "D", "DE", "E", "H", "HL", "L",
         "I", "IX", "IY", "R", "SP",
-        "Z", "NZ", "M", "P", "PE", "PO"].indexOf(operand) !== -1;
+        "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
 }
 
 /**
@@ -89,7 +89,7 @@ export function extractIndirection(operand: string): string {
  * @returns 1 if the operand is one of the 8 bit general purpose registers, 0 otherwise
  */
 export function is8bitRegisterScore(operand: string): number {
-    return ["A", "B", "C", "D", "E", "H", "L"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["A", "B", "C", "D", "E", "H", "L"].includes(operand)? 1 : 0;
 }
 
 /**
@@ -113,7 +113,7 @@ export function isIYWithOffsetScore(operand: string): number {
  * @returns 1 if the operand is the high part of the IX index register, 0 otherwise
  */
 export function isIXhScore(operand: string): number {
-    return ["IXH", "IXU", "XH", "HX"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["IXH", "IXU", "XH", "HX"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -121,7 +121,7 @@ export function isIXhScore(operand: string): number {
  * @returns 1 if the operand is the low part of the IX index register, 0 otherwise
  */
 export function isIXlScore(operand: string): number {
-    return ["IXL", "XL", "LX"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["IXL", "XL", "LX"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -129,7 +129,7 @@ export function isIXlScore(operand: string): number {
  * @returns 1 if the operand is the high or low part of the IX index register, 0 otherwise
  */
 export function isIX8bitScore(operand: string): number {
-    return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -137,7 +137,7 @@ export function isIX8bitScore(operand: string): number {
  * @returns 1 if the operand is the high part of the IY index register, 0 otherwise
  */
 export function isIYhScore(operand: string): number {
-    return ["IYH", "IYU", "YH", "HY"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["IYH", "IYU", "YH", "HY"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -145,7 +145,7 @@ export function isIYhScore(operand: string): number {
  * @returns 1 if the operand is the low part of the IY index register, 0 otherwise
  */
 export function isIYlScore(operand: string): number {
-    return ["IYL", "YL", "LY"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["IYL", "YL", "LY"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -153,7 +153,7 @@ export function isIYlScore(operand: string): number {
  * @returns 1 if the operand is the high or low part of the IY index register, 0 otherwise
  */
 export function isIY8bitScore(operand: string): number {
-    return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].indexOf(operand) !== -1 ? 1 : 0;
+    return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -161,7 +161,7 @@ export function isIY8bitScore(operand: string): number {
  * @returns 1 if the operand is a register where H and L have been replaced by IXh and IXl, 0 otherwise
  */
 export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
-    return ["A", "B", "C", "D", "E"].indexOf(operand) !== -1 ? 1 : isIX8bitScore(operand);
+    return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIX8bitScore(operand);
 }
 
 /**
@@ -169,7 +169,7 @@ export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number 
  * @returns 1 if the operand is a register where H and L have been replaced by IYh and IYl, 0 otherwise
  */
 export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
-    return ["A", "B", "C", "D", "E"].indexOf(operand) !== -1 ? 1 : isIY8bitScore(operand);
+    return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIY8bitScore(operand);
 }
 
 /**
@@ -187,7 +187,7 @@ export function isAnyRegister(operand: string): boolean {
  * @returns true if the operand is a flag for conditional operations
  */
 export function isAnyCondition(operand: string): boolean {
-    return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].indexOf(operand) !== -1;
+    return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
 }
 
 /**
@@ -195,7 +195,7 @@ export function isAnyCondition(operand: string): boolean {
  * @returns true if the operand is a flag for conditional JR
  */
 export function isJrCondition(operand: string): boolean {
-    return ["C", "NC", "Z", "NZ"].indexOf(operand) !== -1;
+    return ["C", "NC", "Z", "NZ"].includes(operand);
 }
 
 /**
@@ -299,7 +299,7 @@ export function isJumpInstruction(instruction: string) {
  */
 export function isUnconditionalJump(mnemonic: string, operands: string[]): boolean {
 
-    return (["JP", "JR"].indexOf(mnemonic) !== -1)
+    return ["JP", "JR"].includes(mnemonic)
         && (operands.length === 1);
 }
 
@@ -337,7 +337,7 @@ export function isCallInstruction(instruction: string) {
  */
 export function isUnconditionalCall(mnemonic: string, operands: string[]): boolean {
 
-    return (["CALL", "RST"].indexOf(mnemonic) !== -1)
+    return ["CALL", "RST"].includes(mnemonic)
         && (operands.length === 1);
 }
 
@@ -368,7 +368,7 @@ export function isRetInstruction(instruction: string) {
  */
 export function isUnconditionalRet(mnemonic: string, operands: string[]): boolean {
 
-    return (["RET", "RETI", "RETN"].indexOf(mnemonic) !== -1)
+    return ["RET", "RETI", "RETN"].includes(mnemonic)
         && (operands.length === 0);
 }
 
