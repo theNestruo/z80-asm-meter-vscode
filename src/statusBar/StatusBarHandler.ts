@@ -296,8 +296,8 @@ export class StatusBarHandler extends AbstractHandler {
 
 		const table = new vscode.MarkdownString(
 			platform === "msx" ? "||MSX|Z80||\n|--:|--:|--:|---|\n"
-				: platform === "pc8000" ? "||Z80|Z80+M1||\n|--:|--:|--:|---|\n"
-					: "||||\n|--:|--:|---|\n"
+			: platform === "pc8000" ? "||Z80|Z80+M1||\n|--:|--:|--:|---|\n"
+			: "||||\n|--:|--:|---|\n"
 		);
 
 		for (const totalTiming of totalTimings) {
@@ -322,7 +322,7 @@ export class StatusBarHandler extends AbstractHandler {
 					table.appendMarkdown(`|${totalTiming.name}:|**${value}**|${timingSuffix}|\n`);
 					break;
 			}
-		};
+		}
 
 		return table;
 	}

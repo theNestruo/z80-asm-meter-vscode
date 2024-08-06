@@ -20,7 +20,7 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		}
 
 		// Checks timing hint comment
-		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:\-\s*)?\d+(?:\/(?:\-\s*)?\d+)?)\]/g);
+		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g);
 		if (!matches) {
 			return undefined;
 		}

@@ -47,7 +47,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get z80Timing(): number[] {
 
 		if (!this.cachedZ80Timing) {
-			let totalZ80Timing: number[] = [0, 0];
+			const totalZ80Timing: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
 				const z80Timing = meterable.z80Timing;
 				totalZ80Timing[0] += z80Timing[0];
@@ -61,7 +61,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get msxTiming(): number[] {
 
 		if (!this.cachedMsxTiming) {
-			let totalMsxTiming: number[] = [0, 0];
+			const totalMsxTiming: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
 				const msxTiming = meterable.msxTiming;
 				totalMsxTiming[0] += msxTiming[0];
@@ -75,7 +75,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get cpcTiming(): number[] {
 
 		if (!this.cachedCpcTiming) {
-			let totalCpcTiming: number[] = [0, 0];
+			const totalCpcTiming: number[] = [0, 0];
 			this.meterables.forEach(meterable => {
 				const cpcTiming = meterable.cpcTiming;
 				totalCpcTiming[0] += cpcTiming[0];
@@ -89,7 +89,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	get bytes(): string[] {
 
 		if (!this.cachedBytes) {
-			let bytes: string[] = [];
+			const bytes: string[] = [];
 			this.meterables.forEach(meterable => bytes.push(...meterable.bytes));
 			this.cachedBytes = bytes;
 		}
@@ -109,7 +109,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	flatten(): Meterable[] {
 
 		if (!this.cachedMeterables?.length) {
-			let meterables: Meterable[] = [];
+			const meterables: Meterable[] = [];
 			this.meterables.forEach(meterable => {
 				if (meterable.composed) {
 					meterables.push(...meterable.flatten());

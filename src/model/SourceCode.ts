@@ -10,10 +10,11 @@ export function extractSourceCode(rawLine: string,
     SourceCode[] {
 
     // Removes surrounding label, parses and removes repeat pseudo-op
+    // eslint-disable-next-line prefer-const
     let [ repetitions, s ] = removeSurroundingLabelAndRepetitions(
         rawLine, labelRegExp, repeatRegExp);
 
-    let fragments: SourceCode[] = [];
+    const fragments: SourceCode[] = [];
     const n = s.length;
     for (let i = 0; i < n; i++) {
 

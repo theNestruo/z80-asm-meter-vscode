@@ -89,7 +89,7 @@ class RepeatedMeterable extends AbstractAggregatedMeterable {
 	get bytes(): string[] {
 
 		if (!this.cachedBytes) {
-			let bytes: string[] = [];
+			const bytes: string[] = [];
 			for (let i = 0; i < this.repetitions; i++) {
 				bytes.push(...this.meterable.bytes);
 			}
@@ -115,7 +115,7 @@ class RepeatedMeterable extends AbstractAggregatedMeterable {
 
 		// Nested meterable is composed
 		const repeatedMeterables = this.meterable.flatten();
-		const meterables = new Array();
+		const meterables = [];
 		for (let i = 0; i < this.repetitions; i++) {
 			meterables.push(...repeatedMeterables);
 		}

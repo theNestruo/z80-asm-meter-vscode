@@ -35,7 +35,7 @@ export abstract class TotalTimingMeterable implements Meterable {
 			const meterables = this.flatten();
 			let i = 0;
 			const n = meterables.length;
-			let totalZ80Timing: number[] = [0, 0];
+			const totalZ80Timing: number[] = [0, 0];
 			meterables.forEach(meterable => {
 				const z80Timing = this.modifiedTimingsOf(
 					meterable.z80Timing, i++, n, meterable.instruction);
@@ -53,7 +53,7 @@ export abstract class TotalTimingMeterable implements Meterable {
 			const meterables = this.flatten();
 			let i = 0;
 			const n = meterables.length;
-			let totalMsxTiming: number[] = [0, 0];
+			const totalMsxTiming: number[] = [0, 0];
 			meterables.forEach(meterable => {
 				const msxTiming = this.modifiedTimingsOf(
 					meterable.msxTiming, i++, n, meterable.instruction);
@@ -71,7 +71,7 @@ export abstract class TotalTimingMeterable implements Meterable {
 			const meterables = this.flatten();
 			let i = 0;
 			const n = meterables.length;
-			let totalCpcTiming: number[] = [0, 0];
+			const totalCpcTiming: number[] = [0, 0];
 			meterables.forEach(meterable => {
 				const cpcTiming = this.modifiedTimingsOf(
 					meterable.cpcTiming, i++, n, meterable.instruction);

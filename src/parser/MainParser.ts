@@ -97,7 +97,7 @@ class MainParser {
 
             // Parses the actual meterable and optional timing hints
             let meterable = this.parseInstruction(sourceCode);
-            let timingHints = this.parseTimingHints(sourceCode);
+            const timingHints = this.parseTimingHints(sourceCode);
             if (timingHints) {
                 meterable = timingHintedMeterable(meterable, timingHints, sourceCode);
             }
@@ -131,7 +131,7 @@ class MainParser {
         }
 
         // Splits the lines and extracts repetition counter and trailing comments
-        let sourceCode: SourceCode[] = [];
+        const sourceCode: SourceCode[] = [];
         rawLines.forEach(rawLine => {
             sourceCode.push(...extractSourceCode(rawLine,
                 config.syntax.lineSeparatorCharacter,
