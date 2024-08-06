@@ -1,8 +1,10 @@
+.github
 .vscode
 node_modules
-src/**
+src
+.eslintrc.js
+.gitignore
+esbuild.js
 package-lock.json
 tsconfig.json
-esbuild.js
-.eslintrc.js
-**/*.map
+dist/**/*.map
