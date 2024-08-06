@@ -1,4 +1,4 @@
-name: VSCE
+name: vsce package and upload
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: VSCE
+name: vsce package
 
 on:
   pull_request:
