@@ -1,0 +1,37 @@
+name: VSCE
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install the dependencies
+      run: npm install
+
+    - name: Install vsce
+      run: npm install --global @vscode/vsce
+
+    - run: vsce package
+
+    - name: Read version
+      id: get-version
+      uses: martinbeentjes/npm-get-version-action@main
+
+    - name: Upload nightly build
+      uses: actions/upload-artifact@v4
+      with:
+        name: z80-asm-meter-${{ steps.get-version.outputs.current-version}}-nightly
+        path: z80-asm-meter-${{ steps.get-version.outputs.current-version}}.vsix
