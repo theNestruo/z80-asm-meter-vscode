@@ -1,3 +1,7 @@
+## 5.4.0
+
+- esbuild toolchain updated, following [esbuild-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/esbuild-sample)
+
 ## 5.3.5
 
 - Fix Amstrad CPC timing of some instructions, by contributor: **RenaudLottiaux**

@@ -1,12 +1,8 @@
-.github/**
-.vscode/**
-out/**
+.vscode
+node_modules
 src/**
-.gitignore
-.yarnrc
-.eslintrc.json
+package-lock.json
 tsconfig.json
-vsc-extension-quickstart.md
+esbuild.js
+.eslintrc.js
 **/*.map
-**/*.ts
-
