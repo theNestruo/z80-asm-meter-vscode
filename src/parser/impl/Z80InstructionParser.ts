@@ -2,9 +2,8 @@ import { config } from "../../config";
 import { z80InstructionSet } from "../../data/Z80InstructionSet";
 import { Meterable } from "../../model/Meterable";
 import { SourceCode } from "../../model/SourceCode";
-import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/ByteUtils";
-import { parseNumericExpression } from "../../utils/NumberUtils";
 import { formatTiming, parseTiming } from "../../utils/TimingUtils";
 import { InstructionParser } from "../Parsers";
 
@@ -281,10 +280,8 @@ class Z80Instruction implements Meterable {
 
         // Extracts the candidate operands
         const candidateOperands = extractOperandsOf(candidateInstruction);
-        for (const candidateOperand of candidateOperands) {
-            if (candidateOperand === "") {
-                return 0; // (incomplete candidate instruction, such as "LD A,")
-            }
+        if (candidateOperands.includes("")) {
+            return 0; // (incomplete candidate instruction, such as "LD A,")
         }
 
         const candidateOperandsLength = candidateOperands.length;
@@ -388,7 +385,7 @@ class Z80Instruction implements Meterable {
             case "28H": // RST 28H
             case "30H": // RST 30H
             case "38H": // RST 38H
-                return this.numericOperandScore(expectedOperand, candidateOperand);
+                return numericOperandScore(expectedOperand, candidateOperand);
             default:
                 return anySymbolOperandScore(candidateOperand);
         }
@@ -400,26 +397,6 @@ class Z80Instruction implements Meterable {
         return isIndirectionOperand(candidateOperand, false)
             ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
             : 0;
-    }
-
-    private numericOperandScore(expectedOperand: string, candidateOperand: string): number {
-
-        // Compares as numeric expressions
-        const candidateNumber = parseNumericExpression(candidateOperand);
-        if (candidateNumber !== undefined) {
-            return (candidateNumber === parseNumericExpression(expectedOperand))
-                ? 1 // (exact match)
-                : 0; // (discards match; will default to unexpanded instruction if exists)
-        }
-
-        // (due possibility of using constants, labels, and expressions in the source code,
-        // uses a "best effort" to discard registers and indirections)
-        return isAnyRegister(
-            isIndirectionOperand(candidateOperand, false)
-                ? extractIndirection(candidateOperand)
-                : candidateOperand)
-            ? 0
-            : 0.25;
     }
 }
 

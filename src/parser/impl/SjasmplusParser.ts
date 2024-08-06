@@ -3,10 +3,9 @@ import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstruction
 import { Meterable } from "../../model/Meterable";
 import { MeterableCollection } from "../../model/MeterableCollection";
 import { SourceCode } from "../../model/SourceCode";
-import { extractIndirection, extractMnemonicOf, extractOperandsOf, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
-
 
 /**
  * A sjasmplus fake instruction
@@ -132,10 +131,8 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 
         // Extracts the candidate operands
         const candidateOperands = extractOperandsOf(candidateInstruction);
-        for (const candidateOperand of candidateOperands) {
-            if (candidateOperand === "") {
-                return 0; // (incomplete candidate instruction, such as "LD A,")
-            }
+        if (candidateOperands.includes("")) {
+            return 0; // (incomplete candidate instruction, such as "LD A,")
         }
 
         const candidateOperandsLength = candidateOperands.length;
@@ -194,15 +191,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
             case "IYl":
                 return isIYlScore(candidateOperand);
             default:
-                // (due possibility of using constants, labels, and expressions in the source code,
-                // there is no proper way to discriminate: b, n, nn, o, 0, 8H, 10H, 20H, 28H, 30H, 38H;
-                // but uses a "best effort" to discard registers)
-                return isAnyRegister(
-                    isIndirectionOperand(candidateOperand, false)
-                        ? extractIndirection(candidateOperand)
-                        : candidateOperand)
-                    ? 0
-                    : 0.75;
+                return anySymbolOperandScore(candidateOperand);
         }
     }
 

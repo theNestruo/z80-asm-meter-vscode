@@ -1,4 +1,5 @@
 import { extractSourceCode } from "../model/SourceCode";
+import { parseNumericExpression } from "./NumberUtils";
 
 export function extractMnemonicOf(s: string): string {
 
@@ -202,34 +203,44 @@ export function isJrCondition(operand: string): boolean {
  * @param operand the candidate operand
  * @returns 0.75 if the operand is any constant, label, or expression
  */
-export function anySymbolOperandScore(candidateOperand: string): number {
+export function anySymbolOperandScore(operand: string): number {
 
     // (due possibility of using constants, labels, and expressions in the source code,
     // there is no proper way to discriminate: b, n, nn, o;
     // but uses a "best effort" to discard registers)
     return isAnyRegister(
-        isIndirectionOperand(candidateOperand, false)
-            ? extractIndirection(candidateOperand)
-            : candidateOperand)
-        ? 0
-        : 0.75;
+            isIndirectionOperand(operand, false)
+                ? extractIndirection(operand)
+                : operand)
+            ? 0
+            : 0.75;
 }
 
-// /**
-//  * @returns if the instruction is a conditional instruction
-//  */
-// export function isJumpCallOrRetInstruction(instruction: string) {
+/**
+ * @param expectedOperand the expected operand
+ * @param candidateOperand the candidate operand
+ * @returns 1 if the operand is a numeric expression that matches the expected operand,
+ * 0.25 if the operand is any numeric expression
+ */
+export function numericOperandScore(expectedOperand: string, candidateOperand: string): number {
 
-//     const mnemonic = extractMnemonicOf(instruction);
-//     const operands = extractOperandsOf(instruction);
+    // Compares as numeric expressions
+    const candidateNumber = parseNumericExpression(candidateOperand);
+    if (candidateNumber !== undefined) {
+        return (candidateNumber === parseNumericExpression(expectedOperand))
+            ? 1 // (exact match)
+            : 0; // (discards match; will default to unexpanded instruction if exists)
+    }
 
-//     return isUnconditionalJump(mnemonic, operands)
-//         || isConditionalJump(mnemonic, operands)
-//         || isUnconditionalCall(mnemonic, operands)
-//         || isConditionalCall(mnemonic, operands)
-//         || isUnconditionalRet(mnemonic, operands)
-//         || isConditionalRet(mnemonic, operands);
-// }
+    // (due possibility of using constants, labels, and expressions in the source code,
+    // uses a "best effort" to discard registers and indirections)
+    return isAnyRegister(
+            isIndirectionOperand(candidateOperand, false)
+                ? extractIndirection(candidateOperand)
+                : candidateOperand)
+            ? 0
+            : 0.25;
+}
 
 /**
  * @returns if the instruction is a conditional instruction
