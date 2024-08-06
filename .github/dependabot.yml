@@ -1,10 +1,20 @@
 version: 2
 updates:
+# Enable version updates for npm
 - package-ecosystem: "npm"
-  directory: "/"
+  # Look for `package.json` and `lock` files in the `root` directory
+  directory:
+  # Check for updates once a week
   schedule:
-    interval: "monthly"
+    interval: "weekly"
+  # Create a group of dependencies to be updated together in one pull request
   groups:
-    all:
+    # Specify a name for the group, which will be used in pull request titles
+    # and branch names
+    all-dependencies:
+      # Define patterns to include dependencies in the group (based on
+      # dependency name)
+      applies-to: version-updates # Applies the group rule to version updates
       patterns:
-      - "*"
+        - "*" # A wildcard that matches all dependencies in the package
+              # ecosystem. Note: using "*" may open a large pull request
