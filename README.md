@@ -67,16 +67,16 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 * [MSX Z80](https://marketplace.visualstudio.com/items?itemName=sharksym.asm-msx) by Yeoungman Seo
 * [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) by BouKiChi
 * [DeZog - Z80 Debugger](https://marketplace.visualstudio.com/items?itemName=maziac.dezog) by Maziac
-* (and probably others; please check the `z80-asm-meter.languageIds` [setting](#main-settings))
+* (and probably others; please check the [`z80-asm-meter.languageIds` setting](#main-settings))
 
 
 ### Main settings
 
-* `z80-asm-meter.languageIds`: Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly).
+* [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds): Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly).
 
     Defaults to: `["asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"]`.
 
-* `z80-asm-meter.platform`: Controls the instruction set to use and the timing information to display:
+* [`z80-asm-meter.platform`](vscode://settings/z80-asm-meter.platform): Controls the instruction set to use and the timing information to display:
 
     * `z80` (default): Uses the default Z80 instruction set and shows default timing information.
     * `msx`: For MSX developers. Uses the default Z80 instruction set and shows Z80+M1 timing information (MSX standard).
@@ -84,7 +84,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
     * `cpc`: For Amstrad CPC developers. Uses the default Z80 instruction set and shows timing measured in number of NOPs.
     * `z80n`: For ZX Spectrum Next developers. Includes the ZX Spectrum Next Extended Z80 instruction set and shows default timing information.
 
-* `z80-asm-meter.syntax`: Adjusts the main syntax of the assembler.
+* [`z80-asm-meter.syntax`](vscode://settings/z80-asm-meter.syntax): Adjusts the main syntax of the assembler.
 
     The main syntax of the assembler changes the default value of particular features (such as syntax of the labels, or support for fake instructions) to best suit one particular assembler. See [assembler syntax settings](#assembler-syntax-settings) for details.
 
@@ -95,14 +95,14 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
     * `sjasmplus`: Matches [SjASMPlus](https://github.com/sjasmplus/sjasmplus) assembler syntax.
     * `tniasm`: Matches [tniASM](http://www.tni.nl/products/tniasm.html) assembler syntax.
 
-* `z80-asm-meter.expandSelectionToLine`: When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`).
+* [`z80-asm-meter.expandSelectionToLine`](vscode://settings/z80-asm-meter.expandSelectionToLine): When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`).
 
     Enabled by default.
 
 
 ### Status bar settings
 
-* `z80-asm-meter.statusBar.alignment`: Controls the status bar item position:
+* [`z80-asm-meter.statusBar.alignment`](vscode://settings/z80-asm-meter.statusBar.alignment): Controls the status bar item position:
 
     * `leftmost`: Leftmost position of the status bar.
     * `left`: Left side of the status bar.
@@ -111,11 +111,11 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
 #### Status bar settings: Instructions
 
-* `z80-asm-meter.statusBar.showInstruction`: Shows the processed instruction in the status bar. Useful to check if the extension is mistaking instructions.
+* [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction): Shows the processed instruction in the status bar. Useful to check if the extension is mistaking instructions.
 
     Disabled by default.
 
-* `z80-asm-meter.statusBar.instructionIcon`: The icon to identify the instruction in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.statusBar.instructionIcon`](vscode://settings/z80-asm-meter.statusBar.instructionIcon): The icon to identify the instruction in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(code)`.
 
@@ -123,13 +123,13 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
 #### Status bar settings: Timings
 
-* `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.statusBar.timingsIcon`](vscode://settings/z80-asm-meter.statusBar.timingsIcon): The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(watch)`.
 
     ![](images/statusBar.timingsIcon.png)
 
-* `z80-asm-meter.statusBar.totalTimings`: Shows [total timing calculations](#total-timing-calculations) in the status bar.
+* [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings): Shows [total timing calculations](#total-timing-calculations) in the status bar.
 
     * `all`: Shows all the total timing calculation that apply to the selection.
 
@@ -155,7 +155,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
         ![](images/statusBar.totalTimings=default.png)
 
-* `z80-asm-meter.statusBar.totalTimingsOrder`: Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
+* [`z80-asm-meter.statusBar.totalTimingsOrder`](vscode://settings/z80-asm-meter.statusBar.totalTimingsOrder): Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
 
     * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
 
@@ -169,25 +169,25 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
         ![](images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
 
-* `z80-asm-meter.statusBar.timingsIcon`: The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.statusBar.timingsIcon`](vscode://settings/z80-asm-meter.statusBar.timingsIcon): The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(watch)`.
 
 #### Status bar settings: Size
 
-* `z80-asm-meter.statusBar.sizeIcon`: The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.statusBar.sizeIcon`](vscode://settings/z80-asm-meter.statusBar.sizeIcon): The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(file-binary)`.
 
     ![](images/statusBar.sizeIcon.png)
 
-* `z80-asm-meter.statusBar.sizeNumericFormat`: The numerical format of the size in bytes in the status bar.
+* [`z80-asm-meter.statusBar.sizeNumericFormat`](vscode://settings/z80-asm-meter.statusBar.sizeNumericFormat): The numerical format of the size in bytes in the status bar.
 
     * `decimal` (default): Size in bytes as a decimal number.
     * `hexadecimal`: Size in bytes as an hexadecimal number.
     * `both`: Size in bytes as both a decimal and an hexadecimal number.
 
-* `z80-asm-meter.statusBar.sizeHexadecimalFormat`: The hexadecimal format for the hexadecimal size in bytes in the status bar.
+* [`z80-asm-meter.statusBar.sizeHexadecimalFormat`](vscode://settings/z80-asm-meter.statusBar.sizeHexadecimalFormat): The hexadecimal format for the hexadecimal size in bytes in the status bar.
 
     * `hash`: Hexadecimal size in bytes in hash format (`#b45d`).
     * `motorola` (default): Hexadecimal size in bytes in Motorola format (`$b45d`).
@@ -200,71 +200,89 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
     * `uppercaseIntelUppercase`: Hexadecimal size in bytes in uppercase, Intel format (`0B45DH`).
     * `uppercaseCStyle`: Hexadecimal size in bytes in uppercase, C-style format (`0xB45D`).
 
-* `z80-asm-meter.statusBar.sizeSuffix`: The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural.
+* [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix): The suffix for the size in bytes in the status bar. Either a single string (such as `" B"`), or a couple of strings separated by pipe (|) for singular and plural.
 
     Defaults to `" byte| bytes"`.
 
-* `z80-asm-meter.statusBar.showBytes`: Shows the bytes (opcode) in the status bar.
+* [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes): Shows the bytes (opcode) in the status bar.
 
     Disabled by default.
 
 #### Status bar settings: Behaviour
 
-* `z80-asm-meter.statusBar.copyTimingsAsHints`: Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format.
+* [`z80-asm-meter.statusBar.copyTimingsAsHints`](vscode://settings/z80-asm-meter.statusBar.copyTimingsAsHints): Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format.
 
     Disabled by default.
 
-* `z80-asm-meter.statusBar.debounce`: Milliseconds to prevent metering from being called too frequently when the selection changes.
+* [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce): Milliseconds to prevent metering from being called too frequently when the selection changes.
 
     Defaults to: `100` (100&nbsp;ms).
 
 
 ### Assembler syntax settings
 
-* `z80-asm-meter.syntaxFeature.labelColonOptional`: Adjusts the label detection to match the syntax of the assembler.
+* [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional): Adjusts the label detection to match the syntax of the assembler.
 
-    * `true`: the trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as Pasmo and SjASMPlus. This is the default value when the main syntax of the assembler is set to `pasmo` or `sjasmplus`.
-    * `false` (default): the labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
+    When disabled, the labels must be followed by a colon (:) and can be indented. This behaviour matches most assemblers and coding styles.
 
-* `z80-asm-meter.syntaxFeature.repeat`: Enables support for parsing repeat count:
+    When enabled, the trailing colon is optional, and the labels must not be indented. This behaviour matches some assemblers such as Pasmo and SjASMPlus.
+
+    Enabled by default when the main syntax of the assembler is set to `pasmo` or `sjasmplus`, disabled by default otherwise.
+
+* [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat): Enables support for parsing repeat count:
 
     * `none` (default): Disables repeat count.
     * `brackets`: The repeat count is specified within square brackets (`[` and `]`) before the instruction. This behaviour partially matches the [source format](http://www.xl2s.tk/sjasmman2.html#s3) of Sjasm, but multiple repeat counts and iteration count are not supported. This is the default value when the main syntax of the assembler is set to `sjasm`.
     * `dot`: The repeat count is specified after a dot (`.`) before the instruction. This behaviour partially matches the repeat [pseudo-op](https://z00m128.github.io/sjasmplus/documentation.html#s_pseudoops) of SjASMPlus, but multiple repeat counts and expressions are not supported. This is the default value when the main syntax of the assembler is set to `sjasmplus`.
 
-* `z80-asm-meter.syntaxFeature.lineSeparator`: Adjusts the line separator to match the syntax of the assembler:
+* [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator): Adjusts the line separator to match the syntax of the assembler:
     * `disabled` (default): Does not allow multiple instructions on a single line.
     * `colon`: Use colon (`:`) to have more than one instruction on a line.
     * `pipe`: Use pipe (`|`) to have more than one instruction on a line. This behaviour matches some assemblers such as tniASM. This is the default value when the main syntax of the assembler is set to `tniasm`.
 
-* `z80-asm-meter.syntaxFeature.fakeInstructions`: Enables SjASMPlus [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) support.
+* [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions): Enables SjASMPlus [fake instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_fake_instructions) support.
 
     Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntaxFeature.registerListInstructions`: Enables SjASMPlus [register list instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) support.
+* [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions): Enables SjASMPlus [register list instructions](https://z00m128.github.io/sjasmplus/documentation.html#s_asm_lang) support.
 
     Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntaxFeature.negativeConditions`: Enables Glass [negative conditions](http://www.grauw.nl/projects/glass/)) support.
+* [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions): Enables Glass [negative conditions](http://www.grauw.nl/projects/glass/)) support.
 
     Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
 
-* `z80-asm-meter.syntaxFeature.dupEdup`: Enables `DUP`/`EDUP` repetition blocks.
+* [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup): Enables `DUP`/`EDUP` repetition blocks.
 
     Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntaxFeature.reptEndr`: Enables `REPT`/`ENDR` repetition blocks.
+* [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr): Enables `REPT`/`ENDR` repetition blocks.
 
     Enabled by default when the main syntax of the assembler is set to `sjasmplus`, disabled by default otherwise.
 
-* `z80-asm-meter.syntaxFeature.reptEndm`: Enables `REPT`/`ENDM` repetition blocks.
+* [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm): Enables `REPT`/`ENDM` repetition blocks.
 
     Enabled by default when the main syntax of the assembler is set to `glass`, disabled by default otherwise.
 
+<br>
+
+As a summary, these are the default values of the assembler syntax settings, based on the value of the main [`z80-asm-meter.syntax` setting](#main-settings):
+
+| Assembler syntax feature   | Default value | `default` | `glass` | `pasmo` | `sjasm`    | `sjasmplus` | `tniasm` |
+| ---                        | :-:           | :-:       | :-:     | :-:     | :-:        | :-:         | :-:      |
+| `labelColonOptional`       | disabled      | -         | -       | enabled | -          | enabled     | enabled  |
+| `repeat`                   | `none`        | -         | -       | -       | `brackets` | `dot`       | -        |
+| `lineSeparator`            | `disabled`    | -         | -       | -       | -          | -           | `pipe`   |
+| `fakeInstructions`         | disabled      | -         | -       | -       | -          | enabled     | -        |
+| `registerListInstructions` | disabled      | -         | -       | -       | -          | enabled     | -        |
+| `negativeConditions`       | disabled      | -         | enabled | -       | -          | -           | -        |
+| `dupEdup`                  | disabled      | -         | -       | -       | -          | enabled     | -        |
+| `reptEndr`                 | disabled      | -         | -       | -       | -          | enabled     | -        |
+| `reptEndm`                 | disabled      | -         | enabled | -       | -          | -           | -        |
 
 ### Parser settings
 
-* `z80-asm-meter.parser.directives.defsAsInstructions`: Tries to parse `DEFS` directive bytes as single byte instructions.
+* [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions): Tries to parse `DEFS` directive bytes as single byte instructions.
 
     Disabled by default.
 
@@ -287,67 +305,67 @@ There are three total timing calculation available:
 
 #### Execution flow total timing calculation settings
 
-* `z80-asm-meter.timing.executionFlow.enabled`: Enables execution flow total timing calculation.
+* [`z80-asm-meter.timing.executionFlow.enabled`](vscode://settings/z80-asm-meter.timing.executionFlow.enabled): Enables execution flow total timing calculation.
 
     Enabled by default.
 
-* `z80-asm-meter.timing.executionFlow.threshold`: Minimum number of instructions to be selected for the calculation of execution flow total timing.
+* [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold): Minimum number of instructions to be selected for the calculation of execution flow total timing.
 
     Defaults to: `2` (2 instructions).
 
-* `z80-asm-meter.timing.executionFlow.requireConditional`: Requires at least one conditional instruction to enable execution flow total timing calculation.
+* [`z80-asm-meter.timing.executionFlow.requireConditional`](vscode://settings/z80-asm-meter.timing.executionFlow.requireConditional): Requires at least one conditional instruction to enable execution flow total timing calculation.
 
     Enabled by default.
 
-* `z80-asm-meter.timing.executionFlow.icon`: Execution flow total timing calculation icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.timing.executionFlow.icon`](vscode://settings/z80-asm-meter.timing.executionFlow.icon): Execution flow total timing calculation icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-over)`.
 
     ![](images/timing.executionFlow.icon.png)
 
-* `z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump`: Disables execution flow total timing calculation if an unconditional `JP`, `JR` or `RET` instruction is found.
+* [`z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump`](vscode://settings/z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump): Disables execution flow total timing calculation if an unconditional `JP`, `JR` or `RET` instruction is found.
 
     Enabled by default.
 
 #### Total timing calculation of the execution flow to the selected exit point settings
 
-* `z80-asm-meter.timing.atExit.retEnabled`: Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `RET`, `RETI` or `RETN` instruction.
+* [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled): Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `RET`, `RETI` or `RETN` instruction.
 
     Enabled by default.
 
-* `z80-asm-meter.timing.atExit.jumpEnabled`: Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `DJNZ`, `JP` or `JR` instruction.
+* [`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled): Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `DJNZ`, `JP` or `JR` instruction.
 
     Enabled by default.
 
-* `z80-asm-meter.timing.atExit.callEnabled`: Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `CALL` or `RST` instruction.
+* [`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled): Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `CALL` or `RST` instruction.
 
     Disabled by default.
 
-* `z80-asm-meter.timing.atExit.threshold`: Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point.
+* [`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold): Minimum number of instructions to be selected for the calculation of total timing calculation of the execution flow to the selected exit point.
 
     Defaults to: `2` (2 instructions).
 
-* `z80-asm-meter.timing.atExit.requireConditional`: Requires at least one conditional instruction to enable total timing calculation of the execution flow to the selected exit point.
+* [`z80-asm-meter.timing.atExit.requireConditional`](vscode://settings/z80-asm-meter.timing.atExit.requireConditional): Requires at least one conditional instruction to enable total timing calculation of the execution flow to the selected exit point.
 
     Enabled by default.
 
-* `z80-asm-meter.timing.atExit.stopOnUnconditionalJump`: Disables total timing calculation of the execution flow to the selected exit point if an unconditional `JP`, `JR` or `RET` instruction is found.
+* [`z80-asm-meter.timing.atExit.stopOnUnconditionalJump`](vscode://settings/z80-asm-meter.timing.atExit.stopOnUnconditionalJump): Disables total timing calculation of the execution flow to the selected exit point if an unconditional `JP`, `JR` or `RET` instruction is found.
 
     Enabled by default.
 
-* `z80-asm-meter.timing.atExit.retIcon`: Total timing calculation of the execution flow to the selected exit point (`RET`, `RETI` or `RETN` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.timing.atExit.retIcon`](vscode://settings/z80-asm-meter.timing.atExit.retIcon): Total timing calculation of the execution flow to the selected exit point (`RET`, `RETI` or `RETN` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-back)`.
 
     ![](images/timing.atExit.retIcon.png)
 
-* `z80-asm-meter.timing.atExit.jumpIcon`: Total timing calculation of the execution flow to the selected exit point (`DJNZ`, `JP` or `JR` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon): Total timing calculation of the execution flow to the selected exit point (`DJNZ`, `JP` or `JR` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-out)`.
 
     ![](images/timing.atExit.jumpIcon.png)
 
-* `z80-asm-meter.timing.atExit.callIcon`: Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
+* [`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon): Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-into)`.
 
@@ -397,14 +415,14 @@ Negative timings are supported. This may seem unintuitive, but serves very parti
 
 #### Timing hints settings
 
-* `z80-asm-meter.timing.hints.enabled`: Enables [timing hints](#timing-hints), read from the line comment:
+* [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled): Enables [timing hints](#timing-hints), read from the line comment:
 
     * `none`: Disables timing hints.
     * `subroutine` (default): Subroutine timing hint will be added to `CALL`, `DJNZ`, `JP`, `JR`, `RET` or `RST` instructions only. If the timing hint is a pair of values, both will be added to the current source code block timings. If the instruction is conditional, the timing hint will be added to the _taken_ branch timing only.
     * `any`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines.
     * `ignoreCommentedOut`: Any timing hint found, regardless the instruction. This includes empty (i.e.: no actual source code) lines, but ignores empty lines that look like commented out source code.
 
-* `z80-asm-meter.timing.hints.regexps`: An array of regexp-based user-defined timing hints. The line comment will be matched agains the regular expression and the timing hint values will be read from this configuration object.
+* [`z80-asm-meter.timing.hints.regexps`](vscode://settings/z80-asm-meter.timing.hints.regexps): An array of regexp-based user-defined timing hints. The line comment will be matched agains the regular expression and the timing hint values will be read from this configuration object.
 
     * `pattern`: The pattern of the regular expression to match against the line comment.
     * `flags`: The string indicating the flags of the regular expression to match against the line comment. Optional.
@@ -468,7 +486,7 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 #### Macros settings
 
-* `z80-asm-meter.macros`: An array of [user-defined macros](#user-defined-macros):
+* [`z80-asm-meter.macros`](vscode://settings/z80-asm-meter.macros): An array of [user-defined macros](#user-defined-macros):
     * `name`: The name of the macro; will be matched against the mnemonic of the source code.
     * `z80`: Declares or overrides Z80 default macro timing. Optional.
     * `msx`: Declares or overrides Z80+M1 macro timing information (MSX standard). Optional.
@@ -488,28 +506,28 @@ Please find the deprecated settings, the last version where setting was availabl
 | Version | Deprecated setting | Replacement setting(s) |
 | --: | --- | --- |
 | | | |
-| v4.3.0 | `z80-asm-meter.viewInstruction` | `z80-asm-meter.statusBar.showInstruction` |
-| v4.3.0 | `z80-asm-meter.timing.mode` | `z80-asm-meter.statusBar.totalTimings` |
-| v4.3.0 | `z80-asm-meter.viewBytes` | `z80-asm-meter.statusBar.showBytes` |
-| v4.3.0 | `z80-asm-meter.debounce` | `z80-asm-meter.statusBar.debounce` |
-| v4.3.0 | `z80-asm-meter.syntax.label` | `z80-asm-meter.syntax.label.colonOptional` |
-| v4.3.0 | `z80-asm-meter.directivesAsInstructions` | `z80-asm-meter.parser.directives.defsAsInstructions` |
-| v4.3.0 | `z80-asm-meter.timing.threshold` | `z80-asm-meter.timing.executionFlow.threshold`<br>`z80-asm-meter.timing.atExit.threshold` |
-| v4.3.0 | `z80-asm-meter.timing.hints` | `z80-asm-meter.timing.hints.enabled` |
+| v4.3.0 | `z80-asm-meter.viewInstruction` | [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction) |
+| v4.3.0 | `z80-asm-meter.timing.mode` | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
+| v4.3.0 | `z80-asm-meter.viewBytes` | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
+| v4.3.0 | `z80-asm-meter.debounce` | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
+| v4.3.0 | `z80-asm-meter.syntax.label` | [`z80-asm-meter.syntax.label.colonOptional`](vscode://settings/z80-asm-meter.syntax.label.colonOptional) |
+| v4.3.0 | `z80-asm-meter.directivesAsInstructions` | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
+| v4.3.0 | `z80-asm-meter.timing.threshold` | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
+| v4.3.0 | `z80-asm-meter.timing.hints` | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
 | | | |
-| v5.1.0 | `z80-asm-meter.statusBar.compactSize` | `z80-asm-meter.statusBar.sizeSuffix` |
-| v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | `z80-asm-meter.timing.atExit.retEnabled`<br>`z80-asm-meter.timing.atExit.jumpEnabled`<br>`z80-asm-meter.timing.atExit.callEnabled` |
-| v5.1.0 | `z80-asm-meter.timing.atExit.icon` | `z80-asm-meter.timing.atExit.jumpIcon`<br>`z80-asm-meter.timing.atExit.callIcon` |
+| v5.1.0 | `z80-asm-meter.statusBar.compactSize` | [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix) |
+| v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled)<br>[`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled)<br>[`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled) |
+| v5.1.0 | `z80-asm-meter.timing.atExit.icon` | [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon)<br>[`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon) |
 | | | |
-| v5.3.0 | `z80-asm-meter.syntax.label.colonOptional` | `z80-asm-meter.syntaxFeature.labelColonOptional` |
-| v5.3.0 | `z80-asm-meter.syntax.repeat` | `z80-asm-meter.syntaxFeature.repeat` |
-| v5.3.0 | `z80-asm-meter.syntax.lineSeparator` | `z80-asm-meter.syntaxFeature.lineSeparator` |
-| v5.3.0 | `z80-asm-meter.syntax.enable.fakeInstructions` | `z80-asm-meter.syntaxFeature.fakeInstructions` |
-| v5.3.0 | `z80-asm-meter.syntax.enable.registerListInstructions` | `z80-asm-meter.syntaxFeature.registerListInstructions` |
-| v5.3.0 | `z80-asm-meter.syntax.enable.negativeConditions` | `z80-asm-meter.syntaxFeature.negativeConditions` |
-| v5.3.0 | `z80-asm-meter.syntax.enable.dupEdup` | `z80-asm-meter.syntaxFeature.dupEdup` |
-| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndr` | `z80-asm-meter.syntaxFeature.reptEndr` |
-| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndm` | `z80-asm-meter.syntaxFeature.reptEndm` |
+| v5.3.0 | `z80-asm-meter.syntax.label.colonOptional` | [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional) |
+| v5.3.0 | `z80-asm-meter.syntax.repeat` | [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat) |
+| v5.3.0 | `z80-asm-meter.syntax.lineSeparator` | [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator) |
+| v5.3.0 | `z80-asm-meter.syntax.enable.fakeInstructions` | [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions) |
+| v5.3.0 | `z80-asm-meter.syntax.enable.registerListInstructions` | [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions) |
+| v5.3.0 | `z80-asm-meter.syntax.enable.negativeConditions` | [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions) |
+| v5.3.0 | `z80-asm-meter.syntax.enable.dupEdup` | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
+| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndr` | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
+| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndm` | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
 
 
 
@@ -518,7 +536,7 @@ Please find the deprecated settings, the last version where setting was availabl
 
 ### Q: The status bar does not display any information. I don't get clock cycles and bytecode size!
 
-Double check the `z80-asm-meter.languageIds` setting in your settings.
+Double check the [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) setting in your settings.
 
 
 ### Q: My macros are not recognized.
@@ -528,7 +546,7 @@ Macro definitions are not read from actual source code, but from user settings. 
 
 ### Q: How can I get clock cycles and bytecode size for in-lined assembly in my C files?
 
-Double check the `z80-asm-meter.languageIds` setting in your settings. It has to include `c`:
+Double check the [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) setting in your settings. It has to include `c`:
 
 ```json
 "z80-asm-meter.languageIds": [ "c" ]
@@ -537,7 +555,7 @@ Double check the `z80-asm-meter.languageIds` setting in your settings. It has to
 
 ### Q: I've added `"z80-asm-meter.languageIds": [ "c", "s", "asm" ]`, but I only get clock cycles for in-lined assembly; now I don't get clock cycles in my assembly files!
 
-The `z80-asm-meter.languageIds` setting uses language IDs, not extensions. Check the language ID of your assembly files and replace `"s"` and `"asm"` with that extension ID. Or use the default language IDs, then add `"c"`:
+The [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) setting uses language IDs, not extensions. Check the language ID of your assembly files and replace `"s"` and `"asm"` with that extension ID. Or use the default language IDs, then add `"c"`:
 
 ```json
 "z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
