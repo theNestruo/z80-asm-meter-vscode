@@ -6,17 +6,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: 16
     - run: npm install
     - run: npm install --global @vscode/vsce
     - run: vsce package
-    - name: get-npm-version
+    - uses: martinbeentjes/npm-get-version-action@main
       id: package-version
-      uses: martinbeentjes/npm-get-version-action@main
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: z80-asm-meter-${{ steps.package-version.outputs.current-version}}-nightly
         path: z80-asm-meter-${{ steps.package-version.outputs.current-version}}.vsix
