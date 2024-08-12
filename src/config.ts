@@ -321,6 +321,10 @@ class StatusBarConfiguration {
 		return read("statusBar.debounce");
 	}
 
+	get cacheSize(): number {
+		return read("statusBar.cacheSize");
+	}
+
 	get instructionIcon(): string {
 		return read("statusBar.instructionIcon");
 	}

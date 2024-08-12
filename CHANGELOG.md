@@ -1,6 +1,7 @@
 ## 5.4.0
 
-- esbuild toolchain updated, following [esbuild-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/esbuild-sample)
+- esbuild toolchain updated, following [esbuild-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/esbuild-sample).
+- Performance improvements (LRU cache).
 
 ## 5.3.5
 

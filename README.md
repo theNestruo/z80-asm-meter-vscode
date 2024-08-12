@@ -218,6 +218,10 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
     Defaults to: `100` (100&nbsp;ms).
 
+* [`z80-asm-meter.statusBar.cacheSize`](vscode://settings/z80-asm-meter.statusBar.cacheSize): Size of the cache to minimize metering calculations when navigating through code.
+
+    Defaults to: `100`.
+
 
 ### Assembler syntax settings
 

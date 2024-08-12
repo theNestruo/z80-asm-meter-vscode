@@ -1,4 +1,4 @@
-import { LRUCache } from 'lru-cache';
+import QuickLRU from 'quick-lru';
 import * as vscode from 'vscode';
 import { config } from "../config";
 import { StatusBarItemData } from '../model/StatusBarItemData';
@@ -147,7 +147,7 @@ abstract class StatusBarHandler extends AbstractHandler {
 	}
 }
 
-export class DefaultStatusBarHandler extends StatusBarHandler {
+class BaseStatusBarHandler extends StatusBarHandler {
 
 	constructor(commandHandler: CommandHandler) {
 		super(commandHandler);
@@ -344,19 +344,22 @@ export class DefaultStatusBarHandler extends StatusBarHandler {
 	}
 }
 
-export class CachedStatusBarHandler extends DefaultStatusBarHandler {
+export class CachedStatusBarHandler extends BaseStatusBarHandler {
 
-	private readonly cache = new LRUCache<number, StatusBarItemData>({
-		max: 16
+	private readonly cache = new QuickLRU<number, StatusBarItemData>({
+		maxSize: 100
 	});
 
 	constructor(commandHandler: CommandHandler) {
 		super(commandHandler);
+
+		this.cache.resize(config.statusBar.cacheSize);
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
 		this.cache.clear();
+		this.cache.resize(config.statusBar.cacheSize);
 
 		super.onConfigurationChange(e);
 	}
@@ -369,14 +372,20 @@ export class CachedStatusBarHandler extends DefaultStatusBarHandler {
 		}
 
 		const currentHashCode = hashCode(sourceCode);
-
-		// Uses cache
 		const cachedData = this.cache.get(currentHashCode);
+
+		// Uses cached value
 		if (cachedData) {
-			return new StatusBarItemData("cached " + cachedData.text, cachedData.tooltip);
+			return cachedData;
 		}
 		
+		// Computes actual value
 		const currentData = super.buildStatusBarItemData(sourceCode);
+		if (!currentData) {
+			return undefined;
+		}
+
+		// Caches and uses computed value
 		this.cache.set(currentHashCode, currentData);
 		return currentData;
 	}

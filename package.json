@@ -278,6 +278,12 @@
 						"default": 100,
 						"description": "Milliseconds to prevent metering from being called too frequently when the selection changes"
 					},
+					"z80-asm-meter.statusBar.cacheSize": {
+						"order": 75,
+						"type": "integer",
+						"default": 100,
+						"description": "Size of the cache to minimize metering calculations when navigating through code"
+					},
 					"z80-asm-meter.statusBar.instructionIcon": {
 						"order": 80,
 						"type": "string",
@@ -759,15 +765,17 @@
 		"lint": "eslint \"src/**/*.ts\""
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.73.0",
 		"@types/mocha": "^10.0.6",
 		"@types/node": "22.x",
+		"@types/vscode": "^1.73.0",
 		"@typescript-eslint/eslint-plugin": "^8.0.1",
 		"@typescript-eslint/parser": "^8.0.1",
-		"eslint": "^8.57.0",
 		"esbuild": "^0.23.0",
+		"eslint": "^8.57.0",
 		"npm-run-all": "^4.1.5",
-		"typescript": "^5.5.2",
-		"lru-cache": "11.0.0"
+		"typescript": "^5.5.2"
+	},
+	"dependencies": {
+		"quick-lru": "^7.0.0"
 	}
 }
