@@ -1,5 +1,5 @@
-import { extractSourceCode } from "../model/SourceCode";
 import { parseNumericExpression } from "./NumberUtils";
+import { extractSourceCode } from "./SourceCodeUtils";
 
 export function extractMnemonicOf(s: string): string {
 

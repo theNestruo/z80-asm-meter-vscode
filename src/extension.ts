@@ -5,7 +5,7 @@ import { mainParser, noMacroMainParser, noTimingHintsMainParser } from './parser
 import { macroParser } from './parser/impl/MacroParser';
 import { regExpTimingHintsParser } from './parser/impl/RegExpTimingHintsParser';
 import { CommandHandler } from './statusBar/CommandHandler';
-import { DebouncedStatusBarHandler, StatusBarHandler } from "./statusBar/StatusBarHandler";
+import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./statusBar/StatusBarHandler";
 
 
 let disposable: vscode.Disposable | undefined;
@@ -15,7 +15,7 @@ let disposable: vscode.Disposable | undefined;
 export function activate(context: vscode.ExtensionContext) {
 
 	const commandHandler = new CommandHandler();
-	const statusBarHandler = new StatusBarHandler(commandHandler);
+	const statusBarHandler = new CachedStatusBarHandler(commandHandler);
 	const debouncedHandler = new DebouncedStatusBarHandler(statusBarHandler);
 
 	disposable = vscode.Disposable.from(

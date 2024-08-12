@@ -1,5 +1,7 @@
+import { LRUCache } from 'lru-cache';
 import * as vscode from 'vscode';
 import { config } from "../config";
+import { StatusBarItemData } from '../model/StatusBarItemData';
 import { mainParser } from "../parser/MainParser";
 import { AtExitTotalTiminsMeterable, atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
@@ -63,15 +65,13 @@ export class DebouncedStatusBarHandler {
 	}
 }
 
-export class StatusBarHandler extends AbstractHandler {
+abstract class StatusBarHandler extends AbstractHandler {
 
-	private readonly commandHandler: CommandHandler;
-
-	private previousHashCode: number | undefined = undefined;
+	protected readonly commandHandler: CommandHandler;
 
 	private statusBarItem: vscode.StatusBarItem | undefined;
 
-	constructor(commandHandler: CommandHandler) {
+	protected constructor(commandHandler: CommandHandler) {
 		super();
 
 		this.commandHandler = commandHandler;
@@ -121,24 +121,49 @@ export class StatusBarHandler extends AbstractHandler {
 
 		// Reads the source code
 		const sourceCode = this.readFromSelection();
-		if (!sourceCode) {
-			this.previousHashCode = undefined;
+
+		// Builds the status bar item data
+		const statusBarItemData = this.buildStatusBarItemData(sourceCode);
+		if (!statusBarItemData) {
 			this.hide();
 			return;
 		}
-		const currentHashCode = hashCode(sourceCode);
-		if (currentHashCode === this.previousHashCode) {
-			// (no changes)
-			return;
+
+		// Builds the actual status bar item
+		this.create();
+		this.statusBarItem!.text = statusBarItemData.text;
+		this.statusBarItem!.tooltip = statusBarItemData.tooltip;
+		this.statusBarItem!.command = this.commandHandler;
+		this.statusBarItem!.show();
+	}
+
+	protected abstract buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined;
+
+	private hide() {
+
+		if (this.statusBarItem) {
+			this.statusBarItem.hide();
 		}
-		this.previousHashCode = currentHashCode;
+	}
+}
+
+export class DefaultStatusBarHandler extends StatusBarHandler {
+
+	constructor(commandHandler: CommandHandler) {
+		super(commandHandler);
+	}
+
+	protected buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined {
+
+		// (sanity check)
+		if (!sourceCode) {
+			return undefined;
+		}
 
 		// Parses the source code
 		const metered = mainParser.parse(sourceCode);
 		if (!metered) {
-			this.previousHashCode = undefined;
-			this.hide();
-			return;
+			return undefined;
 		}
 
 		// Prepares the total timings
@@ -147,18 +172,9 @@ export class StatusBarHandler extends AbstractHandler {
 		const atExitTiming = atExitTotalTiming.applyTo(metered);
 
 		// Builds the status bar item
-		this.create();
-		this.statusBarItem!.text = this.buildText(defaultTiming, flowTiming, atExitTiming);
-		this.statusBarItem!.tooltip = this.buildTooltip(defaultTiming, flowTiming, atExitTiming);
-		this.statusBarItem!.command = this.commandHandler;
-		this.statusBarItem!.show();
-	}
-
-	private hide() {
-
-		if (this.statusBarItem) {
-			this.statusBarItem.hide();
-		}
+		return new StatusBarItemData(
+				this.buildText(defaultTiming, flowTiming, atExitTiming),
+				this.buildTooltip(defaultTiming, flowTiming, atExitTiming));
 	}
 
 	private buildText(
@@ -325,5 +341,43 @@ export class StatusBarHandler extends AbstractHandler {
 		}
 
 		return table;
+	}
+}
+
+export class CachedStatusBarHandler extends DefaultStatusBarHandler {
+
+	private readonly cache = new LRUCache<number, StatusBarItemData>({
+		max: 16
+	});
+
+	constructor(commandHandler: CommandHandler) {
+		super(commandHandler);
+	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+		this.cache.clear();
+
+		super.onConfigurationChange(e);
+	}
+
+	protected buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined {
+
+		// (sanity check)
+		if (!sourceCode) {
+			return undefined;
+		}
+
+		const currentHashCode = hashCode(sourceCode);
+
+		// Uses cache
+		const cachedData = this.cache.get(currentHashCode);
+		if (cachedData) {
+			return new StatusBarItemData("cached " + cachedData.text, cachedData.tooltip);
+		}
+		
+		const currentData = super.buildStatusBarItemData(sourceCode);
+		this.cache.set(currentHashCode, currentData);
+		return currentData;
 	}
 }

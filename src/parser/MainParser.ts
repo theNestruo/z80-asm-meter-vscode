@@ -3,17 +3,18 @@ import { config } from '../config';
 import { Meterable } from '../model/Meterable';
 import { MeterableCollection } from '../model/MeterableCollection';
 import { repeatedMeterable } from '../model/RepeatedMeterable';
-import { SourceCode, extractSourceCode } from '../model/SourceCode';
+import { SourceCode } from '../model/SourceCode';
 import { timingHintedMeterable } from '../model/TimingHintedMeterable';
 import { TimingHints } from '../model/TimingHints';
+import { extractSourceCode } from '../utils/SourceCodeUtils';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
 import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
 import { defaultTimingHintsParser } from './impl/DefaultTimingHintsParser';
 import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
-import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
-import { z80InstructionParser } from './impl/Z80InstructionParser';
 import { macroParser } from './impl/MacroParser';
 import { regExpTimingHintsParser } from './impl/RegExpTimingHintsParser';
+import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
+import { z80InstructionParser } from './impl/Z80InstructionParser';
 
 class MainParser {
 
