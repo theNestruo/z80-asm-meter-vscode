@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { config } from "../../config";
 import { z80InstructionSet } from "../../data/Z80InstructionSet";
 import { Meterable } from "../../model/Meterable";
@@ -406,6 +407,9 @@ class Z80InstructionParser implements InstructionParser {
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
     private instructionByOpcode: Record<string, Z80Instruction>;
 
+    // (cached for performance reasons)
+    private instructionSets: string[];
+
     constructor() {
 
         // Initializes instruction maps
@@ -438,6 +442,13 @@ class Z80InstructionParser implements InstructionParser {
                 }
             });
         });
+
+        this.instructionSets = config.instructionSets;
+    }
+
+    onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+        this.instructionSets = config.instructionSets;
     }
 
     get isEnabled(): boolean {
@@ -455,7 +466,7 @@ class Z80InstructionParser implements InstructionParser {
         const mnemonic = extractMnemonicOf(instruction);
         const candidates = this.instructionByMnemonic[mnemonic];
         if (candidates) {
-            return this.findBestCandidate(instruction, candidates, config.instructionSets);
+            return this.findBestCandidate(instruction, candidates);
         }
 
         // (unknown mnemonic/instruction)
@@ -467,14 +478,14 @@ class Z80InstructionParser implements InstructionParser {
         return this.instructionByOpcode[formatHexadecimalByte(opcode)];
     }
 
-    private findBestCandidate(instruction: string,
-        candidates: Z80Instruction[], instructionSets: string[]): Z80Instruction | undefined {
+    private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
+            Z80Instruction | undefined {
 
         // Locates instruction
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (!instructionSets.includes(candidate.instructionSet)) {
+            if (!this.instructionSets.includes(candidate.instructionSet)) {
                 // Invalid instruction set
                 continue;
             }

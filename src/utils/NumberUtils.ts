@@ -19,13 +19,13 @@ class NumericExpressionParser {
 }
 
 const numericParsers: NumericExpressionParser[] = [
-    new NumericExpressionParser(/^0x([0-9a-f]+)$/i, 16),
-    new NumericExpressionParser(/^[#$&]([0-9a-f]+)$/i, 16),
-    new NumericExpressionParser(/^([0-9a-f]+)h$/i, 16),
+    new NumericExpressionParser(/^0x([0-9A-Fa-f]+)$/, 16),
+    new NumericExpressionParser(/^[#$&]([0-9A-Fa-f]+)$/, 16),
+    new NumericExpressionParser(/^([0-9A-Fa-f]+)h$/, 16),
     new NumericExpressionParser(/^[0@]([0-7]+)$/, 8),
-    new NumericExpressionParser(/^([0-7]+)o$/i, 8),
-    new NumericExpressionParser(/^%([0-1]+)$/i, 2),
-    new NumericExpressionParser(/^([0-1]+)b$/i, 2),
+    new NumericExpressionParser(/^([0-7]+)o$/, 8),
+    new NumericExpressionParser(/^%([01]+)$/, 2),
+    new NumericExpressionParser(/^([01]+)b$/, 2),
     new NumericExpressionParser(/^(\d+)$/, 10)
 ];
 

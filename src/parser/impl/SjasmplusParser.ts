@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { config } from "../../config";
 import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
 import { Meterable } from "../../model/Meterable";
@@ -215,6 +216,9 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
     // Instruction maps
     private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
 
+    // (cached for performance reasons)
+    private instructionSets: string[];
+
     constructor() {
 
         // Initializes instruction maps
@@ -234,6 +238,13 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
             }
             this.instructionByMnemonic[mnemonic].push(instruction);
         });
+
+        this.instructionSets = config.instructionSets;
+    }
+
+    onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+        this.instructionSets = config.instructionSets;
     }
 
     get isEnabled(): boolean {
@@ -247,21 +258,21 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
         const mnemonic = extractMnemonicOf(instruction);
         const candidates = this.instructionByMnemonic[mnemonic];
         if (candidates) {
-            return this.findBestCandidate(instruction, candidates, config.instructionSets);
+            return this.findBestCandidate(instruction, candidates);
         }
 
         // (unknown mnemonic/instruction)
         return undefined;
     }
 
-    private findBestCandidate(instruction: string,
-        candidates: SjasmplusFakeInstruction[], instructionSets: string[]): SjasmplusFakeInstruction | undefined {
+    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
+            SjasmplusFakeInstruction | undefined {
 
         // Locates instruction
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (!instructionSets.includes(candidate.getInstructionSet())) {
+            if (!this.instructionSets.includes(candidate.getInstructionSet())) {
                 // Invalid instruction set
                 continue;
             }

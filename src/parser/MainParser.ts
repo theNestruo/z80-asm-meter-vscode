@@ -131,13 +131,16 @@ class MainParser {
             }
         }
 
+        // (avoids querying the configuration for each line)
+        const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
+        const labelRegExp = config.syntax.labelRegExp;
+        const repeatRegExp = config.syntax.repeatRegExp;
+
         // Splits the lines and extracts repetition counter and trailing comments
         const sourceCode: SourceCode[] = [];
         rawLines.forEach(rawLine => {
-            sourceCode.push(...extractSourceCode(rawLine,
-                config.syntax.lineSeparatorCharacter,
-                config.syntax.labelRegExp,
-                config.syntax.repeatRegExp));
+            sourceCode.push(...extractSourceCode(
+                rawLine, lineSeparatorCharacter, labelRegExp, repeatRegExp));
         });
         return (!sourceCode.length) ? undefined : sourceCode;
     }
