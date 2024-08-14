@@ -1,3 +1,7 @@
+## 5.5.1
+
+- Fixes broken README.md in the 5.5.0 version published to Visual Studio Marketplace
+
 ## 5.5.0
 
 - Performance improvements, particularly when metering large source code blocks
@@ -9,7 +13,7 @@
 
 ## 5.3.5
 
-- Fix Amstrad CPC timing of some instructions, by contributor: **RenaudLottiaux**
+- Fixes Amstrad CPC timing of some instructions, by contributor: **RenaudLottiaux**
 
 ## 5.3.4
 
