@@ -605,7 +605,7 @@ Double check the [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.l
 
 ### Q: My macros are not recognized.
 
-Macro definitions are not read from actual source code, but from user settings. Double check the [`z80-asm-meter.macros` setting](#macros-settings).
+Macro definitions are not read from actual source code, but from user settings. Double check the [`z80-asm-meter.macros` setting](#user-defined-macros).
 
 
 ### Q: How can I get clock cycles and bytecode size for in-lined assembly in my C files?
@@ -628,14 +628,14 @@ The [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) s
 
 ### Q: &lt;some feature&gt; stopped working after updating the extension.
 
-Double check your settings for any [deprecated setting](#deprecated-settings) that needs to be replaced.
+Double check your settings for any [deprecated setting](#migration-to-version-5x) that needs to be replaced.
 
 
 ### Q: But that is your fault! You should support the deprecated settings for a few versions!
 
 VS Code API support for deprecated settings does conflict with default values. I did my best to keep the extension backwards compatible, but it ended up being a hard-to-debug mess that failed most of the times.
 
-From version 5.0.0 onwards I'll keep the [deprecated setting](#deprecated-settings) section updated.
+From version 5.0.0 onwards I'll keep the [deprecated setting](#migration-to-version-5x) section updated.
 
 
 ### Q: The extension is too confusing; there are too many things in the status bar now.
