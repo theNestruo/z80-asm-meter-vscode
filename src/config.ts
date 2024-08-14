@@ -177,6 +177,10 @@ class ParserConfiguration {
 	get directivesDefsAsInstructions(): boolean {
 		return read("parser.directives.defsAsInstructions");
 	}
+
+	get instructionsCacheSize(): number {
+		return read("parser.instructionsCacheSize");
+	}
 }
 
 class TimingConfiguration {

@@ -4,6 +4,9 @@ import { TimingHints } from "../../model/TimingHints";
 import { parseTimingLenient } from "../../utils/TimingUtils";
 import { TimingHintsParser } from "../Parsers";
 
+// (precompiled RegExp for performance reasons)
+const timingHintsRegexp = /\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g;
+
 class DefaultTimingHintsParser implements TimingHintsParser {
 
 	get isEnabled(): boolean {
@@ -20,7 +23,7 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		}
 
 		// Checks timing hint comment
-		const matches = rawComment?.matchAll(/\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g);
+		const matches = rawComment.matchAll(timingHintsRegexp);
 		if (!matches) {
 			return undefined;
 		}

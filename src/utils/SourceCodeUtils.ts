@@ -1,6 +1,12 @@
 import { SourceCode } from "../model/SourceCode";
 import { parseNumericExpression } from "./NumberUtils";
 
+// (used instead of /\s/ for performance reasons)
+const whitespaceCharacters = "\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff";
+
+// (precompiled RegExp for performance reasons)
+const exAfAfRegexp = /^ex af ?, ?af$/i;
+
 export function extractFirstInstruction(s: string): string | undefined {
 
     return extractSourceCode(s).shift()?.instruction;
@@ -48,7 +54,7 @@ export function extractSourceCode(rawLine: string,
             }
 
             // Whitespace?
-            if (/\s/.test(c)) {
+            if (whitespaceCharacters.includes(c)) {
                 whitespace = whitespace < 0 ? -1 : 1;
                 continue;
             }
@@ -108,6 +114,6 @@ function isQuote(c: string, currentPart: string): string | undefined {
     return (c === "\"") ? c
         // Prevents considering "'" as a quote
         // when parsing the instruction "ex af,af'"
-        : ((c === "'") && (!/^ex\s+af\s*,\s*af$/i.test(currentPart))) ? c
+        : ((c === "'") && (!exAfAfRegexp.test(currentPart))) ? c
         : undefined;
 }

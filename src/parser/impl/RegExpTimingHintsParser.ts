@@ -69,12 +69,15 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 
 	parse(s: SourceCode): TimingHints | undefined {
 
-		if (!s.lineComment) {
+		const rawComment = s.lineComment;
+
+		// (sanity check)
+		if (!rawComment) {
 			return undefined;
 		}
 
 		for (const pair of this.regExpTimingHints) {
-			if (new RegExp(pair.regExp).test(s.lineComment)) {
+			if (pair.regExp.test(rawComment)) {
 				return pair.timingHints;
 			}
 		}

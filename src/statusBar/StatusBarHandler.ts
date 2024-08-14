@@ -346,20 +346,20 @@ class BaseStatusBarHandler extends StatusBarHandler {
 
 export class CachedStatusBarHandler extends BaseStatusBarHandler {
 
-	private readonly cache = new QuickLRU<number, StatusBarItemData>({
+	private readonly statusBarItemDataCache = new QuickLRU<number, StatusBarItemData>({
 		maxSize: 100
 	});
 
 	constructor(commandHandler: CommandHandler) {
 		super(commandHandler);
 
-		this.cache.resize(config.statusBar.cacheSize);
+		this.statusBarItemDataCache.resize(config.statusBar.cacheSize);
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
-		this.cache.clear();
-		this.cache.resize(config.statusBar.cacheSize);
+		this.statusBarItemDataCache.clear();
+		this.statusBarItemDataCache.resize(config.statusBar.cacheSize);
 
 		super.onConfigurationChange(e);
 	}
@@ -372,13 +372,13 @@ export class CachedStatusBarHandler extends BaseStatusBarHandler {
 		}
 
 		const currentHashCode = hashCode(sourceCode);
-		const cachedData = this.cache.get(currentHashCode);
+		const cachedData = this.statusBarItemDataCache.get(currentHashCode);
 
-		// Uses cached value
+		// Uses the cached value
 		if (cachedData) {
 			return cachedData;
 		}
-		
+
 		// Computes actual value
 		const currentData = super.buildStatusBarItemData(sourceCode);
 		if (!currentData) {
@@ -386,7 +386,7 @@ export class CachedStatusBarHandler extends BaseStatusBarHandler {
 		}
 
 		// Caches and uses computed value
-		this.cache.set(currentHashCode, currentData);
+		this.statusBarItemDataCache.set(currentHashCode, currentData);
 		return currentData;
 	}
 }

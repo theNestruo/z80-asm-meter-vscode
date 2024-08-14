@@ -8,6 +8,14 @@ import { parseNumericExpression } from "../../utils/NumberUtils";
 import { InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
+// (precompiled RegExp for performance reasons)
+const defbOrDefmDirectiveRegexp = /^\.?(?:DEFB|DB|DEFM|DM)$/;
+const defwDirectiveRegexp = /^\.?(?:DEFW|DW)$/;
+const defsDirectiveRegexp = /^\.?(?:DEFS|DS)$/;
+const rbDirectiveRegexp = /^\.?RB$/;
+const rwDirectiveRegexp = /^\.?RW$/;
+const stringRegexp = /^(?:(?:".*")|(?:'.*'))$/;
+
 /**
  * An assembly directive, such as `db`, `dw` or `ds`
  */
@@ -55,19 +63,19 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Locates defb/defw/defs directives
 		const mnemonic = extractMnemonicOf(instruction);
-		if (mnemonic.match(/^[.]?(DEFB|DB|DEFM|DM)$/)) {
+		if (defbOrDefmDirectiveRegexp.test(mnemonic)) {
 			return this.parseDefbDirective(instruction);
 		}
-		if (mnemonic.match(/^[.]?(DEFW|DW)$/)) {
+		if (defwDirectiveRegexp.test(mnemonic)) {
 			return this.parseDefwDirective(instruction);
 		}
-		if (mnemonic.match(/^[.]?(DEFS|DS)$/)) {
+		if (defsDirectiveRegexp.test(mnemonic)) {
 			return this.parseDefsDirective(instruction);
 		}
-		if (mnemonic.match(/^[.]?(RB)$/)) {
+		if (rbDirectiveRegexp.test(mnemonic)) {
 			return this.parseRbDirective(instruction);
 		}
-		if (mnemonic.match(/^[.]?(RW)$/)) {
+		if (rwDirectiveRegexp.test(mnemonic)) {
 			return this.parseRwDirective(instruction);
 		}
 
@@ -85,7 +93,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 		// Extracts bytes
 		const bytes: string[] = [];
 		operands.forEach(operand => {
-			if (operand.match(/^((".*")|('.*'))$/)) {
+			if (stringRegexp.test(operand)) {
 				// String
 				const string = operand.substring(1, operand.length - 1);
 				for (let i = 0; i < string.length; i++) {

@@ -15,6 +15,10 @@ import { macroParser } from './impl/MacroParser';
 import { regExpTimingHintsParser } from './impl/RegExpTimingHintsParser';
 import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
 import { z80InstructionParser } from './impl/Z80InstructionParser';
+import QuickLRU from 'quick-lru';
+
+// (precompiled RegExp for performance reasons)
+const lineSeparatorRegexp = /[\r\n]+/;
 
 class MainParser {
 
@@ -28,6 +32,10 @@ class MainParser {
     private enabledRepetitionParsers: RepetitionParser[] = [];
     private enabledTimingHintsParsers: TimingHintsParser[] = [];
 
+    private readonly instructionsCache = new QuickLRU<string, Meterable>({
+		maxSize: 100
+	});
+
     constructor(
         instructionParsers: InstructionParser[],
         repetitionParsers: RepetitionParser[],
@@ -38,12 +46,16 @@ class MainParser {
         this.timingHintsParsers = timingHintsParsers;
 
         this.initializeParsers();
+		this.instructionsCache.resize(config.parser.instructionsCacheSize);
     }
 
     onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
         // Re-initializes parsers
         this.initializeParsers();
+
+        this.instructionsCache.clear();
+		this.instructionsCache.resize(config.parser.instructionsCacheSize);
     }
 
     private initializeParsers() {
@@ -119,7 +131,7 @@ class MainParser {
         if (!s) {
             return undefined;
         }
-        const rawLines = s.split(/[\r\n]+/);
+        const rawLines = s.split(lineSeparatorRegexp);
         if (!rawLines.length) {
             return undefined;
         }
@@ -143,20 +155,6 @@ class MainParser {
                 rawLine, lineSeparatorCharacter, labelRegExp, repeatRegExp));
         });
         return (!sourceCode.length) ? undefined : sourceCode;
-    }
-
-    private parseInstruction(s: SourceCode): Meterable | undefined {
-
-        // Tries to parse as an instruction
-        for (const parser of this.enabledInstructionParsers) {
-            const instruction = parser.parse(s);
-            if (instruction) {
-                return instruction;
-            }
-        }
-
-        // (not an instruction)
-        return undefined;
     }
 
     private parseRepetition(s: string): number | undefined {
@@ -184,6 +182,29 @@ class MainParser {
 
         // (not a repetition end instruction)
         return false;
+    }
+
+    private parseInstruction(s: SourceCode): Meterable | undefined {
+
+        const cachedMeterable = this.instructionsCache.get(s.instruction);
+
+        // Uses the cached value
+        if (cachedMeterable) {
+			return cachedMeterable;
+		}
+
+        // Tries to parse as an instruction
+        for (const parser of this.enabledInstructionParsers) {
+            const instruction = parser.parse(s);
+            if (instruction) {
+                // Caches value
+                this.instructionsCache.set(s.instruction, instruction);
+                return instruction;
+            }
+        }
+
+        // (not an instruction)
+        return undefined;
     }
 
     private parseTimingHints(s: SourceCode): TimingHints | undefined {

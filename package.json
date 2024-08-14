@@ -1,7 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.4.1",
+	"version": "5.5.0",
 	"engines": {
 		"vscode": "^1.74.0"
 	},
@@ -282,7 +282,7 @@
 						"order": 75,
 						"type": "integer",
 						"default": 100,
-						"description": "Size of the cache to minimize metering calculations when navigating through code"
+						"description": "Size of the cache, in selections, used to minimize metering calculations when navigating through previously metered code"
 					},
 					"z80-asm-meter.statusBar.instructionIcon": {
 						"order": 80,
@@ -423,6 +423,12 @@
 						"type": "boolean",
 						"default": false,
 						"description": "When enabled, tries to parse DEFS directive bytes as single byte instructions"
+					},
+					"z80-asm-meter.parser.instructionsCacheSize": {
+						"order": 20,
+						"type": "integer",
+						"default": 100,
+						"description": "Size of the internal cache, in instructions, to lighten the metering calculations; particularly when metering large source code blocks"
 					}
 				}
 			},

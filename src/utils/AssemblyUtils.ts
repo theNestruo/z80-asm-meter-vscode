@@ -1,6 +1,13 @@
 import { parseNumericExpression } from "./NumberUtils";
 import { extractSourceCode } from "./SourceCodeUtils";
 
+// (precompiled RegExp for performance reasons)
+const sdccIxRegisterWithOffsetRegexp = /(?:\(\s*IX\s*\)|\[\s*IX\s*\])$/; // "...(IX)" or "...[IX]"
+const sdccIyRegisterWithOffsetRegexp = /(?:\(\s*IY\s*\)|\[\s*IY\s*\])$/; // "...(IY)" or "...[IY]"
+const ixRegisterWithOffsetRegexp = /^IX\b/; // "IX..."
+const iyRegisterWithOffsetRegexp = /^IY\b/; // "IY..."
+const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
+
 export function extractMnemonicOf(s: string): string {
 
     const i = s.indexOf(" ");
@@ -10,7 +17,7 @@ export function extractMnemonicOf(s: string): string {
 export function extractOperandsOf(s: string): string[] {
 
     const i = s.indexOf(" ");
-    return i === -1 ? [] : s.substring(i + 1).split(/\s*,\s*/);
+    return i === -1 ? [] : s.substring(i + 1).split(",").map(ss => ss.trim());
 }
 
 export function extractOperandsOfQuotesAware(s: string): string[] {
@@ -67,11 +74,11 @@ export function isIndirectionOperand(operand: string, strict: boolean): boolean 
 export function sdccIndexRegisterIndirectionScore(expectedOperand: string, candidateOperand: string): number | undefined {
 
     // Depending on the expected indirection...
-    switch (extractIndirection(expectedOperand)) {
-        case "IX+o":
-            return candidateOperand.match(/(\(\s*IX\s*\)|\[\s*IX\s*\])$/) ? 1 : undefined;
-        case "IY+o":
-            return candidateOperand.match(/(\(\s*IY\s*\)|\[\s*IY\s*\])$/) ? 1 : undefined;
+    switch (expectedOperand) {
+        case "(IX+o)":
+            return sdccIxRegisterWithOffsetRegexp.test(candidateOperand) ? 1 : undefined;
+        case "(IY+o)":
+            return sdccIyRegisterWithOffsetRegexp.test(candidateOperand) ? 1 : undefined;
         default:
             return undefined;
     }
@@ -98,7 +105,7 @@ export function is8bitRegisterScore(operand: string): number {
  * @returns 1 if the operand is the IX index register with an optional offset, 0 otherwise
  */
 export function isIXWithOffsetScore(operand: string): number {
-    return operand.match(/^IX(\W|$)/) ? 1 : 0;
+    return ixRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
 /**
@@ -106,7 +113,7 @@ export function isIXWithOffsetScore(operand: string): number {
  * @returns 1 if the operand is the IY index register with an optional offset, 0 otherwise
  */
 export function isIYWithOffsetScore(operand: string): number {
-    return operand.match(/^IY(\W|$)/) ? 1 : 0;
+    return iyRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
 /**
@@ -180,7 +187,10 @@ export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number 
  * false otherwise
  */
 export function isAnyRegister(operand: string): boolean {
-    return !!operand.match(/(^(A|AF'?|BC?|C|DE?|E|HL?|L|I|I[XY][UHL]?|R|SP)$)|(^I[XY]\W)/);
+    return ["A", "AF", "AF'", "B", "BC", "C", "D", "DE", "E", "H", "HL", "L",
+            "I", "IX", "IXU", "IXH", "IXL", "IY", "IYU", "IYH", "IYL",
+            "R", "SP"].includes(operand)
+            || ixOrIyRegisterWithOffsetRegexp.test(operand);
 }
 
 /**

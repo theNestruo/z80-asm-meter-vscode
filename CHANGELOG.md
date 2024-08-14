@@ -1,11 +1,11 @@
-## 5.4.1
+## 5.5.0
 
-- Performance improvements.
+- Performance improvements, particularly when metering large source code blocks
 
 ## 5.4.0
 
 - esbuild toolchain updated, following [esbuild-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/esbuild-sample).
-- Performance improvements (LRU cache).
+- Performance improvements, particularly when navigating through previously metered code.
 
 ## 5.3.5
 
