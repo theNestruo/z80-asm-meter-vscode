@@ -312,7 +312,7 @@ These settings allow to fine-tune the source code parsing and metering.
 
     Defaults to: `100` (100 instructions).
 
-<details>
+</details>
 
 
 
