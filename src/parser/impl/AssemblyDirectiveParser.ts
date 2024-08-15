@@ -14,7 +14,6 @@ const defwDirectiveRegexp = /^\.?(?:DEFW|DW)$/;
 const defsDirectiveRegexp = /^\.?(?:DEFS|DS)$/;
 const rbDirectiveRegexp = /^\.?RB$/;
 const rwDirectiveRegexp = /^\.?RW$/;
-const stringRegexp = /^(?:(?:".*")|(?:'.*'))$/;
 
 /**
  * An assembly directive, such as `db`, `dw` or `ds`
@@ -93,7 +92,10 @@ class AssemblyDirectiveParser implements InstructionParser {
 		// Extracts bytes
 		const bytes: string[] = [];
 		operands.forEach(operand => {
-			if (stringRegexp.test(operand)) {
+			const length = operand.length;
+			if ((length >= 3)
+					&& "\"'".includes(operand.charAt(0))
+					&& (operand.charAt(0) == operand.charAt(operand.length - 1))) {
 				// String
 				const string = operand.substring(1, operand.length - 1);
 				for (let i = 0; i < string.length; i++) {
