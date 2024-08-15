@@ -1,6 +1,6 @@
 ## 5.5.2
 
-- Further performance improvements (~~[quick-lru](https://www.npmjs.com/package/quick-lru)~~ replaced with [hashlru](https://www.npmjs.com/package/hashlru)).
+- Performance improvements (~~[quick-lru](https://www.npmjs.com/package/quick-lru)~~ replaced with [hashlru](https://www.npmjs.com/package/hashlru)).
 
 ## 5.5.1
 
