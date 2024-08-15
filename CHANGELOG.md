@@ -1,10 +1,14 @@
+## 5.5.2
+
+- Further performance improvements (~~[quick-lru](https://www.npmjs.com/package/quick-lru)~~ replaced with [hashlru](https://www.npmjs.com/package/hashlru)).
+
 ## 5.5.1
 
-- Fixes broken README.md in the 5.5.0 version published to Visual Studio Marketplace
+- Fixes broken README.md in the 5.5.0 version published to Visual Studio Marketplace.
 
 ## 5.5.0
 
-- Performance improvements, particularly when metering large source code blocks
+- Performance improvements, particularly when metering large source code blocks.
 
 ## 5.4.0
 

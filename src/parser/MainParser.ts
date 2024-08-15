@@ -1,3 +1,4 @@
+import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from '../config';
 import { Meterable } from '../model/Meterable';
@@ -15,7 +16,6 @@ import { macroParser } from './impl/MacroParser';
 import { regExpTimingHintsParser } from './impl/RegExpTimingHintsParser';
 import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
 import { z80InstructionParser } from './impl/Z80InstructionParser';
-import QuickLRU from 'quick-lru';
 
 // (precompiled RegExp for performance reasons)
 const lineSeparatorRegexp = /[\r\n]+/;
@@ -32,9 +32,7 @@ class MainParser {
     private enabledRepetitionParsers: RepetitionParser[] = [];
     private enabledTimingHintsParsers: TimingHintsParser[] = [];
 
-    private readonly instructionsCache = new QuickLRU<string, Meterable>({
-		maxSize: 100
-	});
+    private instructionsCache;
 
     constructor(
         instructionParsers: InstructionParser[],
@@ -46,7 +44,7 @@ class MainParser {
         this.timingHintsParsers = timingHintsParsers;
 
         this.initializeParsers();
-		this.instructionsCache.resize(config.parser.instructionsCacheSize);
+		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
     onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
@@ -54,8 +52,7 @@ class MainParser {
         // Re-initializes parsers
         this.initializeParsers();
 
-        this.instructionsCache.clear();
-		this.instructionsCache.resize(config.parser.instructionsCacheSize);
+		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
     private initializeParsers() {

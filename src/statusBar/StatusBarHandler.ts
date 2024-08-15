@@ -1,4 +1,4 @@
-import QuickLRU from 'quick-lru';
+import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from "../config";
 import { StatusBarItemData } from '../model/StatusBarItemData';
@@ -346,22 +346,18 @@ class BaseStatusBarHandler extends StatusBarHandler {
 
 export class CachedStatusBarHandler extends BaseStatusBarHandler {
 
-	private readonly statusBarItemDataCache = new QuickLRU<number, StatusBarItemData>({
-		maxSize: 100
-	});
+	private statusBarItemDataCache;
 
 	constructor(commandHandler: CommandHandler) {
 		super(commandHandler);
 
-		this.statusBarItemDataCache.resize(config.statusBar.cacheSize);
+		this.statusBarItemDataCache = HLRU(config.statusBar.cacheSize);
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-
-		this.statusBarItemDataCache.clear();
-		this.statusBarItemDataCache.resize(config.statusBar.cacheSize);
-
 		super.onConfigurationChange(e);
+
+		this.statusBarItemDataCache = HLRU(config.statusBar.cacheSize);
 	}
 
 	protected buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined {

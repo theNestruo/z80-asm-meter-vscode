@@ -24,6 +24,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
     - [Timing hints](#timing-hints)
     - [User-defined macros](#user-defined-macros)
 - [Migration to version 5.x](#migration-to-version-5x)
+- [Performance and efficiency](#performance-and-efficiency)
 - [F.A.Q.](#faq)
 - [Credits](#credits)
 
@@ -593,6 +594,23 @@ Please find the deprecated settings, the last version where the setting was avai
 | v5.3.0 | `z80-asm-meter.syntax.enable.reptEndm` | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
 
 </details>
+
+
+## Performance and efficiency
+
+Until version 5.3.5, the only effciency mesaures of the extension were to avoid metering more than once the same selection, and debouncing (preventing the extension to be triggered too frequently).
+
+From version 5.4.0 onwards, there have been several performance improvements: first using a "Least Recently Used" (LRU) cache for previously metered code, replacing expensive RegExp for lighter alternatives, then adding a second LRU cache for instructions, improving the performance of metering large source code blocks.
+
+The following table compares the time took to meter 11&nbsp;179 lines of source code (the [fully annotated disassembly of King's Valley (&copy; Konami 1985)](https://github.com/GuillianSeed/Kings-Valley) by [Manuel Pazos](https://github.com/GuillianSeed)) using VS Code 1.92.1, Windows 10, AMD Ryzen 3 2200U:
+
+| Version | [`z80-asm-meter.parser.instructionsCacheSize`](vscode://settings/z80-asm-meter.parser.instructionsCacheSize) | Time |
+| :-: | :-- | --: |
+| 5.3.5 | (not available) | 4&nbsp;149&nbsp;ms |
+| 5.4.0 | (not available) | 3&nbsp;795&nbsp;ms |
+| 5.5.0<br>5.5.1 | `100` (default value) | 398&nbsp;ms |
+| 5.5.2 | `100` (default value) | 242&nbsp;ms |
+| 5.5.2 | `500` | 202&nbsp;ms |
 
 
 ## F.A.Q.
