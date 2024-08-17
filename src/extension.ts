@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { mainParser, noMacroMainParser, noTimingHintsMainParser } from './parser/MainParser';
 import { macroParser } from './parser/impl/MacroParser';
 import { regExpTimingHintsParser } from './parser/impl/RegExpTimingHintsParser';
-import { CommandHandler } from './statusBar/CommandHandler';
+import { CopyToClipboardCommandHandler } from './statusBar/CommandHandler';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./statusBar/StatusBarHandler";
 import { z80InstructionParser } from './parser/impl/Z80InstructionParser';
 import { sjasmplusFakeInstructionParser } from './parser/impl/SjasmplusParser';
@@ -16,24 +16,23 @@ let disposable: vscode.Disposable | undefined;
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const commandHandler = new CommandHandler();
-	const statusBarHandler = new CachedStatusBarHandler(commandHandler);
-	const debouncedHandler = new DebouncedStatusBarHandler(statusBarHandler);
+	const commandHandler = new CopyToClipboardCommandHandler();
+	const statusBarHandler = new DebouncedStatusBarHandler(new CachedStatusBarHandler(commandHandler));
 
 	disposable = vscode.Disposable.from(
 		statusBarHandler,
 
 		// subscribe to selection change and editor activation events
 		vscode.window.onDidChangeTextEditorSelection(
-			debouncedHandler.update, debouncedHandler),
+			statusBarHandler.update, statusBarHandler),
 		vscode.window.onDidChangeActiveTextEditor(
-			debouncedHandler.update, debouncedHandler),
+			statusBarHandler.update, statusBarHandler),
 		vscode.workspace.onDidChangeTextDocument(
-			debouncedHandler.update, debouncedHandler),
+			statusBarHandler.update, statusBarHandler),
 
 		// create a command to copy timing and size to clipboard
 		vscode.commands.registerCommand(
-			commandHandler.command, commandHandler.copy, commandHandler),
+			commandHandler.command, commandHandler.onExecute, commandHandler),
 
 		// subscribe to configuration change event
 		vscode.workspace.onDidChangeConfiguration(
@@ -60,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	// First execution
-	statusBarHandler.update();
+	statusBarHandler.forceUpdate();
 }
 
 // this method is called when your extension is deactivated

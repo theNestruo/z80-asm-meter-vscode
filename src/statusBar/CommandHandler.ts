@@ -8,13 +8,13 @@ import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
 import { formatTiming, humanReadableTiming } from '../utils/TimingUtils';
 import { readFromSelection } from '../utils/EditorUtils';
 
-export class CommandHandler implements vscode.Command {
+export class CopyToClipboardCommandHandler implements vscode.Command {
 
     readonly title = "Z80 Assembly Meter: copy to clipboard";
 
     readonly command = "z80-asm-meter.copyToClipboard";
 
-    copy() {
+    onExecute() {
 
         // Reads and parses the source code
         const sourceCode = readFromSelection();

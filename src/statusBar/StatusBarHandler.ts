@@ -1,7 +1,6 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from "../config";
-import { StatusBarItemData } from '../model/StatusBarItemData';
 import { mainParser } from "../parser/MainParser";
 import { AtExitTotalTiminsMeterable, atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
 import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
@@ -12,16 +11,29 @@ import { humanReadableInstructions } from "../utils/InstructionUtils";
 import { humanReadableSize } from '../utils/SizeUtils';
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
 import { formatTiming, humanReadableTimings } from '../utils/TimingUtils';
-import { CommandHandler } from "./CommandHandler";
+import { CopyToClipboardCommandHandler } from "./CommandHandler";
 import { readFromSelection } from '../utils/EditorUtils';
+
+class StatusBarItemContents {
+
+    readonly text: string;
+
+    /** The optional line repetition count */
+    readonly tooltip: vscode.MarkdownString;
+
+    constructor(text: string, tooltip: vscode.MarkdownString) {
+        this.text = text;
+        this.tooltip = tooltip;
+    }
+}
 
 abstract class StatusBarHandler {
 
-	protected readonly commandHandler: CommandHandler;
+	protected readonly commandHandler: CopyToClipboardCommandHandler;
 
 	private statusBarItem: vscode.StatusBarItem | undefined;
 
-	protected constructor(commandHandler: CommandHandler) {
+	protected constructor(commandHandler: CopyToClipboardCommandHandler) {
 		this.commandHandler = commandHandler;
 		this.create();
 	}
@@ -32,11 +44,51 @@ abstract class StatusBarHandler {
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
-		// Reloads caches for "heavy" configurations
+		// Recreates StatusBarItem on alignment change
 		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
 			this.destroy();
 			this.create();
 		}
+	}
+
+	update() {
+
+		// Reads the source code
+		const sourceCode = readFromSelection();
+
+		// Parses the source code and builds the status bar item contents
+		const contents = this.parseAndBuildStatusBarItemContents(sourceCode);
+
+		// Shows or hides the actual status bar item
+		if (contents) {
+			this.show(contents);
+		} else {
+			this.hide();
+		}
+	}
+
+	protected parseAndBuildStatusBarItemContents(sourceCode: string | undefined): StatusBarItemContents | undefined {
+
+		// (sanity check)
+		if (!sourceCode) {
+			return undefined;
+		}
+
+		// Parses the source code
+		const metered = mainParser.parse(sourceCode);
+		if (!metered) {
+			return undefined;
+		}
+
+		// Prepares the total timings
+		const defaultTiming = defaultTotalTiming.applyTo(metered);
+		const flowTiming = executionFlowTotalTiming.applyTo(metered);
+		const atExitTiming = atExitTotalTiming.applyTo(metered);
+
+		// Builds the status bar item contents
+		return new StatusBarItemContents(
+				this.buildText(defaultTiming, flowTiming, atExitTiming),
+				this.buildTooltip(defaultTiming, flowTiming, atExitTiming));
 	}
 
 	private create() {
@@ -57,72 +109,21 @@ abstract class StatusBarHandler {
 
 	private destroy() {
 
-		if (!this.statusBarItem) {
-			return;
-		}
-
-		this.statusBarItem.dispose();
+		this.statusBarItem?.dispose();
 		this.statusBarItem = undefined;
 	}
 
-	update() {
-
-		// Reads the source code
-		const sourceCode = readFromSelection();
-
-		// Builds the status bar item data
-		const statusBarItemData = this.buildStatusBarItemData(sourceCode);
-		if (!statusBarItemData) {
-			this.hide();
-			return;
-		}
-
-		// Builds the actual status bar item
+	private show(contents: StatusBarItemContents) {
 		this.create();
-		this.statusBarItem!.text = statusBarItemData.text;
-		this.statusBarItem!.tooltip = statusBarItemData.tooltip;
+		this.statusBarItem!.text = contents.text;
+		this.statusBarItem!.tooltip = contents.tooltip;
 		this.statusBarItem!.command = this.commandHandler;
 		this.statusBarItem!.show();
 	}
 
-	protected abstract buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined;
-
 	private hide() {
 
-		if (this.statusBarItem) {
-			this.statusBarItem.hide();
-		}
-	}
-}
-
-class BaseStatusBarHandler extends StatusBarHandler {
-
-	constructor(commandHandler: CommandHandler) {
-		super(commandHandler);
-	}
-
-	protected buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined {
-
-		// (sanity check)
-		if (!sourceCode) {
-			return undefined;
-		}
-
-		// Parses the source code
-		const metered = mainParser.parse(sourceCode);
-		if (!metered) {
-			return undefined;
-		}
-
-		// Prepares the total timings
-		const defaultTiming = defaultTotalTiming.applyTo(metered);
-		const flowTiming = executionFlowTotalTiming.applyTo(metered);
-		const atExitTiming = atExitTotalTiming.applyTo(metered);
-
-		// Builds the status bar item
-		return new StatusBarItemData(
-				this.buildText(defaultTiming, flowTiming, atExitTiming),
-				this.buildTooltip(defaultTiming, flowTiming, atExitTiming));
+		this.statusBarItem?.hide();
 	}
 
 	private buildText(
@@ -292,46 +293,44 @@ class BaseStatusBarHandler extends StatusBarHandler {
 	}
 }
 
-export class CachedStatusBarHandler extends BaseStatusBarHandler {
+export class CachedStatusBarHandler extends StatusBarHandler {
 
-	private statusBarItemDataCache;
+	private cache;
 
-	constructor(commandHandler: CommandHandler) {
+	constructor(commandHandler: CopyToClipboardCommandHandler) {
 		super(commandHandler);
 
-		this.statusBarItemDataCache = HLRU(config.statusBar.cacheSize);
+		this.cache = HLRU(config.statusBar.cacheSize);
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 		super.onConfigurationChange(e);
 
-		this.statusBarItemDataCache = HLRU(config.statusBar.cacheSize);
+		this.cache = HLRU(config.statusBar.cacheSize);
 	}
 
-	protected buildStatusBarItemData(sourceCode: string | undefined): StatusBarItemData | undefined {
+	protected override parseAndBuildStatusBarItemContents(
+		sourceCode: string | undefined): StatusBarItemContents | undefined {
 
 		// (sanity check)
 		if (!sourceCode) {
 			return undefined;
 		}
 
+		// Checks cache
 		const currentHashCode = hashCode(sourceCode);
-		const cachedData = this.statusBarItemDataCache.get(currentHashCode);
-
-		// Uses the cached value
-		if (cachedData) {
-			return cachedData;
+		const cachedContents = this.cache.get(currentHashCode);
+		if (cachedContents) {
+			return cachedContents;
 		}
 
-		// Computes actual value
-		const currentData = super.buildStatusBarItemData(sourceCode);
-		if (!currentData) {
-			return undefined;
-		}
+		// Parses the source code and builds the status bar item contents
+		const contents = super.parseAndBuildStatusBarItemContents(sourceCode);
 
-		// Caches and uses computed value
-		this.statusBarItemDataCache.set(currentHashCode, currentData);
-		return currentData;
+		// Caches the status bar item contents
+		this.cache.set(currentHashCode, contents);
+
+		return contents;
 	}
 }
 
@@ -345,6 +344,14 @@ export class DebouncedStatusBarHandler {
 
 	constructor(statusBarHandler: StatusBarHandler) {
 		this.delegate = statusBarHandler;
+	}
+
+	dispose() {
+		this.delegate.dispose();
+	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+		this.delegate.onConfigurationChange(e);
 	}
 
 	update() {
@@ -382,5 +389,9 @@ export class DebouncedStatusBarHandler {
 			this.delegate.update();
 			this.isLeadingEvent = true;
 		}, debounce);
+	}
+
+	forceUpdate() {
+		this.delegate.update();
 	}
 }
