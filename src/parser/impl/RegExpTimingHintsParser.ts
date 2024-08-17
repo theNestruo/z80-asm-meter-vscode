@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { config } from "../../config";
 import { SourceCode } from "../../model/SourceCode";
 import { TimingHints } from "../../model/TimingHints";
-import { parseTimingLenient, parseTimingsLenient } from '../../utils/TimingUtils';
+import { parseTimingsLenient } from '../../utils/TimingUtils';
 import { TimingHintsParser } from "../Parsers";
 
 const emptyRegExp = new RegExp("");
@@ -81,6 +81,8 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 				return pair.timingHints;
 			}
 		}
+
+		return undefined;
 	}
 }
 

@@ -47,7 +47,7 @@ class MainParser {
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
-    onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
 
         // Re-initializes parsers
         this.initializeParsers();

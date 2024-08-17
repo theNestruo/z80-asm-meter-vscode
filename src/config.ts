@@ -21,13 +21,6 @@ function readIgnoreDefault<T>(section: string): T | undefined {
 
 function readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
 
-	const config = vscode.workspace.getConfiguration("z80-asm-meter");
-	const info = config.inspect(section);
-	if ((info?.defaultValue !== undefined)
-		&& (info?.defaultValue !== "default")) {
-		const a = actualDefaultValue;
-	}
-
 	if (actualDefaultValue === undefined) {
 		return read(section);
 	}

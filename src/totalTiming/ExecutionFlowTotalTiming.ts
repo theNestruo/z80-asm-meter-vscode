@@ -18,7 +18,7 @@ class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
 	}
 
 	protected modifiedTimingsOf(timing: number[],
-		i: number, n: number, instruction: string): number[] {
+		_i: number, _n: number, instruction: string): number[] {
 
 		return isConditionalJumpOrRetInstruction(instruction)
 			? [timing[1], timing[1]]	// "Not taken" timing

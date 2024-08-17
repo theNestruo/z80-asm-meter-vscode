@@ -242,7 +242,7 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
         this.instructionSets = config.instructionSets;
     }
 
-    onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
 
         this.instructionSets = config.instructionSets;
     }
