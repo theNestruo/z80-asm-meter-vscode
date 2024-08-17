@@ -12,68 +12,16 @@ import { humanReadableInstructions } from "../utils/InstructionUtils";
 import { humanReadableSize } from '../utils/SizeUtils';
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
 import { formatTiming, humanReadableTimings } from '../utils/TimingUtils';
-import { AbstractHandler } from "./AbstractHandler";
 import { CommandHandler } from "./CommandHandler";
+import { readFromSelection } from '../utils/EditorUtils';
 
-export class DebouncedStatusBarHandler {
-
-	private readonly delegate: StatusBarHandler;
-
-	private isLeadingEvent: boolean = true;
-	private previousEventTimestamp: number | undefined = undefined;
-	private updateStatusBarTimeout: NodeJS.Timeout | undefined;
-
-	constructor(statusBarHandler: StatusBarHandler) {
-		this.delegate = statusBarHandler;
-	}
-
-	update() {
-
-		// Checks debounce configuration
-		const debounce = config.statusBar.debounce;
-		if (debounce <= 0) {
-			// No debounce: immediate execution
-			this.delegate.update();
-			return;
-		}
-
-		// Cancels any pending execution
-		clearTimeout(this.updateStatusBarTimeout);
-
-		// Detect leading events
-		const now = new Date().getTime();
-		if (!this.isLeadingEvent
-			&& this.previousEventTimestamp
-			&& (this.previousEventTimestamp + debounce < now)) {
-			this.isLeadingEvent = true;
-		}
-		this.previousEventTimestamp = now;
-
-		// Leading event?
-		if (this.isLeadingEvent) {
-			// Immediate execution
-			this.delegate.update();
-			this.isLeadingEvent = false;
-			return;
-		}
-
-		// Debounced execution
-		this.updateStatusBarTimeout = setTimeout(() => {
-			this.delegate.update();
-			this.isLeadingEvent = true;
-		}, debounce);
-	}
-}
-
-abstract class StatusBarHandler extends AbstractHandler {
+abstract class StatusBarHandler {
 
 	protected readonly commandHandler: CommandHandler;
 
 	private statusBarItem: vscode.StatusBarItem | undefined;
 
 	protected constructor(commandHandler: CommandHandler) {
-		super();
-
 		this.commandHandler = commandHandler;
 		this.create();
 	}
@@ -120,7 +68,7 @@ abstract class StatusBarHandler extends AbstractHandler {
 	update() {
 
 		// Reads the source code
-		const sourceCode = this.readFromSelection();
+		const sourceCode = readFromSelection();
 
 		// Builds the status bar item data
 		const statusBarItemData = this.buildStatusBarItemData(sourceCode);
@@ -384,5 +332,55 @@ export class CachedStatusBarHandler extends BaseStatusBarHandler {
 		// Caches and uses computed value
 		this.statusBarItemDataCache.set(currentHashCode, currentData);
 		return currentData;
+	}
+}
+
+export class DebouncedStatusBarHandler {
+
+	private readonly delegate: StatusBarHandler;
+
+	private isLeadingEvent: boolean = true;
+	private previousEventTimestamp: number | undefined = undefined;
+	private updateStatusBarTimeout: NodeJS.Timeout | undefined;
+
+	constructor(statusBarHandler: StatusBarHandler) {
+		this.delegate = statusBarHandler;
+	}
+
+	update() {
+
+		// Checks debounce configuration
+		const debounce = config.statusBar.debounce;
+		if (debounce <= 0) {
+			// No debounce: immediate execution
+			this.delegate.update();
+			return;
+		}
+
+		// Cancels any pending execution
+		clearTimeout(this.updateStatusBarTimeout);
+
+		// Detect leading events
+		const now = new Date().getTime();
+		if (!this.isLeadingEvent
+			&& this.previousEventTimestamp
+			&& (this.previousEventTimestamp + debounce < now)) {
+			this.isLeadingEvent = true;
+		}
+		this.previousEventTimestamp = now;
+
+		// Leading event?
+		if (this.isLeadingEvent) {
+			// Immediate execution
+			this.delegate.update();
+			this.isLeadingEvent = false;
+			return;
+		}
+
+		// Debounced execution
+		this.updateStatusBarTimeout = setTimeout(() => {
+			this.delegate.update();
+			this.isLeadingEvent = true;
+		}, debounce);
 	}
 }
