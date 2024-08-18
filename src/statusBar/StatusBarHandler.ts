@@ -1,18 +1,16 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from "../config";
+import { TotalTimingMeterable } from '../model/TotalTimingMeterable';
 import { mainParser } from "../parser/MainParser";
-import { AtExitTotalTiminsMeterable, atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
-import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
-import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
-import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
+import { TotalTimings } from '../totalTiming/TotalTimings';
 import { humanReadableBytes } from '../utils/ByteUtils';
+import { readFromSelection } from '../utils/EditorUtils';
 import { humanReadableInstructions } from "../utils/InstructionUtils";
 import { humanReadableSize } from '../utils/SizeUtils';
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
 import { formatTiming, humanReadableTimings } from '../utils/TimingUtils';
 import { CopyToClipboardCommandHandler } from "./CommandHandler";
-import { readFromSelection } from '../utils/EditorUtils';
 
 class StatusBarItemContents {
 
@@ -81,14 +79,12 @@ abstract class StatusBarHandler {
 		}
 
 		// Prepares the total timings
-		const defaultTiming = defaultTotalTiming.applyTo(metered);
-		const flowTiming = executionFlowTotalTiming.applyTo(metered);
-		const atExitTiming = atExitTotalTiming.applyTo(metered);
+		const totalTimings = new TotalTimings(metered);
 
 		// Builds the status bar item contents
 		return new StatusBarItemContents(
-				this.buildText(defaultTiming, flowTiming, atExitTiming),
-				this.buildTooltip(defaultTiming, flowTiming, atExitTiming));
+				this.buildText(totalTimings),
+				this.buildTooltip(totalTimings));
 	}
 
 	private create() {
@@ -126,36 +122,33 @@ abstract class StatusBarHandler {
 		this.statusBarItem?.hide();
 	}
 
-	private buildText(
-		defaultTiming: TotalTimingMeterable,
-		flowTiming: TotalTimingMeterable | undefined,
-		atExitTiming: AtExitTotalTiminsMeterable | undefined): string {
+	private buildText(totalTimings: TotalTimings): string {
 
 		// Builds the statur bar text
 		let text = "";
 
 		if (config.statusBar.showInstruction) {
-			const instruction = humanReadableInstructions(defaultTiming);
+			const instruction = humanReadableInstructions(totalTimings.defaultTiming);
 			if (instruction) {
 				const instructionIcon = espaceIfNotInfix(config.statusBar.instructionIcon);
 				text += `${instructionIcon}${instruction}`;
 			}
 		}
 
-		const timing = this.buidTimingsText(defaultTiming, flowTiming, atExitTiming);
+		const timing = this.buidTimingsText(totalTimings);
 		if (timing) {
 			const timingsIcon = espaceIfNotInfix(config.statusBar.timingsIcon);
 			text += `${timingsIcon}${timing}`;
 		}
 
-		const size = defaultTiming.size;
+		const size = totalTimings.defaultTiming.size;
 		if (size) {
 			const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
 			const formattedSize = humanReadableSize(size);
 			const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
 			text += `${sizeIcon}${formattedSize}${sizeSuffix}`;
 			if (config.statusBar.showBytes) {
-				const bytes = humanReadableBytes(defaultTiming);
+				const bytes = humanReadableBytes(totalTimings.defaultTiming);
 				if (bytes) {
 					text += ` (${bytes})`;
 				}
@@ -165,57 +158,35 @@ abstract class StatusBarHandler {
 		return text.trim().replace(/\s+/, " ");
 	}
 
-	private buidTimingsText(
-		defaultTiming: TotalTimingMeterable,
-		flowTiming: TotalTimingMeterable | undefined,
-		atExitTiming: AtExitTotalTiminsMeterable | undefined): string | undefined {
-
-		const [b, c, d] = this.reorder(flowTiming, atExitTiming);
+	private buidTimingsText(totalTimings: TotalTimings): string | undefined {
 
 		switch (config.statusBar.totalTimings) {
 			case "all":
 			case "combineAll":
-				return humanReadableTimings(
-					[defaultTiming, b, c, d], config.statusBar.totalTimingsCombined);
+				return humanReadableTimings(totalTimings.ordered(), config.statusBar.totalTimingsCombined);
 
 			case "smart":
-			case "combineSmart":
-				return flowTiming || atExitTiming
+			case "combineSmart": {
+				const [a, b, c, d] = totalTimings.ordered();
+				return totalTimings.flowTiming || totalTimings.atExitTiming
 					? humanReadableTimings([b, c, d], config.statusBar.totalTimingsCombined)
-					: humanReadableTimings([defaultTiming]);
+					: humanReadableTimings([a]);
+			}
 
 			case "best":
-				return humanReadableTimings([atExitTiming || flowTiming || defaultTiming]);
+				return humanReadableTimings([totalTimings.best()]);
 
 			case "default":
 			default:
-				return humanReadableTimings([defaultTiming]);
+				return humanReadableTimings([totalTimings.defaultTiming]);
 		}
 	}
 
-	private reorder(
-		flowTiming: TotalTimingMeterable | undefined,
-		atExitTiming: AtExitTotalTiminsMeterable | undefined): (TotalTimingMeterable | undefined)[] {
+	private buildTooltip(totalTimings: TotalTimings): vscode.MarkdownString {
 
-		// Applies requested order
-		const totalTimingsOrder = config.statusBar.totalTimingsOrder;
-		const [retTiming, jumpCallTiming] = atExitTiming?.isLastInstructionRet
-			? [atExitTiming, undefined]
-			: [undefined, atExitTiming];
-		return totalTimingsOrder === "retFlowJumpCall" ? [retTiming, flowTiming, jumpCallTiming]
-			: totalTimingsOrder === "flowRetJumpCall" ? [flowTiming, retTiming, jumpCallTiming]
-			: totalTimingsOrder === "retJumpCallFlow" ? [retTiming, jumpCallTiming, flowTiming]
-			: [undefined, undefined, undefined]; // (should never happen)
-	}
-
-	private buildTooltip(
-		defaultTiming: TotalTimingMeterable,
-		flowTiming: TotalTimingMeterable | undefined,
-		atExitTiming: AtExitTotalTiminsMeterable | undefined): vscode.MarkdownString {
-
-		const instruction = humanReadableInstructions(defaultTiming);
-		const size = defaultTiming.size;
-		const bytes = size ? humanReadableBytes(defaultTiming) : undefined;
+		const instruction = humanReadableInstructions(totalTimings.defaultTiming);
+		const size = totalTimings.defaultTiming.size;
+		const bytes = size ? humanReadableBytes(totalTimings.defaultTiming) : undefined;
 
 		const text = new vscode.MarkdownString();
 
@@ -232,7 +203,7 @@ abstract class StatusBarHandler {
 			text.appendMarkdown("\n---\n\n");
 		}
 
-		text.appendMarkdown(this.buildTooltipTiming([defaultTiming, ...this.reorder(flowTiming, atExitTiming)]).value);
+		text.appendMarkdown(this.buildTooltipTiming(totalTimings.ordered()).value);
 
 		if (size) {
 			const formattedSize = humanReadableSize(size);
@@ -244,7 +215,7 @@ abstract class StatusBarHandler {
 		}
 		text.appendMarkdown("\n");
 
-		const textToCopy = this.commandHandler.buildTextToCopy(defaultTiming, flowTiming, atExitTiming);
+		const textToCopy = this.commandHandler.buildTextToCopy(totalTimings);
 		if (textToCopy) {
 			text.appendMarkdown(`---\n\nCopy "${textToCopy}" to clipboard\n`);
 		}

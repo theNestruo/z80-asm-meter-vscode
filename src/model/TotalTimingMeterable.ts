@@ -1,24 +1,18 @@
-import { Meterable } from "../model/Meterable";
-
-export interface TotalTiming {
-
-	applyTo(meterable: Meterable): Meterable | undefined;
-}
+import { Meterable } from "./Meterable";
 
 export abstract class TotalTimingMeterable implements Meterable {
 
-	// The meterable instance to be decorated
-	protected decoratedMeterable: Meterable;
+	// The original meterable instance
+	protected originalMeterable: Meterable;
 
 	// Derived information (will be cached for performance reasons)
 	private cachedZ80Timing: number[] | undefined;
 	private cachedMsxTiming: number[] | undefined;
 	private cachedCpcTiming: number[] | undefined;
-	// private cachedMeterables: Meterable[] | undefined;
 
 	protected constructor(meterable: Meterable) {
 
-		this.decoratedMeterable = meterable;
+		this.originalMeterable = meterable;
 	}
 
 	abstract get name(): string;
@@ -26,7 +20,7 @@ export abstract class TotalTimingMeterable implements Meterable {
 	abstract get statusBarIcon(): string;
 
 	get instruction(): string {
-		return this.decoratedMeterable.instruction;
+		return this.originalMeterable.instruction;
 	}
 
 	get z80Timing(): number[] {
@@ -84,19 +78,19 @@ export abstract class TotalTimingMeterable implements Meterable {
 	}
 
 	get bytes(): string[] {
-		return this.decoratedMeterable.bytes;
+		return this.originalMeterable.bytes;
 	}
 
 	get size(): number {
-		return this.decoratedMeterable.size;
+		return this.originalMeterable.size;
 	}
 
 	flatten(): Meterable[] {
-		return this.decoratedMeterable.flatten();
+		return this.originalMeterable.flatten();
 	}
 
 	get composed(): boolean {
-		return this.decoratedMeterable.composed;
+		return this.originalMeterable.composed;
 	}
 
 	protected abstract modifiedTimingsOf(timing: number[],

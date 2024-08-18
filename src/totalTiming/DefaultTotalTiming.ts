@@ -1,5 +1,13 @@
 import { Meterable } from "../model/Meterable";
-import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
+import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
+
+export function calculateDefaultTotalTiming(meterable: Meterable): TotalTimingMeterable {
+
+	// (for performance reasons)
+	const meterables = meterable.flatten();
+
+	return new DefaultTotalTimingsMeterable(meterable, meterables.length >= 2);
+}
 
 class DefaultTotalTimingsMeterable extends TotalTimingMeterable {
 
@@ -23,16 +31,3 @@ class DefaultTotalTimingsMeterable extends TotalTimingMeterable {
 		return timing;
 	}
 }
-
-class DefaultTotalTiming implements TotalTiming {
-
-	applyTo(meterable: Meterable): TotalTimingMeterable {
-
-		// (for performance reasons)
-		const meterables = meterable.flatten();
-
-		return new DefaultTotalTimingsMeterable(meterable, meterables.length >= 2);
-	}
-}
-
-export const defaultTotalTiming = new DefaultTotalTiming();

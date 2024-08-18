@@ -1,7 +1,63 @@
 import { config } from "../config";
 import { Meterable } from "../model/Meterable";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
-import { TotalTiming, TotalTimingMeterable } from "./TotalTiming";
+import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
+
+/**
+ * Conditionaly builds an instance of the "execution flow timing" decorator
+ * @param meterable The meterable instance to be decorated
+ * @return The "execution flow timing" decorator, or undefined
+ */
+export function calculateExecutionFlowTotalTiming(meterable: Meterable): TotalTimingMeterable | undefined {
+
+	// Builds the "execution flow timing" decorator
+	return canCalculateExecutionFlowTotalTiming(meterable)
+		? new ExecutionFlowTotalTimingsMeterable(meterable)
+		: undefined;
+}
+
+/**
+ * Checks if "execution flow timing" decorator can apply to the meterable
+ * @param meterable The meterable instance to be decorated
+ * @return true if the "execution flow timing" decorator can be applied
+ */
+function canCalculateExecutionFlowTotalTiming(meterable: Meterable): boolean {
+
+	if (!config.statusBar.totalTimingsEnabled
+		|| !config.timing.executionFlow.enabled) {
+		return false;
+	}
+
+	// Length check
+	const meterables = meterable.flatten();
+	const threshold = config.timing.executionFlow.threshold;
+	if ((threshold > 0) && (meterables.length < threshold)) {
+		return false;
+	}
+
+	const isStopOnUnconditionalJump = config.timing.executionFlow.stopOnUnconditionalJump;
+
+	// Checks the instructions
+	let anyConditionalJump: boolean = false;
+	for (let i = 0, n = meterables.length; i < n; i++) {
+		const instruction = meterables[i].instruction;
+		const lastInstruction = i === n - 1;
+
+		// No unconditional jumps
+		if (isStopOnUnconditionalJump
+			&& isUnconditionalJumpOrRetInstruction(instruction)) {
+			return false;
+		}
+
+		anyConditionalJump ||= lastInstruction
+			? isConditionalInstruction(instruction)
+			: isConditionalJumpOrRetInstruction(instruction);
+	}
+
+	// At least one conditional jump/ret
+	return anyConditionalJump
+		|| !config.timing.executionFlow.requireConditional;
+}
 
 class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
 
@@ -25,65 +81,3 @@ class ExecutionFlowTotalTimingsMeterable extends TotalTimingMeterable {
 			: timing;
 	}
 }
-
-class ExecutionFlowTotalTiming implements TotalTiming {
-
-	/**
-	 * Conditionaly builds an instance of the "execution flow timing" decorator
-	 * @param meterable The meterable instance to be decorated
-	 * @return The "execution flow timing" decorator, or undefined
-	 */
-	applyTo(meterable: Meterable): TotalTimingMeterable | undefined {
-
-		// Builds the "execution flow timing" decorator
-		return this.canDecorate(meterable)
-			? new ExecutionFlowTotalTimingsMeterable(meterable)
-			: undefined;
-	}
-
-	/**
-	 * Checks if "execution flow timing" decorator can apply to the meterable
-	 * @param meterable The meterable instance to be decorated
-	 * @return true if the "execution flow timing" decorator can be applied
-	 */
-	private canDecorate(meterable: Meterable): boolean {
-
-		if (!config.statusBar.totalTimingsEnabled
-			|| !config.timing.executionFlow.enabled) {
-			return false;
-		}
-
-		// Length check
-		const meterables = meterable.flatten();
-		const threshold = config.timing.executionFlow.threshold;
-		if ((threshold > 0) && (meterables.length < threshold)) {
-			return false;
-		}
-
-		const isStopOnUnconditionalJump = config.timing.executionFlow.stopOnUnconditionalJump;
-
-		// Checks the instructions
-		let anyConditionalJump: boolean = false;
-		for (let i = 0, n = meterables.length; i < n; i++) {
-			const instruction = meterables[i].instruction;
-			const lastInstruction = i === n - 1;
-
-			// No unconditional jumps
-			if (isStopOnUnconditionalJump
-				&& isUnconditionalJumpOrRetInstruction(instruction)) {
-				return false;
-			}
-
-			anyConditionalJump ||= lastInstruction
-				? isConditionalInstruction(instruction)
-				: isConditionalJumpOrRetInstruction(instruction);
-		}
-
-		// At least one conditional jump/ret
-		return anyConditionalJump
-			|| !config.timing.executionFlow.requireConditional;
-	}
-}
-
-export const executionFlowTotalTiming = new ExecutionFlowTotalTiming();
-

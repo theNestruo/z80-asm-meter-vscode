@@ -1,12 +1,9 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
 import { mainParser } from "../parser/MainParser";
-import { atExitTotalTiming } from '../totalTiming/AtExitTotalTiming';
-import { defaultTotalTiming } from '../totalTiming/DefaultTotalTiming';
-import { executionFlowTotalTiming } from '../totalTiming/ExecutionFlowTotalTiming';
-import { TotalTimingMeterable } from '../totalTiming/TotalTiming';
-import { formatTiming, humanReadableTiming } from '../utils/TimingUtils';
+import { TotalTimings } from '../totalTiming/TotalTimings';
 import { readFromSelection } from '../utils/EditorUtils';
+import { formatTiming, humanReadableTiming } from '../utils/TimingUtils';
 
 export class CopyToClipboardCommandHandler implements vscode.Command {
 
@@ -26,13 +23,11 @@ export class CopyToClipboardCommandHandler implements vscode.Command {
             return;
         }
 
-        // Prepares the total timing
-        const defaultTiming = defaultTotalTiming.applyTo(metered);
-        const flowTiming = executionFlowTotalTiming.applyTo(metered);
-        const atExitTiming = atExitTotalTiming.applyTo(metered);
+        // Prepares the total timings
+        const totalTimings = new TotalTimings(metered);
 
         // Builds the text to copy to clipboard
-        const textToCopy = this.buildTextToCopy(defaultTiming, flowTiming, atExitTiming);
+        const textToCopy = this.buildTextToCopy(totalTimings);
         if (!textToCopy) {
             // (should never happen)
             return;
@@ -49,14 +44,11 @@ export class CopyToClipboardCommandHandler implements vscode.Command {
         }
     }
 
-    buildTextToCopy(
-        defaultTiming: TotalTimingMeterable,
-        flowTiming: TotalTimingMeterable | undefined,
-        atExitTiming: TotalTimingMeterable | undefined): string | undefined {
+    buildTextToCopy(totalTimings: TotalTimings): string | undefined {
 
         const timing = config.statusBar.totalTimingsEnabled
-            ? atExitTiming || flowTiming || defaultTiming
-            : defaultTiming;
+            ? totalTimings.best()
+            : totalTimings.defaultTiming;
 
         // Human readable
         if (!config.statusBar.copyTimingsAsHints) {

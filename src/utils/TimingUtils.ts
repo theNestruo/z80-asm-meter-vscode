@@ -1,6 +1,6 @@
 import { config } from "../config";
 import { Meterable } from "../model/Meterable";
-import { TotalTimingMeterable } from "../totalTiming/TotalTiming";
+import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
 
 export function parseTimingsLenient(...array: unknown[]): number[] | undefined {
 
