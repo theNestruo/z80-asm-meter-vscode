@@ -1,12 +1,6 @@
 import { SourceCode } from "../model/SourceCode";
 import { parseNumericExpression } from "./NumberUtils";
 
-// (used instead of /\s/ for performance reasons)
-const whitespaceCharacters = "\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff";
-
-// (precompiled RegExp for performance reasons)
-const exAfAfRegexp = /^ex af ?, ?af$/i;
-
 export function extractFirstInstruction(s: string): string | undefined {
 
     return extractSourceCode(s).shift()?.instruction;
@@ -15,6 +9,11 @@ export function extractFirstInstruction(s: string): string | undefined {
 export function extractSourceCode(rawLine: string,
     lineSeparatorCharacter?: string, labelRegExp?: RegExp, repeatRegExp?: RegExp | undefined):
     SourceCode[] {
+
+    // (used instead of /\s/ for performance reasons)
+    const whitespaceCharacters = "\f\n\r\t\v\u0020\u00a0\u1680"
+        + "\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a"
+        + "\u2028\u2029\u202f\u205f\u3000\ufeff";
 
     // Removes surrounding label, parses and removes repeat pseudo-op
     // eslint-disable-next-line prefer-const
@@ -108,6 +107,9 @@ function isLineCommentStart(
         : (c === "/") && (i + 1 < n) && (line.charAt(i + 1) === "/") ? line.substring(i + 2).trim()
         : undefined;
 }
+
+// (precompiled RegExp for performance reasons)
+const exAfAfRegexp = /^ex af ?, ?af$/i;
 
 function isQuote(c: string, currentPart: string): string | undefined {
 
