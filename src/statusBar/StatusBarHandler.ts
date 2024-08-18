@@ -274,7 +274,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		this.cache = HLRU(config.statusBar.cacheSize);
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 		super.onConfigurationChange(e);
 
 		this.cache = HLRU(config.statusBar.cacheSize);

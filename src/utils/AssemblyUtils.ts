@@ -1,13 +1,6 @@
 import { parseNumericExpression } from "./NumberUtils";
 import { extractSourceCode } from "./SourceCodeUtils";
 
-// (precompiled RegExp for performance reasons)
-const sdccIxRegisterWithOffsetRegexp = /(?:\(\s*IX\s*\)|\[\s*IX\s*\])$/; // "...(IX)" or "...[IX]"
-const sdccIyRegisterWithOffsetRegexp = /(?:\(\s*IY\s*\)|\[\s*IY\s*\])$/; // "...(IY)" or "...[IY]"
-const ixRegisterWithOffsetRegexp = /^IX\b/; // "IX..."
-const iyRegisterWithOffsetRegexp = /^IY\b/; // "IY..."
-const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
-
 export function extractMnemonicOf(s: string): string {
 
     const i = s.indexOf(" ");
@@ -65,6 +58,10 @@ export function isIndirectionOperand(operand: string, strict: boolean): boolean 
     return (operand.startsWith("[") && operand.endsWith("]"));
 }
 
+// (precompiled RegExp for performance reasons)
+const sdccIxRegisterWithOffsetRegexp = /(?:\(\s*IX\s*\)|\[\s*IX\s*\])$/; // "...(IX)" or "...[IX]"
+const sdccIyRegisterWithOffsetRegexp = /(?:\(\s*IY\s*\)|\[\s*IY\s*\])$/; // "...(IY)" or "...[IY]"
+
 /**
  * @param expectedOperand the operand of the instruction
  * @param candidateOperand the operand from the cleaned-up line
@@ -100,6 +97,9 @@ export function is8bitRegisterScore(operand: string): number {
     return ["A", "B", "C", "D", "E", "H", "L"].includes(operand)? 1 : 0;
 }
 
+// (precompiled RegExp for performance reasons)
+const ixRegisterWithOffsetRegexp = /^IX\b/; // "IX..."
+
 /**
  * @param operand the candidate operand
  * @returns 1 if the operand is the IX index register with an optional offset, 0 otherwise
@@ -107,6 +107,9 @@ export function is8bitRegisterScore(operand: string): number {
 export function isIXWithOffsetScore(operand: string): number {
     return ixRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
+
+// (precompiled RegExp for performance reasons)
+const iyRegisterWithOffsetRegexp = /^IY\b/; // "IY..."
 
 /**
  * @param operand the candidate operand
@@ -180,6 +183,8 @@ export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number 
     return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIY8bitScore(operand);
 }
 
+// (precompiled RegExp for performance reasons)
+const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
 /**
  * @param operand the candidate operand
  * @returns true if the operand is any 8 or 16 bit register,

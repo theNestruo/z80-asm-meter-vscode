@@ -49,12 +49,12 @@ class Macro extends MeterableCollection {
 	}
 
 	/** false; this meterable is not composed */
-	readonly composed = false;
+	override readonly composed = false;
 
 	/**
 	 * @returns The name of the macro
 	 */
-	get instruction(): string {
+	override get instruction(): string {
 
 		return this.providedName;
 	}
@@ -62,7 +62,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The Z80 timing, in time (T) cycles
 	 */
-	get z80Timing(): number[] {
+	override get z80Timing(): number[] {
 
 		if (this.providedZ80Timing) {
 			return this.providedZ80Timing;
@@ -74,7 +74,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
 	 */
-	get msxTiming(): number[] {
+	override get msxTiming(): number[] {
 
 		if (this.providedMsxTiming) {
 			return this.providedMsxTiming;
@@ -86,7 +86,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The CPC timing, in NOPS
 	 */
-	get cpcTiming(): number[] {
+	override get cpcTiming(): number[] {
 
 		if (this.providedCpcTiming) {
 			return this.providedCpcTiming;
@@ -98,7 +98,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The bytes
 	 */
-	get bytes(): string[] {
+	override get bytes(): string[] {
 
 		this.init();
 		const bytes = super.bytes;
@@ -114,7 +114,7 @@ class Macro extends MeterableCollection {
 	/**
 	 * @returns The size in bytes
 	 */
-	get size(): number {
+	override get size(): number {
 
 		if (this.providedSize) {
 			return this.providedSize;

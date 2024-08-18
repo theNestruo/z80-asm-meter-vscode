@@ -42,7 +42,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The normalized sjasmplus fake instruction
      */
-    get instruction(): string {
+    override get instruction(): string {
         return this.fakeInstruction;
     }
 
@@ -99,7 +99,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns The size in bytes
      */
-    get size(): number {
+    override get size(): number {
         this.init();
         return super.size;
     }
