@@ -1,6 +1,6 @@
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 
-export function humanReadableInstructions(meterable: Meterable): string | undefined {
+export function printHumanReadableInstructions(meterable: Meterable): string | undefined {
 
 	const meterables = [...meterable.flatten()];
 	const firstInstruction = shiftFirstInstruction(meterables);

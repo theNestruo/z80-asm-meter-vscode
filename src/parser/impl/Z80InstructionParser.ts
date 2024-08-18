@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { config } from "../../config";
 import { z80InstructionSet } from "../../data/Z80InstructionSet";
-import { Meterable } from "../../model/Meterable";
+import { Meterable } from "../../model/Meterables";
 import { SourceCode } from "../../model/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/ByteUtils";

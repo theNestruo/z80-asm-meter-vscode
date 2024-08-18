@@ -1,8 +1,7 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { Meterable } from '../model/Meterable';
-import { MeterableCollection } from '../model/MeterableCollection';
+import { Meterable, MeterableCollection } from '../model/Meterables';
 import { repeatedMeterable } from '../model/RepeatedMeterable';
 import { SourceCode } from '../model/SourceCode';
 import { timingHintedMeterable } from '../model/TimingHintedMeterable';

@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
 import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
 

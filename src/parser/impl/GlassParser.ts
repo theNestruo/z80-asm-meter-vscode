@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { Meterable } from "../../model/Meterable";
+import { Meterable } from "../../model/Meterables";
 import { SourceCode } from "../../model/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";

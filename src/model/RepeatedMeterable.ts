@@ -1,4 +1,4 @@
-import { AbstractAggregatedMeterable, Meterable } from "./Meterable";
+import { AbstractAggregatedMeterable, Meterable } from "./Meterables";
 
 /**
  * Conditionaly builds an instance of a repetition of Meterables

@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { config } from '../config';
 import { mainParser } from "../parser/MainParser";
 import { TotalTimings } from '../totalTiming/TotalTimings';
-import { readFromSelection } from '../utils/EditorUtils';
-import { formatTiming, humanReadableTiming } from '../utils/TimingUtils';
+import { readFromEditorSelection } from '../utils/EditorUtils';
+import { formatTiming, printHumanReadableTiming } from '../utils/TimingUtils';
 
 export class CopyToClipboardCommandHandler implements vscode.Command {
 
@@ -14,7 +14,7 @@ export class CopyToClipboardCommandHandler implements vscode.Command {
     onExecute() {
 
         // Reads and parses the source code
-        const sourceCode = readFromSelection();
+        const sourceCode = readFromEditorSelection();
         if (!sourceCode) {
             return;
         }
@@ -48,11 +48,11 @@ export class CopyToClipboardCommandHandler implements vscode.Command {
 
         const timing = config.statusBar.totalTimingsEnabled
             ? totalTimings.best()
-            : totalTimings.defaultTiming;
+            : totalTimings.default;
 
         // Human readable
         if (!config.statusBar.copyTimingsAsHints) {
-            let text = humanReadableTiming(timing) || "";
+            let text = printHumanReadableTiming(timing) || "";
             if (text) {
                 const timingSuffix = config.platform === "cpc" ? "NOPs" : "clock cycles";
                 text += ` ${timingSuffix}`;

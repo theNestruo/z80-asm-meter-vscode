@@ -1,49 +1,49 @@
 import { config } from "../config";
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
-import { AtExitTotalTiminsMeterable, calculateAtExitTotalTiming } from "./AtExitTotalTiming";
+import { AtExitTotalTimingsMeterable, calculateAtExitTotalTiming } from "./AtExitTotalTiming";
 import { calculateDefaultTotalTiming } from "./DefaultTotalTiming";
 import { calculateExecutionFlowTotalTiming } from "./ExecutionFlowTotalTiming";
 
 export class TotalTimings {
 
-	readonly defaultTiming: TotalTimingMeterable;
+	readonly default: TotalTimingMeterable;
 
-	readonly flowTiming: TotalTimingMeterable | undefined;
+	readonly executionFlow: TotalTimingMeterable | undefined;
 
-	readonly atExitTiming: AtExitTotalTiminsMeterable | undefined;
+	readonly atExit: AtExitTotalTimingsMeterable | undefined;
 
 	constructor(meterable: Meterable) {
 
-		this.defaultTiming = calculateDefaultTotalTiming(meterable);
-		this.flowTiming = calculateExecutionFlowTotalTiming(meterable);
-		this.atExitTiming = calculateAtExitTotalTiming(meterable);
+		this.default = calculateDefaultTotalTiming(meterable);
+		this.executionFlow = calculateExecutionFlowTotalTiming(meterable);
+		this.atExit = calculateAtExitTotalTiming(meterable);
 	}
 
 	best(): TotalTimingMeterable {
-		return this.atExitTiming || this.flowTiming || this.defaultTiming;
+		return this.atExit || this.executionFlow || this.default;
 	}
 
 	ordered(): (TotalTimingMeterable | undefined)[] {
 
 		// Applies requested order
-		const [retTiming, jumpCallTiming] = this.atExitTiming?.isLastInstructionRet
-			? [this.atExitTiming, undefined]
-			: [undefined, this.atExitTiming];
+		const [ret, jumpCall] = this.atExit?.isLastInstructionRet
+			? [this.atExit, undefined]
+			: [undefined, this.atExit];
 
 		switch (config.statusBar.totalTimingsOrder) {
 			case "retFlowJumpCall":
-				return [this.defaultTiming, retTiming, this.flowTiming, jumpCallTiming];
+				return [this.default, ret, this.executionFlow, jumpCall];
 
 			case "flowRetJumpCall":
-				return [this.defaultTiming, this.flowTiming, retTiming, jumpCallTiming];
+				return [this.default, this.executionFlow, ret, jumpCall];
 
 			case "retJumpCallFlow":
-				return [this.defaultTiming, retTiming, jumpCallTiming, this.flowTiming];
+				return [this.default, ret, jumpCall, this.executionFlow];
 
 			default:
 				// (should never happen)
-				return [this.defaultTiming, undefined, undefined, undefined];
+				return [this.default, undefined, undefined, undefined];
 		}
 	}
 }

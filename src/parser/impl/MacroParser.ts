@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { MacroDefinition, config } from "../../config";
-import { Meterable } from "../../model/Meterable";
-import { MeterableCollection } from "../../model/MeterableCollection";
+import { Meterable, MeterableCollection } from "../../model/Meterables";
 import { SourceCode } from "../../model/SourceCode";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { parteIntLenient } from "../../utils/NumberUtils";

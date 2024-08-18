@@ -4,12 +4,12 @@ import { config } from "../config";
 import { TotalTimingMeterable } from '../model/TotalTimingMeterable';
 import { mainParser } from "../parser/MainParser";
 import { TotalTimings } from '../totalTiming/TotalTimings';
-import { humanReadableBytes } from '../utils/ByteUtils';
-import { readFromSelection } from '../utils/EditorUtils';
-import { humanReadableInstructions } from "../utils/InstructionUtils";
-import { humanReadableSize } from '../utils/SizeUtils';
+import { printHumanReadableBytes } from '../utils/ByteUtils';
+import { readFromEditorSelection } from '../utils/EditorUtils';
+import { printHumanReadableInstructions } from "../utils/InstructionUtils";
+import { printHumanReadableSize } from '../utils/SizeUtils';
 import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
-import { formatTiming, humanReadableTimings } from '../utils/TimingUtils';
+import { formatTiming, printHumanReadableTimings } from '../utils/TimingUtils';
 import { CopyToClipboardCommandHandler } from "./CommandHandler";
 
 class StatusBarItemContents {
@@ -52,7 +52,7 @@ abstract class StatusBarHandler {
 	update() {
 
 		// Reads the source code
-		const sourceCode = readFromSelection();
+		const sourceCode = readFromEditorSelection();
 
 		// Parses the source code and builds the status bar item contents
 		const contents = this.parseAndBuildStatusBarItemContents(sourceCode);
@@ -128,7 +128,7 @@ abstract class StatusBarHandler {
 		let text = "";
 
 		if (config.statusBar.showInstruction) {
-			const instruction = humanReadableInstructions(totalTimings.defaultTiming);
+			const instruction = printHumanReadableInstructions(totalTimings.default);
 			if (instruction) {
 				const instructionIcon = espaceIfNotInfix(config.statusBar.instructionIcon);
 				text += `${instructionIcon}${instruction}`;
@@ -141,14 +141,14 @@ abstract class StatusBarHandler {
 			text += `${timingsIcon}${timing}`;
 		}
 
-		const size = totalTimings.defaultTiming.size;
+		const size = totalTimings.default.size;
 		if (size) {
 			const sizeIcon = espaceIfNotInfix(config.statusBar.sizeIcon);
-			const formattedSize = humanReadableSize(size);
+			const formattedSize = printHumanReadableSize(size);
 			const sizeSuffix = pluralize(config.statusBar.sizeSuffix, size);
 			text += `${sizeIcon}${formattedSize}${sizeSuffix}`;
 			if (config.statusBar.showBytes) {
-				const bytes = humanReadableBytes(totalTimings.defaultTiming);
+				const bytes = printHumanReadableBytes(totalTimings.default);
 				if (bytes) {
 					text += ` (${bytes})`;
 				}
@@ -163,30 +163,30 @@ abstract class StatusBarHandler {
 		switch (config.statusBar.totalTimings) {
 			case "all":
 			case "combineAll":
-				return humanReadableTimings(totalTimings.ordered(), config.statusBar.totalTimingsCombined);
+				return printHumanReadableTimings(totalTimings.ordered(), config.statusBar.totalTimingsCombined);
 
 			case "smart":
 			case "combineSmart": {
 				const [a, b, c, d] = totalTimings.ordered();
-				return totalTimings.flowTiming || totalTimings.atExitTiming
-					? humanReadableTimings([b, c, d], config.statusBar.totalTimingsCombined)
-					: humanReadableTimings([a]);
+				return totalTimings.executionFlow || totalTimings.atExit
+					? printHumanReadableTimings([b, c, d], config.statusBar.totalTimingsCombined)
+					: printHumanReadableTimings([a]);
 			}
 
 			case "best":
-				return humanReadableTimings([totalTimings.best()]);
+				return printHumanReadableTimings([totalTimings.best()]);
 
 			case "default":
 			default:
-				return humanReadableTimings([totalTimings.defaultTiming]);
+				return printHumanReadableTimings([totalTimings.default]);
 		}
 	}
 
 	private buildTooltip(totalTimings: TotalTimings): vscode.MarkdownString {
 
-		const instruction = humanReadableInstructions(totalTimings.defaultTiming);
-		const size = totalTimings.defaultTiming.size;
-		const bytes = size ? humanReadableBytes(totalTimings.defaultTiming) : undefined;
+		const instruction = printHumanReadableInstructions(totalTimings.default);
+		const size = totalTimings.default.size;
+		const bytes = size ? printHumanReadableBytes(totalTimings.default) : undefined;
 
 		const text = new vscode.MarkdownString();
 
@@ -206,7 +206,7 @@ abstract class StatusBarHandler {
 		text.appendMarkdown(this.buildTooltipTiming(totalTimings.ordered()).value);
 
 		if (size) {
-			const formattedSize = humanReadableSize(size);
+			const formattedSize = printHumanReadableSize(size);
 			const platform = config.platform;
 			const hasM1 = platform === "msx" || platform === "pc8000";
 			text.appendMarkdown(hasM1

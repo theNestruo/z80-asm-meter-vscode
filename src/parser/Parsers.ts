@@ -1,4 +1,4 @@
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 import { SourceCode } from "../model/SourceCode";
 import { TimingHints } from "../model/TimingHints";
 import { extractMnemonicOf, extractOperandsOf } from "../utils/AssemblyUtils";

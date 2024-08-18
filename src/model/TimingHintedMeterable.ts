@@ -1,8 +1,7 @@
 import { config } from "../config";
 import { noTimingHintsMainParser } from "../parser/MainParser";
 import { isConditionalInstruction, isJumpOrCallInstruction } from "../utils/AssemblyUtils";
-import { Meterable } from "./Meterable";
-import { MeterableCollection } from "./MeterableCollection";
+import { Meterable, MeterableCollection } from "./Meterables";
 import { SourceCode } from "./SourceCode";
 import { TimingHints } from "./TimingHints";
 

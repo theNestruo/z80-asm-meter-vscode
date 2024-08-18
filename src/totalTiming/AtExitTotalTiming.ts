@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 import { isCallInstruction, isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpInstruction, isRetInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
 import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
 
@@ -8,7 +8,7 @@ import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
  * @param meterable The meterable instance to be decorated
  * @return The "timing at exit" decorator, or undefined
  */
-export function calculateAtExitTotalTiming(meterable: Meterable): AtExitTotalTiminsMeterable | undefined {
+export function calculateAtExitTotalTiming(meterable: Meterable): AtExitTotalTimingsMeterable | undefined {
 
 	// (for performance reasons)
 	const meterables = meterable.flatten();
@@ -19,7 +19,7 @@ export function calculateAtExitTotalTiming(meterable: Meterable): AtExitTotalTim
 
 	// Builds the "timing at exit" decorator
 	const lastInstruction = meterables[meterables.length - 1].instruction;
-	return new AtExitTotalTiminsMeterable(meterable, lastInstruction);
+	return new AtExitTotalTimingsMeterable(meterable, lastInstruction);
 }
 
 /**
@@ -91,7 +91,7 @@ function isInvalidInstruction(instruction: string, stopOnUnconditionalJump: bool
 		&& isUnconditionalJumpOrRetInstruction(instruction);
 }
 
-export class AtExitTotalTiminsMeterable extends TotalTimingMeterable {
+export class AtExitTotalTimingsMeterable extends TotalTimingMeterable {
 
 	private readonly lastInstruction: string;
 	readonly isLastInstructionRet: boolean;

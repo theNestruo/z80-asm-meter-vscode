@@ -1,4 +1,4 @@
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 
 export function formatHexadecimalByte(n: number): string {
 
@@ -6,7 +6,7 @@ export function formatHexadecimalByte(n: number): string {
     return s.substring(s.length - 2);
 }
 
-export function humanReadableBytes(meterable: Meterable): string | undefined {
+export function printHumanReadableBytes(meterable: Meterable): string | undefined {
 
 	const meterables = [...meterable.flatten()];
 	const firstBytes = shiftFirstBytes(meterables);

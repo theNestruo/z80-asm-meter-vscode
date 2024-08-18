@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { Meterable } from "../../model/Meterable";
+import { Meterable } from "../../model/Meterables";
 import { repeatedMeterable } from "../../model/RepeatedMeterable";
 import { SourceCode } from "../../model/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
@@ -7,13 +7,6 @@ import { formatHexadecimalByte } from "../../utils/ByteUtils";
 import { parseNumericExpression } from "../../utils/NumberUtils";
 import { InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
-
-// (precompiled RegExp for performance reasons)
-const defbOrDefmDirectiveRegexp = /^\.?(?:DEFB|DB|DEFM|DM)$/;
-const defwDirectiveRegexp = /^\.?(?:DEFW|DW)$/;
-const defsDirectiveRegexp = /^\.?(?:DEFS|DS)$/;
-const rbDirectiveRegexp = /^\.?RB$/;
-const rwDirectiveRegexp = /^\.?RW$/;
 
 /**
  * An assembly directive, such as `db`, `dw` or `ds`
@@ -62,19 +55,19 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Locates defb/defw/defs directives
 		const mnemonic = extractMnemonicOf(instruction);
-		if (defbOrDefmDirectiveRegexp.test(mnemonic)) {
+		if (["DEFB", ".DEFB", "DB", ".DB", "DEFM", ".DEFM", "DM", ".DM"].includes(mnemonic)) {
 			return this.parseDefbDirective(instruction);
 		}
-		if (defwDirectiveRegexp.test(mnemonic)) {
+		if (["DEFW", ".DEFW", "DW", ".DW"].includes(mnemonic)) {
 			return this.parseDefwDirective(instruction);
 		}
-		if (defsDirectiveRegexp.test(mnemonic)) {
+		if (["DEFS", ".DEFS", "DS", ".DS"].includes(mnemonic)) {
 			return this.parseDefsDirective(instruction);
 		}
-		if (rbDirectiveRegexp.test(mnemonic)) {
+		if (["RB", ".RB"].includes(mnemonic)) {
 			return this.parseRbDirective(instruction);
 		}
-		if (rwDirectiveRegexp.test(mnemonic)) {
+		if (["RW", ".RW"].includes(mnemonic)) {
 			return this.parseRwDirective(instruction);
 		}
 

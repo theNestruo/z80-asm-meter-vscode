@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import { config } from "../../config";
 import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
-import { Meterable } from "../../model/Meterable";
-import { MeterableCollection } from "../../model/MeterableCollection";
+import { Meterable, MeterableCollection } from "../../model/Meterables";
 import { SourceCode } from "../../model/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";

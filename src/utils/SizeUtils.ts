@@ -1,6 +1,6 @@
 import { config } from "../config";
 
-export function humanReadableSize(n: number): string {
+export function printHumanReadableSize(n: number): string {
 
 	const dec = n.toString();
 	if (n < 10) {
@@ -19,8 +19,6 @@ export function humanReadableSize(n: number): string {
 			return `${dec} (${formatHexadecimalSize(n)})`;
 	}
 }
-
-const digitRegExp = /^\d$/;
 
 function formatHexadecimalSize(n: number): string {
 
@@ -42,13 +40,13 @@ function formatHexadecimalSize(n: number): string {
 
 		case "intel":
 		case "uppercaseIntel":
-			return digitRegExp.test(hex.charAt(0))
+			return "0123456789".includes(hex.charAt(0))
 				? `${hex}h`
 				: `0${hex}h`;
 
 		case "intelUppercase":
 		case "uppercaseIntelUppercase":
-			return digitRegExp.test(hex.charAt(0))
+			return "0123456789".includes(hex.charAt(0))
 				? `${hex}H`
 				: `0${hex}H`;
 

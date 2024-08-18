@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
 
-export function readFromSelection(): string | undefined {
+export function readFromEditorSelection(): string | undefined {
 
     const editor = vscode.window.activeTextEditor;
     if ((!editor)

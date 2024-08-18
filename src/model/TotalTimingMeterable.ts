@@ -1,4 +1,4 @@
-import { Meterable } from "./Meterable";
+import { Meterable } from "./Meterables";
 
 export abstract class TotalTimingMeterable implements Meterable {
 

@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { Meterable } from "../model/Meterable";
+import { Meterable } from "../model/Meterables";
 import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
 
 export function parseTimingsLenient(...array: unknown[]): number[] | undefined {
@@ -31,7 +31,7 @@ export function formatTiming(t: number[]): string {
     return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
 }
 
-export function humanReadableTimings(
+export function printHumanReadableTimings(
     totalTimings: (TotalTimingMeterable | undefined)[],
     combined: boolean = false): string {
 
@@ -44,7 +44,7 @@ export function humanReadableTimings(
             return;
         }
         const icon = totalTiming.statusBarIcon;
-        const value = humanReadableTiming(totalTiming) || "0";
+        const value = printHumanReadableTiming(totalTiming) || "0";
 
         // Combines when the previous timing when they have the same values
         if (!combined) {
@@ -73,7 +73,7 @@ export function humanReadableTimings(
     return text.trim();
 }
 
-export function humanReadableTiming(meterable: Meterable): string | undefined {
+export function printHumanReadableTiming(meterable: Meterable): string | undefined {
 
     // timing depending on the platform
     const timing =
