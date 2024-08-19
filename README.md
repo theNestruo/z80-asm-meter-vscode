@@ -96,7 +96,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 These settings allow to fine-tune the information to be shown in the status bar item and its appearance.
 
 <details>
-<summary>Status bar alignment</summary>
+<summary>Status bar alignment settings</summary>
 
 * [`z80-asm-meter.statusBar.alignment`](vscode://settings/z80-asm-meter.statusBar.alignment): Controls the status bar item position:
 
@@ -108,7 +108,7 @@ These settings allow to fine-tune the information to be shown in the status bar 
 </details>
 
 <details>
-<summary>Status bar: instructions information</summary>
+<summary>Status bar information settings</summary>
 
 * [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction): Shows the processed instruction in the status bar. Useful to check if the extension is mistaking instructions.
 
@@ -120,65 +120,19 @@ These settings allow to fine-tune the information to be shown in the status bar 
 
     ![](images/statusBar.instructionIcon.png)
 
-</details>
-
-<details>
-<summary>Status bar: timings information</summary>
-
 * [`z80-asm-meter.statusBar.timingsIcon`](vscode://settings/z80-asm-meter.statusBar.timingsIcon): The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(watch)`.
 
     ![](images/statusBar.timingsIcon.png)
 
-* [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings): Shows [total timing calculations](#total-timing-calculations) in the status bar.
+* [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings): Shows total timing calculations in the status bar.
 
-    * `all`: Shows all the total timing calculation that apply to the selection.
+    See [Total timing calculations](#total-timing-calculations) for details.
 
-        ![](images/statusBar.totalTimings=all.png)
+* [`z80-asm-meter.statusBar.totalTimingsOrder`](vscode://settings/z80-asm-meter.statusBar.totalTimingsOrder): Determines the order of the total timing calculations in the status bar when more than one total timing calculation is visible.
 
-    * `combineAll`: Shows all the total timing calculation that apply to the selection, but combined to reduce the size of the status bar item.
-
-        ![](images/statusBar.totalTimings=combineAll.png)
-
-    * `smart` (default): Shows total timing calculation that are relevant to the selection.
-
-        ![](images/statusBar.totalTimings=smart.png)
-
-    * `combineSmart`: Shows total timing calculation that are relevant to the selection, but combined to reduce the size of the status bar item.
-
-        ![](images/statusBar.totalTimings=combineSmart.png)
-
-    * `best`: Shows the total timing calculation that best fits the selection.
-
-        ![](images/statusBar.totalTimings=best.png)
-
-    * `default`: Does not show any alternative total timing calculation.
-
-        ![](images/statusBar.totalTimings=default.png)
-
-* [`z80-asm-meter.statusBar.totalTimingsOrder`](vscode://settings/z80-asm-meter.statusBar.totalTimingsOrder): Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
-
-    * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
-
-        ![](images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
-
-    * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
-
-        ![](images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
-
-    * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
-
-        ![](images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
-
-* [`z80-asm-meter.statusBar.timingsIcon`](vscode://settings/z80-asm-meter.statusBar.timingsIcon): The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
-
-    Defaults to: `$(watch)`.
-
-</details>
-
-<details>
-<summary>Status bar: size information</summary>
+    See [Total timing calculations](#total-timing-calculations) for details.
 
 * [`z80-asm-meter.statusBar.sizeIcon`](vscode://settings/z80-asm-meter.statusBar.sizeIcon): The icon to identify the size and the bytes in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
@@ -216,7 +170,7 @@ These settings allow to fine-tune the information to be shown in the status bar 
 </details>
 
 <details>
-<summary>Status bar behaviour</summary>
+<summary>Status bar behaviour settings</summary>
 
 * [`z80-asm-meter.statusBar.copyTimingsAsHints`](vscode://settings/z80-asm-meter.statusBar.copyTimingsAsHints): Enable copying timings as [timing hints](#timing-hints), instead of the default human-readable format.
 
@@ -338,7 +292,52 @@ There are three total timing calculation available:
 </details>
 
 <details>
-<summary>Execution flow total timing calculation settings</summary>
+<summary>Total timing calculations settings</summary>
+
+* [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings): Shows [total timing calculations](#total-timing-calculations) in the status bar.
+
+    * `all`: Shows all the total timing calculation that apply to the selection.
+
+        ![](images/statusBar.totalTimings=all.png)
+
+    * `combineAll`: Shows all the total timing calculation that apply to the selection, but combined to reduce the size of the status bar item.
+
+        ![](images/statusBar.totalTimings=combineAll.png)
+
+    * `smart` (default): Shows total timing calculation that are relevant to the selection.
+
+        ![](images/statusBar.totalTimings=smart.png)
+
+    * `combineSmart`: Shows total timing calculation that are relevant to the selection, but combined to reduce the size of the status bar item.
+
+        ![](images/statusBar.totalTimings=combineSmart.png)
+
+    * `best`: Shows the total timing calculation that best fits the selection.
+
+        ![](images/statusBar.totalTimings=best.png)
+
+    * `default`: Does not show any alternative total timing calculation.
+
+        ![](images/statusBar.totalTimings=default.png)
+
+* [`z80-asm-meter.statusBar.totalTimingsOrder`](vscode://settings/z80-asm-meter.statusBar.totalTimingsOrder): Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
+
+    * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
+
+        ![](images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
+
+    * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
+
+        ![](images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
+
+    * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
+
+        ![](images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
+
+</details>
+
+<details>
+<summary>Execution flow total timing calculation: settings</summary>
 
 * [`z80-asm-meter.timing.executionFlow.enabled`](vscode://settings/z80-asm-meter.timing.executionFlow.enabled): Enables execution flow total timing calculation.
 
@@ -365,7 +364,7 @@ There are three total timing calculation available:
 </details>
 
 <details>
-<summary>Total timing calculation of the execution flow to the selected exit point settings</summary>
+<summary>Total timing calculation of the execution flow to the selected exit point: settings</summary>
 
 * [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled): Enables total timing calculation of the execution flow to the selected exit point when the selection ends with a `RET`, `RETI` or `RETN` instruction.
 
@@ -574,7 +573,7 @@ Please find the deprecated settings, the last version where the setting was avai
 | v4.3.0 | `z80-asm-meter.timing.mode` | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
 | v4.3.0 | `z80-asm-meter.viewBytes` | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
 | v4.3.0 | `z80-asm-meter.debounce` | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
-| v4.3.0 | `z80-asm-meter.syntax.label` | [`z80-asm-meter.syntax.label.colonOptional`](vscode://settings/z80-asm-meter.syntax.label.colonOptional) |
+| v4.3.0 | `z80-asm-meter.syntax.label` | `z80-asm-meter.syntax.label.colonOptional` |
 | v4.3.0 | `z80-asm-meter.directivesAsInstructions` | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
 | v4.3.0 | `z80-asm-meter.timing.threshold` | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
 | v4.3.0 | `z80-asm-meter.timing.hints` | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
@@ -592,6 +591,7 @@ Please find the deprecated settings, the last version where the setting was avai
 | v5.3.0 | `z80-asm-meter.syntax.enable.dupEdup` | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
 | v5.3.0 | `z80-asm-meter.syntax.enable.reptEndr` | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
 | v5.3.0 | `z80-asm-meter.syntax.enable.reptEndm` | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
+| | | |
 
 </details>
 
