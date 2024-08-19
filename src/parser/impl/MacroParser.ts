@@ -5,7 +5,7 @@ import { SourceCode } from "../../model/SourceCode";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { parteIntLenient } from "../../utils/NumberUtils";
 import { parseTimingLenient } from "../../utils/TimingUtils";
-import { noMacroMainParser } from "../MainParser";
+import { mainParserWithoutMacro } from "../MainParser";
 import { InstructionParser } from "../Parsers";
 
 class Macro extends MeterableCollection {
@@ -130,7 +130,7 @@ class Macro extends MeterableCollection {
 		}
 
 		if (this.providedSourceCode) {
-			const meterable = noMacroMainParser.parse(this.providedSourceCode);
+			const meterable = mainParserWithoutMacro.parse(this.providedSourceCode);
 			this.add(meterable);
 		}
 

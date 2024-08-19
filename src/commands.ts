@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { config } from '../config';
-import { mainParser } from "../parser/MainParser";
-import { TotalTimings } from '../totalTiming/TotalTimings';
-import { readFromEditorSelection } from '../utils/EditorUtils';
-import { formatTiming, printHumanReadableTiming } from '../utils/TimingUtils';
+import { config } from './config';
+import { mainParser } from "./parser/MainParser";
+import { TotalTimings } from './totalTiming/TotalTimings';
+import { readFromEditorSelection } from './utils/EditorUtils';
+import { formatTiming, printHumanReadableTiming } from './utils/TimingUtils';
 
-export class CopyToClipboardCommandHandler implements vscode.Command {
+export class CopyToClipboardCommand implements vscode.Command {
 
     readonly title = "Z80 Assembly Meter: copy to clipboard";
 

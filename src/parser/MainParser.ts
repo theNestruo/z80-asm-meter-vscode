@@ -227,7 +227,7 @@ const allInstructionParsers = [
     assemblyDirectiveParser
 ];
 
-const allButMacroInstructionParsers = [
+const allInstructionParsersButMacro = [
     z80InstructionParser,
     sjasmplusFakeInstructionParser,
     sjasmplusRegisterListInstructionParser,
@@ -249,8 +249,8 @@ const allTimingHintsParsers = [
 export const mainParser = new MainParser(
     allInstructionParsers, allRepetitionParsers, allTimingHintsParsers);
 
-export const noMacroMainParser = new MainParser(
-    allButMacroInstructionParsers, allRepetitionParsers, allTimingHintsParsers);
+export const mainParserWithoutMacro = new MainParser(
+    allInstructionParsersButMacro, allRepetitionParsers, allTimingHintsParsers);
 
-export const noTimingHintsMainParser = new MainParser(
+export const mainParserWithoutTimingHints = new MainParser(
     allInstructionParsers, allRepetitionParsers, []);

@@ -88,15 +88,11 @@ export function printHumanReadableTiming(meterable: Meterable): string | undefin
 
     // As text
     const text = formatTiming(timing);
-    if (!text) {
-        return undefined;
-    }
 
+    // Special case: NEC PC-8000 series dual timing
     if (config.platform !== "pc8000") {
         return text;
     }
-
-    // Special case: NEC PC-8000 series dual timing
     const m1Text = formatTiming(meterable.msxTiming);
     return `${text} (${m1Text})`;
 }

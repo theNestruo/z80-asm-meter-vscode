@@ -1,16 +1,16 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
-import { config } from "../config";
-import { TotalTimingMeterable } from '../model/TotalTimingMeterable';
-import { mainParser } from "../parser/MainParser";
-import { TotalTimings } from '../totalTiming/TotalTimings';
-import { printHumanReadableBytes } from '../utils/ByteUtils';
-import { readFromEditorSelection } from '../utils/EditorUtils';
-import { printHumanReadableInstructions } from "../utils/InstructionUtils";
-import { printHumanReadableSize } from '../utils/SizeUtils';
-import { espaceIfNotInfix, hashCode, pluralize } from "../utils/TextUtils";
-import { formatTiming, printHumanReadableTimings } from '../utils/TimingUtils';
-import { CopyToClipboardCommandHandler } from "./CommandHandler";
+import { config } from "./config";
+import { TotalTimingMeterable } from './model/TotalTimingMeterable';
+import { mainParser } from "./parser/MainParser";
+import { TotalTimings } from './totalTiming/TotalTimings';
+import { printHumanReadableBytes } from './utils/ByteUtils';
+import { readFromEditorSelection } from './utils/EditorUtils';
+import { printHumanReadableInstructions } from "./utils/InstructionUtils";
+import { printHumanReadableSize } from './utils/SizeUtils';
+import { espaceIfNotInfix, hashCode, pluralize } from "./utils/TextUtils";
+import { formatTiming, printHumanReadableTimings } from './utils/TimingUtils';
+import { CopyToClipboardCommand } from "./commands";
 
 class StatusBarItemContents {
 
@@ -27,12 +27,12 @@ class StatusBarItemContents {
 
 abstract class StatusBarHandler {
 
-	protected readonly commandHandler: CopyToClipboardCommandHandler;
+	protected readonly copyToClipboardCommand: CopyToClipboardCommand;
 
 	private statusBarItem: vscode.StatusBarItem | undefined;
 
-	protected constructor(commandHandler: CopyToClipboardCommandHandler) {
-		this.commandHandler = commandHandler;
+	protected constructor(copyToClipboardCommand: CopyToClipboardCommand) {
+		this.copyToClipboardCommand = copyToClipboardCommand;
 		this.create();
 	}
 
@@ -49,7 +49,7 @@ abstract class StatusBarHandler {
 		}
 	}
 
-	update() {
+	onUpdateRequest() {
 
 		// Reads the source code
 		const sourceCode = readFromEditorSelection();
@@ -113,7 +113,7 @@ abstract class StatusBarHandler {
 		this.create();
 		this.statusBarItem!.text = contents.text;
 		this.statusBarItem!.tooltip = contents.tooltip;
-		this.statusBarItem!.command = this.commandHandler;
+		this.statusBarItem!.command = this.copyToClipboardCommand;
 		this.statusBarItem!.show();
 	}
 
@@ -215,7 +215,7 @@ abstract class StatusBarHandler {
 		}
 		text.appendMarkdown("\n");
 
-		const textToCopy = this.commandHandler.buildTextToCopy(totalTimings);
+		const textToCopy = this.copyToClipboardCommand.buildTextToCopy(totalTimings);
 		if (textToCopy) {
 			text.appendMarkdown(`---\n\nCopy "${textToCopy}" to clipboard\n`);
 		}
@@ -268,8 +268,8 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 
 	private cache;
 
-	constructor(commandHandler: CopyToClipboardCommandHandler) {
-		super(commandHandler);
+	constructor(copyToClipboardCommand: CopyToClipboardCommand) {
+		super(copyToClipboardCommand);
 
 		this.cache = HLRU(config.statusBar.cacheSize);
 	}
@@ -317,21 +317,13 @@ export class DebouncedStatusBarHandler {
 		this.delegate = statusBarHandler;
 	}
 
-	dispose() {
-		this.delegate.dispose();
-	}
-
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-		this.delegate.onConfigurationChange(e);
-	}
-
-	update() {
+	onUpdateRequest() {
 
 		// Checks debounce configuration
 		const debounce = config.statusBar.debounce;
 		if (debounce <= 0) {
 			// No debounce: immediate execution
-			this.delegate.update();
+			this.delegate.onUpdateRequest();
 			return;
 		}
 
@@ -350,19 +342,15 @@ export class DebouncedStatusBarHandler {
 		// Leading event?
 		if (this.isLeadingEvent) {
 			// Immediate execution
-			this.delegate.update();
+			this.delegate.onUpdateRequest();
 			this.isLeadingEvent = false;
 			return;
 		}
 
 		// Debounced execution
 		this.updateStatusBarTimeout = setTimeout(() => {
-			this.delegate.update();
+			this.delegate.onUpdateRequest();
 			this.isLeadingEvent = true;
 		}, debounce);
-	}
-
-	forceUpdate() {
-		this.delegate.update();
 	}
 }

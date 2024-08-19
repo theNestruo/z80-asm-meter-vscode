@@ -1,13 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { mainParser, noMacroMainParser, noTimingHintsMainParser } from './parser/MainParser';
+import { CopyToClipboardCommand } from './commands';
+import { mainParser, mainParserWithoutMacro, mainParserWithoutTimingHints } from './parser/MainParser';
 import { macroParser } from './parser/impl/MacroParser';
 import { regExpTimingHintsParser } from './parser/impl/RegExpTimingHintsParser';
-import { CopyToClipboardCommandHandler } from './statusBar/CommandHandler';
-import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./statusBar/StatusBarHandler";
-import { z80InstructionParser } from './parser/impl/Z80InstructionParser';
 import { sjasmplusFakeInstructionParser } from './parser/impl/SjasmplusParser';
+import { z80InstructionParser } from './parser/impl/Z80InstructionParser';
+import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./statusBarHandlers";
 
 
 let disposable: vscode.Disposable | undefined;
@@ -16,27 +16,29 @@ let disposable: vscode.Disposable | undefined;
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const commandHandler = new CopyToClipboardCommandHandler();
-	const statusBarHandler = new DebouncedStatusBarHandler(new CachedStatusBarHandler(commandHandler));
+	const copyToClipboardCommand = new CopyToClipboardCommand();
+
+	const internalStatusBarHandler = new CachedStatusBarHandler(copyToClipboardCommand);
+	const statusBarHandler = new DebouncedStatusBarHandler(internalStatusBarHandler);
 
 	disposable = vscode.Disposable.from(
-		statusBarHandler,
+		internalStatusBarHandler,
 
 		// subscribe to selection change and editor activation events
 		vscode.window.onDidChangeTextEditorSelection(
-			statusBarHandler.update, statusBarHandler),
+			statusBarHandler.onUpdateRequest, statusBarHandler),
 		vscode.window.onDidChangeActiveTextEditor(
-			statusBarHandler.update, statusBarHandler),
+			statusBarHandler.onUpdateRequest, statusBarHandler),
 		vscode.workspace.onDidChangeTextDocument(
-			statusBarHandler.update, statusBarHandler),
+			statusBarHandler.onUpdateRequest, statusBarHandler),
 
 		// create a command to copy timing and size to clipboard
 		vscode.commands.registerCommand(
-			commandHandler.command, commandHandler.onExecute, commandHandler),
+			copyToClipboardCommand.command, copyToClipboardCommand.onExecute, copyToClipboardCommand),
 
 		// subscribe to configuration change event
 		vscode.workspace.onDidChangeConfiguration(
-			statusBarHandler.onConfigurationChange, statusBarHandler),
+			internalStatusBarHandler.onConfigurationChange, internalStatusBarHandler),
 
 		vscode.workspace.onDidChangeConfiguration(
 			z80InstructionParser.onConfigurationChange, z80InstructionParser),
@@ -46,9 +48,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration(
 			mainParser.onConfigurationChange, mainParser),
 		vscode.workspace.onDidChangeConfiguration(
-			noMacroMainParser.onConfigurationChange, noMacroMainParser),
+			mainParserWithoutMacro.onConfigurationChange, mainParserWithoutMacro),
 		vscode.workspace.onDidChangeConfiguration(
-			noTimingHintsMainParser.onConfigurationChange, noTimingHintsMainParser),
+			mainParserWithoutTimingHints.onConfigurationChange, mainParserWithoutTimingHints),
 
 		vscode.workspace.onDidChangeConfiguration(
 			macroParser.onConfigurationChange, macroParser),
@@ -59,14 +61,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	// First execution
-	statusBarHandler.forceUpdate();
+	internalStatusBarHandler.onUpdateRequest();
 }
 
 // this method is called when your extension is deactivated
 export function deactivate() {
 
-	if (disposable) {
-		disposable.dispose();
+	disposable?.dispose();
 		disposable = undefined;
-	}
 }

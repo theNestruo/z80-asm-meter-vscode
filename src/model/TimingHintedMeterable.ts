@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { noTimingHintsMainParser } from "../parser/MainParser";
+import { mainParserWithoutTimingHints } from "../parser/MainParser";
 import { isConditionalInstruction, isJumpOrCallInstruction } from "../utils/AssemblyUtils";
 import { Meterable, MeterableCollection } from "./Meterables";
 import { SourceCode } from "./SourceCode";
@@ -40,7 +40,7 @@ function isCommentedOutSourceCode(sourceCode: SourceCode): boolean {
 
 	return !sourceCode.instruction // non empty line (should never happen)
 		&& !!sourceCode.lineComment // no comment (should never happen)
-		&& !!noTimingHintsMainParser.parse(sourceCode.lineComment);
+		&& !!mainParserWithoutTimingHints.parse(sourceCode.lineComment);
 }
 
 class TimingHintedMeterable implements Meterable {
