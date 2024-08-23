@@ -1,13 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { CopyToClipboardCommand } from './commands';
+import { configurationReader } from './config';
 import { mainParser, mainParserWithoutMacro, mainParserWithoutTimingHints } from './parser/MainParser';
 import { macroParser } from './parser/impl/MacroParser';
-import { regExpTimingHintsParser } from './parser/impl/RegExpTimingHintsParser';
-import { sjasmplusFakeInstructionParser } from './parser/impl/SjasmplusParser';
-import { z80InstructionParser } from './parser/impl/Z80InstructionParser';
-import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./statusBarHandlers";
+import { regExpTimingHintsParser } from './parser/timingHints/RegExpTimingHintsParser';
+import { CopyFromActiveTextEditorSelecionToClipboardCommand } from './vscode/Commands';
+import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
+import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 
 
 let disposable: vscode.Disposable | undefined;
@@ -16,47 +16,29 @@ let disposable: vscode.Disposable | undefined;
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const copyToClipboardCommand = new CopyToClipboardCommand();
+	const copyFromActiveTextEditorSelecionCommand =
+			new CopyFromActiveTextEditorSelecionToClipboardCommand();
 
-	const internalStatusBarHandler = new CachedStatusBarHandler(copyToClipboardCommand);
-	const statusBarHandler = new DebouncedStatusBarHandler(internalStatusBarHandler);
+	const internalStatusBarHandler =
+			new CachedStatusBarHandler(copyFromActiveTextEditorSelecionCommand);
+	const statusBarHandler =
+			new DebouncedStatusBarHandler(internalStatusBarHandler);
+
+	const inlayHintsProvider = new InlayHintsProvider();
 
 	disposable = vscode.Disposable.from(
+		copyFromActiveTextEditorSelecionCommand,
 		internalStatusBarHandler,
-
-		// subscribe to selection change and editor activation events
-		vscode.window.onDidChangeTextEditorSelection(
-			statusBarHandler.onUpdateRequest, statusBarHandler),
-		vscode.window.onDidChangeActiveTextEditor(
-			statusBarHandler.onUpdateRequest, statusBarHandler),
-		vscode.workspace.onDidChangeTextDocument(
-			statusBarHandler.onUpdateRequest, statusBarHandler),
-
-		// create a command to copy timing and size to clipboard
-		vscode.commands.registerCommand(
-			copyToClipboardCommand.command, copyToClipboardCommand.onExecute, copyToClipboardCommand),
+		statusBarHandler,
+		inlayHintsProvider,
 
 		// subscribe to configuration change event
-		vscode.workspace.onDidChangeConfiguration(
-			internalStatusBarHandler.onConfigurationChange, internalStatusBarHandler),
-
-		vscode.workspace.onDidChangeConfiguration(
-			z80InstructionParser.onConfigurationChange, z80InstructionParser),
-		vscode.workspace.onDidChangeConfiguration(
-			sjasmplusFakeInstructionParser.onConfigurationChange, sjasmplusFakeInstructionParser),
-
-		vscode.workspace.onDidChangeConfiguration(
-			mainParser.onConfigurationChange, mainParser),
-		vscode.workspace.onDidChangeConfiguration(
-			mainParserWithoutMacro.onConfigurationChange, mainParserWithoutMacro),
-		vscode.workspace.onDidChangeConfiguration(
-			mainParserWithoutTimingHints.onConfigurationChange, mainParserWithoutTimingHints),
-
-		vscode.workspace.onDidChangeConfiguration(
-			macroParser.onConfigurationChange, macroParser),
-
-		vscode.workspace.onDidChangeConfiguration(
-			regExpTimingHintsParser.onConfigurationChange, regExpTimingHintsParser),
+		configurationReader,
+		mainParser,
+		mainParserWithoutMacro,
+		mainParserWithoutTimingHints,
+		macroParser,
+		regExpTimingHintsParser
 	);
 	context.subscriptions.push(disposable);
 
@@ -68,5 +50,5 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 
 	disposable?.dispose();
-		disposable = undefined;
+	disposable = undefined;
 }

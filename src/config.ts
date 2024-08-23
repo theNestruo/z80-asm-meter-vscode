@@ -1,41 +1,13 @@
 import * as vscode from 'vscode';
 
-function read<T>(section: string): T {
-
-	return <T>vscode.workspace.getConfiguration("z80-asm-meter").get(section);
-}
-
-function readIgnoreDefault<T>(section: string): T | undefined {
-
-	const config = vscode.workspace.getConfiguration("z80-asm-meter");
-	const info = config.inspect(section);
-	const isSet = info && (info.globalValue !== undefined
-		|| info.workspaceValue !== undefined
-		|| info.workspaceFolderValue !== undefined
-		|| info.defaultLanguageValue !== undefined
-		|| info.globalLanguageValue !== undefined
-		|| info.workspaceLanguageValue !== undefined
-		|| info.workspaceFolderLanguageValue !== undefined);
-	return isSet ? <T>config.get(section) : undefined;
-}
-
-function readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
-
-	if (actualDefaultValue === undefined) {
-		return read(section);
-	}
-	const value = <T>readIgnoreDefault(section);
-	return (value !== undefined) ? value : actualDefaultValue;
-}
-
 class Configuration {
 
 	get languageIds(): string[] {
-		return read("languageIds");
+		return configurationReader.read("languageIds");
 	}
 
 	get platform(): "z80" | "cpc" | "msx" | "pc8000" | "z80n" {
-		return read("platform");
+		return configurationReader.read("platform");
 	}
 
 	get instructionSets(): string[] {
@@ -47,7 +19,7 @@ class Configuration {
 
 	get expandSelectionToLine(): boolean {
 
-		return read("expandSelectionToLine");
+		return configurationReader.read("expandSelectionToLine");
 	}
 
 	// Status bar
@@ -64,20 +36,92 @@ class Configuration {
 
 	// User-defined macros
 	get macros(): MacroDefinition[] {
-		return read("macros");
+		return configurationReader.read("macros");
 	}
+
+	// Inlay hints
+	readonly inlayHints = new InlayHintsConfiguration();
 }
 
+class StatusBarConfiguration {
+
+	get alignment(): "leftmost" | "left" | "right" | "rightmost" {
+		return configurationReader.read("statusBar.alignment");
+	}
+
+	get showInstruction(): boolean {
+		return configurationReader.read("statusBar.showInstruction");
+	}
+
+	get showBytes(): boolean {
+		return configurationReader.read("statusBar.showBytes");
+	}
+
+	get copyTimingsAsHints(): boolean {
+		return configurationReader.read("statusBar.copyTimingsAsHints");
+	}
+
+	get sizeNumericFormat(): "decimal" | "hexadecimal" | "both" {
+		return configurationReader.read("statusBar.sizeNumericFormat");
+	}
+
+	get sizeHexadecimalFormat(): "hash" | "motorola" | "intel" | "intelUppercase" | "cStyle" | "uppercaseHash" | "uppercaseMotorola" | "uppercaseIntel" | "uppercaseIntelUppercase" | "uppercaseCStyle" {
+		return configurationReader.read("statusBar.sizeHexadecimalFormat");
+	}
+
+	get sizeSuffix(): string {
+		return configurationReader.read("statusBar.sizeSuffix");
+	}
+
+	get totalTimings(): "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default" {
+		return configurationReader.read("statusBar.totalTimings");
+	}
+
+	get totalTimingsEnabled(): boolean {
+		return this.totalTimings !== "default";
+	}
+
+	get totalTimingsCombined(): boolean {
+
+		const value = this.totalTimings;
+		return value === "combineAll"
+			|| value === "combineSmart";
+	}
+
+	get totalTimingsOrder(): "retFlowJumpCall" | "flowRetJumpCall" | "retJumpCallFlow" {
+		return configurationReader.read("statusBar.totalTimingsOrder");
+	}
+
+	get debounce(): number {
+		return configurationReader.read("statusBar.debounce");
+	}
+
+	get cacheSize(): number {
+		return configurationReader.read("statusBar.cacheSize");
+	}
+
+	get instructionIcon(): string {
+		return configurationReader.read("statusBar.instructionIcon");
+	}
+
+	get timingsIcon(): string {
+		return configurationReader.read("statusBar.timingsIcon");
+	}
+
+	get sizeIcon(): string {
+		return configurationReader.read("statusBar.sizeIcon");
+	}
+}
 
 class SyntaxConfiguration {
 
 	get syntax(): "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "tniasm" {
-		return read("syntax");
+		return configurationReader.read("syntax");
 	}
 
 	private get lineSeparator(): "disabled" | "colon" | "pipe" {
 
-		return readWithDefaultValue("syntaxFeature.lineSeparator",
+		return configurationReader.readWithDefaultValue("syntaxFeature.lineSeparator",
 			this.syntax === "tniasm" ? "pipe" // (derived)
 			: undefined);
 	}
@@ -93,7 +137,7 @@ class SyntaxConfiguration {
 	private get labelColonOptional(): boolean {
 
 		const value = this.syntax;
-		return readWithDefaultValue("syntaxFeature.labelColonOptional",
+		return configurationReader.readWithDefaultValue("syntaxFeature.labelColonOptional",
 			value === "pasmo" ? true // (derived)
 			: value === "sjasmplus" ? true // (derived)
 			: undefined);
@@ -102,13 +146,13 @@ class SyntaxConfiguration {
 	get labelRegExp(): RegExp {
 
 		return this.labelColonOptional
-			? /(^[^\s:]+([\s:]|$))/
+			? /(^[^\s:]+(?:[\s:]|$))/
 			: /(^\s*[^\s:]+:)/;
 	}
 
 	private get repeat(): "disabled" | "brackets" | "dot" {
 
-		return readWithDefaultValue("syntaxFeature.repeat",
+		return configurationReader.readWithDefaultValue("syntaxFeature.repeat",
 			(this.syntax === "sjasm") ? "brackets" // (derived)
 			: (this.syntax === "sjasmplus") ? "dot" // (derived)
 			: undefined);
@@ -124,42 +168,42 @@ class SyntaxConfiguration {
 
 	get sjasmplusFakeInstructions(): boolean {
 
-		return readWithDefaultValue("syntaxFeature.fakeInstructions",
+		return configurationReader.readWithDefaultValue("syntaxFeature.fakeInstructions",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
 	get sjasmplusRegisterListInstructions(): boolean {
 
-		return readWithDefaultValue("syntaxFeature.registerListInstructions",
+		return configurationReader.readWithDefaultValue("syntaxFeature.registerListInstructions",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
 	get glassNegativeConditions(): boolean {
 
-		return readWithDefaultValue("syntaxFeature.negativeConditions",
+		return configurationReader.readWithDefaultValue("syntaxFeature.negativeConditions",
 			(this.syntax === "glass") ? true // (derived)
 			: undefined);
 	}
 
 	get sjasmplusDupEdupRepetition(): boolean {
 
-		return readWithDefaultValue("syntaxFeature.dupEdup",
+		return configurationReader.readWithDefaultValue("syntaxFeature.dupEdup",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
 	get sjasmplusReptEndrRepetition(): boolean {
 
-		return readWithDefaultValue("syntaxFeature.reptEndr",
+		return configurationReader.readWithDefaultValue("syntaxFeature.reptEndr",
 			(this.syntax === "sjasmplus") ? true // (derived)
 			: undefined);
 	}
 
 	get glassReptEndmRepetition(): boolean {
 
-		return readWithDefaultValue("syntaxFeature.reptendm",
+		return configurationReader.readWithDefaultValue("syntaxFeature.reptendm",
 			(this.syntax === "glass") ? true // (derived)
 			: undefined);
 	}
@@ -168,11 +212,11 @@ class SyntaxConfiguration {
 class ParserConfiguration {
 
 	get directivesDefsAsInstructions(): boolean {
-		return read("parser.directives.defsAsInstructions");
+		return configurationReader.read("parser.directives.defsAsInstructions");
 	}
 
 	get instructionsCacheSize(): number {
-		return read("parser.instructionsCacheSize");
+		return configurationReader.read("parser.instructionsCacheSize");
 	}
 }
 
@@ -186,7 +230,7 @@ class TimingConfiguration {
 class TimingHintsConfiguration {
 
 	get enabledValue(): "disabled" | "subroutines" | "any" | "ignoreCommentedOut" {
-		return read("timing.hints.enabled");
+		return configurationReader.read("timing.hints.enabled");
 	}
 
 	get enabled(): boolean {
@@ -199,139 +243,108 @@ class TimingHintsConfiguration {
 
 	// RegExp-based user-defined timing hints
 	get regexps(): TimingHintsDefinition[] {
-		return read("timing.hints.regexps");
+		return configurationReader.read("timing.hints.regexps");
 	}
 }
 
 class ExecutionFlowTotalTimingConfiguration {
 
 	get enabled(): boolean {
-		return read("timing.executionFlow.enabled");
+		return configurationReader.read("timing.executionFlow.enabled");
 	}
 
 	get threshold(): number {
-		return read("timing.executionFlow.threshold");
+		return configurationReader.read("timing.executionFlow.threshold");
 	}
 
 	get requireConditional(): boolean {
-		return read("timing.executionFlow.requireConditional");
+		return configurationReader.read("timing.executionFlow.requireConditional");
 	}
 
 	get stopOnUnconditionalJump(): boolean {
-		return read("timing.executionFlow.stopOnUnconditionalJump");
+		return configurationReader.read("timing.executionFlow.stopOnUnconditionalJump");
 	}
 
 	get icon(): string {
-		return read("timing.executionFlow.icon");
+		return configurationReader.read("timing.executionFlow.icon");
 	}
 }
 
 class AtExitTotalTimingConfiguration {
 
 	get retEnabled(): boolean {
-		return read("timing.atExit.retEnabled");
+		return configurationReader.read("timing.atExit.retEnabled");
 	}
 
 	get jumpEnabled(): boolean {
-		return read("timing.atExit.jumpEnabled");
+		return configurationReader.read("timing.atExit.jumpEnabled");
 	}
 
 	get callEnabled(): boolean {
-		return read("timing.atExit.callEnabled");
+		return configurationReader.read("timing.atExit.callEnabled");
 	}
 
 	get threshold(): number {
-		return read("timing.atExit.threshold");
+		return configurationReader.read("timing.atExit.threshold");
 	}
 
 	get requireConditional(): boolean {
-		return read("timing.atExit.requireConditional");
+		return configurationReader.read("timing.atExit.requireConditional");
 	}
 
 	get stopOnUnconditionalJump(): boolean {
-		return read("timing.atExit.stopOnUnconditionalJump");
+		return configurationReader.read("timing.atExit.stopOnUnconditionalJump");
 	}
 
 	get retIcon(): string {
-		return read("timing.atExit.retIcon");
+		return configurationReader.read("timing.atExit.retIcon");
 	}
 
 	get jumpIcon(): string {
-		return read("timing.atExit.jumpIcon");
+		return configurationReader.read("timing.atExit.jumpIcon");
 	}
 
 	get callIcon(): string {
-		return read("timing.atExit.callIcon");
+		return configurationReader.read("timing.atExit.callIcon");
 	}
 }
 
-class StatusBarConfiguration {
+class InlayHintsConfiguration {
 
-	get alignment(): "leftmost" | "left" | "right" | "rightmost" {
-		return read("statusBar.alignment");
+	get enabled(): boolean {
+		return configurationReader.read("inlayHints.enabled");
 	}
 
-	get showInstruction(): boolean {
-		return read("statusBar.showInstruction");
+	get unlabelledSubroutines(): boolean {
+		return configurationReader.read("inlayHints.subroutines.unlabelled");
 	}
 
-	get showBytes(): boolean {
-		return read("statusBar.showBytes");
+	get nestedSubroutines(): boolean {
+		return configurationReader.read("inlayHints.subroutines.nested");
 	}
 
-	get copyTimingsAsHints(): boolean {
-		return read("statusBar.copyTimingsAsHints");
+	get fallthroughSubroutines(): boolean {
+		return configurationReader.read("inlayHints.subroutines.fallthrough");
 	}
 
-	get sizeNumericFormat(): "decimal" | "hexadecimal" | "both" {
-		return read("statusBar.sizeNumericFormat");
+	get exitPointRet(): boolean {
+		return configurationReader.read("inlayHints.exitPoint.ret");
 	}
 
-	get sizeHexadecimalFormat(): "hash" | "motorola" | "intel" | "intelUppercase" | "cStyle" | "uppercaseHash" | "uppercaseMotorola" | "uppercaseIntel" | "uppercaseIntelUppercase" | "uppercaseCStyle" {
-		return read("statusBar.sizeHexadecimalFormat");
+	get exitPointJp(): boolean {
+		return configurationReader.read("inlayHints.exitPoint.jp");
 	}
 
-	get sizeSuffix(): string {
-		return read("statusBar.sizeSuffix");
+	get exitPointJr(): boolean {
+		return configurationReader.read("inlayHints.exitPoint.jr");
 	}
 
-	get totalTimings(): "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default" {
-		return read("statusBar.totalTimings");
+	get exitPointDjnz(): boolean {
+		return configurationReader.read("inlayHints.exitPoint.djnz");
 	}
 
-	get totalTimingsEnabled(): boolean {
-		return this.totalTimings !== "default";
-	}
-
-	get totalTimingsCombined() {
-
-		const value = this.totalTimings;
-		return value === "combineAll"
-			|| value === "combineSmart";
-	}
-
-	get totalTimingsOrder(): "retFlowJumpCall" | "flowRetJumpCall" | "retJumpCallFlow" {
-		return read("statusBar.totalTimingsOrder");
-	}
-
-	get debounce(): number {
-		return read("statusBar.debounce");
-	}
-
-	get cacheSize(): number {
-		return read("statusBar.cacheSize");
-	}
-
-	get instructionIcon(): string {
-		return read("statusBar.instructionIcon");
-	}
-
-	get timingsIcon(): string {
-		return read("statusBar.timingsIcon");
-	}
-
-	get sizeIcon(): string {
-		return read("statusBar.sizeIcon");
+	get exitPointLabel(): "first" | "closest" {
+		return configurationReader.read("inlayHints.exitPoint.label");
 	}
 }
 
@@ -431,5 +444,86 @@ export interface TimingHintsDefinition {
 	 */
 	t: number | string | undefined;
 }
+
+class SimpleConfigurationReader {
+
+	read<T>(section: string): T {
+
+		return <T>vscode.workspace.getConfiguration("z80-asm-meter").get(section);
+	}
+
+	readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
+
+		if (actualDefaultValue === undefined) {
+			return this.read(section);
+		}
+		const value = <T>this.readIgnoreDefault(section);
+		return (value !== undefined) ? value : actualDefaultValue;
+	}
+
+	private readIgnoreDefault<T>(section: string): T | undefined {
+
+		const config = vscode.workspace.getConfiguration("z80-asm-meter");
+		const info = config.inspect(section);
+		const isSet = info && (info.globalValue !== undefined
+			|| info.workspaceValue !== undefined
+			|| info.workspaceFolderValue !== undefined
+			|| info.defaultLanguageValue !== undefined
+			|| info.globalLanguageValue !== undefined
+			|| info.workspaceLanguageValue !== undefined
+			|| info.workspaceFolderLanguageValue !== undefined);
+		return isSet ? <T>config.get(section) : undefined;
+	}
+}
+
+class CachedConfigurationReader extends SimpleConfigurationReader {
+
+    private readonly disposable: vscode.Disposable;
+
+	private cache = new Map<string, any>;
+
+    constructor() {
+		super();
+
+		// Subscribe to configuration change event
+		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+    }
+
+	dispose() {
+        this.disposable.dispose();
+	}
+
+	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+		this.cache.clear();
+	}
+
+	override read<T>(section: string): T {
+
+		if (this.cache.has(section)) {
+			return this.cache.get(section);
+		}
+
+		const value: T = super.read(section);
+		this.cache.set(section, value);
+		return value;
+	}
+
+	override readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
+
+		if (actualDefaultValue === undefined) {
+			return this.read(section);
+		}
+
+		if (this.cache.has(section)) {
+			return this.cache.get(section);
+		}
+
+		const value: T = super.readWithDefaultValue(section, actualDefaultValue);
+		this.cache.set(section, value);
+		return value;
+	}
+}
+
+export const configurationReader = new CachedConfigurationReader();
 
 export const config = new Configuration();

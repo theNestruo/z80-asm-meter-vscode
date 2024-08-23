@@ -1,4 +1,4 @@
-import { AbstractAggregatedMeterable, Meterable } from "./Meterables";
+import { AbstractAggregatedMeterable, Meterable } from "../types";
 
 /**
  * Conditionaly builds an instance of a repetition of Meterables
@@ -26,12 +26,12 @@ class RepeatedMeterable extends AbstractAggregatedMeterable {
 	private repetitions: number;
 
     // Derived information (will be cached for performance reasons)
-    private cachedInstruction: string | undefined;
-    private cachedZ80Timing: number[] | undefined;
-    private cachedMsxTiming: number[] | undefined;
-    private cachedCpcTiming: number[] | undefined;
-    private cachedBytes: string[] | undefined;
-    private cachedSize: number | undefined;
+    private cachedInstruction?: string;
+    private cachedZ80Timing?: number[];
+    private cachedMsxTiming?: number[];
+    private cachedCpcTiming?: number[];
+    private cachedBytes?: string[];
+    private cachedSize?: number;
 
 	/**
 	 * Constructor

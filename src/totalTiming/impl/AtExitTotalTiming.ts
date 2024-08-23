@@ -1,7 +1,7 @@
-import { config } from "../config";
-import { Meterable } from "../model/Meterables";
-import { isCallInstruction, isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpInstruction, isRetInstruction, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
-import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
+import { config } from "../../config";
+import { Meterable } from "../../types";
+import { isCallInstruction, isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpInstruction, isRetInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
+import { TotalTimingMeterable } from "../TotalTimingMeterable";
 
 /**
  * Conditionaly builds an instance of the "timing at exit" decorator

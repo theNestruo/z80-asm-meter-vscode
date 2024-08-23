@@ -1,5 +1,5 @@
-import { Meterable } from "../model/Meterables";
-import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
+import { Meterable } from "../../types";
+import { TotalTimingMeterable } from "../TotalTimingMeterable";
 
 export function calculateDefaultTotalTiming(meterable: Meterable): TotalTimingMeterable {
 

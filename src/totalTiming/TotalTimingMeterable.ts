@@ -1,4 +1,4 @@
-import { Meterable } from "./Meterables";
+import { Meterable } from "../types";
 
 export abstract class TotalTimingMeterable implements Meterable {
 
@@ -6,9 +6,9 @@ export abstract class TotalTimingMeterable implements Meterable {
 	protected originalMeterable: Meterable;
 
 	// Derived information (will be cached for performance reasons)
-	private cachedZ80Timing: number[] | undefined;
-	private cachedMsxTiming: number[] | undefined;
-	private cachedCpcTiming: number[] | undefined;
+	private cachedZ80Timing?: number[];
+	private cachedMsxTiming?: number[];
+	private cachedCpcTiming?: number[];
 
 	protected constructor(meterable: Meterable) {
 

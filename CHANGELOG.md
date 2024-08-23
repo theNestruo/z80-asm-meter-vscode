@@ -1,3 +1,9 @@
+## 5.6.0 (preview)
+
+- Code refactor
+- Performance improvements
+- Inlay Hints (experimental)
+
 ## 5.5.2
 
 - Performance improvements (~~[quick-lru](https://www.npmjs.com/package/quick-lru)~~ replaced with [hashlru](https://www.npmjs.com/package/hashlru)).

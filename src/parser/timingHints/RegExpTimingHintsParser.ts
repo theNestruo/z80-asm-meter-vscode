@@ -1,23 +1,35 @@
 import * as vscode from 'vscode';
 import { config } from "../../config";
-import { SourceCode } from "../../model/SourceCode";
-import { TimingHints } from "../../model/TimingHints";
-import { parseTimingsLenient } from '../../utils/TimingUtils';
+import { SourceCode } from "../../types";
+import { TimingHints } from "../timingHints/TimingHints";
+import { parseTimingsLenient } from '../../utils/ParserUtils';
 import { TimingHintsParser } from "../Parsers";
 
 const emptyRegExp = new RegExp("");
 
 class RegExpTimingHintsParser implements TimingHintsParser {
 
+    private readonly disposable: vscode.Disposable;
+
 	// Timing hints maps
 	private regExpTimingHints: { regExp: RegExp, timingHints: TimingHints }[];
 
 	constructor() {
+
+		// Subscribe to configuration change event
+		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+
+        // Initializes definitions
 		this.regExpTimingHints = this.reloadDefinitions();
+	}
+
+	dispose() {
+        this.disposable.dispose();
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
+        // Re-initializes definitions
 		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
 			this.regExpTimingHints = this.reloadDefinitions();
 		}

@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import { MacroDefinition, config } from "../../config";
-import { Meterable, MeterableCollection } from "../../model/Meterables";
-import { SourceCode } from "../../model/SourceCode";
+import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
-import { parteIntLenient } from "../../utils/NumberUtils";
-import { parseTimingLenient } from "../../utils/TimingUtils";
+import { parseTimingLenient, parteIntLenient } from "../../utils/ParserUtils";
+import { preprocessLinesAsSourceCode } from '../../vscode/SourceCodeReader';
 import { mainParserWithoutMacro } from "../MainParser";
 import { InstructionParser } from "../Parsers";
 
@@ -12,11 +11,11 @@ class Macro extends MeterableCollection {
 
 	// User-provided information
 	private providedName: string;
-	private providedSourceCode: string | undefined;
-	private providedZ80Timing: number[] | undefined;
-	private providedMsxTiming: number[] | undefined;
-	private providedCpcTiming: number[] | undefined;
-	private providedSize: number | undefined;
+	private providedSourceCode: string[];
+	private providedZ80Timing?: number[];
+	private providedMsxTiming?: number[];
+	private providedCpcTiming?: number[];
+	private providedSize?: number;
 
 	// Derived information (will be cached for performance reasons)
 	private ready: boolean = false;
@@ -25,7 +24,7 @@ class Macro extends MeterableCollection {
 		super();
 
 		this.providedName = source.name;
-		this.providedSourceCode = source.instructions?.join("\n");
+		this.providedSourceCode = source.instructions || [];
 		this.providedZ80Timing =
 			parseTimingLenient(source.z80)
 			|| parseTimingLenient(source.ts)
@@ -130,7 +129,7 @@ class Macro extends MeterableCollection {
 		}
 
 		if (this.providedSourceCode) {
-			const meterable = mainParserWithoutMacro.parse(this.providedSourceCode);
+			const meterable = mainParserWithoutMacro.parse(preprocessLinesAsSourceCode(this.providedSourceCode));
 			this.add(meterable);
 		}
 
@@ -140,15 +139,27 @@ class Macro extends MeterableCollection {
 
 class MacroParser implements InstructionParser {
 
+    private readonly disposable: vscode.Disposable;
+
 	// Macro maps
 	private definitionByMnemonic: Record<string, MacroDefinition>;
 
 	constructor() {
+
+		// Subscribe to configuration change event
+		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+
+        // Initializes definitions
 		this.definitionByMnemonic = this.reloadDefinitions();
+	}
+
+	dispose() {
+        this.disposable.dispose();
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
+        // Re-initializes definitions
 		if (e.affectsConfiguration("z80-asm-meter.macros")) {
 			this.definitionByMnemonic = this.reloadDefinitions();
 		}

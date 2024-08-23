@@ -1,23 +1,25 @@
 import * as vscode from 'vscode';
-import { config } from './config';
-import { mainParser } from "./parser/MainParser";
-import { TotalTimings } from './totalTiming/TotalTimings';
-import { readFromEditorSelection } from './utils/EditorUtils';
-import { formatTiming, printHumanReadableTiming } from './utils/TimingUtils';
+import { config } from '../config';
+import { mainParser } from "../parser/MainParser";
+import { readSourceCodeFromActiveTextEditorSelecion } from './SourceCodeReader';
+import { TotalTimings } from '../totalTiming/TotalTimings';
+import { formatTiming, printTiming } from '../utils/FormatterUtils';
+import { SourceCode } from '../types';
 
-export class CopyToClipboardCommand implements vscode.Command {
+export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
 
-    readonly title = "Z80 Assembly Meter: copy to clipboard";
+    abstract title: string;
 
-    readonly command = "z80-asm-meter.copyToClipboard";
+    abstract command: string;
 
-    onExecute() {
+    protected doCopyToClipboard(sourceCode: SourceCode[]) {
 
-        // Reads and parses the source code
-        const sourceCode = readFromEditorSelection();
-        if (!sourceCode) {
+        // (sanity check)
+        if (!sourceCode.length) {
             return;
         }
+
+        // Parses the source code
         const metered = mainParser.parse(sourceCode);
         if (!metered) {
             return;
@@ -35,7 +37,7 @@ export class CopyToClipboardCommand implements vscode.Command {
 
         // Copies to clipboard and notifies the user
         vscode.env.clipboard.writeText(textToCopy);
-        vscode.window.showInformationMessage(`"${textToCopy}" copied to clipboard`);
+        vscode.window.showInformationMessage(this.buildNotification(textToCopy));
 
         // Returns the focus to the editor
         const editor = vscode.window.activeTextEditor;
@@ -44,7 +46,7 @@ export class CopyToClipboardCommand implements vscode.Command {
         }
     }
 
-    buildTextToCopy(totalTimings: TotalTimings): string | undefined {
+    protected buildTextToCopy(totalTimings: TotalTimings): string | undefined {
 
         const timing = config.statusBar.totalTimingsEnabled
             ? totalTimings.best()
@@ -52,7 +54,7 @@ export class CopyToClipboardCommand implements vscode.Command {
 
         // Human readable
         if (!config.statusBar.copyTimingsAsHints) {
-            let text = printHumanReadableTiming(timing) || "";
+            let text = printTiming(timing);
             if (text) {
                 const timingSuffix = config.platform === "cpc" ? "NOPs" : "clock cycles";
                 text += ` ${timingSuffix}`;
@@ -80,5 +82,45 @@ export class CopyToClipboardCommand implements vscode.Command {
             return `[z80=${z80text}] [m1=${m1Text}]`;
         }
         return `[z80=${z80text}]`;
+    }
+
+    buildDescription(totalTimings: TotalTimings): string | undefined {
+
+		const textToCopy = this.buildTextToCopy(totalTimings);
+        if (!textToCopy) {
+            return undefined;
+        }
+        return `Copy "${textToCopy}" to clipboard`;
+    }
+
+    protected buildNotification(textToCopy: string): string {
+
+        return `"${textToCopy}" copied to clipboard`;
+    }
+}
+
+export class CopyFromActiveTextEditorSelecionToClipboardCommand extends AbstractCopyToClipboardCommand {
+
+    override readonly title = "Z80 Assembly Meter: copy to clipboard";
+
+    override readonly command = "z80-asm-meter.copyToClipboard";
+
+    private readonly disposable: vscode.Disposable;
+
+    constructor() {
+        super();
+
+        // Registers as a command
+        this.disposable = vscode.commands.registerCommand(this.command, this.onExecute, this);
+    }
+
+    dispose() {
+        this.disposable.dispose();
+    }
+
+    onExecute(): void {
+
+        // Reads and parses the source code
+        this.doCopyToClipboard(readSourceCodeFromActiveTextEditorSelecion());
     }
 }

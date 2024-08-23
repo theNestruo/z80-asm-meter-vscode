@@ -1,10 +1,9 @@
 import { config } from "../../config";
-import { Meterable } from "../../model/Meterables";
 import { repeatedMeterable } from "../../model/RepeatedMeterable";
-import { SourceCode } from "../../model/SourceCode";
+import { Meterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
-import { formatHexadecimalByte } from "../../utils/ByteUtils";
-import { parseNumericExpression } from "../../utils/NumberUtils";
+import { formatHexadecimalByte } from "../../utils/FormatterUtils";
+import { parseNumericExpression } from "../../utils/ParserUtils";
 import { InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
@@ -121,7 +120,9 @@ class AssemblyDirectiveParser implements InstructionParser {
 		operands.forEach(operand => {
 			const value = parseNumericExpression(operand);
 			if (value !== undefined) {
-				bytes.push(formatHexadecimalByte(value & 0xff) + " " + formatHexadecimalByte((value & 0xff00) >> 8));
+				bytes.push(formatHexadecimalByte(value & 0xff)
+					+ " "
+					+ formatHexadecimalByte((value & 0xff00) >> 8));
 			} else {
 				bytes.push("n n");
 			}

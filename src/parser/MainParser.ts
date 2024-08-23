@@ -1,32 +1,29 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { Meterable, MeterableCollection } from '../model/Meterables';
+import { Meterable, MeterableCollection, SourceCode } from '../types';
 import { repeatedMeterable } from '../model/RepeatedMeterable';
-import { SourceCode } from '../model/SourceCode';
-import { timingHintedMeterable } from '../model/TimingHintedMeterable';
-import { TimingHints } from '../model/TimingHints';
-import { extractSourceCode } from '../utils/SourceCodeUtils';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
 import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
-import { defaultTimingHintsParser } from './impl/DefaultTimingHintsParser';
 import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
 import { macroParser } from './impl/MacroParser';
-import { regExpTimingHintsParser } from './impl/RegExpTimingHintsParser';
 import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
 import { z80InstructionParser } from './impl/Z80InstructionParser';
-
-// (precompiled RegExp for performance reasons)
-const lineSeparatorRegexp = /[\r\n]+/;
+import { timingHintedMeterable } from './timingHints/TimingHintedMeterable';
+import { TimingHints } from './timingHints/TimingHints';
+import { defaultTimingHintsParser } from './timingHints/DefaultTimingHintsParser';
+import { regExpTimingHintsParser } from './timingHints/RegExpTimingHintsParser';
 
 class MainParser {
+
+    private readonly disposable: vscode.Disposable;
 
     // Available parsers for this instance
     private readonly instructionParsers: InstructionParser[];
     private readonly repetitionParsers: RepetitionParser[];
     private readonly timingHintsParsers: TimingHintsParser[];
 
-    // Enabled parsers for this instance
+    // Enabled parsers for this instance (for performance reasons)
     private enabledInstructionParsers: InstructionParser[] = [];
     private enabledRepetitionParsers: RepetitionParser[] = [];
     private enabledTimingHintsParsers: TimingHintsParser[] = [];
@@ -42,21 +39,28 @@ class MainParser {
         this.repetitionParsers = repetitionParsers;
         this.timingHintsParsers = timingHintsParsers;
 
+		// Subscribe to configuration change event
+		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+
+        // Initializes parsers and cache
         this.initializeParsers();
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
+	dispose() {
+        this.disposable.dispose();
+	}
+
     onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
 
-        // Re-initializes parsers
+        // Re-initializes parsers and cache
         this.initializeParsers();
-
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
     private initializeParsers() {
 
-        // Enables/disables parsers
+        // Enables/disables parsers for this instance (for performance reasons)
         this.enabledInstructionParsers = this.instructionParsers
             .filter(instructionParser => instructionParser.isEnabled);
         this.enabledRepetitionParsers = this.repetitionParsers
@@ -65,11 +69,10 @@ class MainParser {
             .filter(timingHintsParser => timingHintsParser.isEnabled);
     }
 
-    parse(s: string): MeterableCollection | undefined {
+    parse(sourceCodes: SourceCode[]): MeterableCollection | undefined {
 
-        // Extracts actual source code, single line repetitions, and line comments
-        const sourceCodes = this.extractSourceCode(s);
-        if (!sourceCodes || !sourceCodes.length) {
+        // (sanity checks)
+        if (!sourceCodes.length) {
             return undefined;
         }
 
@@ -121,38 +124,6 @@ class MainParser {
         return isEmpty ? undefined : ret;
     }
 
-    private extractSourceCode(s: string): SourceCode[] | undefined {
-
-        // (sanity checks)
-        if (!s) {
-            return undefined;
-        }
-        const rawLines = s.split(lineSeparatorRegexp);
-        if (!rawLines.length) {
-            return undefined;
-        }
-        if (rawLines[rawLines.length - 1].trim() === "") {
-            // (removes possible spurious empty line at the end of the selection)
-            rawLines.pop();
-            if (!rawLines.length) {
-                return undefined;
-            }
-        }
-
-        // (avoids querying the configuration for each line)
-        const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
-        const labelRegExp = config.syntax.labelRegExp;
-        const repeatRegExp = config.syntax.repeatRegExp;
-
-        // Splits the lines and extracts repetition counter and trailing comments
-        const sourceCode: SourceCode[] = [];
-        rawLines.forEach(rawLine => {
-            sourceCode.push(...extractSourceCode(
-                rawLine, lineSeparatorCharacter, labelRegExp, repeatRegExp));
-        });
-        return (!sourceCode.length) ? undefined : sourceCode;
-    }
-
     private parseRepetition(s: string): number | undefined {
 
         // Tries to parse as a repetition instruction
@@ -180,7 +151,7 @@ class MainParser {
         return false;
     }
 
-    private parseInstruction(s: SourceCode): Meterable | undefined {
+    /* private */ parseInstruction(s: SourceCode): Meterable | undefined {
 
         const cachedMeterable = this.instructionsCache.get(s.instruction);
 

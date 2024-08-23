@@ -1,8 +1,8 @@
-import { config } from "../config";
-import { mainParserWithoutTimingHints } from "../parser/MainParser";
-import { isConditionalInstruction, isJumpOrCallInstruction } from "../utils/AssemblyUtils";
-import { Meterable, MeterableCollection } from "./Meterables";
-import { SourceCode } from "./SourceCode";
+import { config } from "../../config";
+import { Meterable, MeterableCollection, SourceCode } from "../../types";
+import { isConditionalInstruction, isJumpOrCallInstruction } from "../../utils/AssemblyUtils";
+import { preprocessLineAsSourceCode } from "../../vscode/SourceCodeReader";
+import { mainParserWithoutTimingHints } from "../MainParser";
 import { TimingHints } from "./TimingHints";
 
 export function timingHintedMeterable(
@@ -40,7 +40,7 @@ function isCommentedOutSourceCode(sourceCode: SourceCode): boolean {
 
 	return !sourceCode.instruction // non empty line (should never happen)
 		&& !!sourceCode.lineComment // no comment (should never happen)
-		&& !!mainParserWithoutTimingHints.parse(sourceCode.lineComment);
+		&& !!mainParserWithoutTimingHints.parse(preprocessLineAsSourceCode(sourceCode.lineComment));
 }
 
 class TimingHintedMeterable implements Meterable {
@@ -99,7 +99,7 @@ class TimingHintedMeterable implements Meterable {
 		return false;
 	}
 
-	private modifiedTimingOf(timing: number[], addend: number[] | undefined): number[] {
+	private modifiedTimingOf(timing: number[], addend?: number[]): number[] {
 
 		// (sanity check)
 		if (!addend) {

@@ -1,4 +1,30 @@
 /**
+ * A container for source code:
+ * an instruction, and an optional trailing comment of the entire line
+ */
+export class SourceCode {
+
+    /** The optional label */
+    readonly label: string | undefined;
+
+    /** The optional line repetition count */
+    readonly repetitions: number;
+
+    /** The instruction (the actual source code) */
+    readonly instruction: string;
+
+    /** The optional trailing comment of the entire line */
+    readonly lineComment: string | undefined;
+
+    constructor(label: string | undefined, repetitions: number, instruction: string, lineComment: string | undefined) {
+        this.label = label;
+        this.repetitions = repetitions;
+        this.instruction = instruction;
+        this.lineComment = lineComment;
+    }
+}
+
+/**
  * Anything that can be metered: Z80 Instructions, ASM directives, sjasmplus fake instructions...
  */
 export interface Meterable {
@@ -84,19 +110,19 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 	protected meterables: Meterable[] = [];
 
     // Derived information (will be cached for performance reasons)
-    private cachedZ80Timing: number[] | undefined;
-    private cachedMsxTiming: number[] | undefined;
-    private cachedCpcTiming: number[] | undefined;
-    private cachedBytes: string[] | undefined;
-    private cachedSize: number | undefined;
-	private cachedMeterables: Meterable[] | undefined;
+    private cachedZ80Timing?: number[];
+    private cachedMsxTiming?: number[];
+    private cachedCpcTiming?: number[];
+    private cachedBytes?: string[];
+    private cachedSize?: number;
+	private cachedMeterables?: Meterable[];
 
 	/**
 	 * Adds a meterable to the aggregation
 	 * @param meterable The Meterable to aggregate
 	 * @return true if the meterable was aggregated; false otherwise
 	 */
-	add(meterable: Meterable | undefined): boolean {
+	add(meterable?: Meterable): boolean {
 
 		// (sanity check)
 		if (!meterable) {

@@ -1,8 +1,6 @@
-import * as vscode from 'vscode';
 import { config } from "../../config";
 import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
-import { Meterable, MeterableCollection } from "../../model/Meterables";
-import { SourceCode } from "../../model/SourceCode";
+import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
@@ -18,8 +16,8 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     private rawInstructions: string[];
 
     // Derived information (will be cached for performance reasons)
-    private mnemonic: string | undefined;
-    private operands: string[] | undefined;
+    private mnemonic?: string;
+    private operands?: string[];
     private ready: boolean = false;
 
     constructor(
@@ -215,9 +213,6 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
     // Instruction maps
     private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
 
-    // (cached for performance reasons)
-    private instructionSets: string[];
-
     constructor() {
 
         // Initializes instruction maps
@@ -237,13 +232,6 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
             }
             this.instructionByMnemonic[mnemonic].push(instruction);
         });
-
-        this.instructionSets = config.instructionSets;
-    }
-
-    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
-
-        this.instructionSets = config.instructionSets;
     }
 
     get isEnabled(): boolean {
@@ -267,11 +255,14 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
     private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
             SjasmplusFakeInstruction | undefined {
 
+        // (for performance reasons)
+        const instructionSets = config.instructionSets;
+
         // Locates instruction
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (!this.instructionSets.includes(candidate.getInstructionSet())) {
+            if (!instructionSets.includes(candidate.getInstructionSet())) {
                 // Invalid instruction set
                 continue;
             }

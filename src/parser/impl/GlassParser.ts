@@ -1,6 +1,5 @@
 import { config } from "../../config";
-import { Meterable } from "../../model/Meterables";
-import { SourceCode } from "../../model/SourceCode";
+import { Meterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";

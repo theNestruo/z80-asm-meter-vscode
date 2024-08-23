@@ -1,11 +1,9 @@
-import * as vscode from 'vscode';
 import { config } from "../../config";
 import { z80InstructionSet } from "../../data/Z80InstructionSet";
-import { Meterable } from "../../model/Meterables";
-import { SourceCode } from "../../model/SourceCode";
+import { Meterable, SourceCode } from "../../types";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
-import { formatHexadecimalByte } from "../../utils/ByteUtils";
-import { formatTiming, parseTiming } from "../../utils/TimingUtils";
+import { formatHexadecimalByte, formatTiming } from '../../utils/FormatterUtils';
+import { parseTiming } from "../../utils/ParserUtils";
 import { InstructionParser } from "../Parsers";
 
 /**
@@ -25,10 +23,10 @@ class Z80Instruction implements Meterable {
     readonly size: number;
 
     // Derived information (will be cached for performance reasons)
-    private mnemonic: string | undefined;
-    private operands: string[] | undefined;
-    private implicitAccumulatorSyntaxAllowed: boolean | undefined;
-    private explicitAccumulatorSyntaxAllowed: boolean | undefined;
+    private mnemonic?: string;
+    private operands?: string[];
+    private implicitAccumulatorSyntaxAllowed?: boolean;
+    private explicitAccumulatorSyntaxAllowed?: boolean;
 
     constructor(
         instructionSet: string, instruction: string,
@@ -407,9 +405,6 @@ class Z80InstructionParser implements InstructionParser {
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
     private instructionByOpcode: Record<string, Z80Instruction>;
 
-    // (cached for performance reasons)
-    private instructionSets: string[];
-
     constructor() {
 
         // Initializes instruction maps
@@ -442,13 +437,6 @@ class Z80InstructionParser implements InstructionParser {
                 }
             });
         });
-
-        this.instructionSets = config.instructionSets;
-    }
-
-    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
-
-        this.instructionSets = config.instructionSets;
     }
 
     get isEnabled(): boolean {
@@ -481,11 +469,14 @@ class Z80InstructionParser implements InstructionParser {
     private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
             Z80Instruction | undefined {
 
+        // (for performance reasons)
+        const instructionSets = config.instructionSets;
+
         // Locates instruction
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (!this.instructionSets.includes(candidate.instructionSet)) {
+            if (!instructionSets.includes(candidate.instructionSet)) {
                 // Invalid instruction set
                 continue;
             }

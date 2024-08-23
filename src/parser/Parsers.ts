@@ -1,8 +1,7 @@
-import { Meterable } from "../model/Meterables";
-import { SourceCode } from "../model/SourceCode";
-import { TimingHints } from "../model/TimingHints";
+import { Meterable, SourceCode } from "../types";
 import { extractMnemonicOf, extractOperandsOf } from "../utils/AssemblyUtils";
-import { parseNumericExpression } from "../utils/NumberUtils";
+import { parseNumericExpression } from "../utils/ParserUtils";
+import { TimingHints } from "./timingHints/TimingHints";
 
 export interface InstructionParser {
 

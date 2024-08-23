@@ -1,7 +1,8 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.5.3",
+	"version": "5.6.0",
+	"preview": true,
 	"engines": {
 		"vscode": "^1.74.0"
 	},
@@ -753,6 +754,74 @@
 						},
 						"default": [],
 						"description": "An array of user-defined macros"
+					}
+				}
+			},
+			{
+				"title": "Inlay hints (experimental)",
+				"order": 80,
+				"properties": {
+					"z80-asm-meter.inlayHints.enabled": {
+						"order": 10,
+						"type": "boolean",
+						"default": false,
+						"description": "Enables detection and metering of subroutines as inlay hints"
+					},
+					"z80-asm-meter.inlayHints.subroutines.unlabelled": {
+						"order": 20,
+						"type": "boolean",
+						"default": false,
+						"description": "Consider unlabelled code are subroutines (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.subroutines.nested": {
+						"order": 22,
+						"type": "boolean",
+						"default": false,
+						"description": "Consider nested labels are subroutines (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.subroutines.fallthrough": {
+						"order": 24,
+						"type": "boolean",
+						"default": true,
+						"description": "Consider fallthrough labels are subroutines (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.exitPoint.ret": {
+						"order": 30,
+						"type": "boolean",
+						"default": true,
+						"description": "Consider that conditional RET instructions are subroutine exit points (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.exitPoint.jp": {
+						"order": 32,
+						"type": "boolean",
+						"default": true,
+						"description": "Consider that conditional JP instructions are subroutine exit points (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.exitPoint.jr": {
+						"order": 34,
+						"type": "boolean",
+						"default": false,
+						"description": "Consider that conditional JR instructions are subroutine exit points (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.exitPoint.djnz": {
+						"order": 36,
+						"type": "boolean",
+						"default": false,
+						"description": "Consider that DJNZ instructions are subroutine exit points (for inlay hints metering)"
+					},
+					"z80-asm-meter.inlayHints.exitPoint.label": {
+						"order": 40,
+						"type": "string",
+						"enum": [
+							"first",
+							"closest"
+						],
+						"default": "firstLabel",
+						"description": "When fallthrough labels are considered subroutines (for inlay hints metering), controls which subroutine is considered at exit points",
+						"enumDescriptions": [
+							"The first label found",
+							"The last label found, that is the closest label to the exit point"
+						]
 					}
 				}
 			}

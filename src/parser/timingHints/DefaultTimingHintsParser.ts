@@ -1,7 +1,7 @@
 import { config } from "../../config";
-import { SourceCode } from "../../model/SourceCode";
-import { TimingHints } from "../../model/TimingHints";
-import { parseTimingLenient } from "../../utils/TimingUtils";
+import { SourceCode } from "../../types";
+import { TimingHints } from "../timingHints/TimingHints";
+import { parseTimingLenient } from "../../utils/ParserUtils";
 import { TimingHintsParser } from "../Parsers";
 
 // (precompiled RegExp for performance reasons)

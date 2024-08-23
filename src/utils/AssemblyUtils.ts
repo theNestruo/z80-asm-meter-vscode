@@ -1,5 +1,5 @@
-import { parseNumericExpression } from "./NumberUtils";
-import { extractSourceCode } from "./SourceCodeUtils";
+import { normalizeSplitQuotesAware } from "../vscode/SourceCodeReader";
+import { parseNumericExpression } from "./ParserUtils";
 
 export function extractMnemonicOf(s: string): string {
 
@@ -18,8 +18,7 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
     const i = s.indexOf(" ");
     return i === -1
         ? []
-        : extractSourceCode(s.substring(i + 1), ",")
-            .map(fragment => fragment.instruction);
+        : normalizeSplitQuotesAware(s.substring(i + 1), ",");
 }
 
 /**

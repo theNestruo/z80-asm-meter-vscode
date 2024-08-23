@@ -1,3 +1,5 @@
+// Numbers
+
 class NumericExpressionParser {
 
     private regexp: RegExp;
@@ -62,7 +64,30 @@ export function parteIntLenient(o: unknown): number | undefined {
     return undefined;
 }
 
-export function formatHexadecimalNumber(n: number): string {
+// Timings
 
-    return n.toString(16).toUpperCase();
+export function parseTimingsLenient(...array: unknown[]): number[] | undefined {
+
+    for (const o of array) {
+        const t = parseTimingLenient(o);
+        if (t !== undefined) {
+            return t;
+        }
+    }
+    return undefined;
 }
+
+export function parseTimingLenient(o: unknown): number[] | undefined {
+
+    return (typeof o === "number") ? [o, o]
+        : (typeof o === "string") ? parseTiming(o)
+            : undefined;
+}
+
+export function parseTiming(s: string): number[] {
+
+    const ss = s.split("/");
+    const t0 = parseInt(ss[0], 10);
+    return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1], 10)];
+}
+

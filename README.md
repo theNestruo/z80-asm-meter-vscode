@@ -23,6 +23,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
     - [Total timing calculations](#total-timing-calculations)
     - [Timing hints](#timing-hints)
     - [User-defined macros](#user-defined-macros)
+- [Inlay hints (experimental)](#inlay-hints-experimental)
 - [Migration to version 5.x](#migration-to-version-5x)
 - [Performance and efficiency](#performance-and-efficiency)
 - [F.A.Q.](#faq)
@@ -553,6 +554,15 @@ As most of the macro definition fields are optional, this extension uses a best-
 </details>
 
 
+## Inlay hints (experimental)
+
+* [`z80-asm-meter.inlayHints.enabled`](vscode://settings/z80-asm-meter.inlayHints.enabled): Enables detection and metering of subroutines as inlay hints.
+
+    Disabled by default
+
+* (TBD)
+
+
 ## Migration to version 5.x
 
 The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
@@ -615,6 +625,7 @@ The following table compares the time took to meter 11&nbsp;179 lines of source 
 | 5.5.0<br>5.5.1 | `100` (default value) | 398&nbsp;ms |
 | 5.5.2 | `100` (default value) | 242&nbsp;ms |
 | 5.5.2 | `500` | 202&nbsp;ms |
+| 5.6.0 (preview) | `100` (default value) | 252&nbsp;ms |
 
 </details>
 

@@ -1,9 +1,9 @@
 import { config } from "../config";
-import { Meterable } from "../model/Meterables";
-import { TotalTimingMeterable } from "../model/TotalTimingMeterable";
-import { AtExitTotalTimingsMeterable, calculateAtExitTotalTiming } from "./AtExitTotalTiming";
-import { calculateDefaultTotalTiming } from "./DefaultTotalTiming";
-import { calculateExecutionFlowTotalTiming } from "./ExecutionFlowTotalTiming";
+import { Meterable } from "../types";
+import { TotalTimingMeterable } from "./TotalTimingMeterable";
+import { AtExitTotalTimingsMeterable, calculateAtExitTotalTiming } from "./impl/AtExitTotalTiming";
+import { calculateDefaultTotalTiming } from "./impl/DefaultTotalTiming";
+import { calculateExecutionFlowTotalTiming } from "./impl/ExecutionFlowTotalTiming";
 
 export class TotalTimings {
 

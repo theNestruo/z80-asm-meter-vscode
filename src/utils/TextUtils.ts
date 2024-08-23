@@ -13,7 +13,7 @@ export function hashCode(s: string): number {
     return hash;
 }
 
-export function espaceIfNotInfix(s: string): string {
+export function spaceIfNotInfix(s: string): string {
 
     return s.trim().includes(" ") ? s : ` ${s.trim()} `;
 }
@@ -25,4 +25,27 @@ export function pluralize(s: string, n: number): string {
         return s;
     }
     return (n === 1) || (n === -1) ? split[0] : split[1];
+}
+
+export function removeStart(s: string | undefined, prefix: string): string | undefined {
+
+    return s && s.startsWith(prefix)
+            ? s.substring(prefix.length)
+            : s;
+}
+
+export function removeEnd(s: string | undefined, suffix: string): string | undefined {
+
+    return s && s.endsWith(suffix)
+            ? s.substring(0, s.length - suffix.length)
+            : s;
+}
+
+export function uncapitalize(s: string): string {
+
+    if (!s || !s.length) {
+        return "";
+    }
+
+    return s.charAt(0).toLowerCase() + s.substring(1);
 }
