@@ -1,26 +1,31 @@
+## 5.7.x (pre-release)
+
+- Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_
+- SPASM-ng assembler syntax support
+- Inlay Hints (experimental)
+
 ## 5.6.0 (preview)
 
 - Code refactor
 - Performance improvements
 - Inlay Hints (experimental)
-- SPASM-ng assembler syntax support.
 
 ## 5.5.2
 
-- Performance improvements (~~[quick-lru](https://www.npmjs.com/package/quick-lru)~~ replaced with [hashlru](https://www.npmjs.com/package/hashlru)).
+- Performance improvements (~~[quick-lru](https://www.npmjs.com/package/quick-lru)~~ replaced with [hashlru](https://www.npmjs.com/package/hashlru))
 
 ## 5.5.1
 
-- Fixes broken README.md in the 5.5.0 version published to Visual Studio Marketplace.
+- Fixes broken README.md in the 5.5.0 version published to Visual Studio Marketplace
 
 ## 5.5.0
 
-- Performance improvements, particularly when metering large source code blocks.
+- Performance improvements, particularly when metering large source code blocks
 
 ## 5.4.0
 
-- esbuild toolchain updated, following [esbuild-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/esbuild-sample).
-- Performance improvements, particularly when navigating through previously metered code.
+- esbuild toolchain updated, following [esbuild-sample](https://github.com/microsoft/vscode-extension-samples/tree/main/esbuild-sample)
+- Performance improvements, particularly when navigating through previously metered code
 
 ## 5.3.5
 
@@ -32,13 +37,13 @@
 
 ## 5.3.3
 
-- Ability to show size in bytes in both decimal and hexadecimal in the status bar.
+- Ability to show size in bytes in both decimal and hexadecimal in the status bar
 
 ## 5.3.2
 
-- Status bar examples in the documentation.
-- Expand selection to line enabled by default.
-- Revised documentation; especially advanced features.
+- Status bar examples in the documentation
+- Expand selection to line enabled by default
+- Revised documentation; especially advanced features
 
 ## 5.3.1
 

@@ -84,6 +84,46 @@ function printStatusBarTotalTimings(totalTimings: TotalTimings): string {
 	}
 }
 
+function printStatusBarTotalTimingsArray(totalTimings: (TotalTimingMeterable | undefined)[]): string {
+
+	let text = "";
+
+	let previousIcon = "";
+	let previousValue = "";
+	totalTimings.forEach(totalTiming => {
+		if (!totalTiming) {
+			return;
+		}
+		const icon = totalTiming.statusBarIcon;
+		const value = printTiming(totalTiming) || "0";
+
+		// Combines when the previous timing when they have the same values
+		if (!config.statusBar.totalTimingsCombined) {
+			text += `${icon}${value} `;
+
+		} else {
+			// Same as previous timing?
+			if (value === previousValue) {
+				// Combines the decoration
+				previousIcon += icon;
+
+			} else {
+				// Preserves the previous timing entry
+				if (previousIcon || previousValue) {
+					text += `${previousIcon}${previousValue} `;
+				}
+				// Aggregates a new timing entry
+				previousIcon = icon;
+				previousValue = value;
+			}
+		}
+	});
+	if (config.statusBar.totalTimingsCombined) {
+		text += `${previousIcon}${previousValue} `;
+	}
+	return text.trim();
+}
+
 function printStatusBarSize(n: number): string {
 
 	const sizeIcon = spaceIfNotInfix(config.statusBar.sizeIcon);
@@ -92,12 +132,12 @@ function printStatusBarSize(n: number): string {
 	return `${sizeIcon}${formattedSize}${sizeSuffix}`;
 }
 
+// Status bar: tooltip (Markdown)
+
 export function printTooltipMarkdown(totalTimings: TotalTimings): vscode.MarkdownString {
 
-	const text = new vscode.MarkdownString();
-
 	// Timing
-	text.appendMarkdown(printMarkdownTotalTimingsArray(totalTimings.ordered()).value);
+	const text = printMarkdownTotalTimingsArray(totalTimings.ordered());
 
 	// (separator)
 	text.appendMarkdown(hrMarkdown);
@@ -123,6 +163,46 @@ export function printTooltipMarkdown(totalTimings: TotalTimings): vscode.Markdow
 }
 
 export const hrMarkdown = "\n---\n\n";
+
+function printMarkdownTotalTimingsArray(
+	totalTimings: (TotalTimingMeterable | undefined)[]): vscode.MarkdownString {
+
+	const platform = config.platform;
+	const hasM1 = platform === "msx" || platform === "pc8000";
+	const timingSuffix = platform === "cpc" ? "NOPs" : "clock cycles";
+
+	const table = new vscode.MarkdownString(
+		platform === "msx" ? "|||MSX|Z80||\n|--:|:--|--:|--:|---|\n"
+		: platform === "pc8000" ? "|||Z80|Z80+M1||\n|--:|:--|--:|--:|---|\n"
+		: "|||||\n|--:|:--|--:|---|\n",
+		true);
+
+	for (const totalTiming of totalTimings) {
+		if (!totalTiming) {
+			continue;
+		}
+
+		const value = formatTiming(totalTiming.z80Timing);
+		const m1Value = formatTiming(totalTiming.msxTiming);
+		if (!value && (!hasM1 || !m1Value)) {
+			continue;
+		}
+
+		switch (platform) {
+			case 'msx':
+				table.appendMarkdown(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|\n`);
+				break;
+			case 'pc8000':
+				table.appendMarkdown(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|\n`);
+				break;
+			default:
+				table.appendMarkdown(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|\n`);
+				break;
+		}
+	}
+
+	return table;
+}
 
 // Instructions
 
@@ -200,86 +280,6 @@ export function printTiming(meterable: Meterable): string | undefined {
 	return `${text} (${m1Text})`;
 }
 
-function printStatusBarTotalTimingsArray(totalTimings: (TotalTimingMeterable | undefined)[]): string {
-
-	let text = "";
-
-	let previousIcon = "";
-	let previousValue = "";
-	totalTimings.forEach(totalTiming => {
-		if (!totalTiming) {
-			return;
-		}
-		const icon = totalTiming.statusBarIcon;
-		const value = printTiming(totalTiming) || "0";
-
-		// Combines when the previous timing when they have the same values
-		if (!config.statusBar.totalTimingsCombined) {
-			text += `${icon}${value} `;
-
-		} else {
-			// Same as previous timing?
-			if (value === previousValue) {
-				// Combines the decoration
-				previousIcon += icon;
-
-			} else {
-				// Preserves the previous timing entry
-				if (previousIcon || previousValue) {
-					text += `${previousIcon}${previousValue} `;
-				}
-				// Aggregates a new timing entry
-				previousIcon = icon;
-				previousValue = value;
-			}
-		}
-	});
-	if (config.statusBar.totalTimingsCombined) {
-		text += `${previousIcon}${previousValue} `;
-	}
-	return text.trim();
-}
-
-function printMarkdownTotalTimingsArray(
-	totalTimings: (TotalTimingMeterable | undefined)[]): vscode.MarkdownString {
-
-	const platform = config.platform;
-	const hasM1 = platform === "msx" || platform === "pc8000";
-	const timingSuffix = platform === "cpc" ? "NOPs" : "clock cycles";
-
-	const table = new vscode.MarkdownString(
-		platform === "msx" ? "||MSX|Z80||\n|--:|--:|--:|---|\n"
-		: platform === "pc8000" ? "||Z80|Z80+M1||\n|--:|--:|--:|---|\n"
-		: "||||\n|--:|--:|---|\n"
-	);
-
-	for (const totalTiming of totalTimings) {
-		if (!totalTiming) {
-			continue;
-		}
-
-		const value = formatTiming(totalTiming.z80Timing);
-		const m1Value = formatTiming(totalTiming.msxTiming);
-		if (!value && (!hasM1 || !m1Value)) {
-			continue;
-		}
-
-		switch (platform) {
-			case 'msx':
-				table.appendMarkdown(`|${totalTiming.name}:|**${m1Value}**|${value}|${timingSuffix}|\n`);
-				break;
-			case 'pc8000':
-				table.appendMarkdown(`|${totalTiming.name}:|**${value}**|${m1Value}|${timingSuffix}|\n`);
-				break;
-			default:
-				table.appendMarkdown(`|${totalTiming.name}:|**${value}**|${timingSuffix}|\n`);
-				break;
-		}
-	}
-
-	return table;
-}
-
 // Size
 
 function printSize(n: number): string {
@@ -335,16 +335,6 @@ function formatHexadecimalSize(n: number): string {
 			return `0x${hex}`;
 	}
 }
-
-// function printMarkdownSize(n: number): string {
-
-// 	const formattedSize = printSize(n);
-// 	const platform = config.platform;
-// 	const hasM1 = platform === "msx" || platform === "pc8000";
-// 	return hasM1
-// 		? `|Size:|**${formattedSize}**||bytes|\n`
-// 		: `|Size:|**${formattedSize}**|bytes|\n`;
-// }
 
 // Bytes
 

@@ -5,7 +5,7 @@ import { TotalTimings } from '../totalTiming/TotalTimings';
 import { Meterable, SourceCode } from '../types';
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
 import { hrMarkdown, printTiming, printTooltipMarkdown } from '../utils/FormatterUtils';
-import { removeEnd, uncapitalize } from '../utils/TextUtils';
+import { removeEnd } from '../utils/TextUtils';
 import { isExtensionEnabledFor, preprocessLineAsSourceCode, readSourceCodeFrom } from './SourceCodeReader';
 
 function documentSelector(): readonly vscode.DocumentFilter[] {
@@ -166,48 +166,31 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 	private buildSubroutineInlayHints(document: vscode.TextDocument,
 			starts: vscode.Position[], end: vscode.Position, timingSuffix: string): vscode.InlayHint[] {
 
-		return starts.map(start => this.buildSubroutineInlayHint(document, start, end, timingSuffix));
-	}
-
-	private buildSubroutineInlayHint(document: vscode.TextDocument,
-			start: vscode.Position, end: vscode.Position, timingSuffix: string): vscode.InlayHint {
-
-		const range = new vscode.Range(start, end);
-		const sourceCode = readSourceCodeFrom(document, range);
-		const totalTimings = new TotalTimings(mainParser.parse(sourceCode)!);
-
-		const timing = printTiming(totalTimings.best()) || "0";
-
-		return new SubroutineInlayHint(
-			document.lineAt(start).range.end, `${timing}${timingSuffix}`,
-			range, sourceCode, totalTimings);
+		return starts.map(start => {
+			const position = document.lineAt(start).range.end;
+			const range = new vscode.Range(start, end);
+			return this.buildInlayHint(position, document, range, timingSuffix);
+		});
 	}
 
 	private buildExitPointsInlayHints(document: vscode.TextDocument,
 			starts: vscode.Position[], end: vscode.Position, timingSuffix: string): vscode.InlayHint[] {
 
+		const position = document.lineAt(end).range.end;
 		const start = config.inlayHints.exitPointLabel === "first" ? starts[0] : starts[starts.length - 1];
-		return [ this.buildExitPointInlayHint(document, start, end, timingSuffix) ];
+		const range = new vscode.Range(start, end);
+		return [ this.buildInlayHint(position, document, range, timingSuffix) ];
 	}
 
-	private buildExitPointInlayHint(document: vscode.TextDocument,
-			start: vscode.Position, end: vscode.Position, timingSuffix: string): vscode.InlayHint {
+	private buildInlayHint(position: vscode.Position,
+			document: vscode.TextDocument, range: vscode.Range, timingSuffix: string): vscode.InlayHint {
 
-		const range = new vscode.Range(start, end);
 		const sourceCode = readSourceCodeFrom(document, range);
 		const totalTimings = new TotalTimings(mainParser.parse(sourceCode)!);
+		const totalTiming = totalTimings.best();
+		const timing = printTiming(totalTiming) || "0";
 
-		const timing = printTiming(totalTimings.best()) || "0";
-
-		// const lastSourceCode = sourceCode[sourceCode.length - 1];
-		// const lastLine = document.lineAt(end);
-		// const position = lastSourceCode.lineComment
-		// 		? new vscode.Position(end.line, lastLine.text.indexOf(lastSourceCode.lineComment) - 2)
-		// 		: lastLine.range.end;
-
-		return new SubroutineInlayHint(
-			document.lineAt(end).range.end, `${timing}${timingSuffix}`,
-			range, sourceCode, totalTimings);
+		return new SubroutineInlayHint(position, `${timing}${timingSuffix}`, range, sourceCode, totalTimings);
 	}
 
 	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
@@ -217,20 +200,26 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			return undefined;
 		}
 
-		const sourceCodeLabel = removeEnd(hint.sourceCode[0].label, ":");
 		const rangeText = hint.range.isSingleLine
-				? `Line #${hint.range.start.line + 1}`
-				: `Lines #${hint.range.start.line + 1} - #${hint.range.end.line + 1}`;
-		const tooltipTitle = sourceCodeLabel
-				? `## ${sourceCodeLabel}\n\n${rangeText}\n`
-				: `### Code at ${uncapitalize(rangeText)}\n`;
+			? `Line #${hint.range.start.line + 1}`
+			: `Lines #${hint.range.start.line + 1} - #${hint.range.end.line + 1}`;
+		const tooltip = new vscode.MarkdownString(`${rangeText}\n\n`, true)
+			.appendMarkdown(hrMarkdown);
+
+		const sourceCodeLabel = removeEnd(hint.sourceCode[0].label, ":");
+		if (sourceCodeLabel) {
+			tooltip.appendMarkdown(`## ${sourceCodeLabel}\n\n`);
+		}
+
+		const totalTiming = hint.totalTimings.best();
+		tooltip.appendMarkdown(`${totalTiming.name}: ${totalTiming.statusBarIcon} ${hint.label}\n`)
+			.appendMarkdown(hrMarkdown)
+			.appendMarkdown(printTooltipMarkdown(hint.totalTimings).value);
 
 		return {
 			position: hint.position,
 			label: hint.label,
-			tooltip: new vscode.MarkdownString(`${tooltipTitle}`)
-				.appendMarkdown(hrMarkdown)
-				.appendMarkdown(printTooltipMarkdown(hint.totalTimings).value),
+			tooltip: tooltip,
 			paddingLeft: true
 		};
 	}

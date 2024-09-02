@@ -122,17 +122,17 @@ export function preprocessLineAsSourceCode(line: string): SourceCode[] {
 	return sourceCodes;
 }
 
-function extractLabel(line: string): [ string | undefined, string ] {
+function extractLabel(line: string): [ string | undefined, string, number ] {
 
 	const matches = config.syntax.labelRegExp.exec(line);
 	if (!matches || !matches[1]) {
 		// (no label)
-		return [ undefined, line.trimStart() ];
+		return [ undefined, line.trimStart(), 0 ];
 	}
 
 	// Extracts and removes label
 	const label = matches[1];
-	return [ label.trim(), line.substring(label.length).trimStart() ];
+	return [ label.trim(), line.substring(label.length).trimStart(), label.length ];
 }
 
 function extractRepetitions(line: string): [ number , string ] {
