@@ -3,6 +3,7 @@
 - Code refactor
 - Performance improvements
 - Inlay Hints (experimental)
+- SPASM-ng assembler syntax support.
 
 ## 5.5.2
 

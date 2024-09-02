@@ -115,21 +115,23 @@ class StatusBarConfiguration {
 
 class SyntaxConfiguration {
 
-	get syntax(): "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "tniasm" {
+	get syntax(): "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "spasm-ng" | "tniasm" {
 		return configurationReader.read("syntax");
 	}
 
-	private get lineSeparator(): "disabled" | "colon" | "pipe" {
+	private get lineSeparator(): "disabled" | "backslash" | "colon" | "pipe" {
 
 		return configurationReader.readWithDefaultValue("syntaxFeature.lineSeparator",
-			this.syntax === "tniasm" ? "pipe" // (derived)
+			this.syntax === "spasm-ng" ? "backslash" // (derived)
+			: this.syntax === "tniasm" ? "pipe" // (derived)
 			: undefined);
 	}
 
 	get lineSeparatorCharacter(): string | undefined {
 
 		const value = this.lineSeparator;
-		return value === "colon" ? ":"
+		return value === "backslash" ? "\\"
+			: value === "colon" ? ":"
 			: value === "pipe" ? "|"
 			: undefined;
 	}
@@ -150,7 +152,7 @@ class SyntaxConfiguration {
 			: /(^\s*[^\s:]+:)/;
 	}
 
-	private get repeat(): "disabled" | "brackets" | "dot" {
+	private get repeat(): "disabled" | "brackets" | "dot"{
 
 		return configurationReader.readWithDefaultValue("syntaxFeature.repeat",
 			(this.syntax === "sjasm") ? "brackets" // (derived)

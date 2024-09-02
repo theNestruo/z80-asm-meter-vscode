@@ -85,6 +85,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
     * `pasmo`: Matches [Pasmo](http://pasmo.speccy.org/) assembler syntax.
     * `sjasm`: Matches [Sjasm](http://www.xl2s.tk/sjasmmanual.html) assembler syntax.
     * `sjasmplus`: Matches [SjASMPlus](https://github.com/sjasmplus/sjasmplus) assembler syntax.
+    * `spasm-ng`: Matches [SPASM-ng](https://github.com/alberthdev/spasm-ng) assembler syntax.
     * `tniasm`: Matches [tniASM](http://www.tni.nl/products/tniasm.html) assembler syntax.
 
 * [`z80-asm-meter.expandSelectionToLine`](vscode://settings/z80-asm-meter.expandSelectionToLine): When enabled, expands the selection to cover entire lines, preventing partial line selections to be mistakenly parsed (e.g.: `RET` instead of `RET Z`).
@@ -209,6 +210,7 @@ The [main syntax of the assembler](#main-settings) can be used to best suit one 
 
 * [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator): Adjusts the line separator to match the syntax of the assembler:
     * `disabled` (default): Does not allow multiple instructions on a single line.
+    * `backslash`: Use backslash (`\`) to have more than one instruction on a line. This behaviour matches some assemblers such as SPASM-ng. This is the default value when the main syntax of the assembler is set to `spasm-ng`.
     * `colon`: Use colon (`:`) to have more than one instruction on a line.
     * `pipe`: Use pipe (`|`) to have more than one instruction on a line. This behaviour matches some assemblers such as tniASM. This is the default value when the main syntax of the assembler is set to `tniasm`.
 
@@ -240,17 +242,17 @@ The [main syntax of the assembler](#main-settings) can be used to best suit one 
 
 As a summary, these are the default values of the assembler syntax settings, based on the value of the main [`z80-asm-meter.syntax` setting](#main-settings):
 
-| Assembler syntax feature   | Default value | `default` | `glass` | `pasmo` | `sjasm`    | `sjasmplus` | `tniasm` |
-| ---                        | :-:           | :-:       | :-:     | :-:     | :-:        | :-:         | :-:      |
-| `labelColonOptional`       | disabled      | -         | -       | enabled | -          | enabled     | enabled  |
-| `repeat`                   | `none`        | -         | -       | -       | `brackets` | `dot`       | -        |
-| `lineSeparator`            | `disabled`    | -         | -       | -       | -          | -           | `pipe`   |
-| `fakeInstructions`         | disabled      | -         | -       | -       | -          | enabled     | -        |
-| `registerListInstructions` | disabled      | -         | -       | -       | -          | enabled     | -        |
-| `negativeConditions`       | disabled      | -         | enabled | -       | -          | -           | -        |
-| `dupEdup`                  | disabled      | -         | -       | -       | -          | enabled     | -        |
-| `reptEndr`                 | disabled      | -         | -       | -       | -          | enabled     | -        |
-| `reptEndm`                 | disabled      | -         | enabled | -       | -          | -           | -        |
+| Assembler syntax feature   | Default value | `default` | `glass` | `pasmo` | `sjasm`    | `sjasmplus` | `spasm-ng`  | `tniasm` |
+| ---                        | :-:           | :-:       | :-:     | :-:     | :-:        | :-:         | :-:         | :-:      |
+| `labelColonOptional`       | disabled      | -         | -       | enabled | -          | enabled     | -           | enabled  |
+| `repeat`                   | `none`        | -         | -       | -       | `brackets` | `dot`       | -           | -        |
+| `lineSeparator`            | `disabled`    | -         | -       | -       | -          | -           | `backslash` | `pipe`   |
+| `fakeInstructions`         | disabled      | -         | -       | -       | -          | enabled     | -           | -        |
+| `registerListInstructions` | disabled      | -         | -       | -       | -          | enabled     | -           | -        |
+| `negativeConditions`       | disabled      | -         | enabled | -       | -          | -           | -           | -        |
+| `dupEdup`                  | disabled      | -         | -       | -       | -          | enabled     | -           | -        |
+| `reptEndr`                 | disabled      | -         | -       | -       | -          | enabled     | -           | -        |
+| `reptEndm`                 | disabled      | -         | enabled | -       | -          | -           | -           | -        |
 
 </details>
 
