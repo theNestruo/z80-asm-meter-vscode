@@ -134,48 +134,48 @@ function printStatusBarSize(n: number): string {
 
 // Status bar: tooltip (Markdown)
 
-export function printTooltipMarkdown(totalTimings: TotalTimings): vscode.MarkdownString {
+export function printTooltipMarkdown(totalTimings: TotalTimings): string[] {
 
 	// Timing
-	const text = printMarkdownTotalTimingsArray(totalTimings.ordered());
+	const markdown = printMarkdownTotalTimingsArray(totalTimings.ordered());
 
 	// (separator)
-	text.appendMarkdown(hrMarkdown);
+	markdown.push(hrMarkdown);
 
 	// Instruction and/or size
 	const instruction = printInstructions(totalTimings.default);
 	const size = totalTimings.default.size;
 	if (instruction || size) {
-		text.appendMarkdown("|||\n|---|---|\n");
+		markdown.push("|||");
+		markdown.push("|---|---|");
 		if (instruction) {
-			text.appendMarkdown(`|Instructions:|${instruction}|\n`);
+			markdown.push(`|Instructions:|\`${instruction}\`|`);
 		}
 		if (size) {
 			const formattedSize = printSize(size);
 			const sizeSuffix = pluralize(" byte| bytes", size);
 			const bytes = printBytes(totalTimings.default);
-			text.appendMarkdown(bytes
-				? `|Bytes:|${formattedSize}${sizeSuffix} (${bytes})|\n`
-				: `|Bytes:|${formattedSize}${sizeSuffix}|\n`);
+			markdown.push(bytes
+				? `|Bytes:|${formattedSize}${sizeSuffix} (\`${bytes}\`)|`
+				: `|Bytes:|${formattedSize}${sizeSuffix}|`);
 		}
 	}
-	return text;
+	return markdown;
 }
 
 export const hrMarkdown = "\n---\n\n";
 
 function printMarkdownTotalTimingsArray(
-	totalTimings: (TotalTimingMeterable | undefined)[]): vscode.MarkdownString {
+	totalTimings: (TotalTimingMeterable | undefined)[]): string[] {
 
 	const platform = config.platform;
 	const hasM1 = platform === "msx" || platform === "pc8000";
 	const timingSuffix = printableTimingSuffix();
 
-	const table = new vscode.MarkdownString(
-		platform === "msx" ? "|||MSX|Z80||\n|--:|:--|--:|--:|---|\n"
-		: platform === "pc8000" ? "|||Z80|Z80+M1||\n|--:|:--|--:|--:|---|\n"
-		: "|||||\n|--:|:--|--:|---|\n",
-		true);
+	const table =
+		platform === "msx" ? [ "|||MSX|Z80||", "|--:|:--|--:|--:|---|" ]
+		: platform === "pc8000" ? [ "|||Z80|Z80+M1||", "|--:|:--|--:|--:|---|" ]
+		: [ "|||||", "|--:|:--|--:|---|" ];
 
 	for (const totalTiming of totalTimings) {
 		if (!totalTiming) {
@@ -190,13 +190,13 @@ function printMarkdownTotalTimingsArray(
 
 		switch (platform) {
 			case 'msx':
-				table.appendMarkdown(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|\n`);
+				table.push(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
 				break;
 			case 'pc8000':
-				table.appendMarkdown(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|\n`);
+				table.push(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
 				break;
 			default:
-				table.appendMarkdown(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|\n`);
+				table.push(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
 				break;
 		}
 	}
@@ -384,4 +384,18 @@ function popLastBytes(meterables: Meterable[]): string[] | undefined {
 		}
 	}
 	return undefined;
+}
+
+// Positions and ranges
+
+export function printPosition(position: vscode.Position): string {
+
+	return `Line #${position.line + 1}`;
+}
+
+export function printRange(range: vscode.Range): string {
+
+	return range.isSingleLine
+		? printPosition(range.start)
+		: `Lines #${range.start.line + 1} - #${range.end.line + 1}`;
 }

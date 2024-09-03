@@ -123,15 +123,15 @@ abstract class StatusBarHandler {
 
 	private buildTooltip(totalTimings: TotalTimings): vscode.MarkdownString {
 
-		const text = printTooltipMarkdown(totalTimings);
+		const markdown = printTooltipMarkdown(totalTimings);
 
 		const commandDescription = this.command.buildDescription(totalTimings);
 		if (commandDescription) {
-			text.appendMarkdown(hrMarkdown)
-				.appendMarkdown(commandDescription);
+			markdown.push(hrMarkdown);
+			markdown.push(commandDescription);
 		}
 
-		return text;
+		return new vscode.MarkdownString(markdown.join("\n"), true);
 	}
 }
 
