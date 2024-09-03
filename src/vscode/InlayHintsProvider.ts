@@ -77,7 +77,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 		let incompleteSubroutines: IncompleteSubroutine[] = [];
 		let codeFound: boolean = false;
-		for (let n = range.start.line, m = range.end.line, i = n; i < m; i++) {
+		for (let i = range.start.line, n = range.end.line, m = document.lineCount; i < m; i++) {
 			const line = document.lineAt(i);
 			const sourceCodes = lineToSourceCode(line.text);
 			if (!sourceCodes.length || !sourceCodes[0]) {
@@ -93,14 +93,19 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			// Checks labels (for subroutine starts)
 			if (this.isValidLabel(sourceCode, incompleteSubroutines)) {
-				if (codeFound) {
-					if (config.inlayHints.fallthroughSubroutines) {
-						// "Falls through" label: appends a new subroutine start
+				if (!codeFound) {
+					// Previous labels did not contain code
+					if (i >= n) {
+						// (already out of range)
+						break;
+					}
+					// Discards previous labels
+					incompleteSubroutines = [ new IncompleteSubroutine(line, sourceCodes) ];
+				} else {
+					if (config.inlayHints.fallthroughSubroutines && (i < n)) {
+						// "Falls through" label: appends a new subroutine start (only wihtin range)
 						incompleteSubroutines.push(new IncompleteSubroutine(line, sourceCodes));
 					}
-				} else {
-					// Previous labels did not contain code: discards previous labels
-					incompleteSubroutines = [ new IncompleteSubroutine(line, sourceCodes) ];
 				}
 			}
 
@@ -111,10 +116,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			// Checks no-code (ignore no-code lines)
 			if (!this.isCode(metered)) {
-				// Checks data
+				// Checks if data
 				if (metered.size && !codeFound) {
 					// Latest label did only contain data: discards previous label
 					incompleteSubroutines.pop();
+					if (!incompleteSubroutines.length && (i >= n)) {
+						// (already out of range)
+						break;
+					}
 				}
 				continue;
 			}
@@ -134,6 +143,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 				// (restarts sections)
 				incompleteSubroutines = [];
 				codeFound = false;
+
+				// (checks if still within range)
+				if (i >= n) {
+					break;
+				}
 
 			// Checks subroutine exit point
 			} else if (this.isValidConditionalExitPoint(metered.instruction)) {
