@@ -826,7 +826,7 @@
 							"first",
 							"closest"
 						],
-						"default": "firstLabel",
+						"default": "first",
 						"description": "When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points",
 						"enumDescriptions": [
 							"The first label found; the first (outermost) subroutine in a chain of fallthrough subroutines",

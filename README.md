@@ -458,7 +458,7 @@ This extension can provide inlay hints (additional information about source code
     Disabled by default.
 
 * [`z80-asm-meter.inlayHints.exitPoint.label`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.label): When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points.
-    * `first`: The first label found; the first (outermost) subroutine in a chain of fallthrough subroutines.
+    * `first` (default): The first label found; the first (outermost) subroutine in a chain of fallthrough subroutines.
     * `closest`: The last label found; the last (innermost) subroutine in a chain of fallthrough subroutines. That is, the subroutine whose label is the closest one to the exit point.
 
 </details>
