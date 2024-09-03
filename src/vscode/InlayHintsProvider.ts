@@ -13,14 +13,50 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private readonly disposable: vscode.Disposable;
 
+	// (for performance reasons)
+	private conditionalExitPointMnemonics: string[];
+
 	constructor() {
 
-		// Registers as a inlay hints provider
-		this.disposable = vscode.languages.registerInlayHintsProvider(documentSelector(), this);
+		this.disposable = vscode.Disposable.from(
+			// Registers as a inlay hints provider
+			vscode.languages.registerInlayHintsProvider(documentSelector(), this),
+
+			// Subscribe to configuration change event
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
+		);
+
+		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 	}
 
 	dispose() {
         this.disposable.dispose();
+	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+		// Recreates StatusBarItem on alignment change
+		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
+			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
+		}
+	}
+
+	private initalizeConditionalExitPointMnemonics() {
+
+		const mnemonics = [];
+		if (config.inlayHints.exitPointRet) {
+			mnemonics.push("RET");
+		}
+		if (config.inlayHints.exitPointJp) {
+			mnemonics.push("JP");
+		}
+		if (config.inlayHints.exitPointJr) {
+			mnemonics.push("JR");
+		}
+		if (config.inlayHints.exitPointDjnz) {
+			mnemonics.push("DJNZ");
+		}
+		return mnemonics;
 	}
 
 	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint[]> {
@@ -28,12 +64,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		if (!config.inlayHints.enabled || !isExtensionEnabledFor(document)) {
 			return undefined;
 		}
-
-		// (for performance reasons)
-		const ret = config.inlayHints.exitPointRet;
-		const jp = config.inlayHints.exitPointJp;
-		const jr = config.inlayHints.exitPointJr;
-		const djnz = config.inlayHints.exitPointDjnz;
 
 		// Builds the inlay hints
 		const inlayHints: vscode.InlayHint[] = [];
@@ -99,7 +129,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 				codeFound = false;
 
 			// Checks subroutine exit point
-			} else if (this.isValidConditionalExitPoint(metered.instruction, ret, jp, jr, djnz)) {
+			} else if (this.isValidConditionalExitPoint(metered.instruction)) {
 				// Subroutine exit point
 				const subroutines = incompleteSubroutines.map(incompleteSubroutine => incompleteSubroutine.completeToExitPoint(line));
 				inlayHints.push(...this.buildExitPointsInlayHints(subroutines));
@@ -135,26 +165,26 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return timing && !!timing[0];
 	}
 
-	private isValidConditionalExitPoint(instruction: string, ret: boolean, jp: boolean, jr: boolean, djnz: boolean): boolean {
+	private isValidConditionalExitPoint(instruction: string): boolean {
 
-		// (sanity check)
-		if (!ret && !jp && !jr && !djnz) {
+		const mnemonic = extractMnemonicOf(instruction);
+		if (!this.conditionalExitPointMnemonics.includes(mnemonic)) {
 			return false;
 		}
 
-		const mnemonic = extractMnemonicOf(instruction);
 		const operands = extractOperandsOf(instruction);
 
 		switch (mnemonic) {
 		case "RET":
-			return ret && (operands.length === 1) && isAnyCondition(operands[0]);
+			return (operands.length === 1) && isAnyCondition(operands[0]);
 		case "JP":
-			return jp && (operands.length === 2) && isAnyCondition(operands[0]);
+			return (operands.length === 2) && isAnyCondition(operands[0]);
 		case "JR":
-			return jr && (operands.length === 2) && isJrCondition(operands[0]);
+			return (operands.length === 2) && isJrCondition(operands[0]);
 		case "DJNZ":
-			return djnz && (operands.length === 1);
+			return (operands.length === 1);
 		default:
+			// (should never happen)
 			return false;
 		}
 	}

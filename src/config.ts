@@ -482,7 +482,7 @@ class CachedConfigurationReader extends SimpleConfigurationReader {
 
     private readonly disposable: vscode.Disposable;
 
-	private cache = new Map<string, any>;
+	private cache = new Map<string, any>();
 
     constructor() {
 		super();
