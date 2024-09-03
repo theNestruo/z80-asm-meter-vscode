@@ -3,14 +3,15 @@
 ## 5.6.1 (preview)
 
 - SPASM-ng assembler syntax support
-- Inlay Hints (experimental
 - Fixes outcommented line still being measured. #170
+- Performance improvements
+- Inlay Hints (experimental, work in progress)
 
 ## 5.6.0 (preview)
 
 - Code refactor
 - Performance improvements
-- Inlay Hints (experimental)
+- Inlay Hints (experimental, work in progress)
 
 ## 5.5.2
 
