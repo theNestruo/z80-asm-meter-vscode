@@ -279,13 +279,13 @@ These settings allow to fine-tune the source code parsing and metering.
 
 ### Total timing calculations
 
-When the selection covers several lines and encompasses a single subroutine, there are more than one way to calculate the total timing.
+When the selection covers several lines and encompasses a single subroutine, there are more than one way to calculate the total timing:
+
+![Total timing calculations](images/total-timing-calculation.png)
 
 <details>
 
-There are three total timing calculation available:
-
-![Total timing calculations](images/total-timing-calculation.png)
+These are the three total timing calculation available:
 
 1. **default**: The _default_ total timing calculation mode is the raw addition of the timings of the individual instructions.
 
@@ -419,6 +419,10 @@ There are three total timing calculation available:
 
 Timing hints can be used to modify the timing of a particular instruction. The primary use case is to declare the timing of the subroutine being invoked by `CALL` or `JP` instructions.
 
+For example:
+
+![Timing hints](images/timing-hints.png)
+
 <details>
 
 A timing hint follows the pattern: `[z80=27]` or `[msx=32/22]` with the key being:
@@ -434,11 +438,7 @@ The timing can be either a single value or a pair of values separated by slash (
 
 * `CALL Z, ADD_HL_A ; [msx=32/22]` will be metered as 50/11 Z80+M1 clock cycles, as the result of adding 18/11 + 32(/0). Please note the second timing hint (22) will be ignored in conditional operations.
 
-For example:
-
-![Timing hints](images/timing-hints.png)
-
-In this example:
+In the example shown above:
 
 * Of the timing hints of *.OFF_SCREEN* (41/28 clock cycles), the 41 has been added to the timing of conditional `JR` instruction when the condition is _taken_ (13 clock cycles). Please note the second timing hint (28) has been ignored, as there is only one possible timing for the _taken_ condition path.
 
@@ -559,11 +559,15 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 ## Inlay hints (experimental)
 
+This extension can provide inlay hints (additional information about source code that is rendered inline). Particularly, it can show timing of the execution flow of subroutines (up to the first unconditional exit point), and timing of the execution flow up to conditional exit points.
+
+![Inaly hints](images/inlay-hints.png)
+
+<details>
+
 * [`z80-asm-meter.inlayHints.enabled`](vscode://settings/z80-asm-meter.inlayHints.enabled): Enables detection and metering of subroutines as inlay hints.
 
     Disabled by default.
-
-<details>
 
 * [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider that unlabelled code is a subroutine.
 
