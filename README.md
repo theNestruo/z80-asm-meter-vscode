@@ -565,15 +565,16 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 <details>
 
-* [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider unlabelled code are subroutines.
+* [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider that unlabelled code is a subroutine.
 
     Disabled by default.
 
-* [`z80-asm-meter.inlayHints.subroutines.nested`](vscode://settings/z80-asm-meter.inlayHints.subroutines.nested): Consider nested labels are subroutines.
+* [`z80-asm-meter.inlayHints.subroutines.nested`](vscode://settings/z80-asm-meter.inlayHints.subroutines.nested): Consider that nested labels (lablels starting with a dot (`.`) or with `@@`) are subroutines.
+    * `disabled`: Ignores any nested label.
+    * `enabled`: Considers that any nested label is a new subroutine.
+    * `entryPoint` (default): Considers that a nested label is a subroutine if it is a separate entry points.
 
-    Disabled by default.
-
-* [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider fallthrough labels are subroutines.
+* [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider that labels the code falls through are subroutines.
 
     Enabled by default.
 
@@ -594,9 +595,8 @@ As most of the macro definition fields are optional, this extension uses a best-
     Disabled by default.
 
 * [`z80-asm-meter.inlayHints.exitPoint.label`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.label): When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points.
-
     * `first`: The first label found.
-    * `closest` The last label found, that is the closest label to the exit point.
+    * `closest`: The last label found, that is the closest label to the exit point.
 
 </details>
 

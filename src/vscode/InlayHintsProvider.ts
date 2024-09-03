@@ -92,7 +92,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			const metered = mainParser.parseInstruction(sourceCode);
 
 			// Checks labels (for subroutine starts)
-			if (this.isValidLabel(sourceCode)) {
+			if (this.isValidLabel(sourceCode, incompleteSubroutines)) {
 				if (codeFound) {
 					if (config.inlayHints.fallthroughSubroutines) {
 						// "Falls through" label: appends a new subroutine start
@@ -153,12 +153,29 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return inlayHints;
 	}
 
-	private isValidLabel(sourceCode: SourceCode): boolean {
+	private isValidLabel(sourceCode: SourceCode, incompleteSubroutines: IncompleteSubroutine[]): boolean {
 
-		return !!sourceCode.label
-				&& (config.inlayHints.nestedSubroutines
-					|| (!sourceCode.label.startsWith(".")
-						&& !sourceCode.label.startsWith("@@")));
+		// (sanity checks)
+		if (!sourceCode.label) {
+			// (no label)
+			return false;
+		}
+		if (!sourceCode.label.startsWith(".") && !sourceCode.label.startsWith("@@")) {
+			// (non-nested label)
+			return true;
+		}
+
+		switch (config.inlayHints.nestedSubroutines) {
+			case 'disabled':
+				return false;
+
+			case 'enabled':
+				return true;
+
+			case 'entryPoint':
+				// Entry point: there is no incomplete subroutines
+				return incompleteSubroutines.length == 0;
+		}
 	}
 
 	private isCode(meterable: Meterable): boolean {

@@ -326,7 +326,7 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.unlabelled");
 	}
 
-	get nestedSubroutines(): boolean {
+	get nestedSubroutines(): "disabled" | "enabled" | "entryPoint" {
 		return configurationReader.read("inlayHints.subroutines.nested");
 	}
 
