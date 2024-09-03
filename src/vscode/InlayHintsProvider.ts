@@ -11,6 +11,8 @@ import { isExtensionEnabledFor } from './SourceCodeReader';
 
 export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
+	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
+
 	private readonly disposable: vscode.Disposable;
 
 	// (for performance reasons)
@@ -19,11 +21,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 	constructor() {
 
 		this.disposable = vscode.Disposable.from(
+
 			// Registers as a inlay hints provider
 			vscode.languages.registerInlayHintsProvider(documentSelector(), this),
 
 			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this),
+
+			this.onDidChangeInlayHintsEmitter
 		);
 
 		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
@@ -58,6 +63,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 		return mnemonics;
 	}
+
+	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
 
 	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint[]> {
 
@@ -191,12 +198,24 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private buildSubroutineInlayHints(subroutines: Subroutine[]): vscode.InlayHint[] {
 
+		// (sanity check)
+		if (!subroutines.length) {
+			return [];
+		}
+
 		return subroutines.map(subroutine => this.buildInlayHint(subroutine, true) );
 	}
 
 	private buildExitPointsInlayHints(subroutines: Subroutine[]): vscode.InlayHint[] {
 
-		const subroutine = config.inlayHints.exitPointLabel === "first" ? subroutines[0] : subroutines[subroutines.length - 1];
+		// (sanity check)
+		if (!subroutines.length) {
+			return [];
+		}
+
+		const subroutine = config.inlayHints.exitPointLabel === "first"
+				? subroutines[0]
+				: subroutines[subroutines.length - 1];
 		return [ this.buildInlayHint(subroutine, false) ];
 	}
 

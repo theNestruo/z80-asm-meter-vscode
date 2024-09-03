@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 5.6.2 (preview, unreleased)
+
+- Inlay Hints (experimental, work in progress)
+
 ## 5.6.1 (preview)
 
 - SPASM-ng assembler syntax support
