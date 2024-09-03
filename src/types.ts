@@ -4,22 +4,27 @@
  */
 export class SourceCode {
 
+    /** The instruction (the actual source code) */
+    readonly instruction: string;
+
     /** The optional label */
     readonly label: string | undefined;
 
     /** The optional line repetition count */
     readonly repetitions: number;
 
-    /** The instruction (the actual source code) */
-    readonly instruction: string;
+    /** The position where the optional trailing comment of the entire line starts */
+    readonly lineCommentPosition: number;
 
     /** The optional trailing comment of the entire line */
     readonly lineComment: string | undefined;
 
-    constructor(label: string | undefined, repetitions: number, instruction: string, lineComment: string | undefined) {
+    constructor(instruction: string,
+			label?: string, repetitions?: number, lineCommentPosition?: number, lineComment?: string) {
+		this.instruction = instruction;
         this.label = label;
-        this.repetitions = repetitions;
-        this.instruction = instruction;
+        this.repetitions = repetitions !== undefined ? repetitions : 1;
+		this.lineCommentPosition = lineCommentPosition !== undefined ? lineCommentPosition : -1;
         this.lineComment = lineComment;
     }
 }

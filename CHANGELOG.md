@@ -1,8 +1,10 @@
-## 5.7.x (pre-release)
+<!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
-- Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_
+## 5.6.1 (preview)
+
 - SPASM-ng assembler syntax support
-- Inlay Hints (experimental)
+- Inlay Hints (experimental
+- Fixes outcommented line still being measured. #170
 
 ## 5.6.0 (preview)
 

@@ -3,7 +3,7 @@ import { config } from '../config';
 import { mainParser } from "../parser/MainParser";
 import { readSourceCodeFromActiveTextEditorSelecion } from './SourceCodeReader';
 import { TotalTimings } from '../totalTiming/TotalTimings';
-import { formatTiming, printTiming } from '../utils/FormatterUtils';
+import { formatTiming, printableTimingSuffix, printTiming } from '../utils/FormatterUtils';
 import { SourceCode } from '../types';
 
 export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
@@ -56,8 +56,7 @@ export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
         if (!config.statusBar.copyTimingsAsHints) {
             let text = printTiming(timing);
             if (text) {
-                const timingSuffix = config.platform === "cpc" ? "NOPs" : "clock cycles";
-                text += ` ${timingSuffix}`;
+                text += ` ${printableTimingSuffix()}`;
             }
             const size = timing.size;
             if (size) {

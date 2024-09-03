@@ -1,7 +1,7 @@
 import { config } from "../../config";
 import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { isConditionalInstruction, isJumpOrCallInstruction } from "../../utils/AssemblyUtils";
-import { preprocessLineAsSourceCode } from "../../vscode/SourceCodeReader";
+import { lineToSourceCode } from "../../utils/SourceCodeUtils";
 import { mainParserWithoutTimingHints } from "../MainParser";
 import { TimingHints } from "./TimingHints";
 
@@ -40,7 +40,7 @@ function isCommentedOutSourceCode(sourceCode: SourceCode): boolean {
 
 	return !sourceCode.instruction // non empty line (should never happen)
 		&& !!sourceCode.lineComment // no comment (should never happen)
-		&& !!mainParserWithoutTimingHints.parse(preprocessLineAsSourceCode(sourceCode.lineComment));
+		&& !!mainParserWithoutTimingHints.parse(lineToSourceCode(sourceCode.lineComment));
 }
 
 class TimingHintedMeterable implements Meterable {

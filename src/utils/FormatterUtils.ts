@@ -169,7 +169,7 @@ function printMarkdownTotalTimingsArray(
 
 	const platform = config.platform;
 	const hasM1 = platform === "msx" || platform === "pc8000";
-	const timingSuffix = platform === "cpc" ? "NOPs" : "clock cycles";
+	const timingSuffix = printableTimingSuffix();
 
 	const table = new vscode.MarkdownString(
 		platform === "msx" ? "|||MSX|Z80||\n|--:|:--|--:|--:|---|\n"
@@ -254,6 +254,11 @@ function popLastInstruction(meterables: Meterable[]): string | undefined {
 export function formatTiming(t: number[]): string {
 
 	return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
+}
+
+export function printableTimingSuffix() {
+
+	return config.platform === "cpc" ? " NOPs" : " clock cycles";
 }
 
 export function printTiming(meterable: Meterable): string | undefined {

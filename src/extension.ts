@@ -6,8 +6,8 @@ import { mainParser, mainParserWithoutMacro, mainParserWithoutTimingHints } from
 import { macroParser } from './parser/impl/MacroParser';
 import { regExpTimingHintsParser } from './parser/timingHints/RegExpTimingHintsParser';
 import { CopyFromActiveTextEditorSelecionToClipboardCommand } from './vscode/Commands';
-import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
 import { InlayHintsProvider } from './vscode/InlayHintsProvider';
+import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
 
 
 let disposable: vscode.Disposable | undefined;

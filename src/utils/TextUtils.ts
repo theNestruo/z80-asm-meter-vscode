@@ -49,3 +49,9 @@ export function uncapitalize(s: string): string {
 
     return s.charAt(0).toLowerCase() + s.substring(1);
 }
+
+export function indexOfNonWhitespace(s: string, position?: number): number {
+
+    const ss = s.substring(position || 0);
+    return ss.length - ss.trimStart().length;
+}

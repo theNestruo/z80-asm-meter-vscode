@@ -3,9 +3,9 @@ import { MacroDefinition, config } from "../../config";
 import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { parseTimingLenient, parteIntLenient } from "../../utils/ParserUtils";
-import { preprocessLinesAsSourceCode } from '../../vscode/SourceCodeReader';
 import { mainParserWithoutMacro } from "../MainParser";
 import { InstructionParser } from "../Parsers";
+import { linesToSourceCode } from '../../utils/SourceCodeUtils';
 
 class Macro extends MeterableCollection {
 
@@ -129,7 +129,7 @@ class Macro extends MeterableCollection {
 		}
 
 		if (this.providedSourceCode) {
-			const meterable = mainParserWithoutMacro.parse(preprocessLinesAsSourceCode(this.providedSourceCode));
+			const meterable = mainParserWithoutMacro.parse(linesToSourceCode(this.providedSourceCode));
 			this.add(meterable);
 		}
 

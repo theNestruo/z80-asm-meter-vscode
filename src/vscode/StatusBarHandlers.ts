@@ -5,15 +5,15 @@ import { mainParser } from "../parser/MainParser";
 import { TotalTimings } from '../totalTiming/TotalTimings';
 import { hrMarkdown, printStatusBarText, printTooltipMarkdown } from '../utils/FormatterUtils';
 import { hashCode } from "../utils/TextUtils";
-import { preprocessLinesAsSourceCode, readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
+import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
 import { AbstractCopyToClipboardCommand } from './Commands';
+import { linesToSourceCode } from '../utils/SourceCodeUtils';
 
 class StatusBarItemContents {
 	constructor(
 			readonly text: string,
 			/** The optional line repetition count */
 			readonly tooltip: vscode.MarkdownString) {
-		//
     }
 }
 
@@ -50,8 +50,6 @@ abstract class StatusBarHandler {
 
 	onUpdateRequest() {
 
-        // const startTime = new Date().getTime();
-
 		// Reads the source code
 		const lines = readLinesFromActiveTextEditorSelection();
 
@@ -64,9 +62,6 @@ abstract class StatusBarHandler {
 		} else {
 			this.hide();
 		}
-
-        // const endTime = new Date().getTime();
-        // console.log(`${lines.length} lines metered in ${endTime - startTime} ms`);
 	}
 
 	protected parseAndBuildStatusBarItemContents(lines: string[]): StatusBarItemContents | undefined {
@@ -77,7 +72,7 @@ abstract class StatusBarHandler {
 		}
 
 		// Parses the source code
-		const metered = mainParser.parse(preprocessLinesAsSourceCode(lines));
+		const metered = mainParser.parse(linesToSourceCode(lines));
 		if (!metered) {
 			return undefined;
 		}
@@ -142,6 +137,9 @@ abstract class StatusBarHandler {
 
 export class CachedStatusBarHandler extends StatusBarHandler {
 
+	// (for caching purposes)
+	private readonly empty = new StatusBarItemContents("", new vscode.MarkdownString());
+
 	private cache;
 
 	constructor(command: AbstractCopyToClipboardCommand) {
@@ -167,14 +165,14 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		const currentHashCode = hashCode(lines.join("\n"));
 		const cachedContents = this.cache.get(currentHashCode);
 		if (cachedContents) {
-			return cachedContents;
+			return cachedContents !== this.empty ? cachedContents : undefined;
 		}
 
 		// Parses the source code and builds the status bar item contents
 		const contents = super.parseAndBuildStatusBarItemContents(lines);
 
 		// Caches the status bar item contents
-		this.cache.set(currentHashCode, contents);
+		this.cache.set(currentHashCode, contents || this.empty);
 
 		return contents;
 	}
