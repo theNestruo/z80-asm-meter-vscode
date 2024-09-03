@@ -145,7 +145,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 		// Completes trailing code as subroutine
 		if (incompleteSubroutines.length && codeFound) {
-			const line = document.lineAt(document.lineCount - 1);
+			const line = document.lineAt(range.end.line - 1);
 			const subroutines = incompleteSubroutines.map(incompleteSubroutine => incompleteSubroutine.completeTo(line));
 			inlayHints.push(...this.buildSubroutineInlayHints(subroutines));
 		}
