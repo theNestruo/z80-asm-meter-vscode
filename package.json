@@ -829,8 +829,8 @@
 						"default": "firstLabel",
 						"description": "When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points",
 						"enumDescriptions": [
-							"The first label found",
-							"The last label found, that is the closest label to the exit point"
+							"The first label found; the first (outermost) subroutine in a chain of fallthrough subroutines",
+							"The last label found; the last (innermost) subroutine in a chain of fallthrough subroutines. That is, the subroutine whose label is the closest one to the exit point"
 						]
 					}
 				}

@@ -21,9 +21,9 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
     - [Parser settings](#parser-settings)
 - [Advanced usage](#advanced-usage)
     - [Total timing calculations](#total-timing-calculations)
+    - [Inlay hints (experimental)](#inlay-hints-experimental)
     - [Timing hints](#timing-hints)
     - [User-defined macros](#user-defined-macros)
-- [Inlay hints (experimental)](#inlay-hints-experimental)
 - [Migration to version 5.x](#migration-to-version-5x)
 - [Performance and efficiency](#performance-and-efficiency)
 - [F.A.Q.](#faq)
@@ -415,6 +415,55 @@ These are the three total timing calculation available:
 </details>
 
 
+### Inlay hints (experimental)
+
+This extension can provide inlay hints (additional information about source code that is rendered inline). Particularly, it can show timing of the execution flow of subroutines (up to the first unconditional exit point), and timing of the execution flow up to conditional exit points.
+
+![Inlay hints](images/inlay-hints.png)
+
+<details>
+<summary>Inlay hints settings</summary>
+
+* [`z80-asm-meter.inlayHints.enabled`](vscode://settings/z80-asm-meter.inlayHints.enabled): Enables detection and metering of subroutines as inlay hints.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider that unlabelled code is a subroutine.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.subroutines.nested`](vscode://settings/z80-asm-meter.inlayHints.subroutines.nested): Consider that nested labels (lablels starting with a dot (`.`) or with `@@`) are subroutines.
+    * `disabled`: Ignores any nested label.
+    * `enabled`: Considers that any nested label is a new subroutine.
+    * `entryPoint` (default): Considers that a nested label is a subroutine if it is a separate entry points.
+
+* [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider that labels the code falls through are subroutines.
+
+    Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.ret`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.ret): Consider that conditional RET instructions are subroutine exit points.
+
+    Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.jp`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.jp): Consider that conditional JP instructions are subroutine exit points.
+
+    Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.jr`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.jr): Consider that conditional JR instructions are subroutine exit points.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.djnz`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.djnz): Consider that DJNZ instructions are subroutine exit points.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.label`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.label): When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points.
+    * `first`: The first label found; the first (outermost) subroutine in a chain of fallthrough subroutines.
+    * `closest`: The last label found; the last (innermost) subroutine in a chain of fallthrough subroutines. That is, the subroutine whose label is the closest one to the exit point.
+
+</details>
+
+
 ### Timing hints
 
 Timing hints can be used to modify the timing of a particular instruction. The primary use case is to declare the timing of the subroutine being invoked by `CALL` or `JP` instructions.
@@ -557,54 +606,6 @@ As most of the macro definition fields are optional, this extension uses a best-
 </details>
 
 
-## Inlay hints (experimental)
-
-This extension can provide inlay hints (additional information about source code that is rendered inline). Particularly, it can show timing of the execution flow of subroutines (up to the first unconditional exit point), and timing of the execution flow up to conditional exit points.
-
-![Inaly hints](images/inlay-hints.png)
-
-<details>
-
-* [`z80-asm-meter.inlayHints.enabled`](vscode://settings/z80-asm-meter.inlayHints.enabled): Enables detection and metering of subroutines as inlay hints.
-
-    Disabled by default.
-
-* [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider that unlabelled code is a subroutine.
-
-    Disabled by default.
-
-* [`z80-asm-meter.inlayHints.subroutines.nested`](vscode://settings/z80-asm-meter.inlayHints.subroutines.nested): Consider that nested labels (lablels starting with a dot (`.`) or with `@@`) are subroutines.
-    * `disabled`: Ignores any nested label.
-    * `enabled`: Considers that any nested label is a new subroutine.
-    * `entryPoint` (default): Considers that a nested label is a subroutine if it is a separate entry points.
-
-* [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider that labels the code falls through are subroutines.
-
-    Enabled by default.
-
-* [`z80-asm-meter.inlayHints.exitPoint.ret`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.ret): Consider that conditional RET instructions are subroutine exit points.
-
-    Enabled by default.
-
-* [`z80-asm-meter.inlayHints.exitPoint.jp`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.jp): Consider that conditional JP instructions are subroutine exit points.
-
-    Enabled by default.
-
-* [`z80-asm-meter.inlayHints.exitPoint.jr`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.jr): Consider that conditional JR instructions are subroutine exit points.
-
-    Disabled by default.
-
-* [`z80-asm-meter.inlayHints.exitPoint.djnz`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.djnz): Consider that DJNZ instructions are subroutine exit points.
-
-    Disabled by default.
-
-* [`z80-asm-meter.inlayHints.exitPoint.label`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.label): When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points.
-    * `first`: The first label found.
-    * `closest`: The last label found, that is the closest label to the exit point.
-
-</details>
-
-
 ## Migration to version 5.x
 
 The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
@@ -621,28 +622,28 @@ Please find the deprecated settings, the last version where the setting was avai
 | Version | Deprecated setting | Replacement setting(s) |
 | --: | --- | --- |
 | | | |
-| v4.3.0 | `z80-asm-meter.viewInstruction` | [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction) |
-| v4.3.0 | `z80-asm-meter.timing.mode` | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
-| v4.3.0 | `z80-asm-meter.viewBytes` | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
-| v4.3.0 | `z80-asm-meter.debounce` | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
-| v4.3.0 | `z80-asm-meter.syntax.label` | `z80-asm-meter.syntax.label.colonOptional` |
-| v4.3.0 | `z80-asm-meter.directivesAsInstructions` | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
-| v4.3.0 | `z80-asm-meter.timing.threshold` | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
-| v4.3.0 | `z80-asm-meter.timing.hints` | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
+| v4.3.0 | ~~`z80-asm-meter.viewInstruction`~~ | [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction) |
+| v4.3.0 | ~~`z80-asm-meter.timing.mode`~~ | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
+| v4.3.0 | ~~`z80-asm-meter.viewBytes`~~ | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
+| v4.3.0 | ~~`z80-asm-meter.debounce`~~ | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
+| v4.3.0 | ~~`z80-asm-meter.syntax.label`~~ | ~~`z80-asm-meter.syntax.label.colonOptional`~~ |
+| v4.3.0 | ~~`z80-asm-meter.directivesAsInstructions`~~ | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
+| v4.3.0 | ~~`z80-asm-meter.timing.threshold`~~ | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
+| v4.3.0 | ~~`z80-asm-meter.timing.hints`~~ | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
 | | | |
-| v5.1.0 | `z80-asm-meter.statusBar.compactSize` | [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix) |
-| v5.1.0 | `z80-asm-meter.timing.atExit.enabled` | [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled)<br>[`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled)<br>[`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled) |
-| v5.1.0 | `z80-asm-meter.timing.atExit.icon` | [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon)<br>[`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon) |
+| v5.1.0 | ~~`z80-asm-meter.statusBar.compactSize`~~ | [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix) |
+| v5.1.0 | ~~`z80-asm-meter.timing.atExit.enabled`~~ | [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled)<br>[`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled)<br>[`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled) |
+| v5.1.0 | ~~`z80-asm-meter.timing.atExit.icon`~~ | [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon)<br>[`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon) |
 | | | |
-| v5.3.0 | `z80-asm-meter.syntax.label.colonOptional` | [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional) |
-| v5.3.0 | `z80-asm-meter.syntax.repeat` | [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat) |
-| v5.3.0 | `z80-asm-meter.syntax.lineSeparator` | [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator) |
-| v5.3.0 | `z80-asm-meter.syntax.enable.fakeInstructions` | [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions) |
-| v5.3.0 | `z80-asm-meter.syntax.enable.registerListInstructions` | [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions) |
-| v5.3.0 | `z80-asm-meter.syntax.enable.negativeConditions` | [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions) |
-| v5.3.0 | `z80-asm-meter.syntax.enable.dupEdup` | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
-| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndr` | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
-| v5.3.0 | `z80-asm-meter.syntax.enable.reptEndm` | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.label.colonOptional`~~ | [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.repeat`~~ | [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.lineSeparator`~~ | [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.enable.fakeInstructions`~~ | [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.enable.registerListInstructions`~~ | [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.enable.negativeConditions`~~ | [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.enable.dupEdup`~~ | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.enable.reptEndr`~~ | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
+| v5.3.0 | ~~`z80-asm-meter.syntax.enable.reptEndm`~~ | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
 | | | |
 
 </details>
