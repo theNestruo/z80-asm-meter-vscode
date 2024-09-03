@@ -151,7 +151,7 @@ class MainParser {
         return false;
     }
 
-    /* private */ parseInstruction(s: SourceCode): Meterable | undefined {
+    parseInstruction(s: SourceCode): Meterable | undefined {
 
         const cachedMeterable = this.instructionsCache.get(s.instruction);
 

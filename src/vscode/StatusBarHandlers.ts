@@ -50,6 +50,8 @@ abstract class StatusBarHandler {
 
 	onUpdateRequest() {
 
+        const startTime = new Date().getTime();
+
 		// Reads the source code
 		const lines = readLinesFromActiveTextEditorSelection();
 
@@ -61,6 +63,12 @@ abstract class StatusBarHandler {
 			this.show(contents);
 		} else {
 			this.hide();
+		}
+
+        const endTime = new Date().getTime();
+		const n = lines.length;
+		if (n >= 100 && config.debug) {
+			console.log(`[z80-asm-meter]: ${lines.length} lines metered in ${endTime - startTime} ms`);
 		}
 	}
 

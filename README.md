@@ -282,6 +282,7 @@ These settings allow to fine-tune the source code parsing and metering.
 When the selection covers several lines and encompasses a single subroutine, there are more than one way to calculate the total timing.
 
 <details>
+
 There are three total timing calculation available:
 
 ![Total timing calculations](images/total-timing-calculation.png)
@@ -560,9 +561,44 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 * [`z80-asm-meter.inlayHints.enabled`](vscode://settings/z80-asm-meter.inlayHints.enabled): Enables detection and metering of subroutines as inlay hints.
 
-    Disabled by default
+    Disabled by default.
 
-* (TBD)
+<details>
+
+* [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider unlabelled code are subroutines.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.subroutines.nested`](vscode://settings/z80-asm-meter.inlayHints.subroutines.nested): Consider nested labels are subroutines.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider fallthrough labels are subroutines.
+
+    Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.ret`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.ret): Consider that conditional RET instructions are subroutine exit points.
+
+    Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.jp`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.jp): Consider that conditional JP instructions are subroutine exit points.
+
+    Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.jr`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.jr): Consider that conditional JR instructions are subroutine exit points.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.djnz`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.djnz): Consider that DJNZ instructions are subroutine exit points.
+
+    Disabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.label`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.label): When fallthrough labels are considered subroutines, controls which subroutine is considered at exit points.
+
+    * `first`: The first label found.
+    * `closest` The last label found, that is the closest label to the exit point.
+
+</details>
 
 
 ## Migration to version 5.x
@@ -612,11 +648,13 @@ Please find the deprecated settings, the last version where the setting was avai
 
 Users are encouraged to update to the newer versions for a more performant and efficient source code metering.
 
+Roughly speaking, version 5.5.0 onwards the extension is about 15&times; to 20&times; faster than previous versions.
+
 <details>
 
 Early versions of this extension avoided metering more than once the same selection, and also prevented the metering to be triggered too frequently (debouncing).
 
-From version 5.4.0 onwards, development has focused on performance improvements: now it uses a "Least Recently Used" (LRU) cache for previously metered selections, expensive RegExps have been replaced by lighter alternatives, and another internal LRU cache for instructions improves the performance when metering large source code blocks.
+From version 5.4.0 onwards, development has focused on performance improvements: now it uses a "Least Recently Used" (LRU) cache for previously metered selections, expensive RegExps have been replaced by lighter alternatives, and, since version 5.5.0, another internal LRU cache for instructions improves the performance when metering large source code blocks.
 
 The following table compares the time took to meter 11&nbsp;179 lines of source code (the [fully annotated disassembly of King's Valley (&copy; Konami 1985)](https://github.com/GuillianSeed/Kings-Valley) by [Manuel Pazos](https://github.com/GuillianSeed)) using VS Code 1.92.1, Windows 10, AMD Ryzen 3 2200U:
 
@@ -628,6 +666,7 @@ The following table compares the time took to meter 11&nbsp;179 lines of source 
 | 5.5.2 | `100` (default value) | 242&nbsp;ms |
 | 5.5.2 | `500` | 202&nbsp;ms |
 | 5.6.0 (preview) | `100` (default value) | 252&nbsp;ms |
+| 5.6.1 (preview) | `100` (default value) | 230&nbsp;ms |
 
 </details>
 
