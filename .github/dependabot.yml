@@ -1,5 +1,6 @@
 version: 2
 updates:
+
 # Enable version updates for npm
 - package-ecosystem: "npm"
   # Look for `package.json` and `lock` files in the `root` directory
@@ -18,3 +19,9 @@ updates:
       patterns:
         - "*" # A wildcard that matches all dependencies in the package
               # ecosystem. Note: using "*" may open a large pull request
+
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    # Check for updates to GitHub Actions every week
+    interval: "weekly"
