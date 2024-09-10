@@ -39,7 +39,7 @@ class AssemblyDirective implements Meterable {
 		return [this];
 	}
 
-	readonly composed = false;
+	readonly isComposed = false;
 }
 
 class AssemblyDirectiveParser implements InstructionParser {

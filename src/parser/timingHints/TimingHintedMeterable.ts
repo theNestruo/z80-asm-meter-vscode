@@ -95,7 +95,7 @@ class TimingHintedMeterable implements Meterable {
 		return [this];
 	}
 
-	get composed(): boolean {
+	get isComposed(): boolean {
 		return false;
 	}
 

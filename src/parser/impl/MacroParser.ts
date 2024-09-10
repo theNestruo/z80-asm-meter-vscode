@@ -48,7 +48,7 @@ class Macro extends MeterableCollection {
 	}
 
 	/** false; this meterable is not composed */
-	override readonly composed = false;
+	override readonly isComposed = false;
 
 	/**
 	 * @returns The name of the macro

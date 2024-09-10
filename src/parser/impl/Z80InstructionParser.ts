@@ -51,7 +51,7 @@ class Z80Instruction implements Meterable {
         return [this];
     }
 
-    readonly composed = false;
+    readonly isComposed = false;
 
     /**
      * @returns the mnemonic

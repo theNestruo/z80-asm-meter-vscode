@@ -30,19 +30,20 @@ export function lineToSourceCode(originalLine: string): SourceCode[] {
 	let line = originalLine;
 
 	// Extracts trailing comments
-	const lineCommentPosition = indexOfTrailingCommentsQuotesAware(line);
-	const lineComment = lineCommentPosition >= 0
-			? normalizeTrailingComments(line.substring(lineCommentPosition))
+	const beforeLineCommentPosition = indexOfTrailingCommentsQuotesAware(line);
+	const lineComment = beforeLineCommentPosition >= 0
+			? normalizeTrailingComments(line.substring(beforeLineCommentPosition))
 			: undefined;
 
 	// Removes trailing comments
-	if (lineCommentPosition >= 0) {
-		line = line.substring(0, lineCommentPosition).trimEnd();
+	if (beforeLineCommentPosition >= 0) {
+		line = line.substring(0, beforeLineCommentPosition).trimEnd();
 	}
 
 	// Extracts and removes label
 	let label: string | undefined = undefined;
-	[ label, line ] = extractLabel(line);
+	let afterLabelPosition: number | undefined = undefined;
+	[ label, afterLabelPosition, line ] = extractLabel(line);
 
 	// Extracts and removes repetitions
 	let repetitions: number = 1;
@@ -55,21 +56,23 @@ export function lineToSourceCode(originalLine: string): SourceCode[] {
 	if (!n) {
 		// Attempts to preserve label, or line comment for timing hints)
 		return (label || lineComment)
-				? [ new SourceCode("", label, repetitions, lineCommentPosition, lineComment) ]
+				? [ new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, lineComment) ]
 				: [];
 	}
 
 	// Single fragment: will contain label, repetitions and trailing comments
 	if (n === 1) {
-		return [ new SourceCode(lineFragments[0], label, repetitions, lineCommentPosition, lineComment) ];
+		return [ new SourceCode(lineFragments[0],
+			label, afterLabelPosition, repetitions, beforeLineCommentPosition, lineComment) ];
 	}
 
 	// Multiple fragments: first will contain label and repetitions, last will contain trailing comments
-	const sourceCodes: SourceCode[] = [ new SourceCode(lineFragments[0], label, repetitions) ];
+	const sourceCodes: SourceCode[] = [ new SourceCode(lineFragments[0], label, afterLabelPosition, repetitions) ];
 	for (let i = 1; i < n - 1; i++) {
 		sourceCodes.push(new SourceCode(lineFragments[i]));
 	}
-	sourceCodes.push(new SourceCode(lineFragments[n - 1], undefined, undefined, lineCommentPosition, lineComment));
+	sourceCodes.push(new SourceCode(lineFragments[n - 1],
+		undefined, undefined, undefined, beforeLineCommentPosition, lineComment));
 	return sourceCodes;
 }
 
@@ -141,19 +144,23 @@ function isTrailingCommentsStart(c: string, line: string, i: number, n: number):
 		: 0;
 }
 
-function extractLabel(line: string): [ string | undefined, string ] {
+function extractLabel(line: string): [ string | undefined, number, string ] {
 
-	// (sanity check; also: perfromance reasons on empty lines)
+	// (sanity check for performance reasons on empty lines)
 	if (!line) {
-		return [ undefined, line ];
+		return [ undefined, -1, line ];
 	}
 
 	// Extracts label
 	const matches = config.syntax.labelRegExp.exec(line);
-	const rawLabel = matches ? matches[1] : undefined;
+	if (!matches) {
+		return [ undefined, -1, line.trimStart() ];
+	}
+
 
 	// Returns and removes label
-	return [ rawLabel?.trim(), line.substring(rawLabel?.length || 0).trimStart() ];
+	const rawLabel = matches[1];
+	return [ rawLabel.trim(), rawLabel.length, line.substring(rawLabel.length).trimStart() ];
 }
 
 function extractRepetitions(line: string): [ number, string ] {

@@ -10,21 +10,31 @@ export class SourceCode {
     /** The optional label */
     readonly label: string | undefined;
 
+	/** The position where the optional label ends */
+	readonly afterLabelPosition: number;
+
     /** The optional line repetition count */
     readonly repetitions: number;
 
     /** The position where the optional trailing comment of the entire line starts */
-    readonly lineCommentPosition: number;
+    readonly beforeLineCommentPosition: number;
 
     /** The optional trailing comment of the entire line */
     readonly lineComment: string | undefined;
 
     constructor(instruction: string,
-			label?: string, repetitions?: number, lineCommentPosition?: number, lineComment?: string) {
+			label?: string, afterLabelPosition?: number,
+			repetitions?: number,
+			beforeLineCommentPosition?: number, lineComment?: string) {
+
 		this.instruction = instruction;
+
         this.label = label;
+		this.afterLabelPosition = afterLabelPosition !== undefined ? afterLabelPosition : -1;
+
         this.repetitions = repetitions !== undefined ? repetitions : 1;
-		this.lineCommentPosition = lineCommentPosition !== undefined ? lineCommentPosition : -1;
+
+		this.beforeLineCommentPosition = beforeLineCommentPosition !== undefined ? beforeLineCommentPosition : -1;
         this.lineComment = lineComment;
     }
 }
@@ -75,7 +85,7 @@ export interface Meterable {
     /**
      * @returns if the meterable is composed of finer-grained meterables
      */
-    get composed(): boolean;
+    get isComposed(): boolean;
 }
 
 
@@ -102,7 +112,7 @@ export abstract class AbstractAggregatedMeterable implements Meterable {
 	abstract flatten(): Meterable[];
 
 	/** true; this meterable is composed */
-	composed = true;
+	isComposed = true;
 }
 
 
@@ -217,7 +227,7 @@ export class MeterableCollection extends AbstractAggregatedMeterable {
 		if (!this.cachedMeterables?.length) {
 			const meterables: Meterable[] = [];
 			this.meterables.forEach(meterable => {
-				if (meterable.composed) {
+				if (meterable.isComposed) {
 					meterables.push(...meterable.flatten());
 				} else {
 					meterables.push(meterable);

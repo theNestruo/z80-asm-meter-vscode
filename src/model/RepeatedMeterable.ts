@@ -109,7 +109,7 @@ class RepeatedMeterable extends AbstractAggregatedMeterable {
 	flatten(): Meterable[] {
 
 		// Nested meterable is simple
-		if (!this.meterable.composed) {
+		if (!this.meterable.isComposed) {
 			return new Array(this.repetitions).fill(this.meterable);
 		}
 
