@@ -87,6 +87,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private locateInlayHintCandidates(document: vscode.TextDocument): InlayHintCandidate[] {
 
+		// const start = performance.now();
+
 		const candidates: InlayHintCandidate[] = [];
 
 		let ongoingCandidates: OngoingInlayHintCandidate[] = [];
@@ -161,6 +163,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			const line = document.lineAt(document.lineCount - 1);
 			candidates.push(...this.withUnconditionalJumpOrRetInstruction(ongoingCandidates, line));
 		}
+
+		// const elapsed = performance.now() - start;
+		// console.log(`${document.lineCount} lines: ${candidates.length} InlayHint candidates in ${elapsed} ms`);
 
 		return candidates;
 	}
