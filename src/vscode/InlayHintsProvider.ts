@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
 import { mainParser } from '../parser/MainParser';
+import { TotalTimingMeterable } from '../totalTiming/TotalTimingMeterable';
 import { TotalTimings } from '../totalTiming/TotalTimings';
 import { Meterable, SourceCode } from '../types';
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
@@ -8,8 +9,10 @@ import { hrMarkdown, printableTimingSuffix, printRange, printTiming, printToolti
 import { lineToSourceCode } from '../utils/SourceCodeUtils';
 import { removeEnd } from '../utils/TextUtils';
 import { isExtensionEnabledFor } from './SourceCodeReader';
-import { TotalTimingMeterable } from '../totalTiming/TotalTimingMeterable';
 
+/**
+ * InlayHintsProvider that shows timing of the execution flow of subroutines
+ */
 export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
@@ -87,8 +90,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private locateInlayHintCandidates(document: vscode.TextDocument): InlayHintCandidate[] {
 
-		// const start = performance.now();
-
 		const candidates: InlayHintCandidate[] = [];
 
 		let ongoingCandidates: OngoingInlayHintCandidate[] = [];
@@ -163,9 +164,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			const line = document.lineAt(document.lineCount - 1);
 			candidates.push(...this.withUnconditionalJumpOrRetInstruction(ongoingCandidates, line));
 		}
-
-		// const elapsed = performance.now() - start;
-		// console.log(`${document.lineCount} lines: ${candidates.length} InlayHint candidates in ${elapsed} ms`);
 
 		return candidates;
 	}
