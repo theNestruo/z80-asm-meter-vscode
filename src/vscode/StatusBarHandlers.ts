@@ -9,6 +9,9 @@ import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
 import { AbstractCopyToClipboardCommand } from './Commands';
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
 
+/**
+ * A container for the data to be displayed in the StatusBarItem
+ */
 class StatusBarItemContents {
 	constructor(
 			readonly text: string,
@@ -17,7 +20,10 @@ class StatusBarItemContents {
     }
 }
 
-abstract class StatusBarHandler {
+/**
+ * Base implementation of the StatusBarItem handler
+ */
+class StatusBarHandler {
 
 	protected readonly command: AbstractCopyToClipboardCommand;
 
@@ -35,8 +41,8 @@ abstract class StatusBarHandler {
 	}
 
 	dispose() {
-        this.disposable.dispose();
 		this.destroy();
+        this.disposable.dispose();
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
@@ -65,7 +71,7 @@ abstract class StatusBarHandler {
 			this.hide();
 		}
 
-        const endTime = new Date().getTime();
+		const endTime = new Date().getTime();
 		const n = lines.length;
 		if (n >= 100 && config.debug) {
 			console.log(`[z80-asm-meter]: ${lines.length} lines metered in ${endTime - startTime} ms`);
@@ -143,6 +149,10 @@ abstract class StatusBarHandler {
 	}
 }
 
+/**
+ * Implementation of the StatusBarItem handler
+ * that uses a LRU cache for previously metered selections
+ */
 export class CachedStatusBarHandler extends StatusBarHandler {
 
 	// (for caching purposes)
@@ -186,6 +196,10 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 	}
 }
 
+/**
+ * Decorator for any implementation of StatusBarItem handler
+ * that prevents the metering to be triggered too frequently (debouncing)
+ */
 export class DebouncedStatusBarHandler {
 
 	private readonly delegate: StatusBarHandler;
@@ -235,16 +249,16 @@ export class DebouncedStatusBarHandler {
 
 		// Leading event?
 		if (this.isLeadingEvent) {
+			// (next event will not be a leading event)
+			this.isLeadingEvent = false;
 			// Immediate execution
 			this.delegate.onUpdateRequest();
-			this.isLeadingEvent = false;
 			return;
 		}
 
 		// Debounced execution
 		this.updateStatusBarTimeout = setTimeout(() => {
 			this.delegate.onUpdateRequest();
-			this.isLeadingEvent = true;
 		}, debounce);
 	}
 }
