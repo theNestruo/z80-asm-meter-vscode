@@ -180,11 +180,11 @@ These settings allow to fine-tune the information to be shown in the status bar 
 
 * [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce): Milliseconds to prevent metering from being called too frequently when the selection changes.
 
-    Defaults to: `100` (100&nbsp;ms).
+    Defaults to: `200` (200&nbsp;ms).
 
 * [`z80-asm-meter.statusBar.cacheSize`](vscode://settings/z80-asm-meter.statusBar.cacheSize): Size of the cache, in selections, used to minimize metering calculations when navigating through previously metered code.
 
-    Defaults to: `100` (100 selections).
+    Defaults to: `200` (200 selections).
 
 </details>
 
@@ -268,7 +268,7 @@ These settings allow to fine-tune the source code parsing and metering.
 
 * [`z80-asm-meter.parser.instructionsCacheSize`](vscode://settings/z80-asm-meter.parser.instructionsCacheSize): Size of the internal cache, in instructions, to lighten the metering calculations; particularly when metering large source code blocks.
 
-    Defaults to: `100` (100 instructions).
+    Defaults to: `200` (200 instructions).
 
 </details>
 
@@ -667,11 +667,12 @@ The following table compares the time took to meter 11&nbsp;179 lines of source 
 | :-: | :-- | --: |
 | 5.3.5 | (not available) | 4&nbsp;149&nbsp;ms |
 | 5.4.0 | (not available) | 3&nbsp;795&nbsp;ms |
-| 5.5.0<br>5.5.1 | `100` (default value) | 398&nbsp;ms |
-| 5.5.2 | `100` (default value) | 242&nbsp;ms |
+| 5.5.0<br>5.5.1 | `100` (previous default value) | 398&nbsp;ms |
+| 5.5.2 | `100` (previous default value) | 242&nbsp;ms |
 | 5.5.2 | `500` | 202&nbsp;ms |
-| 5.6.0 (preview) | `100` (default value) | 252&nbsp;ms |
-| 5.6.1 (preview) | `100` (default value) | 230&nbsp;ms |
+| 5.6.0 (preview) | `100` (previous default value) | 252&nbsp;ms |
+| 5.6.1 (preview) | `100` (previous default value) | 230&nbsp;ms |
+| 5.6.2 (preview) | `200` (new default value) | 207&nbsp;ms |
 
 </details>
 
