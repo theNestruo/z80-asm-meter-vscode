@@ -22,15 +22,16 @@ export function linesToSourceCode(lines: string[]): SourceCode[] {
 	}
 
 	// Splits the lines and extracts repetition counter and trailing comments
-	return lines.flatMap(lineToSourceCode);
+	const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
+	return lines.flatMap(line => lineToSourceCode(line, lineSeparatorCharacter));
 }
 
-export function lineToSourceCode(originalLine: string): SourceCode[] {
+export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: string | undefined): SourceCode[] {
 
 	let line = originalLine;
 
 	// Extracts trailing comments
-	const beforeLineCommentPosition = indexOfTrailingCommentsQuotesAware(line);
+	const beforeLineCommentPosition = indexOfTrailingCommentsQuotesAware(line, lineSeparatorCharacter);
 	const lineComment = beforeLineCommentPosition >= 0
 			? normalizeTrailingComments(line.substring(beforeLineCommentPosition))
 			: undefined;
@@ -50,7 +51,7 @@ export function lineToSourceCode(originalLine: string): SourceCode[] {
 	[ repetitions, line ] = extractRepetitions(line);
 
 	// Splits
-	const lineFragments = splitNormalizeQuotesAware(line, config.syntax.lineSeparatorCharacter);
+	const lineFragments = splitNormalizeQuotesAware(line, lineSeparatorCharacter);
 
 	const n = lineFragments.length;
 	if (!n) {
@@ -76,7 +77,7 @@ export function lineToSourceCode(originalLine: string): SourceCode[] {
 	return sourceCodes;
 }
 
-function indexOfTrailingCommentsQuotesAware(s: string): number {
+function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: string | undefined): number {
 
 	// (for performance reasons)
 	const n = s.length;
@@ -105,7 +106,7 @@ function indexOfTrailingCommentsQuotesAware(s: string): number {
 			}
 
 			// Separator?
-			if (c === config.syntax.lineSeparatorCharacter) {
+			if (c === lineSeparatorCharacter) {
 				break;
 			}
 
@@ -186,7 +187,7 @@ function extractRepetitions(line: string): [ number, string ] {
 	return [ repetitions, matches[2].trimStart() ];
 }
 
-export function splitNormalizeQuotesAware(s: string, separator: string | undefined): string[] {
+export function splitNormalizeQuotesAware(s: string, lineSeparatorCharacter: string | undefined): string[] {
 
 	const fragments: string[] = [];
 
@@ -210,7 +211,7 @@ export function splitNormalizeQuotesAware(s: string, separator: string | undefin
 			}
 
 			// Separator?
-			if (c === separator) {
+			if (c === lineSeparatorCharacter) {
 				break;
 			}
 

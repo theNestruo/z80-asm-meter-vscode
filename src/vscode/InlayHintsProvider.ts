@@ -91,13 +91,15 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private locateInlayHintCandidates(document: vscode.TextDocument): InlayHintCandidate[] {
 
+		const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
+
 		const candidates: InlayHintCandidate[] = [];
 
 		let ongoingCandidates: OngoingInlayHintCandidate[] = [];
 		let containsCode: boolean = false;
 		for (let i = 0, n = document.lineCount; i < n; i++) {
 			const line = document.lineAt(i);
-			const sourceCodes = lineToSourceCode(line.text);
+			const sourceCodes = lineToSourceCode(line.text, lineSeparatorCharacter);
 			if (!sourceCodes.length || !sourceCodes[0]) {
 				continue; // (ignore empty lines)
 			}
