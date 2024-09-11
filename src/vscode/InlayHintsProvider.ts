@@ -288,7 +288,7 @@ class OngoingInlayHintCandidate {
 		const inlayHintPosition = this.startLine.range.end.with(undefined, positionCharacter);
 
 		return new InlayHintCandidate(inlayHintPosition,
-			this.startLine, endLine, this.sourceCode, hasLineComment);
+			this.startLine, endLine, [...this.sourceCode], hasLineComment);
 	}
 
 	/**
@@ -306,7 +306,7 @@ class OngoingInlayHintCandidate {
 		const inlayHintPosition = endLine.range.end.with(undefined, positionCharacter);
 
 		return new InlayHintCandidate(inlayHintPosition,
-			this.startLine, endLine, this.sourceCode, hasLineComment);
+			this.startLine, endLine, [...this.sourceCode], hasLineComment);
 	}
 }
 
