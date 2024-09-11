@@ -75,7 +75,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			return undefined;
 		}
 
-		// Builds the inlay hints
+		// Locates the inlay hints, and provides the inlay hints within the requested range
 		return this.locateInlayHintCandidates(document)
 				.filter(candidate => range.intersection(candidate.range))
 				.map(candidate => candidate.provide());
@@ -83,7 +83,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
 
-		return (hint instanceof UnresolvedInlayHint)
+		// Resolves the inlay hints
+		return (hint instanceof InlayHint)
 				? hint.resolve()
 				: undefined;
 	}
@@ -255,6 +256,10 @@ function documentSelector(): readonly vscode.DocumentFilter[] {
 	];
 }
 
+/**
+ * A possible InlayHint candidate; temporary container
+ * while the source code is being parsed and the exit point is yet to be found
+ */
 class OngoingInlayHintCandidate {
 
 	private readonly startLine: vscode.TextLine;
@@ -266,6 +271,10 @@ class OngoingInlayHintCandidate {
 		this.sourceCode = sourceCode;
 	}
 
+	/**
+	 * Materializes the possible InlayHint candidate
+	 * @returns the InlayHint candidate, before the comment of the first line
+	 */
 	withUnconditionalJumpOrRetInstruction(endLine: vscode.TextLine): InlayHintCandidate {
 
 		// Computes the InlayHint position before the comment of the first line
@@ -280,6 +289,10 @@ class OngoingInlayHintCandidate {
 			this.startLine, endLine, this.sourceCode, hasLineComment);
 	}
 
+	/**
+	 * Materializes the possible InlayHint candidate
+	 * @returns the InlayHint candidate, before the comment of the last line
+	 */
 	withConditionalExitPoint(endLine: vscode.TextLine): InlayHintCandidate {
 
 		// Computes the InlayHint position before the comment of the last line
@@ -295,6 +308,9 @@ class OngoingInlayHintCandidate {
 	}
 }
 
+/**
+ * An InlayHint candidate
+ */
 class InlayHintCandidate {
 
 	private readonly position: vscode.Position;
@@ -311,6 +327,9 @@ class InlayHintCandidate {
 		this.hasLineComment = hasLineComment;
 	}
 
+	/**
+	 * @returns the actual InlayHint
+	 */
 	provide(): vscode.InlayHint {
 
 		// Computes the actual data
@@ -323,13 +342,16 @@ class InlayHintCandidate {
 		const label = `${timing}${timingSuffix}`;
 		const paddingRight = this.hasLineComment; // (only if there are line comments);
 
-		return new UnresolvedInlayHint(this.position, label, paddingRight,
+		return new InlayHint(this.position, label, paddingRight,
 			totalTimings, totalTiming, timing, timingSuffix,
 			this.sourceCode[0], this.range);
 	}
 }
 
-class UnresolvedInlayHint extends vscode.InlayHint {
+/**
+ * An InlayHint that has been provided and can be resolved
+ */
+class InlayHint extends vscode.InlayHint {
 
 	private readonly timing: string;
 	private readonly timingSuffix: string;
@@ -355,6 +377,11 @@ class UnresolvedInlayHint extends vscode.InlayHint {
 	}
 
 	resolve(): vscode.InlayHint {
+
+		// (sanity check)
+		if (this.tooltip) {
+			return this;
+		}
 
 		const label = removeEnd(this.sourceCodeForLabel.label, ":");
 
