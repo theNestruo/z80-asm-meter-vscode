@@ -56,8 +56,6 @@ class StatusBarHandler {
 
 	onUpdateRequest() {
 
-        const startTime = new Date().getTime();
-
 		// Reads the source code
 		const lines = readLinesFromActiveTextEditorSelection();
 
@@ -69,12 +67,6 @@ class StatusBarHandler {
 			this.show(contents);
 		} else {
 			this.hide();
-		}
-
-		const n = lines.length;
-		if (n >= 100 && config.debug) {
-			const elapsedTime = new Date().getTime() - startTime;
-			console.log(`[z80-asm-meter]: ${n} lines metered in ${elapsedTime} ms`);
 		}
 	}
 

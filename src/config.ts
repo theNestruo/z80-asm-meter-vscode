@@ -22,11 +22,6 @@ class Configuration {
 		return configurationReader.read("expandSelectionToLine");
 	}
 
-	get debug(): boolean {
-
-		return configurationReader.read("debug");
-	}
-
 	// Status bar
 	readonly statusBar = new StatusBarConfiguration();
 

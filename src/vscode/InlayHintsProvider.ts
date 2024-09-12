@@ -75,10 +75,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			return undefined;
 		}
 
-		// Locates the inlay hints, and provides the inlay hints within the requested range
-		return this.locateInlayHintCandidates(document)
-				.filter(candidate => range.intersection(candidate.range))
-				.map(candidate => candidate.provide());
+		// Locates the inlay hints candidates within the requested range and provides the inlay hints
+		return this.locateInlayHintCandidates(document, range)
+			.map(candidate => candidate.provide());
 	}
 
 	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
@@ -89,34 +88,44 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 				: undefined;
 	}
 
-	private locateInlayHintCandidates(document: vscode.TextDocument): InlayHintCandidate[] {
+	private locateInlayHintCandidates(document: vscode.TextDocument, range: vscode.Range): InlayHintCandidate[] {
 
+		// (for performance reasons)
 		const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
+		const unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
+		const fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
 
 		const candidates: InlayHintCandidate[] = [];
 
 		let ongoingCandidates: OngoingInlayHintCandidate[] = [];
-		let containsCode: boolean = false;
+		let didContainCode: boolean = false;
 		for (let i = 0, n = document.lineCount; i < n; i++) {
 			const line = document.lineAt(i);
+
+			// Stops looking for candidates after the range
+			const isAfterRange = line.range.start.isAfter(range.end);
+			if (isAfterRange && !ongoingCandidates.length) {
+				break;
+			}
+
 			const sourceCodes = lineToSourceCode(line.text, lineSeparatorCharacter);
 			if (!sourceCodes.length || !sourceCodes[0]) {
-				continue; // (ignore empty lines)
+				continue; // (ignore empty line)
 			}
+			const sourceCode = sourceCodes[0];
 
 			// (saves source code on each previously found candidate)
 			ongoingCandidates.forEach(candidateBuilder => {
 				candidateBuilder.sourceCode.push(...sourceCodes);
 			});
 
-			// Checks labels (for subroutine starts)
-			const sourceCode = sourceCodes[0];
-			if (this.isValidLabel(sourceCode, ongoingCandidates)) {
-				if (!containsCode) {
+			// Checks labels for subroutine starts (if not after the range)
+			if (!isAfterRange && this.isValidLabel(sourceCode, ongoingCandidates)) {
+				if (!didContainCode) {
 					// Discards any previous candidates (labels) because they did not contain code
 					ongoingCandidates = [ new OngoingInlayHintCandidate(line, sourceCodes) ];
 
-				} else if (config.inlayHints.fallthroughSubroutines) {
+				} else if (fallthroughSubroutines) {
 					// Creates a new candidate on "falls through" labels
 					ongoingCandidates.push(new OngoingInlayHintCandidate(line, sourceCodes));
 				}
@@ -124,46 +133,38 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			// Checks source code
 			const metered = mainParser.parseInstruction(sourceCode);
-			if (!metered) {
-				// (nothing else to do on unparseable source code)
-				continue;
-			}
-
-			// Checks code
-			if (!this.isCode(metered)) {
-				// Checks data
-				if (!containsCode && metered.size) {
-					// Discards previous candidate (label) because it contains data
-					ongoingCandidates.pop();
-				}
-				// (nothing else to do on no-code lines)
-				continue;
+			if (!metered || !this.isCode(metered)) {
+				continue; // (ignore unparseable source code or no-code (data?) lines)
 			}
 
 			// Creates a new candidate on unlabelled code
-			if (!containsCode && !ongoingCandidates.length && config.inlayHints.unlabelledSubroutines) {
+			if (!didContainCode && !ongoingCandidates.length && unlabelledSubroutines) {
 				ongoingCandidates = [ new OngoingInlayHintCandidate(line, sourceCodes) ];
 			}
-			containsCode = true;
 
-			// Checks subroutine end
+			didContainCode = true;
+
+			const isBeforeRange = line.range.start.isBefore(range.start);
+
+			// Checks subroutine ends
 			if (isUnconditionalJumpOrRetInstruction(metered.instruction)) {
-				// Ends all incomplete subroutines
-				candidates.push(...this.withUnconditionalJumpOrRetInstruction(ongoingCandidates, line));
+				// Ends all incomplete subroutines (if not before the range)
+				if (!isBeforeRange) {
+					candidates.push(...this.withUnconditionalJumpOrRetInstruction(ongoingCandidates, line));
+				}
 
-				// (restarts sections)
+				// (restarts subroutine lookup)
 				ongoingCandidates = [];
-				containsCode = false;
+				didContainCode = false;
 
-			// Checks subroutine conditional exit point
-			} else if (this.isValidConditionalExitPoint(metered.instruction)) {
-				// Subroutine conditional exit point
+			// Checks subroutine conditional exit point (if not before the range)
+			} else if (!isBeforeRange && this.isValidConditionalExitPoint(metered.instruction)) {
 				candidates.push(...this.withConditionalExitPoint(ongoingCandidates, line));
 			}
 		}
 
 		// Completes trailing code as subroutine
-		if (ongoingCandidates.length && containsCode) {
+		if (ongoingCandidates.length && didContainCode) {
 			const line = document.lineAt(document.lineCount - 1);
 			candidates.push(...this.withUnconditionalJumpOrRetInstruction(ongoingCandidates, line));
 		}
@@ -229,23 +230,37 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 	}
 
-	private withUnconditionalJumpOrRetInstruction(ongoingCandidates: OngoingInlayHintCandidate[], endLine: vscode.TextLine): InlayHintCandidate[] {
-
-		return ongoingCandidates.map(ongingCandidate =>
-			ongingCandidate.withUnconditionalJumpOrRetInstruction(endLine));
-	}
-
-	private withConditionalExitPoint(ongoingCandidates: OngoingInlayHintCandidate[], endLine: vscode.TextLine): InlayHintCandidate[] {
+	/**
+	 * Materializes the possible InlayHint candidates
+	 * @returns the InlayHint candidates, before the comment of the first line
+	 */
+	private withUnconditionalJumpOrRetInstruction(
+		ongoingCandidates: OngoingInlayHintCandidate[], endLine: vscode.TextLine): InlayHintCandidate[] {
 
 		// (sanity check)
 		if (!ongoingCandidates.length) {
 			return [];
 		}
 
-		const ongoingCandidate = config.inlayHints.exitPointLabel === "first"
-				? ongoingCandidates[0]
-				: ongoingCandidates[ongoingCandidates.length - 1];
-		return [ ongoingCandidate.withConditionalExitPoint(endLine) ];
+		return ongoingCandidates.map(ongoingCandidate => ongoingCandidate.withUnconditionalJumpOrRetInstruction(endLine));
+	}
+
+	/**
+	 * Materializes the possible InlayHint candidate
+	 * @returns the InlayHint candidate, before the comment of the last line
+	 */
+	private withConditionalExitPoint(
+		ongoingCandidates: OngoingInlayHintCandidate[], endLine: vscode.TextLine): InlayHintCandidate[] {
+
+		// (sanity checks)
+		if (!ongoingCandidates.length) {
+			return [];
+		}
+
+		return [
+			ongoingCandidates[config.inlayHints.exitPointLabel === "first" ? 0 : ongoingCandidates.length - 1]
+			.withConditionalExitPoint(endLine)
+		];
 	}
 }
 
@@ -264,7 +279,7 @@ function documentSelector(): readonly vscode.DocumentFilter[] {
  */
 class OngoingInlayHintCandidate {
 
-	private readonly startLine: vscode.TextLine;
+	readonly startLine: vscode.TextLine;
 
 	readonly sourceCode: SourceCode[];
 
@@ -274,39 +289,49 @@ class OngoingInlayHintCandidate {
 	}
 
 	/**
-	 * Materializes the possible InlayHint candidate
-	 * @returns the InlayHint candidate, before the comment of the first line
+	 * Materializes the InlayHint candidate
+	 * @returns the InlayHint candidate
 	 */
 	withUnconditionalJumpOrRetInstruction(endLine: vscode.TextLine): InlayHintCandidate {
 
 		// Computes the InlayHint position before the comment of the first line
-		const lineCommentPosition = this.sourceCode[0].beforeLineCommentPosition;
-		const hasLineComment = lineCommentPosition >= 0;
-		const positionCharacter = hasLineComment
-				? this.startLine.text.substring(0, lineCommentPosition).trimEnd().length
-				: this.startLine.text.trimEnd().length;
-		const inlayHintPosition = this.startLine.range.end.with(undefined, positionCharacter);
+		const [ position, paddingRight ] = this.positionBeforeLineComment(
+			this.startLine, this.sourceCode[0]);
 
-		return new InlayHintCandidate(inlayHintPosition,
-			this.startLine, endLine, [...this.sourceCode], hasLineComment);
+		return new InlayHintCandidate(
+			position,
+			paddingRight,
+			new vscode.Range(this.startLine.range.start, endLine.range.end),
+			[...this.sourceCode]);
 	}
 
 	/**
-	 * Materializes the possible InlayHint candidate
-	 * @returns the InlayHint candidate, before the comment of the last line
+	 * Materializes the InlayHint candidate
+	 * @returns the InlayHint candidate
 	 */
 	withConditionalExitPoint(endLine: vscode.TextLine): InlayHintCandidate {
 
 		// Computes the InlayHint position before the comment of the last line
-		const lineCommentPosition = this.sourceCode[this.sourceCode.length - 1].beforeLineCommentPosition;
-		const hasLineComment = lineCommentPosition >= 0;
-		const positionCharacter = hasLineComment
-				? endLine.text.substring(0, lineCommentPosition).trimEnd().length
-				: endLine.text.trimEnd().length;
-		const inlayHintPosition = endLine.range.end.with(undefined, positionCharacter);
+		const [ position, paddingRight ] = this.positionBeforeLineComment(
+			endLine, this.sourceCode[this.sourceCode.length - 1]);
 
-		return new InlayHintCandidate(inlayHintPosition,
-			this.startLine, endLine, [...this.sourceCode], hasLineComment);
+		return new InlayHintCandidate(
+			position,
+			paddingRight,
+			new vscode.Range(this.startLine.range.start, endLine.range.end),
+			[...this.sourceCode]);
+	}
+
+	private positionBeforeLineComment(line: vscode.TextLine, sourceCode: SourceCode): [ vscode.Position, boolean ] {
+
+		const lineCommentPosition = sourceCode.beforeLineCommentPosition;
+		const hasLineComment = lineCommentPosition >= 0;
+
+		const positionCharacter = hasLineComment
+				? line.text.substring(0, lineCommentPosition).trimEnd().length
+				: line.text.trimEnd().length;
+
+		return [ line.range.end.with(undefined, positionCharacter), hasLineComment ];
 	}
 }
 
@@ -316,17 +341,16 @@ class OngoingInlayHintCandidate {
 class InlayHintCandidate {
 
 	private readonly position: vscode.Position;
+	private readonly paddingRight: boolean;
+	private readonly range: vscode.Range;
 	private readonly sourceCode: SourceCode[];
-	readonly range: vscode.Range;
-	private readonly hasLineComment: boolean;
 
-	constructor(position: vscode.Position,
-		startLine: vscode.TextLine, endLine: vscode.TextLine, sourceCode: SourceCode[], hasLineComment: boolean) {
+	constructor(position: vscode.Position, paddingRight: boolean, range: vscode.Range, sourceCode: SourceCode[]) {
 
 		this.position = position;
+		this.paddingRight = paddingRight;
+		this.range = range;
 		this.sourceCode = sourceCode;
-		this.range = new vscode.Range(startLine.range.start, endLine.range.end);
-		this.hasLineComment = hasLineComment;
 	}
 
 	/**
@@ -342,11 +366,10 @@ class InlayHintCandidate {
 
 		// Computes the InlayHint label
 		const label = `${timing}${timingSuffix}`;
-		const paddingRight = this.hasLineComment; // (only if there are line comments);
 
-		return new InlayHint(this.position, label, paddingRight,
+		return new InlayHint(this.position, this.range, label, this.paddingRight,
 			totalTimings, totalTiming, timing, timingSuffix,
-			this.sourceCode[0], this.range);
+			this.sourceCode[0]);
 	}
 }
 
@@ -355,27 +378,30 @@ class InlayHintCandidate {
  */
 class InlayHint extends vscode.InlayHint {
 
+	private readonly range: vscode.Range;
+
 	private readonly timing: string;
 	private readonly timingSuffix: string;
 	private readonly totalTimings: TotalTimings;
 	private readonly totalTiming: TotalTimingMeterable;
-	private readonly sourceCodeForLabel: SourceCode;
-	private readonly range: vscode.Range;
 
-	constructor(position: vscode.Position, label: string, paddingRight: boolean,
+	private readonly sourceCodeWithLabel: SourceCode;
+
+	constructor(position: vscode.Position, range: vscode.Range, label: string, paddingRight: boolean,
 		totalTimings: TotalTimings, totalTiming: TotalTimingMeterable, timing: string, timingSuffix: string,
-		sourceCodeForLabel: SourceCode, range: vscode.Range) {
+		sourceCodeWithLabel: SourceCode) {
 
 		super(position, label);
 		this.paddingLeft = true;
 		this.paddingRight = paddingRight;
 
+		this.range = range;
+
 		this.totalTimings = totalTimings;
 		this.totalTiming = totalTiming;
 		this.timing = timing;
 		this.timingSuffix = timingSuffix;
-		this.sourceCodeForLabel = sourceCodeForLabel;
-		this.range = range;
+		this.sourceCodeWithLabel = sourceCodeWithLabel;
 	}
 
 	resolve(): vscode.InlayHint {
@@ -385,13 +411,13 @@ class InlayHint extends vscode.InlayHint {
 			return this;
 		}
 
-		const label = removeEnd(this.sourceCodeForLabel.label, ":");
+		const title = removeEnd(this.sourceCodeWithLabel.label, ":");
 
 		// Computes the InlayHint tooltip
 		const timingText = `**${this.timing}**${this.timingSuffix}`;
 		const rangeText = printRange(this.range);
 		this.tooltip = new vscode.MarkdownString("", true)
-			.appendMarkdown(label ? `### ${label}\n\n`: "")
+			.appendMarkdown(title ? `### ${title}\n\n`: "")
 			.appendMarkdown(`_${rangeText}_\n\n`)
 			.appendMarkdown(`${this.totalTiming.statusBarIcon} ${this.totalTiming.name}: ${timingText}\n`)
 			.appendMarkdown(hrMarkdown)
