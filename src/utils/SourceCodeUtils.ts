@@ -32,12 +32,12 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 
 	// Extracts trailing comments
 	const beforeLineCommentPosition = indexOfTrailingCommentsQuotesAware(line, lineSeparatorCharacter);
-	const lineComment = beforeLineCommentPosition >= 0
+	const lineComment = beforeLineCommentPosition !== undefined
 			? normalizeTrailingComments(line.substring(beforeLineCommentPosition))
 			: undefined;
 
 	// Removes trailing comments
-	if (beforeLineCommentPosition >= 0) {
+	if (beforeLineCommentPosition !== undefined) {
 		line = line.substring(0, beforeLineCommentPosition).trimEnd();
 	}
 
@@ -77,7 +77,7 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	return sourceCodes;
 }
 
-function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: string | undefined): number {
+function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: string | undefined): number | undefined {
 
 	// (for performance reasons)
 	const n = s.length;
@@ -129,7 +129,7 @@ function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: s
 		}
 	}
 
-	return -1;
+	return undefined;
 }
 
 function normalizeTrailingComments(s: string) {
@@ -145,17 +145,17 @@ function isTrailingCommentsStart(c: string, line: string, i: number, n: number):
 		: 0;
 }
 
-function extractLabel(line: string): [ string | undefined, number, string ] {
+function extractLabel(line: string): [ string | undefined, number | undefined, string ] {
 
 	// (sanity check for performance reasons on empty lines)
 	if (!line) {
-		return [ undefined, -1, line ];
+		return [ undefined, undefined, line ];
 	}
 
 	// Extracts label
 	const matches = config.syntax.labelRegExp.exec(line);
 	if (!matches) {
-		return [ undefined, -1, line.trimStart() ];
+		return [ undefined, undefined, line.trimStart() ];
 	}
 
 

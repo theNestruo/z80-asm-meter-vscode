@@ -16,9 +16,7 @@ export function extractOperandsOf(s: string): string[] {
 export function extractOperandsOfQuotesAware(s: string): string[] {
 
     const i = s.indexOf(" ");
-    return i === -1
-        ? []
-        : splitNormalizeQuotesAware(s.substring(i + 1), ",");
+    return i === -1 ? [] : splitNormalizeQuotesAware(s.substring(i + 1), ",");
 }
 
 /**

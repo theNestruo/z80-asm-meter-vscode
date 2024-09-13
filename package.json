@@ -1,7 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.6.3",
+	"version": "5.6.4",
 	"engines": {
 		"vscode": "^1.93.0"
 	},
@@ -275,13 +275,13 @@
 					"z80-asm-meter.statusBar.debounce": {
 						"order": 70,
 						"type": "integer",
-						"default": 200,
+						"default": 100,
 						"description": "Milliseconds to prevent metering from being called too frequently when the selection changes"
 					},
 					"z80-asm-meter.statusBar.cacheSize": {
 						"order": 75,
 						"type": "integer",
-						"default": 200,
+						"default": 150,
 						"description": "Size of the cache, in selections, used to minimize metering calculations when navigating through previously metered code"
 					},
 					"z80-asm-meter.statusBar.instructionIcon": {
@@ -427,7 +427,7 @@
 					"z80-asm-meter.parser.instructionsCacheSize": {
 						"order": 20,
 						"type": "integer",
-						"default": 200,
+						"default": 250,
 						"description": "Size of the internal cache, in instructions, to lighten the metering calculations; particularly when metering large source code blocks"
 					}
 				}
@@ -766,14 +766,35 @@
 						"default": false,
 						"description": "Enables detection and metering of subroutines as inlay hints"
 					},
-					"z80-asm-meter.inlayHints.subroutines.unlabelled": {
+					"z80-asm-meter.inlayHints.subroutines.position": {
 						"order": 20,
+						"type": "string",
+						"enum": [
+							"lineStart",
+							"afterLabel",
+							"beforeCode",
+							"afterCode",
+							"beforeComment",
+							"lineEnd"
+						],
+						"default": "beforeComment",
+						"enumDescriptions": [
+							"At the beginning of the line",
+							"After the label, or at the beginning of the line if there is no label",
+							"Before the actual source code",
+							"After the actual source code",
+							"Before the trailing line comments, or at the end of the line if there are no trailing comments",
+							"At the end of the line"
+						]
+					},
+					"z80-asm-meter.inlayHints.subroutines.unlabelled": {
+						"order": 30,
 						"type": "boolean",
 						"default": false,
 						"description": "Consider that unlabelled code is a subroutine"
 					},
 					"z80-asm-meter.inlayHints.subroutines.nested": {
-						"order": 22,
+						"order": 32,
 						"type": "string",
 						"enum": [
 							"disabled",
@@ -789,37 +810,58 @@
 						]
 					},
 					"z80-asm-meter.inlayHints.subroutines.fallthrough": {
-						"order": 24,
+						"order": 34,
 						"type": "boolean",
 						"default": true,
 						"description": "Consider that labels the code falls through are subroutines"
 					},
+					"z80-asm-meter.inlayHints.exitPoint.position": {
+						"order": 40,
+						"type": "string",
+						"enum": [
+							"lineStart",
+							"afterLabel",
+							"beforeCode",
+							"afterCode",
+							"beforeComment",
+							"lineEnd"
+						],
+						"default": "beforeComment",
+						"enumDescriptions": [
+							"At the beginning of the line",
+							"After the label, or at the beginning of the line if there is no label",
+							"Before the actual source code",
+							"After the actual source code",
+							"Before the trailing line comments, or at the end of the line if there are no trailing comments",
+							"At the end of the line"
+						]
+					},
 					"z80-asm-meter.inlayHints.exitPoint.ret": {
-						"order": 30,
+						"order": 50,
 						"type": "boolean",
 						"default": true,
 						"description": "Considers that conditional RET instructions are subroutine exit points"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.jp": {
-						"order": 32,
+						"order": 52,
 						"type": "boolean",
 						"default": true,
 						"description": "Considers that conditional JP instructions are subroutine exit points"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.jr": {
-						"order": 34,
+						"order": 54,
 						"type": "boolean",
 						"default": false,
 						"description": "Considers that conditional JR instructions are subroutine exit points"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.djnz": {
-						"order": 36,
+						"order": 56,
 						"type": "boolean",
 						"default": false,
 						"description": "Considers that DJNZ instructions are subroutine exit points"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.label": {
-						"order": 40,
+						"order": 58,
 						"type": "string",
 						"enum": [
 							"first",

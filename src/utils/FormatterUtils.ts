@@ -3,7 +3,7 @@ import { config } from "../config";
 import { Meterable } from '../types';
 import { TotalTimingMeterable } from '../totalTiming/TotalTimingMeterable';
 import { TotalTimings } from '../totalTiming/TotalTimings';
-import { spaceIfNotInfix, pluralize } from "./TextUtils";
+import { spaceIfNotInfix, pluralize, validateCodicon } from "./TextUtils";
 
 // Numbers
 
@@ -132,72 +132,87 @@ function printStatusBarSize(n: number): string {
 	return `${sizeIcon}${formattedSize}${sizeSuffix}`;
 }
 
-// Status bar: tooltip (Markdown)
-
-export function printTooltipMarkdown(totalTimings: TotalTimings): string[] {
-
-	// Timing
-	const markdown = printMarkdownTotalTimingsArray(totalTimings.ordered());
-
-	// (separator)
-	markdown.push(hrMarkdown);
-
-	// Instruction and/or size
-	const instruction = printInstructions(totalTimings.default);
-	const size = totalTimings.default.size;
-	if (instruction || size) {
-		markdown.push("|||");
-		markdown.push("|---|---|");
-		if (instruction) {
-			markdown.push(`|Instructions:|\`${instruction}\`|`);
-		}
-		if (size) {
-			const formattedSize = printSize(size);
-			const sizeSuffix = pluralize(" byte| bytes", size);
-			const bytes = printBytes(totalTimings.default);
-			markdown.push(bytes
-				? `|Bytes:|${formattedSize}${sizeSuffix} (\`${bytes}\`)|`
-				: `|Bytes:|${formattedSize}${sizeSuffix}|`);
-		}
-	}
-	return markdown;
-}
+// Status bar / Inlay hint: tooltip (Markdown)
 
 export const hrMarkdown = "\n---\n\n";
 
-function printMarkdownTotalTimingsArray(
-	totalTimings: (TotalTimingMeterable | undefined)[]): string[] {
+export function printMarkdownTotalTimingsAndSize(
+	totalTimings: TotalTimings): string[] {
+
+	const table = printMarkdownTotalTimings(totalTimings);
+
+	const size = totalTimings.default.size;
+	if (size) {
+		const sizeIcon = validateCodicon(config.statusBar.sizeIcon, "$(file-binary)");
+		const formattedSize = printSize(size);
+		const sizeSuffix = pluralize(" byte| bytes", size);
+		const platform = config.platform;
+		const hasM1 = platform === "msx" || platform === "pc8000";
+		table.push(hasM1
+			? `|${sizeIcon}|Size|**${formattedSize}**||${sizeSuffix}|`
+			: `|${sizeIcon}|Size|**${formattedSize}**|${sizeSuffix}|`);
+	}
+
+	return table;
+}
+
+
+export function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] {
 
 	const platform = config.platform;
 	const hasM1 = platform === "msx" || platform === "pc8000";
 	const timingSuffix = printableTimingSuffix();
 
 	const table =
-		platform === "msx" ? [ "|||MSX|Z80||", "|--:|:--|--:|--:|---|" ]
-		: platform === "pc8000" ? [ "|||Z80|Z80+M1||", "|--:|:--|--:|--:|---|" ]
-		: [ "|||||", "|--:|:--|--:|---|" ];
+		platform === "msx" ? [ "||||||", "|:-:|---|--:|--:|---|", "|||**MSX**|Z80||" ]
+		: platform === "pc8000" ? [ "||||||", "|:-:|---|--:|--:|---|", "|||**Z80**|Z80+M1||" ]
+		: [ "|||Z80||", "|:-:|---|--:|---|" ];
 
-	for (const totalTiming of totalTimings) {
+	totalTimings.ordered().forEach(totalTiming => {
 		if (!totalTiming) {
-			continue;
+			return;
 		}
 
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
 		const value = formatTiming(totalTiming.z80Timing);
 		const m1Value = formatTiming(totalTiming.msxTiming);
 		if (!value && (!hasM1 || !m1Value)) {
-			continue;
+			return;
 		}
 
 		switch (platform) {
 			case 'msx':
-				table.push(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
+				table.push(`|${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
 				break;
 			case 'pc8000':
-				table.push(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
+				table.push(`|${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
 				break;
 			default:
-				table.push(`|${totalTiming.statusBarIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
+				table.push(`|${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
 				break;
+		}
+	});
+
+	return table;
+}
+
+export function printMarkdownInstructionsAndBytes(totalTimings: TotalTimings): string[] {
+
+	const table = [];
+
+	// Instruction and/or bytes
+	const totalTiming = totalTimings.default;
+	const instruction = printInstructions(totalTiming);
+	const bytes = printBytes(totalTiming);
+	if (instruction || bytes) {
+		table.push("||||");
+		table.push("|:-:|---|---|");
+		if (instruction) {
+			const instructionIcon = validateCodicon(config.statusBar.instructionIcon, "$(code)");
+			table.push(`|${instructionIcon}|Instructions|**${instruction}**|`);
+		}
+		if (bytes) {
+			table.push(`||Bytes|**${bytes}**|`);
 		}
 	}
 
@@ -390,12 +405,12 @@ function popLastBytes(meterables: Meterable[]): string[] | undefined {
 
 export function printPosition(position: vscode.Position): string {
 
-	return `Line #${position.line + 1}`;
+	return `#${position.line + 1}`;
 }
 
 export function printRange(range: vscode.Range): string {
 
 	return range.isSingleLine
 		? printPosition(range.start)
-		: `Lines #${range.start.line + 1} - #${range.end.line + 1}`;
+		: `#${range.start.line + 1}&nbsp;&ndash;&nbsp;#${range.end.line + 1}`;
 }

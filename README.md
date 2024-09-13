@@ -428,6 +428,32 @@ This extension can provide inlay hints (additional information about source code
 
     Disabled by default.
 
+* [`z80-asm-meter.inlayHints.subroutines.position`](vscode://settings/z80-asm-meter.inlayHints.subroutines.position): The position within the line for the inlay hints of subroutines.
+
+    * `lineStart`: at the beginning of the line.
+
+        ![](images/inlayHints.subroutines.position=lineStart.png)
+
+    * `afterLabel`: after the label, or at the beginning of the line if there is no label.
+
+        ![](images/inlayHints.subroutines.position=afterLabel.png)
+
+    * `beforeCode`: before the actual source code.
+
+        ![](images/inlayHints.subroutines.position=beforeCode.png)
+
+    * `afterCode`: after the actual source code.
+
+        ![](images/inlayHints.subroutines.position=afterCode.png)
+
+    * `beforeComment` (default): before the trailing line comments, or at the end of the line if there are no trailing comments.
+
+        ![](images/inlayHints.subroutines.position=beforeComment.png)
+
+    * `lineEnd`: at the end of the line.
+
+        ![](images/inlayHints.subroutines.position=lineEnd.png)
+
 * [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider that unlabelled code is a subroutine.
 
     Disabled by default.
@@ -440,6 +466,32 @@ This extension can provide inlay hints (additional information about source code
 * [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider that labels the code falls through are subroutines.
 
     Enabled by default.
+
+* [`z80-asm-meter.inlayHints.exitPoint.position`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.position): The position within the line for the inlay hints of subroutine exit points.
+
+    * `lineStart`: at the beginning of the line.
+
+        ![](images/inlayHints.exitPoint.position=lineStart.png)
+
+    * `afterLabel`: after the label, or at the beginning of the line if there is no label.
+
+        ![](images/inlayHints.exitPoint.position=afterLabel.png)
+
+    * `beforeCode`: before the actual source code.
+
+        ![](images/inlayHints.exitPoint.position=beforeCode.png)
+
+    * `afterCode`: after the actual source code.
+
+        ![](images/inlayHints.exitPoint.position=afterCode.png)
+
+    * `beforeComment` (default): before the trailing line comments, or at the end of the line if there are no trailing comments.
+
+        ![](images/inlayHints.exitPoint.position=beforeComment.png)
+
+    * `lineEnd`: at the end of the line.
+
+        ![](images/inlayHints.exitPoint.position=lineEnd.png)
 
 * [`z80-asm-meter.inlayHints.exitPoint.ret`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.ret): Consider that conditional RET instructions are subroutine exit points.
 
@@ -667,12 +719,12 @@ The following table compares the time took to meter 11&nbsp;179 lines of source 
 | :-: | :-- | --: |
 | 5.3.5 | (not available) | 4&nbsp;149&nbsp;ms |
 | 5.4.0 | (not available) | 3&nbsp;795&nbsp;ms |
-| 5.5.0<br>5.5.1 | `100` (previous default value) | 398&nbsp;ms |
-| 5.5.2 | `100` (previous default value) | 242&nbsp;ms |
-| 5.5.2 | `500` | 202&nbsp;ms |
-| 5.6.0 (preview) | `100` (previous default value) | 252&nbsp;ms |
-| 5.6.1 (preview) | `100` (previous default value) | 230&nbsp;ms |
-| 5.6.2 (preview) | `200` (new default value) | 207&nbsp;ms |
+| 5.5.0<br>5.5.1 | `100` (default value) | ~398&nbsp;ms |
+| 5.5.2 | `100` (default value) | 242&nbsp;ms |
+| 5.6.0 (preview) | `100` (default value) | 252&nbsp;ms |
+| 5.6.1 (preview) | `100` (default value) | 230&nbsp;ms |
+| 5.6.2 (preview)<br>5.6.3 | `200` (new default value) | ~207&nbsp;ms |
+| 5.6.4 | `250` (new default value) | 165&nbsp;ms |
 
 </details>
 

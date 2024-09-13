@@ -11,13 +11,13 @@ export class SourceCode {
     readonly label: string | undefined;
 
 	/** The position where the optional label ends */
-	readonly afterLabelPosition: number;
+	readonly afterLabelPosition: number | undefined;
 
     /** The optional line repetition count */
     readonly repetitions: number;
 
     /** The position where the optional trailing comment of the entire line starts */
-    readonly beforeLineCommentPosition: number;
+    readonly beforeLineCommentPosition: number | undefined;
 
     /** The optional trailing comment of the entire line */
     readonly lineComment: string | undefined;
@@ -30,11 +30,11 @@ export class SourceCode {
 		this.instruction = instruction;
 
         this.label = label;
-		this.afterLabelPosition = afterLabelPosition !== undefined ? afterLabelPosition : -1;
+		this.afterLabelPosition = afterLabelPosition;
 
         this.repetitions = repetitions !== undefined ? repetitions : 1;
 
-		this.beforeLineCommentPosition = beforeLineCommentPosition !== undefined ? beforeLineCommentPosition : -1;
+		this.beforeLineCommentPosition = beforeLineCommentPosition;
         this.lineComment = lineComment;
     }
 }

@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 import { config } from "../config";
 import { mainParser } from "../parser/MainParser";
 import { TotalTimings } from '../totalTiming/TotalTimings';
-import { hrMarkdown, printStatusBarText, printTooltipMarkdown } from '../utils/FormatterUtils';
-import { hashCode } from "../utils/TextUtils";
-import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
-import { AbstractCopyToClipboardCommand } from './Commands';
+import { hrMarkdown, printMarkdownInstructionsAndBytes, printMarkdownTotalTimingsAndSize, printStatusBarText } from '../utils/FormatterUtils';
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
+import { hashCode } from "../utils/TextUtils";
+import { AbstractCopyToClipboardCommand } from './Commands';
+import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
 
 /**
  * A container for the data to be displayed in the StatusBarItem
@@ -129,12 +129,16 @@ class StatusBarHandler {
 
 	private buildTooltip(totalTimings: TotalTimings): vscode.MarkdownString {
 
-		const markdown = printTooltipMarkdown(totalTimings);
+		const markdown = [
+			...printMarkdownTotalTimingsAndSize(totalTimings),
+			hrMarkdown,
+			...printMarkdownInstructionsAndBytes(totalTimings)
+		];
 
 		const commandDescription = this.command.buildDescription(totalTimings);
 		if (commandDescription) {
 			markdown.push(hrMarkdown);
-			markdown.push(commandDescription);
+			markdown.push(`${commandDescription}`);
 		}
 
 		return new vscode.MarkdownString(markdown.join("\n"), true);
