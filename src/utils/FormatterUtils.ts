@@ -70,7 +70,7 @@ function printStatusBarTotalTimings(totalTimings: TotalTimings): string {
 		case "smart":
 		case "combineSmart": {
 			const [a, b, c, d] = totalTimings.ordered();
-			return totalTimings.executionFlow || totalTimings.atExit
+			return (totalTimings.executionFlow || totalTimings.atExit)
 				? printStatusBarTotalTimingsArray([b, c, d])
 				: printStatusBarTotalTimingsArray([ a ]);
 		}
@@ -95,7 +95,7 @@ function printStatusBarTotalTimingsArray(totalTimings: (TotalTimingMeterable | u
 			return;
 		}
 		const icon = totalTiming.statusBarIcon;
-		const value = printTiming(totalTiming) || "0";
+		const value = printTiming(totalTiming) ?? "0";
 
 		// Combines when the previous timing when they have the same values
 		if (!config.statusBar.totalTimingsCombined) {

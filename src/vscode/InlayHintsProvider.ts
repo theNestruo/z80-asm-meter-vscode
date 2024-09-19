@@ -408,7 +408,7 @@ class InlayHintCandidate {
 		// Computes the actual data
 		const totalTimings = new TotalTimings(mainParser.parse(this.sourceCode)!);
 		const totalTiming = totalTimings.best();
-		const timing = printTiming(totalTiming) || "0";
+		const timing = printTiming(totalTiming) ?? "0";
 		const timingSuffix = printableTimingSuffix();
 
 		// Computes the InlayHint label
@@ -458,15 +458,14 @@ class InlayHint extends vscode.InlayHint {
 			return this;
 		}
 
-		const title = removeEnd(this.sourceCodeWithLabel.label, ":");
-
 		// Computes the InlayHint tooltip
+		const header = removeEnd(this.sourceCodeWithLabel.label, ":");
 		const timingText = `**${this.timing}**${this.timingSuffix}`;
 		const rangeText = printRange(this.range);
 		this.tooltip = new vscode.MarkdownString([
 			"|||",
 			"|:-:|---|",
-			title ? `||**${title}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
+			header ? `||**${header}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
 			`|${this.totalTiming.statusBarIcon}|${this.totalTiming.name}: ${timingText}|`,
 			hrMarkdown,
 			...printMarkdownTotalTimings(this.totalTimings)

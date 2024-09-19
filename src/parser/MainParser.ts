@@ -1,18 +1,18 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { Meterable, MeterableCollection, SourceCode } from '../types';
 import { repeatedMeterable } from '../model/RepeatedMeterable';
+import { Meterable, MeterableCollection, SourceCode } from '../types';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
 import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
 import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
 import { macroParser } from './impl/MacroParser';
 import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
 import { z80InstructionParser } from './impl/Z80InstructionParser';
-import { timingHintedMeterable } from './timingHints/TimingHintedMeterable';
-import { TimingHints } from './timingHints/TimingHints';
 import { defaultTimingHintsParser } from './timingHints/DefaultTimingHintsParser';
 import { regExpTimingHintsParser } from './timingHints/RegExpTimingHintsParser';
+import { timingHintedMeterable } from './timingHints/TimingHintedMeterable';
+import { TimingHints } from './timingHints/TimingHints';
 
 class MainParser {
 
@@ -102,8 +102,8 @@ class MainParser {
 
             // Handles repetition end
             if (this.parseRepetitionEnd(sourceCode.instruction)) {
-                meterables = meterablesStack.pop() || ret;
-                repetitions = repetitionsStack.pop() || 1;
+                meterables = meterablesStack.pop() ?? ret;
+                repetitions = repetitionsStack.pop() ?? 1;
                 return;
             }
 

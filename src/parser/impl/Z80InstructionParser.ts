@@ -302,8 +302,7 @@ class Z80Instruction implements Meterable {
             } else if (candidateOperands.length === expectedOperands.length + 1) {
                 // Checks explicit accumulator syntax
                 explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed();
-                if ((!explicitAccumulatorSyntax)
-                    || (candidateOperands[0] !== "A")) {
+                if (!explicitAccumulatorSyntax || (candidateOperands[0] !== "A")) {
                     return 0;
                 }
 
@@ -346,7 +345,7 @@ class Z80Instruction implements Meterable {
         if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
             // (checks for SDCC index register syntax first)
             return sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand)
-                || this.indirectOperandScore(expectedOperand, candidateOperand);
+                ?? this.indirectOperandScore(expectedOperand, candidateOperand);
         }
 
         // Depending on the expected operand...

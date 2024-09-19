@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import { MacroDefinition, config } from "../../config";
 import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
-import { parseTimingLenient, parteIntLenient } from "../../utils/ParserUtils";
+import { parseTimingsLenient, parteIntLenient } from "../../utils/ParserUtils";
+import { linesToSourceCode } from '../../utils/SourceCodeUtils';
 import { mainParserWithoutMacro } from "../MainParser";
 import { InstructionParser } from "../Parsers";
-import { linesToSourceCode } from '../../utils/SourceCodeUtils';
 
 class Macro extends MeterableCollection {
 
@@ -24,24 +24,12 @@ class Macro extends MeterableCollection {
 		super();
 
 		this.providedName = source.name;
-		this.providedSourceCode = source.instructions || [];
-		this.providedZ80Timing =
-			parseTimingLenient(source.z80)
-			|| parseTimingLenient(source.ts)
-			|| parseTimingLenient(source.t);
-		this.providedMsxTiming = config.platform === "msx"
-			? (parseTimingLenient(source.msx)
-				|| parseTimingLenient(source.m1)
-				|| parseTimingLenient(source.ts)
-				|| parseTimingLenient(source.t))
-			: (parseTimingLenient(source.m1)
-				|| parseTimingLenient(source.msx)
-				|| parseTimingLenient(source.ts)
-				|| parseTimingLenient(source.t));
-		this.providedCpcTiming =
-			parseTimingLenient(source.cpc)
-			|| parseTimingLenient(source.ts)
-			|| parseTimingLenient(source.t);
+		this.providedSourceCode = source.instructions ?? [];
+		this.providedZ80Timing = parseTimingsLenient(source.z80, source.ts, source.t);
+		this.providedMsxTiming = (config.platform === "msx")
+			? parseTimingsLenient(source.msx, source.m1, source.ts, source.t)
+			: parseTimingsLenient(source.m1, source.msx, source.ts, source.t);
+		this.providedCpcTiming = parseTimingsLenient(source.cpc, source.ts, source.t);
 		this.providedSize = parteIntLenient(source.size);
 
 		this.init();

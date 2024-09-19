@@ -186,7 +186,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		const contents = super.parseAndBuildStatusBarItemContents(lines);
 
 		// Caches the status bar item contents
-		this.cache.set(currentHashCode, contents || this.empty);
+		this.cache.set(currentHashCode, contents ?? this.empty);
 
 		return contents;
 	}

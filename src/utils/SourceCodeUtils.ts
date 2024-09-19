@@ -177,14 +177,9 @@ function extractRepetitions(line: string): [ number, string ] {
 		return [ 1, line ];
 	}
 
-	const repetitions = parseNumericExpression(matches[1]) || 1;
-	if (repetitions <= 0) {
-		// (unparseable repetitions; removes repetitions)
-		return [ 1, matches[2].trimStart() ];
-	}
-
 	// Extracts and removes repetitions
-	return [ repetitions, matches[2].trimStart() ];
+	const repetitions = parseNumericExpression(matches[1]) ?? 1;
+	return [ Math.min(1, repetitions), matches[2].trimStart() ];
 }
 
 export function splitNormalizeQuotesAware(s: string, lineSeparatorCharacter: string | undefined): string[] {

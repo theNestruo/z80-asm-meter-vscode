@@ -467,21 +467,21 @@ class SimpleConfigurationReader {
 		if (actualDefaultValue === undefined) {
 			return this.read(section);
 		}
-		const value = <T>this.readIgnoreDefault(section);
-		return (value !== undefined) ? value : actualDefaultValue;
+		return <T>this.readIgnoreDefault(section) ?? actualDefaultValue;
 	}
 
 	private readIgnoreDefault<T>(section: string): T | undefined {
 
 		const config = vscode.workspace.getConfiguration("z80-asm-meter");
 		const info = config.inspect(section);
-		const isSet = info && (info.globalValue !== undefined
-			|| info.workspaceValue !== undefined
-			|| info.workspaceFolderValue !== undefined
-			|| info.defaultLanguageValue !== undefined
-			|| info.globalLanguageValue !== undefined
-			|| info.workspaceLanguageValue !== undefined
-			|| info.workspaceFolderLanguageValue !== undefined);
+		const isSet = info
+			&& (info.globalValue
+				|| info.workspaceValue
+				|| info.workspaceFolderValue
+				|| info.defaultLanguageValue
+				|| info.globalLanguageValue
+				|| info.workspaceLanguageValue
+				|| info.workspaceFolderLanguageValue);
 		return isSet ? <T>config.get(section) : undefined;
 	}
 }
