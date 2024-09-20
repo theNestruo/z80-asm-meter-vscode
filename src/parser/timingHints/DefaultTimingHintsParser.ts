@@ -29,7 +29,7 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		}
 
 		// Parses timing hint comment
-		const timingHints = new Map<string, number[]>;
+		const timingHints = new Map<string, number[]>();
 		for (const match of matches) {
 			const parsedTimingHint = parseTimingLenient(match[2]);
 			if (parsedTimingHint) {
