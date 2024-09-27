@@ -181,10 +181,10 @@ export function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] 
 		}
 
 		switch (platform) {
-			case 'msx':
+			case "msx":
 				table.push(`|${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
 				break;
-			case 'pc8000':
+			case "pc8000":
 				table.push(`|${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
 				break;
 			default:

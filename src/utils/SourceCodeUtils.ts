@@ -57,23 +57,37 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	if (!n) {
 		// Attempts to preserve label, or line comment for timing hints)
 		return (label || lineComment)
-				? [ new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, lineComment) ]
+				? [
+					new SourceCode("")
+					.withLabel(label, afterLabelPosition)
+					.withRepetitions(repetitions)
+					.withLineComment(beforeLineCommentPosition, lineComment)
+				]
 				: [];
 	}
 
 	// Single fragment: will contain label, repetitions and trailing comments
 	if (n === 1) {
-		return [ new SourceCode(lineFragments[0],
-			label, afterLabelPosition, repetitions, beforeLineCommentPosition, lineComment) ];
+		return [
+			new SourceCode(lineFragments[0])
+			.withLabel(label, afterLabelPosition)
+			.withRepetitions(repetitions)
+			.withLineComment(beforeLineCommentPosition, lineComment)
+		];
 	}
 
 	// Multiple fragments: first will contain label and repetitions, last will contain trailing comments
-	const sourceCodes: SourceCode[] = [ new SourceCode(lineFragments[0], label, afterLabelPosition, repetitions) ];
+	const sourceCodes: SourceCode[] = [
+		new SourceCode(lineFragments[0])
+		.withLabel(label, afterLabelPosition)
+		.withRepetitions(repetitions)
+	];
 	for (let i = 1; i < n - 1; i++) {
 		sourceCodes.push(new SourceCode(lineFragments[i]));
 	}
-	sourceCodes.push(new SourceCode(lineFragments[n - 1],
-		undefined, undefined, undefined, beforeLineCommentPosition, lineComment));
+	sourceCodes.push(
+		new SourceCode(lineFragments[n - 1])
+		.withLineComment(beforeLineCommentPosition, lineComment));
 	return sourceCodes;
 }
 

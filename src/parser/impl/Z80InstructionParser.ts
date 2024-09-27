@@ -225,7 +225,7 @@ class Z80Instruction implements Meterable {
 
     /**
      * @returns true if this operation allows implicit accumulator syntax
-     * (it's mnemonic is not LD, there are two operands, and the first one is A)
+     * (its mnemonic is not LD, there are two operands, and the first one is A)
      */
     private isImplicitAccumulatorSyntaxAllowed(): boolean {
 
@@ -242,7 +242,7 @@ class Z80Instruction implements Meterable {
 
     /**
      * @returns true if this operation allows SDCC explicit accumulator syntax
-     * (it's mnemonic is ADC, ADD, AND, CP, DEC, INC, OR, RL, RLC, RR, RRC, SBC, SLA, SRA, SRL, SUB, or XOR,
+     * (its mnemonic is ADC, ADD, AND, CP, DEC, INC, OR, RL, RLC, RR, RRC, SBC, SLA, SRA, SRL, SUB, or XOR,
      * and there is one single operand)
      */
     private isExplicitAccumulatorSyntaxAllowed(): boolean {

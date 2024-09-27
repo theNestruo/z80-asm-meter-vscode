@@ -35,7 +35,7 @@ class GlassFakeInstructionParser implements InstructionParser {
         if (!["CALL", "JP", "JR", "RET"].includes(mnemonic)
             || !operands
             || operands.length < (mnemonic === "RET" ? 1 : 2)
-            || operands[0].charAt(0) !== '!') {
+            || operands[0].charAt(0) !== "!") {
             return undefined;
         }
 

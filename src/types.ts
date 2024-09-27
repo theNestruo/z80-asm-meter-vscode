@@ -7,36 +7,63 @@ export class SourceCode {
     /** The instruction (the actual source code) */
     readonly instruction: string;
 
-    /** The optional label */
-    readonly label: string | undefined;
+    private aLabel: string | undefined;
+	private aAfterLabelPosition: number | undefined;
 
-	/** The position where the optional label ends */
-	readonly afterLabelPosition: number | undefined;
+    private aRepetitions: number = 1;
 
-    /** The optional line repetition count */
-    readonly repetitions: number;
+    private aBeforeLineCommentPosition: number | undefined;
+    private aLineComment: string | undefined;
 
-    /** The position where the optional trailing comment of the entire line starts */
-    readonly beforeLineCommentPosition: number | undefined;
-
-    /** The optional trailing comment of the entire line */
-    readonly lineComment: string | undefined;
-
-    constructor(instruction: string,
-			label?: string, afterLabelPosition?: number,
-			repetitions?: number,
-			beforeLineCommentPosition?: number, lineComment?: string) {
+    constructor(instruction: string) {
 
 		this.instruction = instruction;
+	}
 
-        this.label = label;
-		this.afterLabelPosition = afterLabelPosition;
+    /** The optional label */
+	public get label(): string | undefined {
+		return this.aLabel;
+	}
 
-        this.repetitions = repetitions !== undefined ? repetitions : 1;
+	/** The position where the optional label ends */
+	public get afterLabelPosition() : number | undefined {
+		return this.aAfterLabelPosition;
+	}
 
-		this.beforeLineCommentPosition = beforeLineCommentPosition;
-        this.lineComment = lineComment;
-    }
+	public withLabel(label: string | undefined, afterLabelPosition: number | undefined): SourceCode {
+
+		this.aLabel = label;
+		this.aAfterLabelPosition = afterLabelPosition;
+		return this;
+	}
+
+    /** The optional line repetition count */
+    public get repetitions(): number {
+		return this.aRepetitions;
+	}
+
+	public withRepetitions(repetitions: number | undefined): SourceCode {
+
+		this.aRepetitions = repetitions ?? 1;
+		return this;
+	}
+
+    /** The position where the optional trailing comment of the entire line starts */
+    public get beforeLineCommentPosition(): number | undefined {
+		return this.aBeforeLineCommentPosition;
+	}
+
+    /** The optional trailing comment of the entire line */
+    public get lineComment(): string | undefined {
+		return this.aLineComment;
+	}
+
+	public withLineComment(beforeLineCommentPosition: number | undefined, lineComment: string | undefined): SourceCode {
+
+		this.aBeforeLineCommentPosition = beforeLineCommentPosition;
+        this.aLineComment = lineComment;
+		return this;
+	}
 }
 
 /**
