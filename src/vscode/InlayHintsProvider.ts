@@ -119,10 +119,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			const startSourcesIndex = sourceCodes.length;
 			sourceCodes.push(...lineSourceCodes);
 
-			// Checks labels for subroutine starts (if not after the range)
-			if (!isAfterRange && this.isValidLabel(sourceCode, candidates)) {
-				this.handleValidLabel(candidates, didContainCode, line, startSourcesIndex);
-			}
+			// Checks labels for subroutine starts
+			this.handleLabel(sourceCode, candidates, didContainCode, isAfterRange, line, startSourcesIndex);
 
 			// Checks source code
 			const metered = mainParser.parseInstruction(sourceCode);
@@ -131,9 +129,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			}
 
 			// Creates a new candidate on unlabelled code
-			if (!didContainCode) {
-				this.handleFirstSourceCode(candidates, line, startSourcesIndex);
-			}
+			this.handleCode(candidates, didContainCode, line, startSourcesIndex);
 
 			didContainCode = true;
 
@@ -167,6 +163,29 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return providers;
 	}
 
+	private handleLabel(
+		sourceCode: SourceCode, candidates: InlayHintCandidate[],
+		didContainCode: boolean, isAfterRange: boolean,
+		line: vscode.TextLine, startSourcesIndex: number) {
+
+		// Checks labels for subroutine starts (if not after the range)
+		if (isAfterRange || !this.isValidLabel(sourceCode, candidates)) {
+			return;
+		}
+
+		if (!didContainCode) {
+			// Discards any previous candidates (labels) because they did not contain code
+			candidates.length = 0;
+			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+			return;
+		}
+
+		if (config.inlayHints.fallthroughSubroutines) {
+			// Creates a new candidate on "falls through" labels
+			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+		}
+	}
+
 	private isValidLabel(sourceCode: SourceCode, existingCandidates: InlayHintCandidate[]): boolean {
 
 		// (sanity checks)
@@ -190,21 +209,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 	}
 
-	private handleValidLabel(candidates: InlayHintCandidate[], didContainCode: boolean, line: vscode.TextLine, startSourcesIndex: number) {
-
-		if (!didContainCode) {
-			// Discards any previous candidates (labels) because they did not contain code
-			candidates.length = 0;
-			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
-			return;
-		}
-
-		if (config.inlayHints.fallthroughSubroutines) {
-			// Creates a new candidate on "falls through" labels
-			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
-		}
-	}
-
 	private isCode(meterable: Meterable): boolean {
 
 		// timing depending on the platform
@@ -216,10 +220,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return timing && !!timing[0];
 	}
 
-	private handleFirstSourceCode(candidates: InlayHintCandidate[], line: vscode.TextLine, startSourcesIndex: number) {
+	private handleCode(
+		candidates: InlayHintCandidate[], didContainCode: boolean, line: vscode.TextLine, startSourcesIndex: number) {
 
 		// Creates a new candidate on unlabelled code
-		if (!candidates.length && config.inlayHints.unlabelledSubroutines) {
+		if (!didContainCode && !candidates.length && config.inlayHints.unlabelledSubroutines) {
 			candidates.length = 0;
 			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
 		}
