@@ -21,8 +21,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	// (for performance reasons)
 	private conditionalExitPointMnemonics: string[];
-	private subroutinesPosition: InlayHintPositionType;
-	private exitPointPosition: InlayHintPositionType;
 
 	constructor() {
 
@@ -38,8 +36,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		);
 
 		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
-		this.subroutinesPosition = config.inlayHints.subroutinesPosition;
-		this.exitPointPosition = config.inlayHints.exitPointPosition;
 	}
 
 	dispose() {
@@ -52,8 +48,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
 				this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 			}
-			this.subroutinesPosition = config.inlayHints.subroutinesPosition;
-			this.exitPointPosition = config.inlayHints.exitPointPosition;
 		}
 	}
 
@@ -101,8 +95,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 		// (for performance reasons)
 		const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
-		const unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
-		const fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
 
 		const sourceCodes: SourceCode[] = [];
 		const candidates: InlayHintCandidate[] = [];
@@ -129,7 +121,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			// Checks labels for subroutine starts (if not after the range)
 			if (!isAfterRange && this.isValidLabel(sourceCode, candidates)) {
-				handleValidLabel(line, startSourcesIndex);
+				this.handleValidLabel(candidates, didContainCode, line, startSourcesIndex);
 			}
 
 			// Checks source code
@@ -140,7 +132,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			// Creates a new candidate on unlabelled code
 			if (!didContainCode) {
-				handleFirstSourceCode(line, startSourcesIndex);
+				this.handleFirstSourceCode(candidates, line, startSourcesIndex);
 			}
 
 			didContainCode = true;
@@ -173,30 +165,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 
 		return providers;
-
-		function handleValidLabel(line: vscode.TextLine, startSourcesIndex: number) {
-
-			if (!didContainCode) {
-				// Discards any previous candidates (labels) because they did not contain code
-				candidates.length = 0;
-				candidates.push(new InlayHintCandidate(line, startSourcesIndex));
-				return;
-			}
-
-			if (fallthroughSubroutines) {
-				// Creates a new candidate on "falls through" labels
-				candidates.push(new InlayHintCandidate(line, startSourcesIndex));
-			}
-		}
-
-		function handleFirstSourceCode(line: vscode.TextLine, startSourcesIndex: number) {
-
-			// Creates a new candidate on unlabelled code
-			if (!candidates.length && unlabelledSubroutines) {
-				candidates.length = 0;
-				candidates.push(new InlayHintCandidate(line, startSourcesIndex));
-			}
-		}
 	}
 
 	private isValidLabel(sourceCode: SourceCode, existingCandidates: InlayHintCandidate[]): boolean {
@@ -222,6 +190,21 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 	}
 
+	private handleValidLabel(candidates: InlayHintCandidate[], didContainCode: boolean, line: vscode.TextLine, startSourcesIndex: number) {
+
+		if (!didContainCode) {
+			// Discards any previous candidates (labels) because they did not contain code
+			candidates.length = 0;
+			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+			return;
+		}
+
+		if (config.inlayHints.fallthroughSubroutines) {
+			// Creates a new candidate on "falls through" labels
+			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+		}
+	}
+
 	private isCode(meterable: Meterable): boolean {
 
 		// timing depending on the platform
@@ -231,6 +214,15 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			: meterable.z80Timing;
 
 		return timing && !!timing[0];
+	}
+
+	private handleFirstSourceCode(candidates: InlayHintCandidate[], line: vscode.TextLine, startSourcesIndex: number) {
+
+		// Creates a new candidate on unlabelled code
+		if (!candidates.length && config.inlayHints.unlabelledSubroutines) {
+			candidates.length = 0;
+			candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+		}
 	}
 
 	private isValidConditionalExitPoint(instruction: string): boolean {
@@ -267,7 +259,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			const [ position, paddingLeft, paddingRight ] = this.computePosition(
 				candidate.startLine,
 				sourceCodes[candidate.startSourcesIndex],
-				this.subroutinesPosition);
+				config.inlayHints.subroutinesPosition);
 
 			return new InlayHintProvider(
 				position,
@@ -293,7 +285,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		const [ position, paddingLeft, paddingRight ] = this.computePosition(
 			endLine,
 			sourceCodes[sourceCodes.length - 1],
-			this.exitPointPosition);
+			config.inlayHints.exitPointPosition);
 
 		return [ new InlayHintProvider(
 				position,
