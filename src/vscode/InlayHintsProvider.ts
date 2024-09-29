@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { config } from '../config';
+import { config, InlayHintPositionType } from '../config';
 import { mainParser } from '../parser/MainParser';
 import { TotalTimingMeterable } from '../totalTiming/TotalTimingMeterable';
 import { TotalTimings } from '../totalTiming/TotalTimings';
@@ -76,7 +76,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 
 		// Locates the inlay hints candidates within the requested range and provides the inlay hints
-		return new InlayHintCandidateFinder(this.conditionalExitPointMnemonics)
+		return this
 			.findInlayHintCandidates(document, range)
 			.map(candidate => candidate.provide());
 	}
@@ -89,6 +89,246 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 				: undefined;
 	}
 
+	private findInlayHintCandidates(document: vscode.TextDocument, range: vscode.Range): InlayHintProvider[] {
+
+		// (for performance reasons)
+		const conditionalExitPointMnemonics = this.conditionalExitPointMnemonics;
+		const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
+		const subroutinesPosition = config.inlayHints.subroutinesPosition;
+		const unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
+		const fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
+		const exitPointPosition = config.inlayHints.exitPointPosition;
+
+		const sourceCodes: SourceCode[] = [];
+		const candidates: InlayHintCandidate[] = [];
+		let didContainCode = false;
+
+		const providers: InlayHintProvider[] = [];
+		for (let i = 0, n = document.lineCount; i < n; i++) {
+			const line = document.lineAt(i);
+
+			// Stops looking for inlay hints after the range
+			const isAfterRange = line.range.start.isAfter(range.end);
+			if (isAfterRange && !candidates.length) {
+				break;
+			}
+
+			// Extracts the source code
+			const lineSourceCodes = lineToSourceCode(line.text, lineSeparatorCharacter);
+			if (!lineSourceCodes.length || !lineSourceCodes[0]) {
+				continue; // (ignore empty line)
+			}
+			const sourceCode = lineSourceCodes[0];
+			const startSourcesIndex = sourceCodes.length;
+			sourceCodes.push(...lineSourceCodes);
+
+			// Checks labels for subroutine starts (if not after the range)
+			if (!isAfterRange && isValidLabel(sourceCode)) {
+				handleValidLabel(line, startSourcesIndex);
+			}
+
+			// Checks source code
+			const metered = mainParser.parseInstruction(sourceCode);
+			if (!metered || !isCode(metered)) {
+				continue; // (ignore unparseable source code or no-code (data?) lines)
+			}
+
+			// Creates a new candidate on unlabelled code
+			if (!didContainCode) {
+				handleFirstSourceCode(line, startSourcesIndex);
+			}
+
+			didContainCode = true;
+
+			const isBeforeRange = line.range.start.isBefore(range.start);
+
+			// Ends all incomplete subroutines
+			if (isUnconditionalJumpOrRetInstruction(metered.instruction)) {
+				if (!isBeforeRange) {
+					handleUnconditionalJumpOrRetInstruction(line);
+				}
+
+				// (restarts subroutine lookup)
+				candidates.length = 0;
+				didContainCode = false;
+
+			// Checks subroutine conditional exit point
+			} else if (!isBeforeRange
+				&& isValidConditionalExitPoint(metered.instruction)
+				&& candidates) {
+
+				handleValidConditionalExitPoint(line);
+			}
+		}
+
+		// Completes trailing code as subroutine
+		if (candidates.length && didContainCode) {
+			const line = document.lineAt(document.lineCount - 1);
+			handleUnconditionalJumpOrRetInstruction(line);
+		}
+
+		return providers;
+
+		function isValidLabel(sourceCode: SourceCode): boolean {
+
+			// (sanity checks)
+			if (!sourceCode.label) {
+				return false; // (no label)
+			}
+			if (!sourceCode.label.startsWith(".") && !sourceCode.label.startsWith("@@")) {
+				return true; // (non-nested label)
+			}
+
+			switch (config.inlayHints.nestedSubroutines) {
+				case "disabled":
+					return false;
+
+				case "enabled":
+					return true;
+
+				case "entryPoint":
+					// If there is no ongoing subroutines, it is an entry point
+					return candidates.length == 0;
+			}
+		}
+
+		function handleValidLabel(line: vscode.TextLine, startSourcesIndex: number) {
+
+			if (!didContainCode) {
+				// Discards any previous candidates (labels) because they did not contain code
+				candidates.length = 0;
+				candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+				return;
+			}
+
+			if (fallthroughSubroutines) {
+				// Creates a new candidate on "falls through" labels
+				candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+			}
+		}
+
+		function isCode(meterable: Meterable): boolean {
+
+			// timing depending on the platform
+			const timing =
+				config.platform === "msx" ? meterable.msxTiming
+				: config.platform === "cpc" ? meterable.cpcTiming
+				: meterable.z80Timing;
+
+			return timing && !!timing[0];
+		}
+
+		function handleFirstSourceCode(line: vscode.TextLine, startSourcesIndex: number) {
+
+			// Creates a new candidate on unlabelled code
+			if (!candidates.length && unlabelledSubroutines) {
+				candidates.length = 0;
+				candidates.push(new InlayHintCandidate(line, startSourcesIndex));
+			}
+		}
+
+		function handleUnconditionalJumpOrRetInstruction(line: vscode.TextLine) {
+
+			// Ends all incomplete subroutines
+			providers.push(...candidates.map(candidate => {
+
+				// Computes the InlayHint position before the comment of the first line
+				const [ position, paddingLeft, paddingRight ] = computePosition(
+					candidate.startLine,
+					sourceCodes[candidate.startSourcesIndex],
+					subroutinesPosition);
+
+				return new InlayHintProvider(
+					position,
+					paddingLeft,
+					paddingRight,
+					new vscode.Range(candidate.startLine.range.start, line.range.end),
+					sourceCodes.slice(candidate.startSourcesIndex, undefined));
+			}));
+		}
+
+		function handleValidConditionalExitPoint(line: vscode.TextLine) {
+
+			// Determines the start of the subroutine
+			const candidate = candidates[
+				config.inlayHints.exitPointLabel === "first" ? 0 : candidates.length - 1];
+
+			// Computes the InlayHint position before the comment of the last line
+			const [ position, paddingLeft, paddingRight ] = computePosition(
+				line,
+				sourceCodes[sourceCodes.length - 1],
+				exitPointPosition);
+
+			providers.push(new InlayHintProvider(
+					position,
+					paddingLeft,
+					paddingRight,
+					new vscode.Range(candidate.startLine.range.start, line.range.end),
+					sourceCodes.slice(candidate.startSourcesIndex, undefined)));
+		}
+
+		function computePosition(
+			line: vscode.TextLine, source: SourceCode,
+			positionType: InlayHintPositionType):
+			[ vscode.Position, boolean, boolean ] {
+
+			switch (positionType) {
+				case "lineStart":
+					return [ line.range.start, false, true ];
+
+				case "afterLabel":
+					return [
+						line.range.start.with(undefined, skipStart(line.text, source.afterLabelPosition, false)),
+						!!source.afterLabelPosition, false
+					];
+
+				case "beforeCode":
+					return [
+						line.range.start.with(undefined, skipStart(line.text, source.afterLabelPosition, true)),
+						true, true
+					];
+
+				case "afterCode":
+					return [
+						line.range.start.with(undefined, skipEnd(line.text, source.beforeLineCommentPosition, true)),
+						true, true
+					];
+
+				case "beforeComment":
+					return [
+						line.range.start.with(undefined, skipEnd(line.text, source.beforeLineCommentPosition, false)),
+						true, !!source.beforeLineCommentPosition
+					];
+
+				case "lineEnd":
+					return [ line.range.end, true, false ];
+			}
+		}
+
+		function isValidConditionalExitPoint(instruction: string): boolean {
+
+			const mnemonic = extractMnemonicOf(instruction);
+			if (!conditionalExitPointMnemonics.includes(mnemonic)) {
+				return false;
+			}
+
+			const operands = extractOperandsOf(instruction);
+
+			switch (mnemonic) {
+			case "RET":
+				return (operands.length === 1) && isAnyCondition(operands[0]);
+			case "JP":
+				return (operands.length === 2) && isAnyCondition(operands[0]);
+			case "JR":
+				return (operands.length === 2) && isJrCondition(operands[0]);
+			case "DJNZ":
+				return (operands.length === 1);
+			default:
+				// (should never happen)
+				return false;
+			}
+		}
+	}
 }
 
 function documentSelector(): readonly vscode.DocumentFilter[] {
@@ -104,278 +344,7 @@ function documentSelector(): readonly vscode.DocumentFilter[] {
  * A possible InlayHint candidate; temporary container
  * while the source code is being parsed and the exit point is yet to be found
  */
-class InlayHintCandidateFinder {
-
-	// (for performance reasons)
-	private readonly conditionalExitPointMnemonics: string[];
-	private readonly lineSeparatorCharacter: string | undefined;
-	private readonly subroutinesPosition: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd";
-	private readonly unlabelledSubroutines: boolean;
-	private readonly fallthroughSubroutines: boolean;
-	private readonly exitPointPosition: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd";
-
-	constructor(conditionalExitPointMnemonics: string[]) {
-
-		this.conditionalExitPointMnemonics = conditionalExitPointMnemonics;
-
-		this.lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
-		this.subroutinesPosition = config.inlayHints.subroutinesPosition;
-		this.unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
-		this.fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
-		this.exitPointPosition = config.inlayHints.exitPointPosition;
-	}
-
-	private ongoingCandidates: OngoingInlayHintCandidate[] = [];
-	private didContainCode: boolean = false;
-	private sources: SourceCode[] = [];
-
-	findInlayHintCandidates(document: vscode.TextDocument, range: vscode.Range): InlayHintCandidate[] {
-
-		this.ongoingCandidates = [];
-		this.didContainCode = false;
-		this.sources = [];
-
-		const candidates: InlayHintCandidate[] = [];
-		for (let i = 0, n = document.lineCount; i < n; i++) {
-			const line = document.lineAt(i);
-
-			// Stops looking for candidates after the range
-			const isAfterRange = line.range.start.isAfter(range.end);
-			if (isAfterRange && !this.ongoingCandidates.length) {
-				break;
-			}
-
-			// Extracts the source code
-			const lineSources = lineToSourceCode(line.text, this.lineSeparatorCharacter);
-			if (!lineSources.length || !lineSources[0]) {
-				continue; // (ignore empty line)
-			}
-			const lineSource = lineSources[0];
-
-			// (saves source code on each previously found candidate)
-			const startSourcesIndex = this.sources.length;
-			this.sources.push(...lineSources);
-			const endSourcesIndex = this.sources.length;
-
-			// Checks labels for subroutine starts (if not after the range)
-			if (!isAfterRange && this.isValidLabel(lineSource)) {
-				if (!this.didContainCode) {
-					// Discards any previous candidates (labels) because they did not contain code
-					this.ongoingCandidates = [ new OngoingInlayHintCandidate(line, startSourcesIndex) ];
-
-				} else if (this.fallthroughSubroutines) {
-					// Creates a new candidate on "falls through" labels
-					this.ongoingCandidates.push(new OngoingInlayHintCandidate(line, startSourcesIndex));
-				}
-			}
-
-			// Checks source code
-			const metered = mainParser.parseInstruction(lineSource);
-			if (!metered || !this.isCode(metered)) {
-				continue; // (ignore unparseable source code or no-code (data?) lines)
-			}
-
-			// Creates a new candidate on unlabelled code
-			if (!this.didContainCode && !this.ongoingCandidates.length && this.unlabelledSubroutines) {
-				this.ongoingCandidates = [ new OngoingInlayHintCandidate(line, startSourcesIndex) ];
-			}
-
-			this.didContainCode = true;
-
-			const isBeforeRange = line.range.start.isBefore(range.start);
-
-			// Checks subroutine ends
-			if (isUnconditionalJumpOrRetInstruction(metered.instruction)) {
-				// Ends all incomplete subroutines (if not before the range)
-				if (!isBeforeRange) {
-					candidates.push(
-						...this.withUnconditionalJumpOrRetInstruction(line, endSourcesIndex));
-				}
-
-				// (restarts subroutine lookup)
-				this.ongoingCandidates = [];
-				this.didContainCode = false;
-
-			// Checks subroutine conditional exit point (if not before the range)
-			} else if (!isBeforeRange && this.isValidConditionalExitPoint(metered.instruction)) {
-				candidates.push(
-					...this.withConditionalExitPoint(line, endSourcesIndex));
-			}
-		}
-
-		// Completes trailing code as subroutine
-		if (this.ongoingCandidates.length && this.didContainCode) {
-			const line = document.lineAt(document.lineCount - 1);
-			const endSourcesIndex = this.sources.length;
-			candidates.push(
-				...this.withUnconditionalJumpOrRetInstruction(line, endSourcesIndex));
-		}
-
-		return candidates;
-	}
-
-	private isValidLabel(sourceCode: SourceCode): boolean {
-
-		// (sanity checks)
-		if (!sourceCode.label) {
-			return false; // (no label)
-		}
-		if (!sourceCode.label.startsWith(".") && !sourceCode.label.startsWith("@@")) {
-			return true; // (non-nested label)
-		}
-
-		switch (config.inlayHints.nestedSubroutines) {
-			case "disabled":
-				return false;
-
-			case "enabled":
-				return true;
-
-			case "entryPoint":
-				// If there is no ongoing subroutines, it is an entry point
-				return this.ongoingCandidates.length == 0;
-		}
-	}
-
-	private isCode(meterable: Meterable): boolean {
-
-		// timing depending on the platform
-		const timing =
-			config.platform === "msx" ? meterable.msxTiming
-			: config.platform === "cpc" ? meterable.cpcTiming
-			: meterable.z80Timing;
-
-		return timing && !!timing[0];
-	}
-
-	private isValidConditionalExitPoint(instruction: string): boolean {
-
-		const mnemonic = extractMnemonicOf(instruction);
-		if (!this.conditionalExitPointMnemonics.includes(mnemonic)) {
-			return false;
-		}
-
-		const operands = extractOperandsOf(instruction);
-
-		switch (mnemonic) {
-		case "RET":
-			return (operands.length === 1) && isAnyCondition(operands[0]);
-		case "JP":
-			return (operands.length === 2) && isAnyCondition(operands[0]);
-		case "JR":
-			return (operands.length === 2) && isJrCondition(operands[0]);
-		case "DJNZ":
-			return (operands.length === 1);
-		default:
-			// (should never happen)
-			return false;
-		}
-	}
-
-	/**
-	 * Materializes the possible InlayHint candidates
-	 * @returns the InlayHint candidates, before the comment of the first line
-	 */
-	private withUnconditionalJumpOrRetInstruction(
-		endLine: vscode.TextLine, endSourcesIndex: number): InlayHintCandidate[] {
-
-		// (sanity check)
-		if (!this.ongoingCandidates.length) {
-			return [];
-		}
-
-		return this.ongoingCandidates.map(ongoingCandidate => {
-
-			// Computes the InlayHint position before the comment of the first line
-			const [ position, paddingLeft, paddingRight ] = this.computePosition(
-				ongoingCandidate.startLine,
-				this.sources[ongoingCandidate.startSourcesIndex],
-				this.subroutinesPosition);
-
-			return new InlayHintCandidate(
-				position,
-				paddingLeft,
-				paddingRight,
-				new vscode.Range(ongoingCandidate.startLine.range.start, endLine.range.end),
-				this.sources.slice(ongoingCandidate.startSourcesIndex, endSourcesIndex));
-		});
-	}
-
-	/**
-	 * Materializes the possible InlayHint candidate
-	 * @returns the InlayHint candidate, before the comment of the last line
-	 */
-	private withConditionalExitPoint(
-		endLine: vscode.TextLine, endSourcesIndex: number): InlayHintCandidate[] {
-
-		// (sanity checks)
-		if (!this.ongoingCandidates.length) {
-			return [];
-		}
-
-		const candidate = this.ongoingCandidates[
-			config.inlayHints.exitPointLabel === "first" ? 0 : this.ongoingCandidates.length - 1];
-
-		// Computes the InlayHint position before the comment of the last line
-		const [ position, paddingLeft, paddingRight ] = this.computePosition(
-			endLine,
-			this.sources[endSourcesIndex - 1],
-			this.exitPointPosition);
-
-		return [
-			new InlayHintCandidate(
-				position,
-				paddingLeft,
-				paddingRight,
-				new vscode.Range(candidate.startLine.range.start, endLine.range.end),
-				this.sources.slice(candidate.startSourcesIndex, endSourcesIndex))
-		];
-	}
-
-	private computePosition(
-		line: vscode.TextLine, source: SourceCode,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd"):
-		[ vscode.Position, boolean, boolean ] {
-
-		switch (positionType) {
-			case "lineStart":
-				return [ line.range.start, false, true ];
-
-			case "afterLabel":
-				return [
-					line.range.start.with(undefined, skipStart(line.text, source.afterLabelPosition, false)),
-					!!source.afterLabelPosition, false
-				];
-
-			case "beforeCode":
-				return [
-					line.range.start.with(undefined, skipStart(line.text, source.afterLabelPosition, true)),
-					true, true
-				];
-
-			case "afterCode":
-				return [
-					line.range.start.with(undefined, skipEnd(line.text, source.beforeLineCommentPosition, true)),
-					true, true
-				];
-
-			case "beforeComment":
-				return [
-					line.range.start.with(undefined, skipEnd(line.text, source.beforeLineCommentPosition, false)),
-					true, !!source.beforeLineCommentPosition
-				];
-
-			case "lineEnd":
-				return [ line.range.end, true, false ];
-		}
-	}
-}
-
-/**
- * A possible InlayHint candidate; temporary container
- * while the source code is being parsed and the exit point is yet to be found
- */
-class OngoingInlayHintCandidate {
+class InlayHintCandidate {
 
 	constructor(
 		readonly startLine: vscode.TextLine,
@@ -384,9 +353,9 @@ class OngoingInlayHintCandidate {
 }
 
 /**
- * An InlayHint candidate
+ * An InlayHint candidate; a provider for a single InlayHint
  */
-class InlayHintCandidate {
+class InlayHintProvider {
 
 	private readonly position: vscode.Position;
 	private readonly paddingLeft: boolean;
@@ -398,8 +367,8 @@ class InlayHintCandidate {
 		range: vscode.Range, sourceCode: SourceCode[]) {
 
 		this.position = position;
-		this.paddingRight = paddingRight;
 		this.paddingLeft = paddingLeft;
+		this.paddingRight = paddingRight;
 		this.range = range;
 		this.sourceCode = sourceCode;
 	}

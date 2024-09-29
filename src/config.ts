@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
 
+type Platform = "z80" | "cpc" | "msx" | "pc8000" | "z80n";
+
 class Configuration {
 
 	get languageIds(): string[] {
 		return configurationReader.read("languageIds");
 	}
 
-	get platform(): "z80" | "cpc" | "msx" | "pc8000" | "z80n" {
+	get platform(): Platform {
 		return configurationReader.read("platform");
 	}
 
@@ -43,9 +45,18 @@ class Configuration {
 	readonly inlayHints = new InlayHintsConfiguration();
 }
 
+type Alignment = "leftmost" | "left" | "right" | "rightmost";
+type SizeNumericFormat = "decimal" | "hexadecimal" | "both";
+type SizeHexadecimalFormat =
+	"hash" | "motorola" | "intel" | "intelUppercase"
+	| "cStyle" | "uppercaseHash" | "uppercaseMotorola" | "uppercaseIntel"
+	| "uppercaseIntelUppercase" | "uppercaseCStyle";
+type TotalTimingsType = "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default";
+type TotalTimingsOrder = "retFlowJumpCall" | "flowRetJumpCall" | "retJumpCallFlow";
+
 class StatusBarConfiguration {
 
-	get alignment(): "leftmost" | "left" | "right" | "rightmost" {
+	get alignment(): Alignment {
 		return configurationReader.read("statusBar.alignment");
 	}
 
@@ -61,11 +72,11 @@ class StatusBarConfiguration {
 		return configurationReader.read("statusBar.copyTimingsAsHints");
 	}
 
-	get sizeNumericFormat(): "decimal" | "hexadecimal" | "both" {
+	get sizeNumericFormat(): SizeNumericFormat {
 		return configurationReader.read("statusBar.sizeNumericFormat");
 	}
 
-	get sizeHexadecimalFormat(): "hash" | "motorola" | "intel" | "intelUppercase" | "cStyle" | "uppercaseHash" | "uppercaseMotorola" | "uppercaseIntel" | "uppercaseIntelUppercase" | "uppercaseCStyle" {
+	get sizeHexadecimalFormat(): SizeHexadecimalFormat {
 		return configurationReader.read("statusBar.sizeHexadecimalFormat");
 	}
 
@@ -73,7 +84,7 @@ class StatusBarConfiguration {
 		return configurationReader.read("statusBar.sizeSuffix");
 	}
 
-	get totalTimings(): "all" | "combineAll" | "smart" | "combineSmart" | "best" | "default" {
+	get totalTimings(): TotalTimingsType {
 		return configurationReader.read("statusBar.totalTimings");
 	}
 
@@ -88,7 +99,7 @@ class StatusBarConfiguration {
 			|| value === "combineSmart";
 	}
 
-	get totalTimingsOrder(): "retFlowJumpCall" | "flowRetJumpCall" | "retJumpCallFlow" {
+	get totalTimingsOrder(): TotalTimingsOrder {
 		return configurationReader.read("statusBar.totalTimingsOrder");
 	}
 
@@ -113,13 +124,17 @@ class StatusBarConfiguration {
 	}
 }
 
+type Syntax = "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "spasm-ng" | "tniasm";
+type LineSeparator = "disabled" | "backslash" | "colon" | "pipe";
+type Repeat = "disabled" | "brackets" | "dot";
+
 class SyntaxConfiguration {
 
-	get syntax(): "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "spasm-ng" | "tniasm" {
+	get syntax(): Syntax {
 		return configurationReader.read("syntax");
 	}
 
-	private get lineSeparator(): "disabled" | "backslash" | "colon" | "pipe" {
+	private get lineSeparator(): LineSeparator {
 
 		return configurationReader.readWithDefaultValue("syntaxFeature.lineSeparator",
 			this.syntax === "spasm-ng" ? "backslash" // (derived)
@@ -152,7 +167,7 @@ class SyntaxConfiguration {
 			: /(^\s*[^\s:]+:)/;
 	}
 
-	private get repeat(): "disabled" | "brackets" | "dot"{
+	private get repeat(): Repeat {
 
 		return configurationReader.readWithDefaultValue("syntaxFeature.repeat",
 			(this.syntax === "sjasm") ? "brackets" // (derived)
@@ -229,9 +244,11 @@ class TimingConfiguration {
 	readonly atExit = new AtExitTotalTimingConfiguration();
 }
 
+type TimingHintsEnabled = "disabled" | "subroutines" | "any" | "ignoreCommentedOut";
+
 class TimingHintsConfiguration {
 
-	get enabledValue(): "disabled" | "subroutines" | "any" | "ignoreCommentedOut" {
+	get enabledValue(): TimingHintsEnabled {
 		return configurationReader.read("timing.hints.enabled");
 	}
 
@@ -311,13 +328,16 @@ class AtExitTotalTimingConfiguration {
 	}
 }
 
+export type InlayHintPositionType = "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd";
+type InlayHintNestedSubroutines = "disabled" | "enabled" | "entryPoint";
+
 class InlayHintsConfiguration {
 
 	get enabled(): boolean {
 		return configurationReader.read("inlayHints.enabled");
 	}
 
-	get subroutinesPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd" {
+	get subroutinesPosition(): InlayHintPositionType {
 		return configurationReader.read("inlayHints.subroutines.position");
 	}
 
@@ -325,7 +345,7 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.unlabelled");
 	}
 
-	get nestedSubroutines(): "disabled" | "enabled" | "entryPoint" {
+	get nestedSubroutines(): InlayHintNestedSubroutines {
 		return configurationReader.read("inlayHints.subroutines.nested");
 	}
 
@@ -333,7 +353,7 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.fallthrough");
 	}
 
-	get exitPointPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd" {
+	get exitPointPosition(): InlayHintPositionType {
 		return configurationReader.read("inlayHints.exitPoint.position");
 	}
 
