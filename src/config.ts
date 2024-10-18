@@ -314,7 +314,8 @@ class AtExitTotalTimingConfiguration {
 	}
 }
 
-export type InlayHintPositionType = "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd";
+export type InlayHintPositionType =
+		"lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd";
 
 class InlayHintsConfiguration {
 
@@ -360,6 +361,14 @@ class InlayHintsConfiguration {
 
 	get exitPointLabel(): "first" | "closest" {
 		return configurationReader.read("inlayHints.exitPoint.label");
+	}
+
+	get tooltipExitPoints(): number {
+		return configurationReader.read("inlayHints.tooltip.exitPoints");
+	}
+
+	get tooltipDetails(): boolean {
+		return configurationReader.read("inlayHints.tooltip.details");
 	}
 }
 

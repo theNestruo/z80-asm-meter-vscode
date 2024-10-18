@@ -873,6 +873,16 @@
 							"The first label found; the first (outermost) subroutine in a chain of fallthrough subroutines",
 							"The last label found; the last (innermost) subroutine in a chain of fallthrough subroutines. That is, the subroutine whose label is the closest one to the exit point"
 						]
+					},
+					"z80-asm-meter.inlayHints.tooltip.exitPoints": {
+						"order": 60,
+						"type": "number",
+						"default": 3
+					},
+					"z80-asm-meter.inlayHints.tooltip.details": {
+						"order": 65,
+						"type": "boolean",
+						"default": false
 					}
 				}
 			}

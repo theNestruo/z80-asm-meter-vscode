@@ -441,16 +441,20 @@ class InlayHint extends vscode.InlayHint {
 
 		// Computes the InlayHint tooltip
 		const header = removeEnd(this.sourceCodeWithLabel.label, ":");
-		const timingText = `**${this.timing}**${this.timingSuffix}`;
+		const timingText = `**${this.timing}** ${this.timingSuffix}`;
 		const rangeText = printRange(this.range);
-		this.tooltip = new vscode.MarkdownString([
+		const table = [
 			"|||",
 			"|:-:|---|",
 			header ? `||**${header}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
-			`|${this.totalTiming.statusBarIcon}|${this.totalTiming.name}: ${timingText}|`,
-			hrMarkdown,
-			...printMarkdownTotalTimings(this.totalTimings)
-		].join("\n"), true);
+			`|${this.totalTiming.statusBarIcon}|${this.totalTiming.name}: ${timingText}|`
+		];
+		if (config.inlayHints.tooltipDetails) {
+			table.push(
+				hrMarkdown,
+				...printMarkdownTotalTimings(this.totalTimings));
+		}
+		this.tooltip = new vscode.MarkdownString(table.join("\n"), true);
 
 		return this;
 	}
