@@ -3,6 +3,7 @@
 ## 5.6.4
 
 - Inlay Hints improvements
+- Fixes strange behaviour on labels with length = 1. #181
 
 ## 5.6.3
 
