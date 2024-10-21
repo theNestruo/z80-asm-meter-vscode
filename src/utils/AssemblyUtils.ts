@@ -213,18 +213,19 @@ export function isJrCondition(operand: string): boolean {
 
 /**
  * @param operand the candidate operand
- * @returns 0.75 if the operand is any constant, label, or expression
+ * @param allowRegisters consider constants that could be a register
+ * @returns 0.75 if the operand is any constant, label, or expression,
+ * or 0 or 0.25 if the constant
  */
-export function anySymbolOperandScore(operand: string): number {
+export function anySymbolOperandScore(operand: string, allowRegisters: boolean = false): number {
 
-    // (due possibility of using constants, labels, and expressions in the source code,
-    // there is no proper way to discriminate: b, n, nn, o;
-    // but uses a "best effort" to discard registers)
     return isAnyRegister(
             isIndirectionOperand(operand, false)
                 ? extractIndirection(operand)
                 : operand)
-            ? 0
+            ? (allowRegisters
+                ? 0.25
+                : 0)
             : 0.75;
 }
 

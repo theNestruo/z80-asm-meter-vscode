@@ -384,8 +384,11 @@ class Z80Instruction implements Meterable {
             case "30H": // RST 30H
             case "38H": // RST 38H
                 return numericOperandScore(expectedOperand, candidateOperand);
+            // (due possibility of using constants, labels, and expressions in the source code,
+            // there is no proper way to discriminate: b, n, nn, o;
+            // but uses a "best effort" to discard registers)
             default:
-                return anySymbolOperandScore(candidateOperand);
+                return anySymbolOperandScore(candidateOperand, true);
         }
     }
 
