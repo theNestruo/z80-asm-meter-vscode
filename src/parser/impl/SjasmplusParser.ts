@@ -56,40 +56,28 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     /**
      * @returns the operands
      */
-    getOperands(): string[] {
+    private getOperands(): string[] {
         return this.operands
             ? this.operands
             : this.operands = extractOperandsOf(this.fakeInstruction);
     }
 
-    /**
-     * @returns The Z80 timing, in time (T) cycles
-     */
-    getZ80Timing(): number[] {
+    override get z80Timing(): number[] {
         this.init();
         return super.z80Timing;
     }
 
-    /**
-     * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
-     */
-    getMsxTiming(): number[] {
+    override get msxTiming(): number[] {
         this.init();
         return super.msxTiming;
     }
 
-    /**
-     * @returns The CPC timing, in NOPS
-     */
-    getCpcTiming(): number[] {
+    override get cpcTiming(): number[] {
         this.init();
         return super.cpcTiming;
     }
 
-    /**
-     * @returns The bytes
-     */
-    getBytes(): string[] {
+    override get bytes(): string[] {
         this.init();
         return super.bytes;
     }
@@ -100,6 +88,11 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     override get size(): number {
         this.init();
         return super.size;
+    }
+
+    override flatten(): Meterable[] {
+        this.init();
+        return super.flatten();
     }
 
     private init(): void {
