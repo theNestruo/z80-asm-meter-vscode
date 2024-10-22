@@ -190,19 +190,19 @@ class MainParser {
 }
 
 const allInstructionParsers = [
-    z80InstructionParser,
     sjasmplusFakeInstructionParser,
     sjasmplusRegisterListInstructionParser,
     glassFakeInstructionParser,
+    z80InstructionParser, // (after SjASMPlus and Glass Z80 assembler parsers)
     macroParser,
     assemblyDirectiveParser
 ];
 
 const allInstructionParsersButMacro = [
-    z80InstructionParser,
     sjasmplusFakeInstructionParser,
     sjasmplusRegisterListInstructionParser,
     glassFakeInstructionParser,
+    z80InstructionParser, // (after SjASMPlus and Glass Z80 assembler parsers)
     assemblyDirectiveParser
 ];
 
