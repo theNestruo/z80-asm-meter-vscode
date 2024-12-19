@@ -412,7 +412,7 @@ class InlayHintCandidate {
 		const timingSuffix = printableTimingSuffix();
 
 		// Computes the InlayHint label
-		const label = `${timing}${timingSuffix}`;
+		const label = `${timing} ${timingSuffix}`;
 
 		return new InlayHint(this.position, label, this.paddingLeft, this.paddingRight,
 			this.range, totalTimings, totalTiming, timing, timingSuffix, this.sourceCode[0]);
