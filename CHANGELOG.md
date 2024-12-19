@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 5.6.6
+
+- Fixes double space on text copied to clipboard.
+
 ## 5.6.5
 
 - Fixes SjASMPlus fake instructions metering.

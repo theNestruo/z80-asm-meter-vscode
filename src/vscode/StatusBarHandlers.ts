@@ -138,7 +138,7 @@ class StatusBarHandler {
 		const commandDescription = this.command.buildDescription(totalTimings);
 		if (commandDescription) {
 			markdown.push(hrMarkdown);
-			markdown.push(`${commandDescription}`);
+			markdown.push(commandDescription);
 		}
 
 		return new vscode.MarkdownString(markdown.join("\n"), true);

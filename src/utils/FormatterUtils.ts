@@ -273,7 +273,7 @@ export function formatTiming(t: number[]): string {
 
 export function printableTimingSuffix() {
 
-	return config.platform === "cpc" ? " NOPs" : " clock cycles";
+	return config.platform === "cpc" ? " NOPs" : "clock cycles";
 }
 
 export function printTiming(meterable: Meterable): string | undefined {
