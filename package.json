@@ -775,6 +775,7 @@
 							"beforeCode",
 							"afterCode",
 							"beforeComment",
+							"insideComment",
 							"lineEnd"
 						],
 						"default": "beforeComment",
@@ -784,6 +785,7 @@
 							"Before the actual source code",
 							"After the actual source code",
 							"Before the trailing line comments, or at the end of the line if there are no trailing comments",
+							"Inside the trailing line comments, or at the end of the line if there are no trailing comments",
 							"At the end of the line"
 						]
 					},
@@ -824,6 +826,7 @@
 							"beforeCode",
 							"afterCode",
 							"beforeComment",
+							"insideComment",
 							"lineEnd"
 						],
 						"default": "beforeComment",
@@ -833,6 +836,7 @@
 							"Before the actual source code",
 							"After the actual source code",
 							"Before the trailing line comments, or at the end of the line if there are no trailing comments",
+							"Inside the trailing line comments, or at the end of the line if there are no trailing comments",
 							"At the end of the line"
 						]
 					},

@@ -31,9 +31,9 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	let line = originalLine;
 
 	// Extracts trailing comments
-	const beforeLineCommentPosition = indexOfTrailingCommentsQuotesAware(line, lineSeparatorCharacter);
-	const lineComment = beforeLineCommentPosition !== undefined
-			? normalizeTrailingComments(line.substring(beforeLineCommentPosition))
+	const [ beforeLineCommentPosition, afterLineCommentPosition ] = indexOfTrailingCommentsQuotesAware(line, lineSeparatorCharacter);
+	const lineComment = afterLineCommentPosition !== undefined
+			? line.substring(afterLineCommentPosition).trim()
 			: undefined;
 
 	// Removes trailing comments
@@ -57,14 +57,14 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	if (!n) {
 		// Attempts to preserve label, or line comment for timing hints)
 		return (label || lineComment)
-				? [ new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, lineComment) ]
+				? [ new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, afterLineCommentPosition, lineComment) ]
 				: [];
 	}
 
 	// Single fragment: will contain label, repetitions and trailing comments
 	if (n === 1) {
 		return [ new SourceCode(lineFragments[0],
-			label, afterLabelPosition, repetitions, beforeLineCommentPosition, lineComment) ];
+			label, afterLabelPosition, repetitions, beforeLineCommentPosition, afterLineCommentPosition, lineComment) ];
 	}
 
 	// Multiple fragments: first will contain label and repetitions, last will contain trailing comments
@@ -73,11 +73,11 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 		sourceCodes.push(new SourceCode(lineFragments[i]));
 	}
 	sourceCodes.push(new SourceCode(lineFragments[n - 1],
-		undefined, undefined, undefined, beforeLineCommentPosition, lineComment));
+		undefined, undefined, undefined, beforeLineCommentPosition, afterLineCommentPosition, lineComment));
 	return sourceCodes;
 }
 
-function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: string | undefined): number | undefined {
+function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: string | undefined): [ number | undefined, number | undefined ] {
 
 	// (for performance reasons)
 	const n = s.length;
@@ -101,8 +101,9 @@ function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: s
 			}
 
 			// Trailing line comments?
-			if (isTrailingCommentsStart(c, s, i, n)) {
-				return i;
+			const trailingCommentsDelimiterSize = isTrailingCommentsStart(c, s, i, n);
+			if (trailingCommentsDelimiterSize) {
+				return [ i, i + trailingCommentsDelimiterSize ];
 			}
 
 			// Separator?
@@ -129,13 +130,7 @@ function indexOfTrailingCommentsQuotesAware(s: string, lineSeparatorCharacter: s
 		}
 	}
 
-	return undefined;
-}
-
-function normalizeTrailingComments(s: string) {
-
-	const delimiterLength = isTrailingCommentsStart(s.charAt(0), s, 0, s.length);
-	return s.substring(delimiterLength).trim();
+	return [ undefined, undefined ];
 }
 
 function isTrailingCommentsStart(c: string, line: string, i: number, n: number): number {

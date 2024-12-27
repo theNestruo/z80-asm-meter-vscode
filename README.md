@@ -450,6 +450,10 @@ This extension can provide inlay hints (additional information about source code
 
         ![](images/inlayHints.subroutines.position=beforeComment.png)
 
+    * `insideComment`: inside the trailing line comments, or at the end of the line if there are no trailing comments.
+
+        ![](images/inlayHints.subroutines.position=insideComment.png)
+
     * `lineEnd`: at the end of the line.
 
         ![](images/inlayHints.subroutines.position=lineEnd.png)
@@ -488,6 +492,10 @@ This extension can provide inlay hints (additional information about source code
     * `beforeComment` (default): before the trailing line comments, or at the end of the line if there are no trailing comments.
 
         ![](images/inlayHints.exitPoint.position=beforeComment.png)
+
+    * `insideComment`: inside the trailing line comments, or at the end of the line if there are no trailing comments.
+
+        ![](images/inlayHints.exitPoint.position=insideComment.png)
 
     * `lineEnd`: at the end of the line.
 

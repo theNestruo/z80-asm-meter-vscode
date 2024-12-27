@@ -19,13 +19,18 @@ export class SourceCode {
     /** The position where the optional trailing comment of the entire line starts */
     readonly beforeLineCommentPosition: number | undefined;
 
+    /** The position where the optional trailing comment of the entire line starts */
+    readonly afterLineCommentPosition: number | undefined;
+
     /** The optional trailing comment of the entire line */
     readonly lineComment: string | undefined;
 
     constructor(instruction: string,
 			label?: string, afterLabelPosition?: number,
 			repetitions?: number,
-			beforeLineCommentPosition?: number, lineComment?: string) {
+			beforeLineCommentPosition?: number,
+			afterLineCommentPosition?: number,
+			lineComment?: string) {
 
 		this.instruction = instruction;
 
@@ -35,6 +40,7 @@ export class SourceCode {
         this.repetitions = repetitions !== undefined ? repetitions : 1;
 
 		this.beforeLineCommentPosition = beforeLineCommentPosition;
+		this.afterLineCommentPosition = afterLineCommentPosition;
         this.lineComment = lineComment;
     }
 }

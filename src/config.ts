@@ -317,7 +317,7 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.enabled");
 	}
 
-	get subroutinesPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd" {
+	get subroutinesPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd" {
 		return configurationReader.read("inlayHints.subroutines.position");
 	}
 
@@ -333,7 +333,7 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.fallthrough");
 	}
 
-	get exitPointPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd" {
+	get exitPointPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd" {
 		return configurationReader.read("inlayHints.exitPoint.position");
 	}
 

@@ -27,23 +27,37 @@ export function pluralize(s: string, n: number): string {
     return (n === 1) || (n === -1) ? split[0] : split[1];
 }
 
-export function removeEnd(s: string | undefined, suffix: string): string | undefined {
+export function removeSuffix(s: string | undefined, suffix: string): string | undefined {
 
     return s && s.endsWith(suffix)
             ? s.substring(0, s.length - suffix.length)
             : s;
 }
 
-export function skipStart(s: string, start?: number, trimStart?: boolean): number {
+export function positionFromStart(_s: string, start?: number): number {
 
-    const substring = (start === undefined) || (start < 0) ? s : s.substring(start);
-    return s.length - (trimStart ? substring.trimStart().length : substring.length);
+    return (start === undefined) || (start < 0)
+            ? 0
+            : start;
 }
 
-export function skipEnd(s: string, end?: number, trimEnd?: boolean): number {
+export function positionFromStartAndSkipWhitespaceAfter(s: string, start?: number): number {
+
+    const substring = (start === undefined) || (start < 0) ? s : s.substring(start);
+    return s.length - substring.trimStart().length;
+}
+
+export function positionFromEnd(s: string, end?: number): number {
+
+    return (end === undefined) || (end < 0)
+            ? s.length
+            : end;
+}
+
+export function positionFromEndAndSkipWhitespaceBefore(s: string, end?: number): number {
 
     const substring = (end === undefined) || (end < 0) ? s : s.substring(0, end);
-    return trimEnd ? substring.trimEnd().length : substring.length;
+    return substring.trimEnd().length;
 }
 
 export function validateCodicon(ps: string | undefined, defaultCodicon: string): string {

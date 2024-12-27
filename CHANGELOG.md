@@ -2,11 +2,12 @@
 
 ## 5.6.6
 
-- Fixes double space on text copied to clipboard.
+- Fixes double space on text copied to clipboard
+- Inlay Hints improvements
 
 ## 5.6.5
 
-- Fixes SjASMPlus fake instructions metering.
+- Fixes SjASMPlus fake instructions metering
 
 ## 5.6.4
 

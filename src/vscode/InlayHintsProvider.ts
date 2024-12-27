@@ -7,7 +7,7 @@ import { Meterable, SourceCode } from '../types';
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
 import { hrMarkdown, printableTimingSuffix, printMarkdownTotalTimings, printRange, printTiming } from '../utils/FormatterUtils';
 import { lineToSourceCode } from '../utils/SourceCodeUtils';
-import { removeEnd, skipEnd, skipStart } from '../utils/TextUtils';
+import { positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStartAndSkipWhitespaceAfter, positionFromStart, removeSuffix } from '../utils/TextUtils';
 import { isExtensionEnabledFor } from './SourceCodeReader';
 
 /**
@@ -241,7 +241,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 	 */
 	private withUnconditionalJumpOrRetInstruction(
 		ongoingCandidates: OngoingInlayHintCandidate[], endLine: vscode.TextLine,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd"):
+		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
 		InlayHintCandidate[] {
 
 		// (sanity check)
@@ -259,7 +259,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 	 */
 	private withConditionalExitPoint(
 		ongoingCandidates: OngoingInlayHintCandidate[], endLine: vscode.TextLine,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd"):
+		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
 		InlayHintCandidate[] {
 
 		// (sanity checks)
@@ -304,7 +304,7 @@ class OngoingInlayHintCandidate {
 	 */
 	withUnconditionalJumpOrRetInstruction(
 		endLine: vscode.TextLine,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd"):
+		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
 		InlayHintCandidate {
 
 		// Computes the InlayHint position before the comment of the first line
@@ -325,7 +325,7 @@ class OngoingInlayHintCandidate {
 	 */
 	withConditionalExitPoint(
 		endLine: vscode.TextLine,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd"):
+		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
 		InlayHintCandidate {
 
 		// Computes the InlayHint position before the comment of the last line
@@ -342,7 +342,7 @@ class OngoingInlayHintCandidate {
 
 	private computePosition(
 		line: vscode.TextLine, sourceCode: SourceCode,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "lineEnd"):
+		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
 		[ vscode.Position, boolean, boolean ] {
 
 		switch (positionType) {
@@ -351,26 +351,32 @@ class OngoingInlayHintCandidate {
 
 			case 'afterLabel':
 				return [
-					line.range.start.with(undefined, skipStart(line.text, sourceCode.afterLabelPosition, false)),
+					line.range.start.with(undefined, positionFromStart(line.text, sourceCode.afterLabelPosition)),
 					!!sourceCode.afterLabelPosition, false
 				];
 
 			case 'beforeCode':
 				return [
-					line.range.start.with(undefined, skipStart(line.text, sourceCode.afterLabelPosition, true)),
+					line.range.start.with(undefined, positionFromStartAndSkipWhitespaceAfter(line.text, sourceCode.afterLabelPosition)),
 					true, true
 				];
 
 			case 'afterCode':
 				return [
-					line.range.start.with(undefined, skipEnd(line.text, sourceCode.beforeLineCommentPosition, true)),
+					line.range.start.with(undefined, positionFromEndAndSkipWhitespaceBefore(line.text, sourceCode.beforeLineCommentPosition)),
 					true, true
 				];
 
 			case 'beforeComment':
 				return [
-					line.range.start.with(undefined, skipEnd(line.text, sourceCode.beforeLineCommentPosition, false)),
+					line.range.start.with(undefined, positionFromEnd(line.text, sourceCode.beforeLineCommentPosition)),
 					true, !!sourceCode.beforeLineCommentPosition
+				];
+
+			case 'insideComment':
+				return [
+					line.range.start.with(undefined, positionFromEnd(line.text, sourceCode.afterLineCommentPosition)),
+					true, !!sourceCode.afterLineCommentPosition
 				];
 
 			case 'lineEnd':
@@ -459,8 +465,8 @@ class InlayHint extends vscode.InlayHint {
 		}
 
 		// Computes the InlayHint tooltip
-		const header = removeEnd(this.sourceCodeWithLabel.label, ":");
-		const timingText = `**${this.timing}**${this.timingSuffix}`;
+		const header = removeSuffix(this.sourceCodeWithLabel.label, ":");
+		const timingText = `**${this.timing}** ${this.timingSuffix}`;
 		const rangeText = printRange(this.range);
 		this.tooltip = new vscode.MarkdownString([
 			"|||",
