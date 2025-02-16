@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
 import { mainParser } from '../parser/MainParser';
-import { TotalTimingMeterable } from '../totalTiming/TotalTimingMeterable';
 import { TotalTimings } from '../totalTiming/TotalTimings';
 import { Meterable, SourceCode } from '../types';
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
@@ -258,27 +257,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			vscode.InlayHint {
 
 		// (convenience local variables)
-		const firstCandidate = candidates[0];
-		const sourceCode = firstCandidate.sourceCode;
-		const firstSourceCode = sourceCode[0];
+		const referenceCandidate = candidates[candidates.length - 1];
+		const sourceCodeWithLabel = referenceCandidate.sourceCodeWithLabel;
 
 		// Computes the InlayHint position in the first line
 		const [ position, paddingLeft, paddingRight ] =
-			this.computePosition(firstCandidate.startLine, firstSourceCode, positionType);
+			this.computePosition(referenceCandidate.startLine, sourceCodeWithLabel, positionType);
 
-		const range = new vscode.Range(firstCandidate.startLine.range.start, firstCandidate.endLine.range.end);
-
-		// Computes the actual data
-		const totalTimings = new TotalTimings(mainParser.parse(sourceCode)!);
-		const totalTiming = totalTimings.best();
-		const timing = printTiming(totalTiming) ?? "0";
-		const timingSuffix = printableTimingSuffix();
-
-		// Computes the InlayHint label
-		const label = `${timing} ${timingSuffix}`;
-
-		return new ResolvableSubroutineInlayHint(position, label, paddingLeft, paddingRight,
-			range, totalTimings, totalTiming, timing, timingSuffix, firstSourceCode);
+		return new ResolvableSubroutineInlayHint(referenceCandidate, position, paddingLeft, paddingRight, candidates);
 	}
 
 	// private provideExitPointInlayHint(
@@ -379,39 +365,48 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 
 	readonly endLine: vscode.TextLine;
 
+	// Derived information (will be cached for performance reasons)
+	private cachedTotalTimings?: TotalTimings;
+	private cachedInlayHintLabel?: string;
+
 	constructor(startLine: vscode.TextLine, endLine: vscode.TextLine, sourceCode: SourceCode[]) {
 		super(startLine, [...sourceCode]);
 		this.endLine = endLine;
+	}
+
+	get sourceCodeWithLabel(): SourceCode {
+
+		return this.sourceCode[0];
+	}
+
+	get totalTimings(): TotalTimings {
+
+		if (!this.cachedTotalTimings) {
+			this.cachedTotalTimings = new TotalTimings(mainParser.parse(this.sourceCode)!);
+		}
+		return this.cachedTotalTimings;
+	}
+
+	get inlayHintLabel(): string {
+
+		if (!this.cachedInlayHintLabel) {
+			const totalTiming = this.totalTimings.best();
+			const timing = printTiming(totalTiming) ?? "0";
+			const timingSuffix = printableTimingSuffix();
+
+			this.cachedInlayHintLabel = `${timing} ${timingSuffix}`;
+		}
+		return this.cachedInlayHintLabel;
 	}
 }
 
 abstract class ResolvableInlayHint extends vscode.InlayHint {
 
-	protected readonly range: vscode.Range;
-
-	protected readonly timing: string;
-	protected readonly timingSuffix: string;
-	protected readonly totalTimings: TotalTimings;
-	protected readonly totalTiming: TotalTimingMeterable;
-
-	protected readonly sourceCodeWithLabel: SourceCode;
-
-	constructor(position: vscode.Position, label: string, paddingLeft: boolean, paddingRight: boolean,
-		range: vscode.Range,
-		totalTimings: TotalTimings, totalTiming: TotalTimingMeterable, timing: string, timingSuffix: string,
-		sourceCodeWithLabel: SourceCode) {
+	constructor(position: vscode.Position, label: string, paddingLeft: boolean, paddingRight: boolean) {
 
 		super(position, label);
 		this.paddingLeft = paddingLeft;
 		this.paddingRight = paddingRight;
-
-		this.range = range;
-
-		this.totalTimings = totalTimings;
-		this.totalTiming = totalTiming;
-		this.timing = timing;
-		this.timingSuffix = timingSuffix;
-		this.sourceCodeWithLabel = sourceCodeWithLabel;
 	}
 
 	abstract resolve(): vscode.InlayHint;
@@ -419,13 +414,17 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 
 class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 
-	constructor(position: vscode.Position, label: string, paddingLeft: boolean, paddingRight: boolean,
-		range: vscode.Range,
-		totalTimings: TotalTimings, totalTiming: TotalTimingMeterable, timing: string, timingSuffix: string,
-		sourceCodeWithLabel: SourceCode) {
+	protected referenceCandidate: InlayHintCandidate;
+	protected candidates: InlayHintCandidate[];
 
-		super(position, label, paddingLeft, paddingRight, range, totalTimings, totalTiming, timing, timingSuffix, sourceCodeWithLabel);
+	constructor(referenceCandidate: InlayHintCandidate,
+		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
+		candidates: InlayHintCandidate[]) {
 
+		super(position, referenceCandidate.inlayHintLabel, paddingLeft, paddingRight);
+
+		this.referenceCandidate = referenceCandidate;
+		this.candidates = candidates;
 	}
 
 	resolve(): vscode.InlayHint {
@@ -436,16 +435,24 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 		}
 
 		// Computes the InlayHint tooltip
-		const header = removeSuffix(this.sourceCodeWithLabel.label, ":");
-		const timingText = `**${this.timing}** ${this.timingSuffix}`;
-		const rangeText = printRange(this.range);
+		const header = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
+
+		const totalTimings = this.referenceCandidate.totalTimings;
+		const totalTiming = totalTimings.best();
+		const timing = printTiming(totalTiming) ?? "0";
+		const timingSuffix = printableTimingSuffix();
+		const timingText = `**${timing}** ${timingSuffix}`;
+
+		const range = new vscode.Range(this.referenceCandidate.startLine.range.start, this.referenceCandidate.endLine.range.end);
+		const rangeText = printRange(range);
+
 		this.tooltip = new vscode.MarkdownString([
 			"|||",
 			"|:-:|---|",
 			header ? `||**${header}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
-			`|${this.totalTiming.statusBarIcon}|${this.totalTiming.name}: ${timingText}|`,
+			`|${totalTiming.statusBarIcon}|${totalTiming.name}: ${timingText}|`,
 			hrMarkdown,
-			...printMarkdownTotalTimings(this.totalTimings)
+			...printMarkdownTotalTimings(totalTimings)
 		].join("\n"), true);
 
 		return this;
