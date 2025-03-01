@@ -4,9 +4,9 @@ import { mainParser } from '../parser/MainParser';
 import { TotalTimings } from '../totalTiming/TotalTimings';
 import { Meterable, SourceCode } from '../types';
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
-import { hrMarkdown, printableTimingSuffix, printMarkdownTotalTimings, printRange, printTiming } from '../utils/FormatterUtils';
+import { formatTiming, hrMarkdown, printableTimingSuffix, printMarkdownTotalTimings, printRange, printTiming } from '../utils/FormatterUtils';
 import { lineToSourceCode } from '../utils/SourceCodeUtils';
-import { positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix } from '../utils/TextUtils';
+import { positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from '../utils/TextUtils';
 import { isExtensionEnabledFor } from './SourceCodeReader';
 
 /**
@@ -400,6 +400,9 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 	}
 }
 
+/**
+ * An InlayHint that can be resolved
+ */
 abstract class ResolvableInlayHint extends vscode.InlayHint {
 
 	constructor(position: vscode.Position, label: string, paddingLeft: boolean, paddingRight: boolean) {
@@ -412,6 +415,9 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 	abstract resolve(): vscode.InlayHint;
 }
 
+/**
+ * A subroutine InlayHint
+ */
 class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 
 	protected referenceCandidate: InlayHintCandidate;
@@ -430,12 +436,22 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 	resolve(): vscode.InlayHint {
 
 		// (sanity check)
-		if (this.tooltip) {
-			return this;
+		if (!this.tooltip) {
+			this.tooltip = new vscode.MarkdownString(
+					(this.candidates.length == 1
+						? this.buildSingleCandidateToolip()
+						: this.buildMultipleCandidateTooltip())
+					.join("\n"), true);
 		}
 
+		return this;
+
+	}
+
+	private buildSingleCandidateToolip(): string[] {
+
 		// Computes the InlayHint tooltip
-		const header = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
+		const label = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
 
 		const totalTimings = this.referenceCandidate.totalTimings;
 		const totalTiming = totalTimings.best();
@@ -446,15 +462,106 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 		const range = new vscode.Range(this.referenceCandidate.startLine.range.start, this.referenceCandidate.endLine.range.end);
 		const rangeText = printRange(range);
 
-		this.tooltip = new vscode.MarkdownString([
+		return [
 			"|||",
 			"|:-:|---|",
-			header ? `||**${header}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
+			label ? `||**${label}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
 			`|${totalTiming.statusBarIcon}|${totalTiming.name}: ${timingText}|`,
 			hrMarkdown,
 			...printMarkdownTotalTimings(totalTimings)
-		].join("\n"), true);
+		];
+	}
 
-		return this;
+	private buildMultipleCandidateTooltip(): string[] {
+
+		// Computes the InlayHint tooltip
+		const label = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
+
+		// const totalTimings = this.referenceCandidate.totalTimings;
+		// const totalTiming = totalTimings.best();
+		// const timing = printTiming(totalTiming) ?? "0";
+		// const timingSuffix = printableTimingSuffix();
+		// const timingText = `**${timing}** ${timingSuffix}`;
+
+		// const range = new vscode.Range(this.referenceCandidate.startLine.range.start, this.referenceCandidate.endLine.range.end);
+		// const rangeText = printRange(range);
+
+		return [
+			// "|||",
+			// "|:-:|---|",
+			// label ? `||**${label}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
+			// `|${totalTiming.statusBarIcon}|${totalTiming.name}: ${timingText}|`,
+			// hrMarkdown,
+			label ? `**${label}**\n${hrMarkdown}` : hrMarkdown,
+			...this.printTotalTimings()
+		];
+	}
+
+	private printTotalTimings(): string[] {
+
+		/*
+		...this.candidates
+			.map(candidate => printMarkdownTotalTimingsTableRows([ candidate.totalTimings.best() ]))
+			.flat()
+			*/
+
+		const platform = config.platform;
+		const hasM1 = platform === "msx" || platform === "pc8000";
+		const timingSuffix = printableTimingSuffix();
+
+		// const rangeStart = `#${this.referenceCandidate.startLine.lineNumber + 1}&nbsp;&ndash;`;
+
+		const table =
+			platform === "msx" ? [
+				"|   |   |   |   |       |   |   |",
+				"|--:|--:|:-:|---|--:    |--:|---|",
+				"|   |   |   |   |**MSX**|Z80|   |"
+				// `|${rangeStart}||||      |   |   |`
+			]
+			: platform === "pc8000" ? [
+				"|   |   |   |   |       |      |   |",
+				"|--:|--:|:-:|---|--:    |--:   |---|",
+				"|   |   |   |   |**Z80**|Z80+M1|   |"
+				// `|${rangeStart}||||      |      |   |`
+			]
+			: [
+				"|   |   |   |   |Z80|   |",
+				"|--:|--:|:-:|---|--:|---|"
+				// `|${rangeStart}||||  |   |`
+			];
+
+		this.candidates.forEach(candidate => {
+			const totalTiming = candidate.totalTimings.best();
+			if (!totalTiming) {
+				return;
+			}
+
+			// const rangeEnd = `#${candidate.endLine.lineNumber + 1}&nbsp;`;
+			const range = `_#${candidate.startLine.lineNumber + 1}&nbsp;&ndash;&nbsp;#${candidate.endLine.lineNumber + 1}&nbsp;_`;
+
+			const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
+			const value = formatTiming(totalTiming.z80Timing);
+			const m1Value = formatTiming(totalTiming.msxTiming);
+			if (!value && (!hasM1 || !m1Value)) {
+				return;
+			}
+
+			switch (platform) {
+				case 'msx':
+					// table.push(`|&ndash;|${rangeEnd}|${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
+					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
+					break;
+				case 'pc8000':
+					// table.push(`|&ndash;|${rangeEnd}|${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
+					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
+					break;
+				default:
+					// table.push(`|&ndash;|${rangeEnd}|${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
+					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
+					break;
+			}
+		});
+
+		return table;
 	}
 }
