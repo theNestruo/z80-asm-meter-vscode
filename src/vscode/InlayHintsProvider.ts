@@ -451,84 +451,69 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 	private buildSingleCandidateToolip(): string[] {
 
 		// Computes the InlayHint tooltip
-		const label = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
-
-		const totalTimings = this.referenceCandidate.totalTimings;
-		const totalTiming = totalTimings.best();
-		const timing = printTiming(totalTiming) ?? "0";
-		const timingSuffix = printableTimingSuffix();
-		const timingText = `**${timing}** ${timingSuffix}`;
-
-		const range = new vscode.Range(this.referenceCandidate.startLine.range.start, this.referenceCandidate.endLine.range.end);
-		const rangeText = printRange(range);
-
-		return [
-			"|||",
-			"|:-:|---|",
-			label ? `||**${label}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
-			`|${totalTiming.statusBarIcon}|${totalTiming.name}: ${timingText}|`,
-			hrMarkdown,
-			...printMarkdownTotalTimings(totalTimings)
-		];
+		return this.printMarkdownHeader();
 	}
 
 	private buildMultipleCandidateTooltip(): string[] {
 
 		// Computes the InlayHint tooltip
-		const label = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
-
-		// const totalTimings = this.referenceCandidate.totalTimings;
-		// const totalTiming = totalTimings.best();
-		// const timing = printTiming(totalTiming) ?? "0";
-		// const timingSuffix = printableTimingSuffix();
-		// const timingText = `**${timing}** ${timingSuffix}`;
-
-		// const range = new vscode.Range(this.referenceCandidate.startLine.range.start, this.referenceCandidate.endLine.range.end);
-		// const rangeText = printRange(range);
-
 		return [
-			// "|||",
-			// "|:-:|---|",
-			// label ? `||**${label}**|\n||_${rangeText}_|` : "||_${rangeText}_|",
-			// `|${totalTiming.statusBarIcon}|${totalTiming.name}: ${timingText}|`,
-			// hrMarkdown,
-			label ? `**${label}**\n${hrMarkdown}` : hrMarkdown,
-			...this.printTotalTimings()
+			...this.printMarkdownHeader(),
+			hrMarkdown,
+			...this.printMultipleCandidateMarkdownTotalTimings()
 		];
 	}
 
-	private printTotalTimings(): string[] {
+	private printMarkdownHeader(): string[] {
 
-		/*
-		...this.candidates
-			.map(candidate => printMarkdownTotalTimingsTableRows([ candidate.totalTimings.best() ]))
-			.flat()
-			*/
+		const label = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
+
+		const range = new vscode.Range(
+			this.referenceCandidate.startLine.range.start,
+			this.referenceCandidate.endLine.range.end);
+		const rangeText = printRange(range);
+
+		const totalTimings = this.referenceCandidate.totalTimings;
+		const totalTiming = totalTimings.best();
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
+		const timing = printTiming(totalTiming) ?? "0";
+		const timingSuffix = printableTimingSuffix();
+		const timingText = `**${timing}** ${timingSuffix}`;
+
+		return [
+			"|   |   |",
+			"|:-:|---|",
+			label
+				? `||**${label}**|\n||_${rangeText}_|`
+				: "||_${rangeText}_|",
+			`|${timingIcon}|${totalTiming.name}: ${timingText}|`
+		];
+	}
+
+	private printMultipleCandidateMarkdownTotalTimings(): string[] {
 
 		const platform = config.platform;
 		const hasM1 = platform === "msx" || platform === "msxz80" || platform === "pc8000";
 		const timingSuffix = printableTimingSuffix();
 
-		// const rangeStart = `#${this.referenceCandidate.startLine.lineNumber + 1}&nbsp;&ndash;`;
-
 		const table =
 			platform === "msx" ? [
-				"|||||MSX||",
-				"|--:|--:|:-:|---|--:|---|"
+				"|   |   |   |MSX|   |",
+				"|:-:|---|--:|--:|---|"
 			]
 			: platform === "msxz80" ? [
-				"||||||||",
-				"|--:|--:|:-:|---|--:|--:|---|",
-				"|||||**MSX**|Z80||"
+				"|   |   |   |       |   |   |",
+				"|:-:|---|--:|------:|--:|---|",
+				"|   |   |   |**MSX**|Z80|   |"
 			]
 			: platform === "pc8000" ? [
-				"||||||||",
-				"|--:|--:|:-:|---|--:|--:|---|",
-				"|||||**Z80**|Z80+M1||"
+				"|   |   |   |       |      |   |",
+				"|:-:|---|--:|------:|-----:|---|",
+				"|   |   |   |**Z80**|Z80+M1|   |"
 			]
 			: [
-				"|||||Z80||",
-				"|--:|--:|:-:|---|--:|---|"
+				"|   |   |   |Z80|   |",
+				"|:-:|---|--:|--:|---|"
 			];
 
 		this.candidates.forEach(candidate => {
@@ -537,8 +522,7 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 				return;
 			}
 
-			// const rangeEnd = `#${candidate.endLine.lineNumber + 1}&nbsp;`;
-			const range = `_#${candidate.startLine.lineNumber + 1}&nbsp;&ndash;&nbsp;#${candidate.endLine.lineNumber + 1}&nbsp;_`;
+			const range = `&nbsp;_(&hellip;&nbsp;#${candidate.endLine.lineNumber + 1})_`;
 
 			const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
 			const value = formatTiming(totalTiming.z80Timing);
@@ -549,16 +533,16 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 
 			switch (platform) {
 				case "msx":
-					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${m1Value}**|${timingSuffix}|`);
+					table.push(`|${timingIcon}|${totalTiming.name}|${range}|**${m1Value}**|${timingSuffix}|`);
 					break;
 				case "msxz80":
-					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
+					table.push(`|${timingIcon}|${totalTiming.name}|${range}|**${m1Value}**|${value}|${timingSuffix}|`);
 					break;
 				case "pc8000":
-					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
+					table.push(`|${timingIcon}|${totalTiming.name}|${range}|**${value}**|${m1Value}|${timingSuffix}|`);
 					break;
 				default:
-					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
+					table.push(`|${timingIcon}|${totalTiming.name}|${range}|**${value}**|${timingSuffix}|`);
 					break;
 			}
 		});
