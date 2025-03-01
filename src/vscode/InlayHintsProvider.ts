@@ -79,7 +79,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 		// (for performance reasons)
 		const subroutinesPosition = config.inlayHints.subroutinesPosition;
-		// const exitPointPosition = config.inlayHints.exitPointPosition;
+		const exitPointPosition = config.inlayHints.exitPointPosition;
+		const exitPointLabel = config.inlayHints.exitPointLabel;
 
 		// Locates the inlay hints candidates within the requested range
 		const candidates = this.locateInlayHintCandidates(document, range);
@@ -92,11 +93,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		});
 
 		// Provides the exit point inlay hints
-		// new Set(candidates.map(candidate => candidate.endLine)).forEach(endLine => {
-		// 	inlayHints.push(this.provideExitPointInlayHint(
-		// 		candidates.filter(candidate => candidate.endLine === endLine),
-		// 		exitPointPosition));
-		// });
+		new Set(candidates.map(candidate => candidate.endLine)).forEach(endLine => {
+			inlayHints.push(this.provideExitPointInlayHint(
+				candidates.filter(candidate => candidate.endLine === endLine),
+				exitPointPosition, exitPointLabel));
+		});
 
 		return inlayHints;
 	}
@@ -267,22 +268,22 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return new ResolvableSubroutineInlayHint(referenceCandidate, position, paddingLeft, paddingRight, candidates);
 	}
 
-	// private provideExitPointInlayHint(
-	// 		candidates: InlayHintCandidate[],
-	// 		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
-	// 		vscode.InlayHint {
+	private provideExitPointInlayHint(
+			candidates: InlayHintCandidate[],
+			positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd",
+			exitPointLabelType: "first" | "closest"):
+			vscode.InlayHint {
 
-	// 	// Computes the InlayHint position in the last line
-	// 	const firstCandidate = candidates[0];
-	// 	const [ position, paddingLeft, paddingRight ] =
-	// 		this.computePosition(firstCandidate.endLine, firstCandidate.sourceCode[firstCandidate.sourceCode.length - 1], positionType);
+		// Computes the InlayHint position in the last line
+		const referenceCandidate = candidates[exitPointLabelType == "first" ? 0 : candidates.length - 1];
+		const sourceCodeWithExitPoint = referenceCandidate.sourceCodeWithExitPoint;
 
-	// 	const range = new vscode.Range(firstCandidate.startLine.range.start, firstCandidate.endLine.range.end),
+		// Computes the InlayHint position in the first line
+		const [ position, paddingLeft, paddingRight ] =
+			this.computePosition(referenceCandidate.endLine, sourceCodeWithExitPoint, positionType);
 
-	// // 		ongoingCandidates[config.inlayHints.exitPointLabel === "first" ? 0 : ongoingCandidates.length - 1]
-	// 	// throw new Error('Function not implemented.');
-	// 	return undefined;
-	// }
+		return new ResolvableExitPointInlayHint(referenceCandidate, position, paddingLeft, paddingRight, candidates);
+	}
 
 	private computePosition(
 		line: vscode.TextLine, sourceCode: SourceCode,
@@ -379,6 +380,11 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 		return this.sourceCode[0];
 	}
 
+	get sourceCodeWithExitPoint(): SourceCode {
+
+		return this.sourceCode[this.sourceCode.length - 1];
+	}
+
 	get totalTimings(): TotalTimings {
 
 		if (!this.cachedTotalTimings) {
@@ -413,6 +419,32 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 	}
 
 	abstract resolve(): vscode.InlayHint;
+
+	protected buildMarkdownSubroutineHeader(candidate: InlayHintCandidate): string[] {
+
+		const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":");
+
+		const range = new vscode.Range(
+			candidate.startLine.range.start,
+			candidate.endLine.range.end);
+		const rangeText = printRange(range);
+
+		const totalTimings = candidate.totalTimings;
+		const totalTiming = totalTimings.best();
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
+		const timing = printTiming(totalTiming) ?? "0";
+		const timingSuffix = printableTimingSuffix();
+		const timingText = `**${timing}** ${timingSuffix}`;
+
+		return [
+			"|   |   |",
+			"|:-:|---|",
+			label
+				? `||**${label}**|\n||_${rangeText}_|`
+				: "||_${rangeText}_|",
+			`|${timingIcon}|${totalTiming.name}: ${timingText}|`
+		];
+	}
 }
 
 /**
@@ -451,42 +483,16 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 	private buildSingleCandidateToolip(): string[] {
 
 		// Computes the InlayHint tooltip
-		return this.printMarkdownHeader();
+		return this.buildMarkdownSubroutineHeader(this.referenceCandidate);
 	}
 
 	private buildMultipleCandidateTooltip(): string[] {
 
 		// Computes the InlayHint tooltip
 		return [
-			...this.printMarkdownHeader(),
+			...this.buildMarkdownSubroutineHeader(this.referenceCandidate),
 			hrMarkdown,
 			...this.printMultipleCandidateMarkdownTotalTimings()
-		];
-	}
-
-	private printMarkdownHeader(): string[] {
-
-		const label = removeSuffix(this.referenceCandidate.sourceCodeWithLabel.label, ":");
-
-		const range = new vscode.Range(
-			this.referenceCandidate.startLine.range.start,
-			this.referenceCandidate.endLine.range.end);
-		const rangeText = printRange(range);
-
-		const totalTimings = this.referenceCandidate.totalTimings;
-		const totalTiming = totalTimings.best();
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
-		const timing = printTiming(totalTiming) ?? "0";
-		const timingSuffix = printableTimingSuffix();
-		const timingText = `**${timing}** ${timingSuffix}`;
-
-		return [
-			"|   |   |",
-			"|:-:|---|",
-			label
-				? `||**${label}**|\n||_${rangeText}_|`
-				: "||_${rangeText}_|",
-			`|${timingIcon}|${totalTiming.name}: ${timingText}|`
 		];
 	}
 
@@ -548,5 +554,59 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 		});
 
 		return table;
+	}
+}
+
+/**
+ * An exit point InlayHint
+ */
+class ResolvableExitPointInlayHint extends ResolvableInlayHint {
+
+	protected referenceCandidate: InlayHintCandidate;
+	protected candidates: InlayHintCandidate[];
+
+	constructor(referenceCandidate: InlayHintCandidate,
+		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
+		candidates: InlayHintCandidate[]) {
+
+		super(position, referenceCandidate.inlayHintLabel, paddingLeft, paddingRight);
+
+		this.referenceCandidate = referenceCandidate;
+		this.candidates = candidates;
+	}
+
+
+	resolve(): vscode.InlayHint {
+
+		// (sanity check)
+		if (!this.tooltip) {
+			this.tooltip = new vscode.MarkdownString(
+					(this.candidates.length == 1
+						? this.buildSingleCandidateToolip()
+						: this.buildMultipleCandidateTooltip())
+					.join("\n"), true);
+		}
+
+		return this;
+
+	}
+
+	private buildSingleCandidateToolip(): string[] {
+
+		// Computes the InlayHint tooltip
+		return this.buildMarkdownSubroutineHeader(this.referenceCandidate);
+	}
+
+	private buildMultipleCandidateTooltip(): string[] {
+
+		// Computes the InlayHint tooltip
+		const tooltip: string[] = [];
+		this.candidates.forEach((candidate, index) => {
+			if (index) {
+				tooltip.push(hrMarkdown);
+			}
+			tooltip.push(...this.buildMarkdownSubroutineHeader(candidate));
+		});
+		return tooltip;
 	}
 }
