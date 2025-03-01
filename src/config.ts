@@ -6,7 +6,7 @@ class Configuration {
 		return configurationReader.read("languageIds");
 	}
 
-	get platform(): "z80" | "cpc" | "msx" | "pc8000" | "z80n" {
+	get platform(): "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n" {
 		return configurationReader.read("platform");
 	}
 

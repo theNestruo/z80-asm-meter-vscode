@@ -204,13 +204,13 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 
 		switch (config.inlayHints.nestedSubroutines) {
-			case 'disabled':
+			case "disabled":
 				return false;
 
-			case 'enabled':
+			case "enabled":
 				return true;
 
-			case 'entryPoint':
+			case "entryPoint":
 				// If there is no ongoing subroutines, it is an entry point
 				return incompleteSubroutines.length == 0;
 		}
@@ -290,40 +290,40 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		[ vscode.Position, boolean, boolean ] {
 
 		switch (positionType) {
-			case 'lineStart':
+			case "lineStart":
 				return [ line.range.start, false, true ];
 
-			case 'afterLabel':
+			case "afterLabel":
 				return [
 					line.range.start.with(undefined, positionFromStart(line.text, sourceCode.afterLabelPosition)),
 					!!sourceCode.afterLabelPosition, false
 				];
 
-			case 'beforeCode':
+			case "beforeCode":
 				return [
 					line.range.start.with(undefined, positionFromStartAndSkipWhitespaceAfter(line.text, sourceCode.afterLabelPosition)),
 					true, true
 				];
 
-			case 'afterCode':
+			case "afterCode":
 				return [
 					line.range.start.with(undefined, positionFromEndAndSkipWhitespaceBefore(line.text, sourceCode.beforeLineCommentPosition)),
 					true, true
 				];
 
-			case 'beforeComment':
+			case "beforeComment":
 				return [
 					line.range.start.with(undefined, positionFromEnd(line.text, sourceCode.beforeLineCommentPosition)),
 					true, !!sourceCode.beforeLineCommentPosition
 				];
 
-			case 'insideComment':
+			case "insideComment":
 				return [
 					line.range.start.with(undefined, positionFromEnd(line.text, sourceCode.afterLineCommentPosition)),
 					true, !!sourceCode.afterLineCommentPosition
 				];
 
-			case 'lineEnd':
+			case "lineEnd":
 				return [ line.range.end, true, false ];
 		}
 	}
@@ -506,28 +506,29 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 			*/
 
 		const platform = config.platform;
-		const hasM1 = platform === "msx" || platform === "pc8000";
+		const hasM1 = platform === "msx" || platform === "msxz80" || platform === "pc8000";
 		const timingSuffix = printableTimingSuffix();
 
 		// const rangeStart = `#${this.referenceCandidate.startLine.lineNumber + 1}&nbsp;&ndash;`;
 
 		const table =
 			platform === "msx" ? [
-				"|   |   |   |   |       |   |   |",
-				"|--:|--:|:-:|---|--:    |--:|---|",
-				"|   |   |   |   |**MSX**|Z80|   |"
-				// `|${rangeStart}||||      |   |   |`
+				"|||||MSX||",
+				"|--:|--:|:-:|---|--:|---|"
+			]
+			: platform === "msxz80" ? [
+				"||||||||",
+				"|--:|--:|:-:|---|--:|--:|---|",
+				"|||||**MSX**|Z80||"
 			]
 			: platform === "pc8000" ? [
-				"|   |   |   |   |       |      |   |",
-				"|--:|--:|:-:|---|--:    |--:   |---|",
-				"|   |   |   |   |**Z80**|Z80+M1|   |"
-				// `|${rangeStart}||||      |      |   |`
+				"||||||||",
+				"|--:|--:|:-:|---|--:|--:|---|",
+				"|||||**Z80**|Z80+M1||"
 			]
 			: [
-				"|   |   |   |   |Z80|   |",
+				"|||||Z80||",
 				"|--:|--:|:-:|---|--:|---|"
-				// `|${rangeStart}||||  |   |`
 			];
 
 		this.candidates.forEach(candidate => {
@@ -547,16 +548,16 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 			}
 
 			switch (platform) {
-				case 'msx':
-					// table.push(`|&ndash;|${rangeEnd}|${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
+				case "msx":
+					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${m1Value}**|${timingSuffix}|`);
+					break;
+				case "msxz80":
 					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
 					break;
-				case 'pc8000':
-					// table.push(`|&ndash;|${rangeEnd}|${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
+				case "pc8000":
 					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
 					break;
 				default:
-					// table.push(`|&ndash;|${rangeEnd}|${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
 					table.push(`|${range}||${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
 					break;
 			}

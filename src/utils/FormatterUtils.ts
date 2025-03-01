@@ -147,8 +147,8 @@ export function printMarkdownTotalTimingsAndSize(
 		const formattedSize = printSize(size);
 		const sizeSuffix = pluralize(" byte| bytes", size);
 		const platform = config.platform;
-		const hasM1 = platform === "msx" || platform === "pc8000";
-		table.push(hasM1
+		const hasBothZ80M1 = platform === "pc8000";
+		table.push(hasBothZ80M1
 			? `|${sizeIcon}|Size|**${formattedSize}**||${sizeSuffix}|`
 			: `|${sizeIcon}|Size|**${formattedSize}**|${sizeSuffix}|`);
 	}
@@ -160,13 +160,28 @@ export function printMarkdownTotalTimingsAndSize(
 export function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] {
 
 	const platform = config.platform;
-	const hasM1 = platform === "msx" || platform === "pc8000";
+	const hasM1 = platform === "msx" || platform === "msxz80" || platform === "pc8000";
 	const timingSuffix = printableTimingSuffix();
 
 	const table =
-		platform === "msx" ? [ "||||||", "|:-:|---|--:|--:|---|", "|||**MSX**|Z80||" ]
-		: platform === "pc8000" ? [ "||||||", "|:-:|---|--:|--:|---|", "|||**Z80**|Z80+M1||" ]
-		: [ "|||Z80||", "|:-:|---|--:|---|" ];
+		platform === "msx" ? [
+			"|||MSX||",
+			"|:-:|---|--:|---|"
+		]
+		: platform === "msxz80" ? [
+			"||||||",
+			"|:-:|---|--:|--:|---|",
+			"|||**MSX**|Z80||"
+		]
+		: platform === "pc8000" ? [
+			"||||||",
+			"|:-:|---|--:|--:|---|",
+			"|||**Z80**|Z80+M1||"
+		]
+		: [
+			"|||Z80||",
+			"|:-:|---|--:|---|"
+		];
 
 	totalTimings.ordered().forEach(totalTiming => {
 		if (!totalTiming) {
@@ -181,10 +196,13 @@ export function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] 
 		}
 
 		switch (platform) {
-			case 'msx':
+			case "msx":
+				table.push(`|${timingIcon}|${totalTiming.name}|**${m1Value}**|${timingSuffix}|`);
+				break;
+			case "msxz80":
 				table.push(`|${timingIcon}|${totalTiming.name}|**${m1Value}**|${value}|${timingSuffix}|`);
 				break;
-			case 'pc8000':
+			case "pc8000":
 				table.push(`|${timingIcon}|${totalTiming.name}|**${value}**|${m1Value}|${timingSuffix}|`);
 				break;
 			default:
