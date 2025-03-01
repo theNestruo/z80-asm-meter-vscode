@@ -4,7 +4,7 @@ import { mainParser } from '../parser/MainParser';
 import { TotalTimings } from '../totalTiming/TotalTimings';
 import { Meterable, SourceCode } from '../types';
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
-import { formatTiming, hrMarkdown, printableTimingSuffix, printMarkdownTotalTimings, printRange, printTiming } from '../utils/FormatterUtils';
+import { formatTiming, hrMarkdown, printableTimingSuffix, printRange, printTiming } from '../utils/FormatterUtils';
 import { lineToSourceCode } from '../utils/SourceCodeUtils';
 import { positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from '../utils/TextUtils';
 import { isExtensionEnabledFor } from './SourceCodeReader';
