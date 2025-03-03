@@ -375,6 +375,11 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 		this.endLine = endLine;
 	}
 
+	get range(): vscode.Range {
+
+		return new vscode.Range(this.startLine.range.start, this.endLine.range.end);
+	}
+
 	get sourceCodeWithLabel(): SourceCode {
 
 		return this.sourceCode[0];
@@ -599,14 +604,77 @@ class ResolvableExitPointInlayHint extends ResolvableInlayHint {
 
 	private buildMultipleCandidateTooltip(): string[] {
 
-		// Computes the InlayHint tooltip
-		const tooltip: string[] = [];
-		this.candidates.forEach((candidate, index) => {
-			if (index) {
-				tooltip.push(hrMarkdown);
+		const platform = config.platform;
+		const hasM1 = platform === "msx" || platform === "msxz80" || platform === "pc8000";
+		const timingSuffix = printableTimingSuffix();
+
+		const table =
+			platform === "msx" ? [
+				// "|   |   |   |   |MSX|   |",
+				// "|--:|---|:-:|---|--:|---|"
+				"|   |   |MSX|   |",
+				"|---|--:|--:|---|"
+			]
+			: platform === "msxz80" ? [
+				// "|   |   |   |   |       |   |   |",
+				// "|--:|---|:-:|---|------:|--:|---|",
+				// "|   |   |   |   |**MSX**|Z80|   |"
+				"|   |   |       |   |   |",
+				"|---|--:|------:|--:|---|",
+				"|   |   |**MSX**|Z80|   |"
+			]
+			: platform === "pc8000" ? [
+				// "|   |   |   |   |       |      |   |",
+				// "|--:|---|:-:|---|------:|-----:|---|",
+				// "|   |   |   |   |**Z80**|Z80+M1|   |"
+				"|   |   |       |      |   |",
+				"|---|--:|------:|-----:|---|",
+				"|   |   |**Z80**|Z80+M1|   |"
+			]
+			: [
+				// "|   |   |   |   |Z80|   |",
+				// "|--:|---|:-:|---|--:|---|"
+				"|   |   |Z80|   |",
+				"|---|--:|--:|---|"
+			];
+
+		this.candidates.forEach(candidate => {
+			const totalTiming = candidate.totalTimings.best();
+			if (!totalTiming) {
+				return;
 			}
-			tooltip.push(...this.buildMarkdownSubroutineHeader(candidate));
+
+			const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":") ?? '';
+
+			const range = printRange(candidate.range);
+
+			// const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
+			const value = formatTiming(totalTiming.z80Timing);
+			const m1Value = formatTiming(totalTiming.msxTiming);
+			if (!value && (!hasM1 || !m1Value)) {
+				return;
+			}
+
+			switch (platform) {
+				case "msx":
+					// table.push(`|_${range}_|${label}|&nbsp;${timingIcon}|${totalTiming.name}|**${m1Value}**|${timingSuffix}|`);
+					table.push(`|**${label}**|_${range}_|**${m1Value}**|${timingSuffix}|`);
+					break;
+				case "msxz80":
+					// table.push(`|${label}|${timingIcon}|${totalTiming.name}|${range}|**${m1Value}**|${value}|${timingSuffix}|`);
+					table.push(`|**${label}**|_${range}_|**${m1Value}**|${value}|${timingSuffix}|`);
+					break;
+				case "pc8000":
+					// table.push(`|${label}|${timingIcon}|${totalTiming.name}|${range}|**${value}**|${m1Value}|${timingSuffix}|`);
+					table.push(`|**${label}**|_${range}_|**${value}**|${m1Value}|${timingSuffix}|`);
+					break;
+				default:
+					// table.push(`|${label}|${timingIcon}|${totalTiming.name}|${range}|**${value}**|${timingSuffix}|`);
+					table.push(`|**${label}**|_${range}_|**${value}**|${timingSuffix}|`);
+					break;
+			}
 		});
-		return tooltip;
+
+		return table;
 	}
 }
