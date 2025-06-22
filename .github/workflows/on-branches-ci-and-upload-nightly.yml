@@ -1,4 +1,4 @@
-name: vsce package and upload
+name: ci and upload nightly on branches
 
 on:
   push:
@@ -19,8 +19,7 @@ jobs:
       with:
         node-version: 20
 
-    - name: Install the dependencies
-      run: npm install
+    - run: npm ci
 
     - name: Install vsce
       run: npm install --global @vscode/vsce

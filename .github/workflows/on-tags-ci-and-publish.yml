@@ -1,0 +1,32 @@
+name: ci and publish on tags
+
+on:
+  push:
+    tags:
+    - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - run: npm ci
+
+    - name: Publish to Open VSX Registry
+      uses: HaaLeo/publish-vscode-extension@v2
+      with:
+        pat: ${{ secrets.OPEN_VSX_TOKEN }}
+
+    - name: Publish to Visual Studio Marketplace
+      uses: HaaLeo/publish-vscode-extension@v2
+      with:
+        pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+        registryUrl: https://marketplace.visualstudio.com
