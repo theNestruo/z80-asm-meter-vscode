@@ -791,6 +791,12 @@
 							"At the end of the line"
 						]
 					},
+					"z80-asm-meter.inlayHints.subroutines.multiple": {
+						"order": 25,
+						"type": "integer",
+						"default": 5,
+						"description": "How many exit points will be shown in the tooltip when there are multiple exit points"
+					},
 					"z80-asm-meter.inlayHints.subroutines.unlabelled": {
 						"order": 30,
 						"type": "boolean",
@@ -841,6 +847,12 @@
 							"Inside the trailing line comments, or at the end of the line if there are no trailing comments",
 							"At the end of the line"
 						]
+					},
+					"z80-asm-meter.inlayHints.exitPoint.multiple": {
+						"order": 45,
+						"type": "integer",
+						"default": 5,
+						"description": "How many different subroutines will be shown in the tooltip when multiple subroutines end up in the selected exit point"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.ret": {
 						"order": 50,
