@@ -321,8 +321,8 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.position");
 	}
 
-	get subroutinesMultipleCount(): number {
-		return configurationReader.read("inlayHints.subroutines.multiple");
+	get subroutinesExitPointsCount(): number {
+		return configurationReader.read("inlayHints.subroutines.exitPointCount");
 	}
 
 	get unlabelledSubroutines(): boolean {
@@ -341,8 +341,8 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.exitPoint.position");
 	}
 
-	get exitPointMultipleCount(): number {
-		return configurationReader.read("inlayHints.exitPoint.multiple");
+	get exitPointSubroutinesCount(): number {
+		return configurationReader.read("inlayHints.exitPoint.subroutinesCount");
 	}
 
 	get exitPointRet(): boolean {

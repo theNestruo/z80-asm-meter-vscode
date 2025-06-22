@@ -2,7 +2,7 @@
 
 ## 5.7.0 (preview)
 
-- TBD
+- Inlay Hints improvements
 
 ## 5.6.6
 

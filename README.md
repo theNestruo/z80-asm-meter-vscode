@@ -458,6 +458,10 @@ This extension can provide inlay hints (additional information about source code
 
         ![](images/inlayHints.subroutines.position=lineEnd.png)
 
+* [`z80-asm-meter.inlayHints.subroutines.exitPointCount`](vscode://settings/z80-asm-meter.inlayHints.subroutines.exitPointCount): When a subroutine has multiple exit points, determines how many exit points are shown in the tooltip. Set to 0 or 1 to disable additional exit points in the tooltip.
+
+    5 by default.
+
 * [`z80-asm-meter.inlayHints.subroutines.unlabelled`](vscode://settings/z80-asm-meter.inlayHints.subroutines.unlabelled): Consider that unlabelled code is a subroutine.
 
     Disabled by default.
@@ -500,6 +504,10 @@ This extension can provide inlay hints (additional information about source code
     * `lineEnd`: at the end of the line.
 
         ![](images/inlayHints.exitPoint.position=lineEnd.png)
+
+* [`z80-asm-meter.inlayHints.exitPoint.subroutinesCount`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.subroutinesCount): When an exit point belongs to multiple subroutines, determines how many subroutines are shown in the tooltip. Set to 0 or 1 to disable multiple subroutines in the tooltip.
+
+    5 by default.
 
 * [`z80-asm-meter.inlayHints.exitPoint.ret`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.ret): Consider that conditional RET instructions are subroutine exit points.
 

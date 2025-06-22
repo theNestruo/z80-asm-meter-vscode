@@ -791,11 +791,11 @@
 							"At the end of the line"
 						]
 					},
-					"z80-asm-meter.inlayHints.subroutines.multiple": {
+					"z80-asm-meter.inlayHints.subroutines.exitPointCount": {
 						"order": 25,
 						"type": "integer",
 						"default": 5,
-						"description": "How many exit points will be shown in the tooltip when there are multiple exit points"
+						"description": "When a subroutine has multiple exit points, determines how many exit points are shown in the tooltip. Set to 0 or 1 to disable additional exit points in the tooltip"
 					},
 					"z80-asm-meter.inlayHints.subroutines.unlabelled": {
 						"order": 30,
@@ -848,11 +848,11 @@
 							"At the end of the line"
 						]
 					},
-					"z80-asm-meter.inlayHints.exitPoint.multiple": {
+					"z80-asm-meter.inlayHints.exitPoint.subroutinesCount": {
 						"order": 45,
 						"type": "integer",
 						"default": 5,
-						"description": "How many different subroutines will be shown in the tooltip when multiple subroutines end up in the selected exit point"
+						"description": "When an exit point belongs to multiple subroutines, determines how many subroutines are shown in the tooltip. Set to 0 or 1 to disable multiple subroutines in the tooltip"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.ret": {
 						"order": 50,

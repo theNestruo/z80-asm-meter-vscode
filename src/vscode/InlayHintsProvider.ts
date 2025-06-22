@@ -416,11 +416,21 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
  */
 abstract class ResolvableInlayHint extends vscode.InlayHint {
 
+	// (for performance reasons)
+	protected readonly platform: "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
+	protected readonly hasM1: boolean;
+	protected readonly timingSuffix: string;
+
 	constructor(position: vscode.Position, label: string, paddingLeft: boolean, paddingRight: boolean) {
 
 		super(position, label);
 		this.paddingLeft = paddingLeft;
 		this.paddingRight = paddingRight;
+
+		// (for performance reasons)
+		this.platform = config.platform;
+		this.hasM1 = this.platform === "msx" || this.platform === "msxz80" || this.platform === "pc8000";
+		this.timingSuffix = printableTimingSuffix();
 	}
 
 	abstract resolve(): vscode.InlayHint;
@@ -438,8 +448,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 		const totalTiming = totalTimings.best();
 		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
 		const timing = printTiming(totalTiming) ?? "0";
-		const timingSuffix = printableTimingSuffix();
-		const timingText = `**${timing}** ${timingSuffix}`;
+		const timingText = `**${timing}** ${this.timingSuffix}`;
 
 		return [
 			"|   |   |",
@@ -453,21 +462,23 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 }
 
 /**
- * A subroutine InlayHint
+ * An InlayHint that can be resolved and has additional meterings
  */
 abstract class ResolvableInlayHintWithCandidates extends ResolvableInlayHint {
 
 	protected referenceCandidate: InlayHintCandidate;
 	protected candidates: InlayHintCandidate[];
+	protected multipleCount: number;
 
 	constructor(referenceCandidate: InlayHintCandidate,
 		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
-		candidates: InlayHintCandidate[]) {
+		candidates: InlayHintCandidate[], multipleCount: number) {
 
 		super(position, referenceCandidate.inlayHintLabel, paddingLeft, paddingRight);
 
 		this.referenceCandidate = referenceCandidate;
 		this.candidates = candidates;
+		this.multipleCount = multipleCount;
 	}
 
 	resolve(): vscode.InlayHint {
@@ -482,51 +493,21 @@ abstract class ResolvableInlayHintWithCandidates extends ResolvableInlayHint {
 
 	private buildTooltip(): string [] {
 
-		if (this.candidates.length == 1) {
+		if ((this.candidates.length == 1) || (this.multipleCount <= 1)) {
 			return this.buildMarkdownSubroutineHeader(this.referenceCandidate);
 		}
 
 		return [
 			...this.buildMarkdownSubroutineHeader(this.referenceCandidate),
-			...this.printMultipleCandidateMarkdownTotalTimings()
+			...this.buildMarkdownExtraTable()
 		];
 	}
 
-	abstract printMultipleCandidateMarkdownTotalTimings(): string[];
-}
-
-/**
- * A subroutine InlayHint
- */
-class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
-
-	// (for performance reasons)
-	private platform: "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
-	private hasM1: boolean;
-	private timingSuffix: string;
-
-	constructor(referenceCandidate: InlayHintCandidate,
-		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
-		candidates: InlayHintCandidate[]) {
-
-		super(referenceCandidate, position, paddingLeft, paddingRight, candidates);
-
-		this.platform = config.platform;
-		this.hasM1 = this.platform === "msx" || this.platform === "msxz80" || this.platform === "pc8000";
-		this.timingSuffix = printableTimingSuffix();
-	}
-
-	printMultipleCandidateMarkdownTotalTimings(): string[] {
-
-		// (configuration check)
-		const limit = config.inlayHints.subroutinesMultipleCount;
-		if (limit <= 1) {
-			return [];
-		}
+	private buildMarkdownExtraTable(): string[] {
 
 		const entries: string[] = [];
 		this.candidates.forEach(candidate => {
-			const entry = this.printMultipleCandidateMarkdownTotalTimingsEntry(candidate);
+			const entry = this.buildMarkdownExtraTableEntry(candidate);
 			if (entry) {
 				entries.push(entry);
 			}
@@ -537,54 +518,79 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
 			return [];
 		}
 
-		// Initializes the table
-		const table = [hrMarkdown];
-		switch (this.platform) {
-			case "msx":
-				table.push(
-					"|   |   |   |MSX|   |",
-					"|--:|:-:|---|--:|---|");
-				break;
-			case "msxz80":
-				table.push(
-					"|   |   |   |       |   |   |",
-					"|--:|:-:|---|------:|--:|---|",
-					"|   |   |   |**MSX**|Z80|   |");
-				break;
-			case "pc8000":
-				table.push(
-					"|   |   |   |       |      |   |",
-					"|--:|:-:|---|------:|-----:|---|",
-					"|   |   |   |**Z80**|Z80+M1|   |");
-				break;
-			default:
-				table.push(
-					"|   |   |   |Z80|   |",
-					"|--:|:-:|---|--:|---|");
-				break;
-		}
-
 		// All entries
-		if (entries.length <= limit) {
-			table.push(...entries);
-			return table;
+		if (entries.length <= this.multipleCount) {
+			return [
+				hrMarkdown,
+				...this.buildMarkdownExtraTableHeader(),
+				...entries
+			];
 		}
 
 		// Exlcudes mid-list entries
-		const firstEntries = Math.floor(limit / 2.0);
-		const lastEntries = entries.length - Math.ceil(limit / 2.0);
-		table.push(
+		const firstEntries = Math.floor(this.multipleCount / 2.0);
+		const lastEntries = this.multipleCount - firstEntries;
+		return [
+			hrMarkdown,
+			...this.buildMarkdownExtraTableHeader(),
 			...entries.slice(0, firstEntries),
 			"||&hellip;||",
-			...entries.slice(lastEntries));
-		return table;
+			...entries.slice(lastEntries)
+		];
 	}
 
-	private printMultipleCandidateMarkdownTotalTimingsEntry(candidate: InlayHintCandidate): string | undefined {
+	abstract buildMarkdownExtraTableHeader(): string[];
+
+	abstract buildMarkdownExtraTableEntry(candidate: InlayHintCandidate): string | undefined;
+}
+
+/**
+ * A subroutine InlayHint
+ */
+class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
+
+	constructor(referenceCandidate: InlayHintCandidate,
+		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
+		candidates: InlayHintCandidate[]) {
+
+		super(
+			referenceCandidate, position, paddingLeft, paddingRight, candidates,
+			config.inlayHints.subroutinesExitPointsCount);
+	}
+
+	buildMarkdownExtraTableHeader(): string[] {
+
+		switch (this.platform) {
+			case "msx":
+				return [
+					"|   |   |   |MSX|   |",
+					"|--:|:-:|---|--:|---|"
+				];
+			case "msxz80":
+				return [
+					"|   |   |   |       |   |   |",
+					"|--:|:-:|---|------:|--:|---|",
+					"|   |   |   |**MSX**|Z80|   |"
+				];
+			case "pc8000":
+				return [
+					"|   |   |   |       |      |   |",
+					"|--:|:-:|---|------:|-----:|---|",
+					"|   |   |   |**Z80**|Z80+M1|   |"
+				];
+			default:
+				return [
+					"|   |   |   |Z80|   |",
+					"|--:|:-:|---|--:|---|"
+				];
+		}
+	}
+
+	buildMarkdownExtraTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
 		if (!totalTiming) {
-			return undefined;
+			return;
 		}
 
 		const range = `_&hellip;&nbsp;#${candidate.endLine.lineNumber + 1}_&nbsp;`;
@@ -614,87 +620,45 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
  */
 class ResolvableExitPointInlayHint extends ResolvableInlayHintWithCandidates {
 
-	// (for performance reasons)
-	private platform: "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
-	private hasM1: boolean;
-	private timingSuffix: string;
-
 	constructor(referenceCandidate: InlayHintCandidate,
 		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
 		candidates: InlayHintCandidate[]) {
 
-		super(referenceCandidate, position, paddingLeft, paddingRight, candidates);
-
-		this.platform = config.platform;
-		this.hasM1 = this.platform === "msx" || this.platform === "msxz80" || this.platform === "pc8000";
-		this.timingSuffix = printableTimingSuffix();
+		super(
+			referenceCandidate, position, paddingLeft, paddingRight, candidates,
+			config.inlayHints.subroutinesExitPointsCount);
 	}
 
-	printMultipleCandidateMarkdownTotalTimings(): string[] {
+	buildMarkdownExtraTableHeader(): string[] {
 
-		// (configuration check)
-		const limit = config.inlayHints.subroutinesMultipleCount;
-		if (limit <= 1) {
-			return [];
-		}
-
-		const entries: string[] = [];
-		this.candidates.forEach(candidate => {
-			const entry = this.printMultipleCandidateMarkdownTotalTimingsEntry(candidate);
-			if (entry) {
-				entries.push(entry);
-			}
-		});
-
-		// (sanity check)
-		if (entries.length <= 1) {
-			return [];
-		}
-
-		// Initializes the table
-		const table = [hrMarkdown];
 		switch (this.platform) {
 			case "msx":
-				table.push(
+				return [
 					"|   |   |MSX|   |",
-					"|--:|---|--:|---|");
-				break;
+					"|--:|---|--:|---|"
+				];
 			case "msxz80":
-				table.push(
+				return [
 					"|   |   |       |   |   |",
 					"|--:|---|------:|--:|---|",
-					"|   |   |**MSX**|Z80|   |");
-				break;
+					"|   |   |**MSX**|Z80|   |"
+				];
 			case "pc8000":
-				table.push(
+				return [
 					"|   |   |       |      |   |",
 					"|--:|---|------:|-----:|---|",
-					"|   |   |**Z80**|Z80+M1|   |");
-				break;
+					"|   |   |**Z80**|Z80+M1|   |"
+				];
 			default:
-				table.push(
+				return [
 					"|   |   |Z80|   |",
-					"|--:|---|--:|---|");
-				break;
+					"|--:|---|--:|---|"
+				];
 		}
-
-		// All entries
-		if (entries.length <= limit) {
-			table.push(...entries);
-			return table;
-		}
-
-		// Exlcudes mid-list entries
-		const firstEntries = Math.floor(limit / 2.0);
-		const lastEntries = entries.length - Math.ceil(limit / 2.0);
-		table.push(
-			...entries.slice(0, firstEntries),
-			"||&hellip;||",
-			...entries.slice(lastEntries));
-		return table;
 	}
 
-	private printMultipleCandidateMarkdownTotalTimingsEntry(candidate: InlayHintCandidate): string | undefined {
+	buildMarkdownExtraTableEntry(candidate: InlayHintCandidate): string | undefined {
+
 		const totalTiming = candidate.totalTimings.best();
 		if (!totalTiming) {
 			return;
