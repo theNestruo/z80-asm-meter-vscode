@@ -1,9 +1,11 @@
-name: ci and publish on tags
+name: ci and publish on master tags
 
 on:
   push:
     tags:
     - "*"
+    tags-ignore:
+    - "*-preview"
 
 jobs:
   build:
