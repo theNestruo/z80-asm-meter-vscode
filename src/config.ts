@@ -341,6 +341,14 @@ class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.exitPoint.position");
 	}
 
+	get exitPointSubroutinesThreshold(): number {
+		return configurationReader.read("inlayHints.exitPoint.subroutinesThreshold");
+	}
+
+	get exitPointLinesThreshold(): number {
+		return configurationReader.read("inlayHints.exitPoint.linesThreshold");
+	}
+
 	get exitPointSubroutinesCount(): number {
 		return configurationReader.read("inlayHints.exitPoint.subroutinesCount");
 	}

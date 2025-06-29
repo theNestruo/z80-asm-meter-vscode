@@ -80,6 +80,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		// (for performance reasons)
 		const subroutinesPosition = config.inlayHints.subroutinesPosition;
 		const exitPointPosition = config.inlayHints.exitPointPosition;
+		const exitPointSubroutinesThreshold = config.inlayHints.exitPointSubroutinesThreshold;
+		const exitPointLinesThreshold = config.inlayHints.exitPointLinesThreshold;
 		const exitPointLabel = config.inlayHints.exitPointLabel;
 
 		// Locates the inlay hints candidates within the requested range
@@ -94,9 +96,12 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 		// Provides the exit point inlay hints
 		new Set(candidates.map(candidate => candidate.endLine)).forEach(endLine => {
-			inlayHints.push(this.provideExitPointInlayHint(
+			const inlayHint = this.provideExitPointInlayHint(
 				candidates.filter(candidate => candidate.endLine === endLine),
-				exitPointPosition, exitPointLabel));
+				exitPointPosition, exitPointSubroutinesThreshold, exitPointLinesThreshold, exitPointLabel);
+			if (inlayHint) {
+				inlayHints.push(inlayHint);
+			}
 		});
 
 		return inlayHints;
@@ -172,7 +177,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			if (isUnconditionalJumpOrRetInstruction(metered.instruction)) {
 				// Ends all incomplete subroutines (if not before the range)
 				if (!isBeforeRange) {
-					ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line)));
+					ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line, false)));
 				}
 
 				// (restarts subroutine lookup)
@@ -181,14 +186,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			// Checks subroutine conditional exit point (if not before the range)
 			} else if (!isBeforeRange && this.isValidConditionalExitPoint(metered.instruction)) {
-				ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line)));
+				ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line, true)));
 			}
 		}
 
 		// Completes trailing code as subroutine
 		if (ongoingCandidates.length && didContainCode) {
 			const line = document.lineAt(document.lineCount - 1);
-			ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line)));
+			ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line, false)));
 		}
 
 		return candidates;
@@ -271,14 +276,25 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 	private provideExitPointInlayHint(
 			candidates: InlayHintCandidate[],
 			positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd",
+			exitPointSubroutinesThreshold: number,
+			exitPointLinesThreshold: number,
 			exitPointLabelType: "first" | "closest"):
-			vscode.InlayHint {
+			vscode.InlayHint | undefined {
 
-		// Computes the InlayHint position in the last line
+		// (convenience local variable)
 		const referenceCandidate = candidates[exitPointLabelType == "first" ? 0 : candidates.length - 1];
+
+		// Unconditional exit point inlay hint threshold conditions
+		if ((!referenceCandidate.conditional)
+			&& (exitPointSubroutinesThreshold > candidates.length)
+			&& (exitPointLinesThreshold > referenceCandidate.lineCount)) {
+			return undefined;
+		}
+
+		// (convenience local variable)
 		const sourceCodeWithExitPoint = referenceCandidate.sourceCodeWithExitPoint;
 
-		// Computes the InlayHint position in the first line
+		// Computes the InlayHint position in the last line
 		const [ position, paddingLeft, paddingRight ] =
 			this.computePosition(referenceCandidate.endLine, sourceCodeWithExitPoint, positionType);
 
@@ -354,8 +370,8 @@ class OngoingInlayHintCandidate {
 		this.sourceCode = sourceCode;
 	}
 
-	withEndLine(endLine: vscode.TextLine) {
-		return new InlayHintCandidate(this.startLine, endLine, this.sourceCode);
+	withEndLine(endLine: vscode.TextLine, conditional: boolean) {
+		return new InlayHintCandidate(this.startLine, this.sourceCode, endLine, conditional);
 	}
 }
 
@@ -365,14 +381,21 @@ class OngoingInlayHintCandidate {
 class InlayHintCandidate extends OngoingInlayHintCandidate {
 
 	readonly endLine: vscode.TextLine;
+	readonly conditional: boolean;
 
 	// Derived information (will be cached for performance reasons)
 	private cachedTotalTimings?: TotalTimings;
 	private cachedInlayHintLabel?: string;
 
-	constructor(startLine: vscode.TextLine, endLine: vscode.TextLine, sourceCode: SourceCode[]) {
+	constructor(startLine: vscode.TextLine, sourceCode: SourceCode[], endLine: vscode.TextLine, conditional: boolean) {
 		super(startLine, [...sourceCode]);
 		this.endLine = endLine;
+		this.conditional = conditional;
+	}
+
+	get lineCount(): number {
+
+		return this.endLine.lineNumber - this.startLine.lineNumber + 1;
 	}
 
 	get range(): vscode.Range {
