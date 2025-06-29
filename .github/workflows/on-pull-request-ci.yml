@@ -1,5 +1,8 @@
 name: ci on pull request
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches:

@@ -1,5 +1,8 @@
 name: ci and publish on master tags
 
+permissions:
+  contents: read
+
 on:
   push:
     tags-ignore:
