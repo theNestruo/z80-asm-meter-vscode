@@ -1,4 +1,4 @@
-name: ci and publish on preview tags
+name: ci and publish on prerelease tags
 
 permissions:
   contents: read
