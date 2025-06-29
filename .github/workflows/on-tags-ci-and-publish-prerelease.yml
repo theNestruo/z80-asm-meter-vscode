@@ -3,7 +3,7 @@ name: ci and publish on preview tags
 on:
   push:
     tags:
-    - "*-preview"
+    - "*-prerelease"
 
 jobs:
   build:

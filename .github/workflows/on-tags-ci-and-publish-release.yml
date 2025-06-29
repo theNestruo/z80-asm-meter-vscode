@@ -3,7 +3,7 @@ name: ci and publish on master tags
 on:
   push:
     tags-ignore:
-    - "*-preview"
+    - "*-prerelease"
 
 jobs:
   build:
