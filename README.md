@@ -1,4 +1,4 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/master)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/master)
+[![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/prerelease)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/prerelease)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/theNestruo/z80-asm-meter)](https://open-vsx.org/extension/theNestruo/z80-asm-meter)
 [![Visual Studio Marketplace](https://vsmarketplacebadges.dev/version-short/theNestruo.z80-asm-meter.png)](https://marketplace.visualstudio.com/items?itemName=theNestruo.z80-asm-meter)
 
