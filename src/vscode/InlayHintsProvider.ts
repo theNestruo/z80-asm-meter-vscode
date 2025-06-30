@@ -75,36 +75,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			return undefined;
 		}
 
-		const inlayHints: vscode.InlayHint[] = [];
-
-		// (for performance reasons)
-		const subroutinesPosition = config.inlayHints.subroutinesPosition;
-		const exitPointPosition = config.inlayHints.exitPointPosition;
-		const exitPointSubroutinesThreshold = config.inlayHints.exitPointSubroutinesThreshold;
-		const exitPointLinesThreshold = config.inlayHints.exitPointLinesThreshold;
-		const exitPointLabel = config.inlayHints.exitPointLabel;
-
 		// Locates the inlay hints candidates within the requested range
 		const candidates = this.locateInlayHintCandidates(document, range);
 
-		// Provides the subroutine inlay hints
-		new Set(candidates.map(candidate => candidate.startLine)).forEach(startLine => {
-			inlayHints.push(this.provideSubroutineInlayHint(
-				candidates.filter(candidate => candidate.startLine === startLine),
-				subroutinesPosition));
-		});
-
-		// Provides the exit point inlay hints
-		new Set(candidates.map(candidate => candidate.endLine)).forEach(endLine => {
-			const inlayHint = this.provideExitPointInlayHint(
-				candidates.filter(candidate => candidate.endLine === endLine),
-				exitPointPosition, exitPointSubroutinesThreshold, exitPointLinesThreshold, exitPointLabel);
-			if (inlayHint) {
-				inlayHints.push(inlayHint);
-			}
-		});
-
-		return inlayHints;
+		// Provides the subroutine inlay hints and the exit point inlay hints
+		return [
+			...this.provideSubroutineInlayHints(candidates),
+			...this.provideExitPointInlayHints(candidates)
+		];
 	}
 
 	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
@@ -142,8 +120,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			const sourceCode = sourceCodes[0];
 
 			// (saves source code on each previously found candidate)
-			ongoingCandidates.forEach(candidateBuilder => {
-				candidateBuilder.sourceCode.push(...sourceCodes);
+			ongoingCandidates.forEach(ongoingCandidate => {
+				ongoingCandidate.sourceCode.push(...sourceCodes);
 			});
 
 			// Checks labels for subroutine starts (if not after the range)
@@ -257,48 +235,80 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		}
 	}
 
-	private provideSubroutineInlayHint(
-			candidates: InlayHintCandidate[],
-			positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
-			vscode.InlayHint {
+	private provideSubroutineInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[] {
 
-		// (convenience local variables)
-		const referenceCandidate = candidates[candidates.length - 1];
-		const sourceCodeWithLabel = referenceCandidate.sourceCodeWithLabel;
+		// (for performance reasons)
+		const subroutinesPosition = config.inlayHints.subroutinesPosition;
 
-		// Computes the InlayHint position in the first line
-		const [ position, paddingLeft, paddingRight ] =
-			this.computePosition(referenceCandidate.startLine, sourceCodeWithLabel, positionType);
+		// Groups by start line
+		const inlayHints: vscode.InlayHint[] = [];
+		new Set(allCandidates.map(candidate => candidate.startLine)).forEach(startLine => {
 
-		return new ResolvableSubroutineInlayHint(referenceCandidate, position, paddingLeft, paddingRight, candidates);
+			// (convenience local variables)
+			const candidates = allCandidates.filter(candidate => candidate.startLine === startLine);
+			const referenceCandidate = candidates[candidates.length - 1];
+
+			// Computes the InlayHint position in the first line
+			const [ position, paddingLeft, paddingRight ] = this.computePosition(
+				referenceCandidate.startLine, referenceCandidate.sourceCodeWithLabel, subroutinesPosition);
+
+			// Builds the InlayHint
+			const inlayHint = new ResolvableSubroutineInlayHint(
+				position, paddingLeft, paddingRight, referenceCandidate, candidates);
+
+			inlayHints.push(inlayHint);
+		});
+
+		return inlayHints;
 	}
 
-	private provideExitPointInlayHint(
-			candidates: InlayHintCandidate[],
-			positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd",
-			exitPointSubroutinesThreshold: number,
-			exitPointLinesThreshold: number,
-			exitPointLabelType: "first" | "closest"):
-			vscode.InlayHint | undefined {
+	private provideExitPointInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[]  {
 
-		// (convenience local variable)
-		const referenceCandidate = candidates[exitPointLabelType == "first" ? 0 : candidates.length - 1];
+		// (for performance reasons)
+		const exitPointPosition = config.inlayHints.exitPointPosition;
+		const exitPointSubroutinesThreshold = config.inlayHints.exitPointSubroutinesThreshold;
+		const exitPointLinesThreshold = config.inlayHints.exitPointLinesThreshold;
+		const exitPointSubroutinesCount = config.inlayHints.exitPointSubroutinesCount;
+		const exitPointLabel = config.inlayHints.exitPointLabel;
 
-		// Unconditional exit point inlay hint threshold conditions
-		if ((!referenceCandidate.conditional)
-			&& (exitPointSubroutinesThreshold > candidates.length)
-			&& (exitPointLinesThreshold > referenceCandidate.lineCount)) {
-			return undefined;
-		}
+		// Groups by end line
+		const inlayHints: vscode.InlayHint[] = [];
+		new Set(allCandidates.map(candidate => candidate.endLine)).forEach(endLine => {
 
-		// (convenience local variable)
-		const sourceCodeWithExitPoint = referenceCandidate.sourceCodeWithExitPoint;
+			// (convenience local variables)
+			const candidates = allCandidates.filter(candidate => candidate.endLine === endLine);
+			const referenceCandidate = candidates[exitPointLabel == "first" ? 0 : candidates.length - 1];
 
-		// Computes the InlayHint position in the last line
-		const [ position, paddingLeft, paddingRight ] =
-			this.computePosition(referenceCandidate.endLine, sourceCodeWithExitPoint, positionType);
+			// Unconditional exit point inlay hint threshold conditions
+			const visible =
+				// Conditional...
+				(referenceCandidate.conditional)
+				// ...or belongs to more than one subroutine (and will show them in the tooltip)...
+				|| ((candidates.length >= exitPointSubroutinesThreshold)
+					&& (exitPointSubroutinesCount >= 2))
+				// ...or is far enough from the subroutine label
+				|| (this.lineCount(referenceCandidate) >= exitPointLinesThreshold);
+			if (!visible) {
+				return;
+			}
 
-		return new ResolvableExitPointInlayHint(referenceCandidate, position, paddingLeft, paddingRight, candidates);
+			// Computes the InlayHint position in the last line
+			const [ position, paddingLeft, paddingRight ] = this.computePosition(
+				referenceCandidate.endLine, referenceCandidate.sourceCodeWithExitPoint, exitPointPosition);
+
+			// Builds the InlayHint
+			const inlayHint = new ResolvableExitPointInlayHint(
+				position, paddingLeft, paddingRight, referenceCandidate, candidates);
+
+			inlayHints.push(inlayHint);
+		});
+
+		return inlayHints;
+	}
+
+	private lineCount(candidate: InlayHintCandidate): number {
+
+		return candidate.endLine.lineNumber - candidate.startLine.lineNumber + 1;
 	}
 
 	private computePosition(
@@ -393,11 +403,6 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 		this.conditional = conditional;
 	}
 
-	get lineCount(): number {
-
-		return this.endLine.lineNumber - this.startLine.lineNumber + 1;
-	}
-
 	get range(): vscode.Range {
 
 		return new vscode.Range(this.startLine.range.start, this.endLine.range.end);
@@ -439,16 +444,27 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
  */
 abstract class ResolvableInlayHint extends vscode.InlayHint {
 
+	protected referenceCandidate: InlayHintCandidate;
+	protected candidates: InlayHintCandidate[];
+	protected displayLimit: number;
+
 	// (for performance reasons)
 	protected readonly platform: "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
 	protected readonly hasM1: boolean;
 	protected readonly timingSuffix: string;
 
-	constructor(position: vscode.Position, label: string, paddingLeft: boolean, paddingRight: boolean) {
+	constructor(
+		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
+		referenceCandidate: InlayHintCandidate,
+		candidates: InlayHintCandidate[], displayLimit: number) {
 
-		super(position, label);
+		super(position, referenceCandidate.inlayHintLabel);
 		this.paddingLeft = paddingLeft;
 		this.paddingRight = paddingRight;
+
+		this.referenceCandidate = referenceCandidate;
+		this.candidates = candidates;
+		this.displayLimit = displayLimit;
 
 		// (for performance reasons)
 		this.platform = config.platform;
@@ -456,9 +472,29 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 		this.timingSuffix = printableTimingSuffix();
 	}
 
-	abstract resolve(): vscode.InlayHint;
+	resolve(): vscode.InlayHint {
 
-	protected buildMarkdownSubroutineHeader(candidate: InlayHintCandidate): string[] {
+		// (sanity check)
+		if (!this.tooltip) {
+			this.tooltip = new vscode.MarkdownString(this.buildTooltip().join("\n"), true);
+		}
+
+		return this;
+	}
+
+	private buildTooltip(): string [] {
+
+		if ((this.candidates.length == 1) || (this.displayLimit <= 1)) {
+			return this.buildTooltipHeader(this.referenceCandidate);
+		}
+
+		return [
+			...this.buildTooltipHeader(this.referenceCandidate),
+			...this.buildTooltipTable()
+		];
+	}
+
+	private buildTooltipHeader(candidate: InlayHintCandidate): string[] {
 
 		const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":");
 
@@ -482,55 +518,12 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 			`|${timingIcon}|${totalTiming.name}: ${timingText}|`
 		];
 	}
-}
 
-/**
- * An InlayHint that can be resolved and has additional meterings
- */
-abstract class ResolvableInlayHintWithCandidates extends ResolvableInlayHint {
-
-	protected referenceCandidate: InlayHintCandidate;
-	protected candidates: InlayHintCandidate[];
-	protected multipleCount: number;
-
-	constructor(referenceCandidate: InlayHintCandidate,
-		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
-		candidates: InlayHintCandidate[], multipleCount: number) {
-
-		super(position, referenceCandidate.inlayHintLabel, paddingLeft, paddingRight);
-
-		this.referenceCandidate = referenceCandidate;
-		this.candidates = candidates;
-		this.multipleCount = multipleCount;
-	}
-
-	resolve(): vscode.InlayHint {
-
-		// (sanity check)
-		if (!this.tooltip) {
-			this.tooltip = new vscode.MarkdownString(this.buildTooltip().join("\n"), true);
-		}
-
-		return this;
-	}
-
-	private buildTooltip(): string [] {
-
-		if ((this.candidates.length == 1) || (this.multipleCount <= 1)) {
-			return this.buildMarkdownSubroutineHeader(this.referenceCandidate);
-		}
-
-		return [
-			...this.buildMarkdownSubroutineHeader(this.referenceCandidate),
-			...this.buildMarkdownExtraTable()
-		];
-	}
-
-	private buildMarkdownExtraTable(): string[] {
+	private buildTooltipTable(): string[] {
 
 		const entries: string[] = [];
 		this.candidates.forEach(candidate => {
-			const entry = this.buildMarkdownExtraTableEntry(candidate);
+			const entry = this.buildTooltipTableEntry(candidate);
 			if (entry) {
 				entries.push(entry);
 			}
@@ -542,46 +535,45 @@ abstract class ResolvableInlayHintWithCandidates extends ResolvableInlayHint {
 		}
 
 		// All entries
-		if (entries.length <= this.multipleCount) {
+		if (entries.length <= this.displayLimit) {
 			return [
 				hrMarkdown,
-				...this.buildMarkdownExtraTableHeader(),
+				...this.buildTooltipTableHeader(),
 				...entries
 			];
 		}
 
 		// Exlcudes mid-list entries
-		const firstEntries = Math.floor(this.multipleCount / 2.0);
-		const lastEntries = this.multipleCount - firstEntries;
+		const firstEntries = Math.floor(this.displayLimit / 2.0);
+		const lastEntries = this.displayLimit - firstEntries;
 		return [
 			hrMarkdown,
-			...this.buildMarkdownExtraTableHeader(),
+			...this.buildTooltipTableHeader(),
 			...entries.slice(0, firstEntries),
 			"||&hellip;||",
 			...entries.slice(lastEntries)
 		];
 	}
 
-	abstract buildMarkdownExtraTableHeader(): string[];
+	abstract buildTooltipTableHeader(): string[];
 
-	abstract buildMarkdownExtraTableEntry(candidate: InlayHintCandidate): string | undefined;
+	abstract buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined;
 }
 
 /**
  * A subroutine InlayHint
  */
-class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
+class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 
-	constructor(referenceCandidate: InlayHintCandidate,
-		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
-		candidates: InlayHintCandidate[]) {
+	constructor(position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
+		referenceCandidate: InlayHintCandidate, candidates: InlayHintCandidate[]) {
 
-		super(
-			referenceCandidate, position, paddingLeft, paddingRight, candidates,
+		super(position, paddingLeft, paddingRight,
+			referenceCandidate, candidates,
 			config.inlayHints.subroutinesExitPointsCount);
 	}
 
-	buildMarkdownExtraTableHeader(): string[] {
+	buildTooltipTableHeader(): string[] {
 
 		switch (this.platform) {
 			case "msx":
@@ -609,7 +601,7 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
 		}
 	}
 
-	buildMarkdownExtraTableEntry(candidate: InlayHintCandidate): string | undefined {
+	buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
 		if (!totalTiming) {
@@ -641,18 +633,17 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHintWithCandidates {
 /**
  * An exit point InlayHint
  */
-class ResolvableExitPointInlayHint extends ResolvableInlayHintWithCandidates {
+class ResolvableExitPointInlayHint extends ResolvableInlayHint {
 
-	constructor(referenceCandidate: InlayHintCandidate,
-		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
-		candidates: InlayHintCandidate[]) {
+	constructor(position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
+		referenceCandidate: InlayHintCandidate, candidates: InlayHintCandidate[]) {
 
-		super(
-			referenceCandidate, position, paddingLeft, paddingRight, candidates,
+		super(position, paddingLeft, paddingRight,
+			referenceCandidate, candidates,
 			config.inlayHints.subroutinesExitPointsCount);
 	}
 
-	buildMarkdownExtraTableHeader(): string[] {
+	buildTooltipTableHeader(): string[] {
 
 		switch (this.platform) {
 			case "msx":
@@ -680,7 +671,7 @@ class ResolvableExitPointInlayHint extends ResolvableInlayHintWithCandidates {
 		}
 	}
 
-	buildMarkdownExtraTableEntry(candidate: InlayHintCandidate): string | undefined {
+	buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
 		if (!totalTiming) {
