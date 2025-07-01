@@ -857,7 +857,7 @@
 					"z80-asm-meter.inlayHints.exitPoint.linesThreshold": {
 						"order": 43,
 						"type": "integer",
-						"default": 25,
+						"default": 30,
 						"description": "Determines if an unconditional exit point metering inlay hint should be displayed based on the distance (in lines) of the subroutine inlay hint, to avoid cluttering with redundand inlay hints. Set to 0 to always display unconditional exit point metering inlay hints"
 					},
 					"z80-asm-meter.inlayHints.exitPoint.subroutinesCount": {

@@ -463,7 +463,7 @@ This extension can provide inlay hints (additional information about source code
 
 * [`z80-asm-meter.inlayHints.exitPoint.linesThreshold`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.linesThreshold): Determines if an unconditional exit point metering inlay hint should be displayed based on the distance (in lines) of the subroutine inlay hint, to avoid cluttering with redundand inlay hints. Set to 0 to always display unconditional exit point metering inlay hints.
 
-    25 by default.
+    30 by default.
 
 * [`z80-asm-meter.inlayHints.subroutines.exitPointCount`](vscode://settings/z80-asm-meter.inlayHints.subroutines.exitPointCount): When a subroutine has multiple exit points, determines how many exit points are shown in the tooltip. Set to 0 or 1 to disable additional exit points in the tooltip.
 

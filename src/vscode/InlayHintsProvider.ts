@@ -395,7 +395,6 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 
 	// Derived information (will be cached for performance reasons)
 	private cachedTotalTimings?: TotalTimings;
-	private cachedInlayHintLabel?: string;
 
 	constructor(startLine: vscode.TextLine, sourceCode: SourceCode[], endLine: vscode.TextLine, conditional: boolean) {
 		super(startLine, [...sourceCode]);
@@ -425,24 +424,22 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 		}
 		return this.cachedTotalTimings;
 	}
-
-	get inlayHintLabel(): string {
-
-		if (!this.cachedInlayHintLabel) {
-			const totalTiming = this.totalTimings.best();
-			const timing = printTiming(totalTiming) ?? "0";
-			const timingSuffix = printableTimingSuffix();
-
-			this.cachedInlayHintLabel = `${timing} ${timingSuffix}`;
-		}
-		return this.cachedInlayHintLabel;
-	}
 }
 
 /**
  * An InlayHint that can be resolved
  */
 abstract class ResolvableInlayHint extends vscode.InlayHint {
+
+	private static buildLabel(referenceCandidate: InlayHintCandidate, candidates: InlayHintCandidate[], displayLimit: number): string {
+
+		const totalTiming = referenceCandidate.totalTimings.best();
+		const timing = printTiming(totalTiming) ?? "0";
+		const timingSuffix = printableTimingSuffix();
+		const ellipsisSuffix = (candidates.length == 1) || (displayLimit <= 1) ? "" : " ...";
+
+		return `${timing} ${timingSuffix}${ellipsisSuffix}`;
+	}
 
 	protected referenceCandidate: InlayHintCandidate;
 	protected candidates: InlayHintCandidate[];
@@ -458,7 +455,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 		referenceCandidate: InlayHintCandidate,
 		candidates: InlayHintCandidate[], displayLimit: number) {
 
-		super(position, referenceCandidate.inlayHintLabel);
+		super(position, ResolvableInlayHint.buildLabel(referenceCandidate, candidates, displayLimit));
 		this.paddingLeft = paddingLeft;
 		this.paddingRight = paddingRight;
 
