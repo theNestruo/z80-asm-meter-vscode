@@ -1,7 +1,7 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "5.7.3",
+	"version": "6.0.0",
 	"engines": {
 		"vscode": "^1.101.0"
 	},
@@ -759,7 +759,7 @@
 				}
 			},
 			{
-				"title": "Inlay hints (experimental)",
+				"title": "Inlay hints",
 				"order": 80,
 				"properties": {
 					"z80-asm-meter.inlayHints.enabled": {

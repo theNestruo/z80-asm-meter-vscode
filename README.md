@@ -20,7 +20,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
     - [Parser settings](#parser-settings)
 - [Advanced usage](#advanced-usage)
     - [Total timing calculations](#total-timing-calculations)
-    - [Inlay hints (experimental)](#inlay-hints-experimental)
+    - [Inlay hints](#inlay-hints)
     - [Timing hints](#timing-hints)
     - [User-defined macros](#user-defined-macros)
 - [Migration to version 5.x](#migration-to-version-5x)
@@ -414,9 +414,9 @@ These are the three total timing calculation available:
 </details>
 
 
-### Inlay hints (experimental)
+### Inlay hints
 
-This extension can provide inlay hints (additional information about source code that is rendered inline). Particularly, it can show timing of the execution flow of subroutines (up to the first unconditional exit point), and timing of the execution flow up to conditional exit points.
+This extension can provide inlay hints (additional information about source code that is rendered inline). Particularly, it can show timing of the execution flow of subroutines (up to the first unconditional exit point), and timing of the execution flow up to conditional and unconditional exit points.
 
 ![Inlay hints](images/inlay-hints.png)
 
