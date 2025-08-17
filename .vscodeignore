@@ -2,9 +2,10 @@
 .vscode
 node_modules
 src
-.eslintrc.js
 .gitignore
 esbuild.js
+eslint.config.mjs
 package-lock.json
 tsconfig.json
 dist/**/*.map
+images/**/*.original.png

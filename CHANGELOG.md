@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 6.1.* (pre-release)
+
+- Extension size and metadata improvements
+
 ## 6.0.0
 
 - Inlay Hints promoted from experimental to stable
