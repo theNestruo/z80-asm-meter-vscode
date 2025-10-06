@@ -923,12 +923,12 @@
 		"@types/mocha": "^10.0.10",
 		"@types/node": "24.x",
 		"@types/vscode": "^1.104.0",
-		"@typescript-eslint/eslint-plugin": "^8.44.1",
+		"@typescript-eslint/eslint-plugin": "^8.45.0",
 		"@typescript-eslint/parser": "^8.32.1",
 		"esbuild": "^0.25.10",
 		"eslint": "^9.21.0",
 		"npm-run-all": "^4.1.5",
-		"typescript": "^5.9.2"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"hashlru": "^2.3.0"
