@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 6.3.* (pre-release)
+
+- (pre-release)
+
 ## 6.2.0
 
 - Extension size and metadata improvements
