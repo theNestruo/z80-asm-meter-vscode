@@ -1,13 +1,13 @@
 {
 	"publisher": "theNestruo",
 	"name": "z80-asm-meter",
-	"version": "6.0.0",
+	"version": "6.1.0",
 	"engines": {
 		"vscode": "^1.106.0"
 	},
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
-	"icon": "images/icon.128.png",
+	"icon": "media/icons/icon.128.png",
 	"galleryBanner": {
 		"color": "#191919",
 		"theme": "dark"
@@ -30,6 +30,7 @@
 		"ZX Spectrum Next"
 	],
 	"license": "LGPL-3.0",
+	"pricing": "Free",
 	"homepage": "https://github.com/theNestruo/z80-asm-meter-vscode",
 	"bugs": {
 		"url": "https://github.com/theNestruo/z80-asm-meter-vscode/issues"
@@ -43,6 +44,10 @@
 		"name": "Néstor Sancho",
 		"url": "https://thenestruo.github.io/"
 	},
+	"extensionKind":[
+		"ui",
+		"workspace"
+	],
 	"activationEvents": [
 		"onLanguage:asm-collection",
 		"onLanguage:pasmo",
@@ -907,6 +912,16 @@
 				}
 			}
 		]
+	},
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"supported": "limited",
+			"description": "Prevents unsafe deserialization of potentially untrusted data",
+			"restrictedConfigurations": [
+				"z80-asm-meter.timing.hints.regexps",
+				"z80-asm-meter.macros"
+			]
+		}
 	},
 	"main": "./dist/extension.js",
 	"scripts": {

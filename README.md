@@ -34,7 +34,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 
 Select Z80 assembly source code to view clock cycles, mnemonic of the instruction, and/or bytecode size in the status bar. Click on either to copy the clock cycles and the bytecode size information to the clipboard.
 
-![Z80 Assembly meter](images/screenshot.png)
+![Z80 Assembly meter](media/images/screenshot.png)
 <br>_Theme: [Dark- (Visual Studio) (Flat UI)](https://marketplace.visualstudio.com/items?itemName=theNestruo.dark-minus-theme)_
 
 If there is no selection, the current line will be used.
@@ -119,13 +119,13 @@ These settings allow to fine-tune the information to be shown in the status bar 
 
     Defaults to: `$(code)`.
 
-    ![](images/statusBar.instructionIcon.png)
+    ![](media/images/statusBar.instructionIcon.png)
 
 * [`z80-asm-meter.statusBar.timingsIcon`](vscode://settings/z80-asm-meter.statusBar.timingsIcon): The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(watch)`.
 
-    ![](images/statusBar.timingsIcon.png)
+    ![](media/images/statusBar.timingsIcon.png)
 
 * [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings): Shows total timing calculations in the status bar.
 
@@ -139,7 +139,7 @@ These settings allow to fine-tune the information to be shown in the status bar 
 
     Defaults to: `$(file-binary)`.
 
-    ![](images/statusBar.sizeIcon.png)
+    ![](media/images/statusBar.sizeIcon.png)
 
 * [`z80-asm-meter.statusBar.sizeNumericFormat`](vscode://settings/z80-asm-meter.statusBar.sizeNumericFormat): The numerical format of the size in bytes in the status bar.
 
@@ -280,7 +280,7 @@ These settings allow to fine-tune the source code parsing and metering.
 
 When the selection covers several lines and encompasses a single subroutine, there are more than one way to calculate the total timing:
 
-![Total timing calculations](images/total-timing-calculation.png)
+![Total timing calculations](media/images/total-timing-calculation.png)
 
 <details>
 
@@ -301,41 +301,41 @@ These are the three total timing calculation available:
 
     * `all`: Shows all the total timing calculation that apply to the selection.
 
-        ![](images/statusBar.totalTimings=all.png)
+        ![](media/images/statusBar.totalTimings=all.png)
 
     * `combineAll`: Shows all the total timing calculation that apply to the selection, but combined to reduce the size of the status bar item.
 
-        ![](images/statusBar.totalTimings=combineAll.png)
+        ![](media/images/statusBar.totalTimings=combineAll.png)
 
     * `smart` (default): Shows total timing calculation that are relevant to the selection.
 
-        ![](images/statusBar.totalTimings=smart.png)
+        ![](media/images/statusBar.totalTimings=smart.png)
 
     * `combineSmart`: Shows total timing calculation that are relevant to the selection, but combined to reduce the size of the status bar item.
 
-        ![](images/statusBar.totalTimings=combineSmart.png)
+        ![](media/images/statusBar.totalTimings=combineSmart.png)
 
     * `best`: Shows the total timing calculation that best fits the selection.
 
-        ![](images/statusBar.totalTimings=best.png)
+        ![](media/images/statusBar.totalTimings=best.png)
 
     * `default`: Does not show any alternative total timing calculation.
 
-        ![](images/statusBar.totalTimings=default.png)
+        ![](media/images/statusBar.totalTimings=default.png)
 
 * [`z80-asm-meter.statusBar.totalTimingsOrder`](vscode://settings/z80-asm-meter.statusBar.totalTimingsOrder): Determines the order of the [total timing calculations](#total-timing-calculations) in the status bar when more than one total timing calculation is visible.
 
     * `retFlowJumpCall` (default): At exit point (returns) first. Execution flow next. Other exit points (jumps and calls) last. This order is the most visual, with returns ("going back") to the left, execution flow ("going down") next, and jumps and calls ("going elsewhere") to the right.
 
-        ![](images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
+        ![](media/images/statusBar.totalTimingsOrder=retFlowJumpCall.png)
 
     * `flowRetJumpCall`: Execution flow first. Any exit points (returns, jumps and calls) last.
 
-        ![](images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
+        ![](media/images/statusBar.totalTimingsOrder=flowRetJumpCall.png)
 
     * `retJumpCallFlow`: Any exit point (returns, jumps and calls) first, execution flow last. This order matches the timing convention of single instructions, where the _conditions met_ (returns, jumps and calls) are to the left and the conditions not met (execution flow) are to the right.
 
-        ![](images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
+        ![](media/images/statusBar.totalTimingsOrder=retJumpCallFlow.png)
 
 </details>
 
@@ -358,7 +358,7 @@ These are the three total timing calculation available:
 
     Defaults to: `$(debug-step-over)`.
 
-    ![](images/timing.executionFlow.icon.png)
+    ![](media/images/timing.executionFlow.icon.png)
 
 * [`z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump`](vscode://settings/z80-asm-meter.timing.executionFlow.stopOnUnconditionalJump): Disables execution flow total timing calculation if an unconditional `JP`, `JR` or `RET` instruction is found.
 
@@ -397,19 +397,19 @@ These are the three total timing calculation available:
 
     Defaults to: `$(debug-step-back)`.
 
-    ![](images/timing.atExit.retIcon.png)
+    ![](media/images/timing.atExit.retIcon.png)
 
 * [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon): Total timing calculation of the execution flow to the selected exit point (`DJNZ`, `JP` or `JR` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-out)`.
 
-    ![](images/timing.atExit.jumpIcon.png)
+    ![](media/images/timing.atExit.jumpIcon.png)
 
 * [`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon): Total timing calculation of the execution flow to the selected exit point (`CALL` or `RST` instruction) icon in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
     Defaults to: `$(debug-step-into)`.
 
-    ![](images/timing.atExit.callIcon.png)
+    ![](media/images/timing.atExit.callIcon.png)
 
 </details>
 
@@ -418,7 +418,7 @@ These are the three total timing calculation available:
 
 This extension can provide inlay hints (additional information about source code that is rendered inline). Particularly, it can show timing of the execution flow of subroutines (up to the first unconditional exit point), and timing of the execution flow up to conditional and unconditional exit points.
 
-![Inlay hints](images/inlay-hints.png)
+![Inlay hints](media/images/inlay-hints.png)
 
 <details>
 <summary>Inlay hints settings</summary>
@@ -431,31 +431,31 @@ This extension can provide inlay hints (additional information about source code
 
     * `lineStart`: at the beginning of the line.
 
-        ![](images/inlayHints.subroutines.position=lineStart.png)
+        ![](media/images/inlayHints.subroutines.position=lineStart.png)
 
     * `afterLabel`: after the label, or at the beginning of the line if there is no label.
 
-        ![](images/inlayHints.subroutines.position=afterLabel.png)
+        ![](media/images/inlayHints.subroutines.position=afterLabel.png)
 
     * `beforeCode`: before the actual source code.
 
-        ![](images/inlayHints.subroutines.position=beforeCode.png)
+        ![](media/images/inlayHints.subroutines.position=beforeCode.png)
 
     * `afterCode`: after the actual source code.
 
-        ![](images/inlayHints.subroutines.position=afterCode.png)
+        ![](media/images/inlayHints.subroutines.position=afterCode.png)
 
     * `beforeComment` (default): before the trailing line comments, or at the end of the line if there are no trailing comments.
 
-        ![](images/inlayHints.subroutines.position=beforeComment.png)
+        ![](media/images/inlayHints.subroutines.position=beforeComment.png)
 
     * `insideComment`: inside the trailing line comments, or at the end of the line if there are no trailing comments.
 
-        ![](images/inlayHints.subroutines.position=insideComment.png)
+        ![](media/images/inlayHints.subroutines.position=insideComment.png)
 
     * `lineEnd`: at the end of the line.
 
-        ![](images/inlayHints.subroutines.position=lineEnd.png)
+        ![](media/images/inlayHints.subroutines.position=lineEnd.png)
 
 * [`z80-asm-meter.inlayHints.exitPoint.subroutinesThreshold`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.subroutinesThreshold): Determines if an unconditional exit point metering inlay hint should be displayed based on how many subroutines it belongs, to avoid cluttering with redundand inlay hints. Set to 0 or 1 to always display unconditional exit point metering inlay hints.
 
@@ -486,31 +486,31 @@ This extension can provide inlay hints (additional information about source code
 
     * `lineStart`: at the beginning of the line.
 
-        ![](images/inlayHints.exitPoint.position=lineStart.png)
+        ![](media/images/inlayHints.exitPoint.position=lineStart.png)
 
     * `afterLabel`: after the label, or at the beginning of the line if there is no label.
 
-        ![](images/inlayHints.exitPoint.position=afterLabel.png)
+        ![](media/images/inlayHints.exitPoint.position=afterLabel.png)
 
     * `beforeCode`: before the actual source code.
 
-        ![](images/inlayHints.exitPoint.position=beforeCode.png)
+        ![](media/images/inlayHints.exitPoint.position=beforeCode.png)
 
     * `afterCode`: after the actual source code.
 
-        ![](images/inlayHints.exitPoint.position=afterCode.png)
+        ![](media/images/inlayHints.exitPoint.position=afterCode.png)
 
     * `beforeComment` (default): before the trailing line comments, or at the end of the line if there are no trailing comments.
 
-        ![](images/inlayHints.exitPoint.position=beforeComment.png)
+        ![](media/images/inlayHints.exitPoint.position=beforeComment.png)
 
     * `insideComment`: inside the trailing line comments, or at the end of the line if there are no trailing comments.
 
-        ![](images/inlayHints.exitPoint.position=insideComment.png)
+        ![](media/images/inlayHints.exitPoint.position=insideComment.png)
 
     * `lineEnd`: at the end of the line.
 
-        ![](images/inlayHints.exitPoint.position=lineEnd.png)
+        ![](media/images/inlayHints.exitPoint.position=lineEnd.png)
 
 * [`z80-asm-meter.inlayHints.exitPoint.subroutinesCount`](vscode://settings/z80-asm-meter.inlayHints.exitPoint.subroutinesCount): When an exit point belongs to multiple subroutines, determines how many subroutines are shown in the tooltip. Set to 0 or 1 to disable multiple subroutines in the tooltip.
 
@@ -545,7 +545,7 @@ Timing hints can be used to modify the timing of a particular instruction. The p
 
 For example:
 
-![Timing hints](images/timing-hints.png)
+![Timing hints](media/images/timing-hints.png)
 
 <details>
 
@@ -822,7 +822,7 @@ It is possible to use text instead of icons via configuration settings:
 "z80-asm-meter.timing.atExit.callIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
 ```
 
-![](images/uxGuildelines.showInstruction=false.png)
+![](media/images/uxGuildelines.showInstruction=false.png)
 
 Or, when showing the processed instruction in the status bar:
 
@@ -837,7 +837,7 @@ Or, when showing the processed instruction in the status bar:
 "z80-asm-meter.timing.atExit.callIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
 ```
 
-![](images/uxGuildelines.showInstruction=true.png)
+![](media/images/uxGuildelines.showInstruction=true.png)
 
 
 ## Credits
