@@ -7,9 +7,6 @@
 ## 6.0.0
 
 - Inlay Hints promoted from experimental to stable
-
-## 5.7.* (pre-release)
-
 - Inlay Hints improvements
 
 ## 5.6.6
