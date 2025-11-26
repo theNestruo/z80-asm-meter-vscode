@@ -10,8 +10,6 @@ import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
 
 
-let disposable: vscode.Disposable | undefined;
-
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -26,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const inlayHintsProvider = new InlayHintsProvider();
 
-	disposable = vscode.Disposable.from(
+	context.subscriptions.push(
 		copyFromActiveTextEditorSelecionCommand,
 		internalStatusBarHandler,
 		statusBarHandler,
@@ -40,7 +38,6 @@ export function activate(context: vscode.ExtensionContext) {
 		macroParser,
 		regExpTimingHintsParser
 	);
-	context.subscriptions.push(disposable);
 
 	// First execution
 	internalStatusBarHandler.onUpdateRequest();
@@ -48,7 +45,4 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-
-	disposable?.dispose();
-	disposable = undefined;
 }
