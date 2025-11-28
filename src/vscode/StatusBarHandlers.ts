@@ -6,7 +6,7 @@ import { TotalTimings } from '../totalTiming/TotalTimings';
 import { hrMarkdown, printMarkdownInstructionsAndBytes, printMarkdownTotalTimingsAndSize, printStatusBarText } from '../utils/FormatterUtils';
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
 import { hashCode } from "../utils/TextUtils";
-import { AbstractCopyToClipboardCommand } from './Commands';
+import { CopyToClipboardCommand } from './Commands';
 import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
 
 /**
@@ -14,35 +14,46 @@ import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
  */
 class StatusBarItemContents {
 	constructor(
-			readonly text: string,
-			/** The optional line repetition count */
-			readonly tooltip: vscode.MarkdownString) {
+		readonly text: string,
+		readonly tooltip: vscode.MarkdownString) {
     }
+}
+
+/**
+ * StatusBarItem handler
+ */
+interface StatusBarHandler extends vscode.Disposable {
+
+	onUpdateRequest(): void;
 }
 
 /**
  * Base implementation of the StatusBarItem handler
  */
-class StatusBarHandler {
-
-	protected readonly command: AbstractCopyToClipboardCommand;
-
-    private readonly disposable: vscode.Disposable;
+class DefaultStatusBarHandler implements StatusBarHandler {
 
 	private statusBarItem?: vscode.StatusBarItem;
 
-	protected constructor(copyToClipboardCommand: AbstractCopyToClipboardCommand) {
-		this.command = copyToClipboardCommand;
+	/**
+	 * @param context extension context to register disposables
+	 */
+	protected constructor(
+			context: vscode.ExtensionContext,
+			protected readonly command: CopyToClipboardCommand) {
 
-		// Subscribe to configuration change event
-		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+		// Listen for configuration changes
+		const disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 		this.create();
+
+		// Registers as disposable
+		context.subscriptions.push(
+			disposable,
+			this);
 	}
 
 	dispose() {
 		this.destroy();
-        this.disposable.dispose();
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
@@ -94,6 +105,7 @@ class StatusBarHandler {
 
 	private create() {
 
+		// (sanity check)
 		if (this.statusBarItem) {
 			return;
 		}
@@ -109,7 +121,6 @@ class StatusBarHandler {
 	}
 
 	private destroy() {
-
 		this.statusBarItem?.dispose();
 		this.statusBarItem = undefined;
 	}
@@ -149,15 +160,20 @@ class StatusBarHandler {
  * Implementation of the StatusBarItem handler
  * that uses a LRU cache for previously metered selections
  */
-export class CachedStatusBarHandler extends StatusBarHandler {
+export class CachedStatusBarHandler extends DefaultStatusBarHandler {
 
 	// (for caching purposes)
 	private readonly empty = new StatusBarItemContents("", new vscode.MarkdownString());
 
 	private cache;
 
-	constructor(command: AbstractCopyToClipboardCommand) {
-		super(command);
+	/**
+	 * @param context extension context to register disposables
+	 */
+	constructor(
+			context: vscode.ExtensionContext,
+			command: CopyToClipboardCommand) {
+		super(context, command);
 
 		this.cache = HLRU(config.statusBar.cacheSize);
 	}
@@ -198,27 +214,25 @@ export class CachedStatusBarHandler extends StatusBarHandler {
  */
 export class DebouncedStatusBarHandler {
 
-	private readonly delegate: StatusBarHandler;
-
-    private readonly disposable: vscode.Disposable;
-
 	private isLeadingEvent: boolean = true;
 	private previousEventTimestamp?: number = undefined;
 	private updateStatusBarTimeout?: NodeJS.Timeout;
 
-	constructor(delegate: StatusBarHandler) {
-		this.delegate = delegate;
+	/**
+	 * @param context extension context to register disposables
+	 */
+	constructor(
+		context: vscode.ExtensionContext,
+		private readonly delegate: StatusBarHandler) {
 
-		this.disposable = vscode.Disposable.from(
-			// Subscribe to selection change and editor activation events
+		// Listen for selection change and editor activation events
+		const disposable = vscode.Disposable.from(
 			vscode.window.onDidChangeTextEditorSelection(this.onUpdateRequest, this),
 			vscode.window.onDidChangeActiveTextEditor(this.onUpdateRequest, this),
-			vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this),
-		);
-	}
+			vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this));
 
-	dispose() {
-        this.disposable.dispose();
+		// Registers as disposable
+		context.subscriptions.push(disposable, delegate);
 	}
 
 	onUpdateRequest() {
@@ -256,5 +270,9 @@ export class DebouncedStatusBarHandler {
 		this.updateStatusBarTimeout = setTimeout(() => {
 			this.delegate.onUpdateRequest();
 		}, debounce);
+	}
+
+	forceUpdateRequest() {
+		this.delegate.onUpdateRequest();
 	}
 }

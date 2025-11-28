@@ -6,7 +6,12 @@ import { TotalTimings } from '../totalTiming/TotalTimings';
 import { formatTiming, printableTimingSuffix, printTiming } from '../utils/FormatterUtils';
 import { SourceCode } from '../types';
 
-export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
+export interface CopyToClipboardCommand extends vscode.Command {
+
+    buildDescription(totalTimings: TotalTimings): string | undefined;
+}
+
+abstract class AbstractCopyToClipboardCommand implements CopyToClipboardCommand {
 
     abstract title: string;
 
@@ -104,17 +109,18 @@ export class CopyFromActiveTextEditorSelecionToClipboardCommand extends Abstract
 
     override readonly command = "z80-asm-meter.copyToClipboard";
 
-    private readonly disposable: vscode.Disposable;
-
-    constructor() {
+	/**
+	 * @param context extension context to register disposables
+	 */
+    constructor(
+            context: vscode.ExtensionContext) {
         super();
 
         // Registers as a command
-        this.disposable = vscode.commands.registerCommand(this.command, this.onExecute, this);
-    }
+        const disposable = vscode.commands.registerCommand(this.command, this.onExecute, this);
 
-    dispose() {
-        this.disposable.dispose();
+		// Registers as disposable
+		context.subscriptions.push(disposable);
     }
 
     onExecute(): void {

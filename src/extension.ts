@@ -1,37 +1,33 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+// VS Code extensibility API
+// Import the `vscode` module and reference it as `vscode` below.
 import * as vscode from 'vscode';
-import { configurationReader } from './config';
+
 import { mainParser, mainParserWithoutMacro, mainParserWithoutTimingHints } from './parser/MainParser';
 import { macroParser } from './parser/impl/MacroParser';
 import { regExpTimingHintsParser } from './parser/timingHints/RegExpTimingHintsParser';
 import { CopyFromActiveTextEditorSelecionToClipboardCommand } from './vscode/Commands';
+import { CachedConfigurationReaderDecorator } from './vscode/ConfigurationReader';
 import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
 
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+/**
+ * Activate the extension.
+ * This method is called when your extension is activated.
+ * Your extension is activated the very first time the command is executed.
+ */
 export function activate(context: vscode.ExtensionContext) {
 
-	const copyFromActiveTextEditorSelecionCommand =
-			new CopyFromActiveTextEditorSelecionToClipboardCommand();
+	CachedConfigurationReaderDecorator.activate(context);
 
-	const internalStatusBarHandler =
-			new CachedStatusBarHandler(copyFromActiveTextEditorSelecionCommand);
-	const statusBarHandler =
-			new DebouncedStatusBarHandler(internalStatusBarHandler);
+	// VS Code integrations
+	const command = new CopyFromActiveTextEditorSelecionToClipboardCommand(context);
+	const statusBarHandler = new DebouncedStatusBarHandler(context, new CachedStatusBarHandler(context, command));
+	new InlayHintsProvider(context);
 
-	const inlayHintsProvider = new InlayHintsProvider();
-
+	// Registers disposables so they are disposed automatically
+	// when the extension is deactivated
 	context.subscriptions.push(
-		copyFromActiveTextEditorSelecionCommand,
-		internalStatusBarHandler,
-		statusBarHandler,
-		inlayHintsProvider,
-
-		// subscribe to configuration change event
-		configurationReader,
 		mainParser,
 		mainParserWithoutMacro,
 		mainParserWithoutTimingHints,
@@ -39,10 +35,12 @@ export function activate(context: vscode.ExtensionContext) {
 		regExpTimingHintsParser
 	);
 
-	// First execution
-	internalStatusBarHandler.onUpdateRequest();
+	// Triggers an update of the status bar immediately after activation
+	statusBarHandler.forceUpdateRequest();
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {
-}
+/**
+ * Deactivate the extension.
+ * This method is called when your extension is deactivated.
+ */
+export function deactivate() {}

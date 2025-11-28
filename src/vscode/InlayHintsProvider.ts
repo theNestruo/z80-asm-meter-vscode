@@ -16,14 +16,19 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
 
-	private readonly disposable: vscode.Disposable;
-
 	// (for performance reasons)
 	private conditionalExitPointMnemonics: string[];
 
-	constructor() {
+	/**
+	 * @param context extension context to register disposables
+	 */
+	constructor(
+			context: vscode.ExtensionContext) {
 
-		this.disposable = vscode.Disposable.from(
+		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
+
+		// Registers as disposable
+		context.subscriptions.push(
 
 			// Registers as a inlay hints provider
 			vscode.languages.registerInlayHintsProvider(documentSelector(), this),
@@ -33,12 +38,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 			this.onDidChangeInlayHintsEmitter
 		);
-
-		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
-	}
-
-	dispose() {
-        this.disposable.dispose();
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
