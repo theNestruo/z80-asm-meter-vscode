@@ -12,9 +12,86 @@ import { isExtensionEnabledFor } from './SourceCodeReader';
 /**
  * InlayHintsProvider that shows timing of the execution flow of subroutines
  */
-export class InlayHintsProvider implements vscode.InlayHintsProvider {
+export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Disposable {
+
+	private readonly candidatesLocator;
+	private readonly candidatesResolver;
 
 	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
+	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
+
+	private disposable: vscode.Disposable;
+
+	constructor(context: vscode.ExtensionContext) {
+
+		this.candidatesLocator = new InlayHintCandidatesLocator(context);
+		this.candidatesResolver = new InlayHintsCandidatesResolver();
+
+		// Registers as a inlay hints provider
+		this.disposable = this.registerInlayHintsProvider();
+
+		context.subscriptions.push(
+
+			// Subscribe to configuration change event
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this),
+
+			this.onDidChangeInlayHintsEmitter
+		);
+	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+		// Re-registers as a inlay hints provider
+		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
+			this.disposable.dispose();
+			this.disposable = this.registerInlayHintsProvider();
+		}
+	}
+
+	private registerInlayHintsProvider() {
+		return vscode.languages.registerInlayHintsProvider(this.documentSelector(), this);
+	}
+
+	private documentSelector(): readonly vscode.DocumentFilter[] {
+
+		return [
+			...config.languageIds.map(languageId => { return { language: languageId }; }),
+			// Always enabled if it is a Z80 assembly file
+			{ language: "z80-asm-meter" }
+		];
+	}
+
+	dispose() {
+		this.disposable.dispose();
+	}
+
+	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken):
+			vscode.ProviderResult<vscode.InlayHint[]> {
+
+		if (!config.inlayHints.enabled || !isExtensionEnabledFor(document)) {
+			return undefined;
+		}
+
+		// Locates the inlay hint candidates within the requested range
+		const candidates = this.candidatesLocator.locateCandidates(document, range);
+
+		// Resolves the inlay hint candidates as subroutine inlay hints and exit point inlay hints
+		return [
+			...this.candidatesResolver.resolveSubroutineInlayHints(candidates),
+			...this.candidatesResolver.resolveExitPointInlayHints(candidates)
+		];
+	}
+
+	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
+
+		// Resolves the inlay hints
+		return (hint instanceof ResolvableInlayHint)
+				? hint.resolve()
+				: undefined;
+	}
+}
+
+export class InlayHintCandidatesLocator {
 
 	// (for performance reasons)
 	private conditionalExitPointMnemonics: string[];
@@ -23,13 +100,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 		context.subscriptions.push(
 
-			// Registers as a inlay hints provider
-			vscode.languages.registerInlayHintsProvider(documentSelector(), this),
-
 			// Subscribe to configuration change event
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this),
-
-			this.onDidChangeInlayHintsEmitter
 		);
 
 		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
@@ -37,7 +109,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
-		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
+ 		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
 			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 		}
 	}
@@ -60,34 +132,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return mnemonics;
 	}
 
-	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
-
-	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken):
-			vscode.ProviderResult<vscode.InlayHint[]> {
-
-		if (!config.inlayHints.enabled || !isExtensionEnabledFor(document)) {
-			return undefined;
-		}
-
-		// Locates the inlay hints candidates within the requested range
-		const candidates = this.locateInlayHintCandidates(document, range);
-
-		// Provides the subroutine inlay hints and the exit point inlay hints
-		return [
-			...this.provideSubroutineInlayHints(candidates),
-			...this.provideExitPointInlayHints(candidates)
-		];
-	}
-
-	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
-
-		// Resolves the inlay hints
-		return (hint instanceof ResolvableInlayHint)
-				? hint.resolve()
-				: undefined;
-	}
-
-	private locateInlayHintCandidates(document: vscode.TextDocument, range: vscode.Range): InlayHintCandidate[] {
+	locateCandidates(document: vscode.TextDocument, range: vscode.Range): InlayHintCandidate[] {
 
 		// (for performance reasons)
 		const lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
@@ -228,8 +273,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			return false;
 		}
 	}
+}
 
-	private provideSubroutineInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[] {
+export class InlayHintsCandidatesResolver {
+
+	resolveSubroutineInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[] {
 
 		// (for performance reasons)
 		const subroutinesPosition = config.inlayHints.subroutinesPosition;
@@ -256,7 +304,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 		return inlayHints;
 	}
 
-	private provideExitPointInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[]  {
+	resolveExitPointInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[]  {
 
 		// (for performance reasons)
 		const exitPointPosition = config.inlayHints.exitPointPosition;
@@ -348,15 +396,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 				return [ line.range.end, true, false ];
 		}
 	}
-}
-
-function documentSelector(): readonly vscode.DocumentFilter[] {
-
-	return [
-		...config.languageIds.map(languageId => { return { language: languageId }; }),
-		// Always enabled if it is a Z80 assembly file
-		{ language: "z80-asm-meter" }
-	];
 }
 
 /**
