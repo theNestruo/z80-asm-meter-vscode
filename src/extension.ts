@@ -1,20 +1,21 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { configurationReader } from './config';
+
 import { mainParser, mainParserWithoutMacro, mainParserWithoutTimingHints } from './parser/MainParser';
 import { macroParser } from './parser/impl/MacroParser';
 import { regExpTimingHintsParser } from './parser/timingHints/RegExpTimingHintsParser';
 import { CopyFromActiveTextEditorSelecionToClipboardCommand } from './vscode/Commands';
 import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
+import { configurationReader } from './vscode/ConfigurationReader';
 
-
-let disposable: vscode.Disposable | undefined;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+
+	configurationReader.activate(context);
 
 	const copyFromActiveTextEditorSelecionCommand =
 			new CopyFromActiveTextEditorSelecionToClipboardCommand();
@@ -26,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const inlayHintsProvider = new InlayHintsProvider();
 
-	disposable = vscode.Disposable.from(
+	context.subscriptions.push(
 		copyFromActiveTextEditorSelecionCommand,
 		internalStatusBarHandler,
 		statusBarHandler,
@@ -40,7 +41,6 @@ export function activate(context: vscode.ExtensionContext) {
 		macroParser,
 		regExpTimingHintsParser
 	);
-	context.subscriptions.push(disposable);
 
 	// First execution
 	internalStatusBarHandler.onUpdateRequest();
@@ -48,7 +48,4 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-
-	disposable?.dispose();
-	disposable = undefined;
 }
