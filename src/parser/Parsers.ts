@@ -5,14 +5,10 @@ import { TimingHints } from "./timingHints/TimingHints";
 
 export interface InstructionParser {
 
-	get isEnabled(): boolean;
-
 	parse(s: SourceCode): Meterable | undefined;
 }
 
 export interface RepetitionParser {
-
-	get isEnabled(): boolean;
 
 	parse(instruction: string): number | undefined;
 
@@ -21,28 +17,20 @@ export interface RepetitionParser {
 
 export interface TimingHintsParser {
 
-	get isEnabled(): boolean;
-
 	parse(s: SourceCode): TimingHints | undefined;
 }
 
 export abstract class AbstractRepetitionParser implements RepetitionParser {
 
-	readonly expectedMnemonic: string;
-
-	readonly expectedEndMnemonic: string;
-
-	constructor(mnemonic: string, mnemonicEnd: string) {
-		this.expectedMnemonic = mnemonic;
-		this.expectedEndMnemonic = mnemonicEnd;
+	constructor(
+		private readonly beginMnemonic: string,
+		private readonly endMnemonic: string) {
 	}
-
-	abstract get isEnabled(): boolean;
 
 	parse(instruction: string): number | undefined {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		if (mnemonic !== this.expectedMnemonic) {
+		if (mnemonic !== this.beginMnemonic) {
 			return undefined;
 		}
 
@@ -58,7 +46,6 @@ export abstract class AbstractRepetitionParser implements RepetitionParser {
 
 	parseEnd(instruction: string): boolean {
 
-		return extractMnemonicOf(instruction) === this.expectedEndMnemonic;
+		return extractMnemonicOf(instruction) === this.endMnemonic;
 	}
-
 }

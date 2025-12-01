@@ -9,30 +9,47 @@ import { CopyFromActiveTextEditorSelecionToClipboardCommand } from './vscode/Com
 import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
 import { configurationReader } from './vscode/ConfigurationReader';
+import { z80InstructionParser } from './parser/impl/Z80InstructionParser';
+import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './parser/impl/SjasmplusParser';
+import { glassFakeInstructionParser, glassReptRepetitionParser } from './parser/impl/GlassParser';
+import { assemblyDirectiveParser } from './parser/impl/AssemblyDirectiveParser';
 
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Activates singletons
-	configurationReader.activate(context);
+	// Invokes activation
+	for (const activable of [
+		configurationReader,
 
-	// Instantiates VS Code integrations
+		z80InstructionParser,
+		assemblyDirectiveParser,
+
+		sjasmplusFakeInstructionParser,
+		sjasmplusRegisterListInstructionParser,
+		sjasmplusDupRepetitionParser,
+		sjasmplusReptRepetitionParser,
+
+		glassFakeInstructionParser,
+		glassReptRepetitionParser,
+
+		regExpTimingHintsParser,
+
+		macroParser,
+
+		mainParser,
+		mainParserWithoutMacro,
+		mainParserWithoutTimingHints,
+	]) {
+		activable.activate(context);
+	};
+
+	// VS Code integrations
 	const command = new CopyFromActiveTextEditorSelecionToClipboardCommand(context);
 	const internalStatusBarHandler = new CachedStatusBarHandler(context, command);
 	new DebouncedStatusBarHandler(context, internalStatusBarHandler);
 	new InlayHintsProvider(context);
-
-	context.subscriptions.push(
-
-		// subscribe to configuration change event
-		mainParser,
-		mainParserWithoutMacro,
-		mainParserWithoutTimingHints,
-		macroParser,
-		regExpTimingHintsParser
-	);
 
 	// First execution
 	internalStatusBarHandler.onUpdateRequest();

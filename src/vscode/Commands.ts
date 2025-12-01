@@ -20,7 +20,7 @@ export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
         }
 
         // Parses the source code
-        const metered = mainParser.parse(sourceCode);
+        const metered = mainParser.instance.parse(sourceCode);
         if (!metered) {
             return;
         }

@@ -131,7 +131,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 			}
 
 			// Checks source code
-			const metered = mainParser.parseInstruction(sourceCode);
+			const metered = mainParser.instance.parseInstruction(sourceCode);
 			if (!metered || !this.isCode(metered)) {
 				continue; // (ignore unparseable source code or no-code (data?) lines)
 			}
@@ -414,7 +414,7 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 	get totalTimings(): TotalTimings {
 
 		if (!this.cachedTotalTimings) {
-			this.cachedTotalTimings = new TotalTimings(mainParser.parse(this.sourceCode)!);
+			this.cachedTotalTimings = new TotalTimings(mainParser.instance.parse(this.sourceCode)!);
 		}
 		return this.cachedTotalTimings;
 	}

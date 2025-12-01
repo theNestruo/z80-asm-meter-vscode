@@ -3,43 +3,16 @@ import { repeatedMeterable } from "../../model/RepeatedMeterable";
 import { Meterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/FormatterUtils";
+import { LazySingleton } from "../../utils/Lifecycle";
 import { parseNumericExpression } from "../../utils/ParserUtils";
 import { InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
-/**
- * An assembly directive, such as `db`, `dw` or `ds`
- */
-class AssemblyDirective implements Meterable {
+class AssemblyDirectiveParserSingleton extends LazySingleton<AssemblyDirectiveParser> {
 
-	// Information
-	private readonly directive: string;
-	readonly z80Timing = [0, 0];
-	readonly msxTiming = [0, 0];
-	readonly cpcTiming = [0, 0];
-	readonly bytes: string[];
-	readonly size: number;
-
-	constructor(
-		directive: string, bytes: string[], size: number) {
-
-		this.directive = directive;
-		this.bytes = bytes;
-		this.size = size;
+	override createInstance(): AssemblyDirectiveParser {
+		return new AssemblyDirectiveParser();
 	}
-
-	/**
-	 * @returns The directive
-	 */
-	get instruction(): string {
-		return this.directive;
-	}
-
-	flatten(): Meterable[] {
-		return [this];
-	}
-
-	readonly isComposed = false;
 }
 
 class AssemblyDirectiveParser implements InstructionParser {
@@ -157,7 +130,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 			const opcode = value !== undefined
 				? value
 				: 0x00; // (defaults to NOP)
-			const instruction = z80InstructionParser.parseOpcode(opcode);
+			const instruction = z80InstructionParser.instance.parseOpcode(opcode);
 			if (instruction) {
 				return repeatedMeterable(instruction, count);
 			}
@@ -206,5 +179,40 @@ class AssemblyDirectiveParser implements InstructionParser {
 	}
 }
 
-export const assemblyDirectiveParser = new AssemblyDirectiveParser();
+/**
+ * An assembly directive, such as `db`, `dw` or `ds`
+ */
+class AssemblyDirective implements Meterable {
+
+	// Information
+	private readonly directive: string;
+	readonly z80Timing = [0, 0];
+	readonly msxTiming = [0, 0];
+	readonly cpcTiming = [0, 0];
+	readonly bytes: string[];
+	readonly size: number;
+
+	constructor(
+		directive: string, bytes: string[], size: number) {
+
+		this.directive = directive;
+		this.bytes = bytes;
+		this.size = size;
+	}
+
+	/**
+	 * @returns The directive
+	 */
+	get instruction(): string {
+		return this.directive;
+	}
+
+	flatten(): Meterable[] {
+		return [this];
+	}
+
+	readonly isComposed = false;
+}
+
+export const assemblyDirectiveParser = new AssemblyDirectiveParserSingleton();
 

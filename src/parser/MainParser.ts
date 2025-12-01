@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { config } from '../config';
 import { repeatedMeterable } from '../model/RepeatedMeterable';
 import { Meterable, MeterableCollection, SourceCode } from '../types';
+import { LazySingleton, OptionalSingleton } from '../utils/Lifecycle';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
 import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
 import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
@@ -14,59 +15,71 @@ import { regExpTimingHintsParser } from './timingHints/RegExpTimingHintsParser';
 import { timingHintedMeterable } from './timingHints/TimingHintedMeterable';
 import { TimingHints } from './timingHints/TimingHints';
 
+class MainParserSingleton extends LazySingleton<MainParser> {
+
+    constructor(
+        private readonly instructionParsers: OptionalSingleton<InstructionParser>[],
+        private readonly repetitionParsers: OptionalSingleton<RepetitionParser>[],
+        private readonly timingHintParsers: OptionalSingleton<TimingHintsParser>[]) {
+
+        super();
+    }
+
+    override activate(context: vscode.ExtensionContext): void {
+        super.activate(context);
+
+        context.subscriptions.push(
+		    // Subscribe to configuration change event
+            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
+        );
+    }
+
+    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+
+        // Forces instance re-creation
+		this._instance?.dispose();
+        this._instance = undefined;
+    }
+
+    protected override createInstance(): MainParser {
+
+        return new MainParser(
+            this.instructionParsers.map(singleton => singleton.instance).filter(instance => !!instance),
+            this.repetitionParsers.map(singleton => singleton.instance).filter(instance => !!instance),
+            this.timingHintParsers.map(singleton => singleton.instance).filter(instance => !!instance)
+        );
+    }
+}
+
 class MainParser {
 
     private readonly disposable: vscode.Disposable;
 
-    // Available parsers for this instance
-    private readonly instructionParsers: InstructionParser[];
-    private readonly repetitionParsers: RepetitionParser[];
-    private readonly timingHintsParsers: TimingHintsParser[];
-
-    // Enabled parsers for this instance (for performance reasons)
-    private enabledInstructionParsers: InstructionParser[] = [];
-    private enabledRepetitionParsers: RepetitionParser[] = [];
-    private enabledTimingHintsParsers: TimingHintsParser[] = [];
-
     private instructionsCache;
 
     constructor(
-        instructionParsers: InstructionParser[],
-        repetitionParsers: RepetitionParser[],
-        timingHintsParsers: TimingHintsParser[]) {
+        private readonly instructionParsers: InstructionParser[],
+        private readonly repetitionParsers: RepetitionParser[],
+        private readonly timingHintsParsers: TimingHintsParser[]) {
 
-        this.instructionParsers = instructionParsers;
-        this.repetitionParsers = repetitionParsers;
-        this.timingHintsParsers = timingHintsParsers;
+        this.disposable = vscode.Disposable.from(
+		    // Subscribe to configuration change event
+            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
+        );
 
-		// Subscribe to configuration change event
-		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
-
-        // Initializes parsers and cache
-        this.initializeParsers();
+        // Initializes cache
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
 	dispose() {
+        this.instructionsCache.clear();
         this.disposable.dispose();
 	}
 
     onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
 
-        // Re-initializes parsers and cache
-        this.initializeParsers();
+        // Re-initializes cache
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
-    }
-
-    private initializeParsers() {
-
-        // Enables/disables parsers for this instance (for performance reasons)
-        this.enabledInstructionParsers = this.instructionParsers
-            .filter(instructionParser => instructionParser.isEnabled);
-        this.enabledRepetitionParsers = this.repetitionParsers
-            .filter(repetitionParser => repetitionParser.isEnabled);
-        this.enabledTimingHintsParsers = this.timingHintsParsers
-            .filter(timingHintsParser => timingHintsParser.isEnabled);
     }
 
     parse(sourceCodes: SourceCode[]): MeterableCollection | undefined {
@@ -127,7 +140,7 @@ class MainParser {
     private parseRepetition(s: string): number | undefined {
 
         // Tries to parse as a repetition instruction
-        for (const repetitionParser of this.enabledRepetitionParsers) {
+        for (const repetitionParser of this.repetitionParsers) {
             const count = repetitionParser.parse(s);
             if (count !== undefined) {
                 return count;
@@ -141,7 +154,7 @@ class MainParser {
     private parseRepetitionEnd(s: string): boolean {
 
         // Tries to parse as a repetition end instruction
-        for (const repetitionParser of this.enabledRepetitionParsers) {
+        for (const repetitionParser of this.repetitionParsers) {
             if (repetitionParser.parseEnd(s)) {
                 return true;
             }
@@ -161,7 +174,7 @@ class MainParser {
 		}
 
         // Tries to parse as an instruction
-        for (const parser of this.enabledInstructionParsers) {
+        for (const parser of this.instructionParsers) {
             const instruction = parser.parse(s);
             if (instruction) {
                 // Caches value
@@ -177,7 +190,7 @@ class MainParser {
     private parseTimingHints(s: SourceCode): TimingHints | undefined {
 
         // Tries to parse timing hints
-        for (const parser of this.enabledTimingHintsParsers) {
+        for (const parser of this.timingHintsParsers) {
             const timingHints = parser.parse(s);
             if (timingHints) {
                 return timingHints;
@@ -188,6 +201,7 @@ class MainParser {
         return undefined;
     }
 }
+
 
 const allInstructionParsers = [
     sjasmplusFakeInstructionParser,
@@ -217,11 +231,12 @@ const allTimingHintsParsers = [
     regExpTimingHintsParser
 ];
 
-export const mainParser = new MainParser(
+
+export const mainParser = new MainParserSingleton(
     allInstructionParsers, allRepetitionParsers, allTimingHintsParsers);
 
-export const mainParserWithoutMacro = new MainParser(
+export const mainParserWithoutMacro = new MainParserSingleton(
     allInstructionParsersButMacro, allRepetitionParsers, allTimingHintsParsers);
 
-export const mainParserWithoutTimingHints = new MainParser(
+export const mainParserWithoutTimingHints = new MainParserSingleton(
     allInstructionParsers, allRepetitionParsers, []);

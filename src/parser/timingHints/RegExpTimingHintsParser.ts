@@ -4,36 +4,48 @@ import { SourceCode } from "../../types";
 import { parseTimingsLenient } from '../../utils/ParserUtils';
 import { TimingHintsParser } from "../Parsers";
 import { TimingHints } from "../timingHints/TimingHints";
+import { LazyOptionalSingleton } from '../../utils/Lifecycle';
 
-const emptyRegExp = new RegExp("");
-
-class RegExpTimingHintsParser implements TimingHintsParser {
-
-    private readonly disposable: vscode.Disposable;
+class RegExpTimingHintsParserSingleton extends LazyOptionalSingleton<RegExpTimingHintsParser> {
 
 	// Timing hints maps
-	private regExpTimingHints: { regExp: RegExp, timingHints: TimingHints }[];
+	private regExpTimingHints: { regExp: RegExp, timingHints: TimingHints }[] = [];
 
-	constructor() {
+	override activate(context: vscode.ExtensionContext): void {
+		super.activate(context);
 
-		// Subscribe to configuration change event
-		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+		context.subscriptions.push(
+			// Subscribe to configuration change event
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
+		);
 
-        // Initializes definitions
+		// Initializes definitions
 		this.regExpTimingHints = this.reloadDefinitions();
 	}
 
-	dispose() {
-        this.disposable.dispose();
+	override dispose() {
+        this.regExpTimingHints = [];
+		super.dispose();
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+		super.onConfigurationChange(e);
 
         // Re-initializes definitions
 		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
 			this.regExpTimingHints = this.reloadDefinitions();
 		}
 	}
+
+	protected override get enabled(): boolean {
+		return this.regExpTimingHints.length !== 0;
+	}
+
+	protected override createInstance(): RegExpTimingHintsParser {
+		return new RegExpTimingHintsParser(this.regExpTimingHints);
+	}
+
+	private readonly emptyRegExpSource = new RegExp("").source;
 
 	private reloadDefinitions(): { regExp: RegExp, timingHints: TimingHints }[] {
 
@@ -52,7 +64,7 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 			} catch (ignored) {
 				return;
 			}
-			if (regExp.source === emptyRegExp.source) {
+			if (regExp.source === this.emptyRegExpSource) {
 				return;
 			}
 
@@ -74,9 +86,12 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 
 		return array;
 	}
+}
 
-	get isEnabled(): boolean {
-		return this.regExpTimingHints.length !== 0;
+class RegExpTimingHintsParser implements TimingHintsParser {
+
+	constructor(
+		private readonly regExpTimingHints: { regExp: RegExp, timingHints: TimingHints }[]) {
 	}
 
 	parse(s: SourceCode): TimingHints | undefined {
@@ -98,4 +113,4 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 	}
 }
 
-export const regExpTimingHintsParser = new RegExpTimingHintsParser();
+export const regExpTimingHintsParser = new RegExpTimingHintsParserSingleton();

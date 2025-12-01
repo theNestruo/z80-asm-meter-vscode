@@ -3,8 +3,107 @@ import { z80InstructionSet } from "../../data/Z80InstructionSet";
 import { Meterable, SourceCode } from "../../types";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte, formatTiming } from '../../utils/FormatterUtils';
+import { LazySingleton } from "../../utils/Lifecycle";
 import { parseTiming } from "../../utils/ParserUtils";
 import { InstructionParser } from "../Parsers";
+
+class Z80InstructionParserSingleton extends LazySingleton<Z80InstructionParser> {
+
+    override createInstance(): Z80InstructionParser {
+        return new Z80InstructionParser();
+    }
+}
+
+class Z80InstructionParser implements InstructionParser {
+
+    // Instruction maps
+    private instructionByMnemonic: Record<string, Z80Instruction[]>;
+    private instructionByOpcode: Record<string, Z80Instruction>;
+
+    constructor() {
+
+        // Initializes instruction maps
+        this.instructionByMnemonic = {};
+        this.instructionByOpcode = {};
+        z80InstructionSet.forEach(rawData => {
+
+            // Parses the raw instruction
+            const originalInstruction = new Z80Instruction(
+                rawData[0], // instructionSet
+                rawData[1], // raw instruction
+                rawData[2], // z80Timing
+                rawData[3], // msxTiming
+                rawData[4], // cpcTiming
+                rawData[5], // opcode
+                rawData[6]); // size
+
+            originalInstruction.expanded().forEach(instruction => {
+                // Prepares a map by mnemonic for performance reasons
+                const mnemonic = instruction.getMnemonic();
+                if (!this.instructionByMnemonic[mnemonic]) {
+                    this.instructionByMnemonic[mnemonic] = [];
+                }
+                this.instructionByMnemonic[mnemonic].push(instruction);
+
+                // Prepares a map by opcode for single byte instructions
+                if (instruction.size === 1) {
+                    const opcode = instruction.bytes[0];
+                    this.instructionByOpcode[opcode] = instruction;
+                }
+            });
+        });
+    }
+
+    parse(s: SourceCode): Meterable | undefined {
+
+        return this.parseInstruction(s.instruction);
+    }
+
+    parseInstruction(instruction: string): Meterable | undefined {
+
+        // Locates candidate instructions
+        const mnemonic = extractMnemonicOf(instruction);
+        const candidates = this.instructionByMnemonic[mnemonic];
+        if (candidates) {
+            return this.findBestCandidate(instruction, candidates);
+        }
+
+        // (unknown mnemonic/instruction)
+        return undefined;
+    }
+
+    parseOpcode(opcode: number): Z80Instruction | undefined {
+
+        return this.instructionByOpcode[formatHexadecimalByte(opcode)];
+    }
+
+    private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
+            Z80Instruction | undefined {
+
+        // (for performance reasons)
+        const instructionSets = config.instructionSets;
+
+        // Locates instruction
+        let bestCandidate;
+        let bestScore = 0;
+        for (const candidate of candidates) {
+            if (!instructionSets.includes(candidate.instructionSet)) {
+                // Invalid instruction set
+                continue;
+            }
+            const score = candidate.match(instruction);
+            if (score === 1) {
+                // Exact match
+                return candidate;
+            }
+            if (score > bestScore) {
+                bestCandidate = candidate;
+                bestScore = score;
+            }
+        }
+        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
+    }
+}
 
 /**
  * A Z80 instruction
@@ -401,100 +500,4 @@ class Z80Instruction implements Meterable {
     }
 }
 
-class Z80InstructionParser implements InstructionParser {
-
-    // Instruction maps
-    private instructionByMnemonic: Record<string, Z80Instruction[]>;
-    private instructionByOpcode: Record<string, Z80Instruction>;
-
-    constructor() {
-
-        // Initializes instruction maps
-        this.instructionByMnemonic = {};
-        this.instructionByOpcode = {};
-        z80InstructionSet.forEach(rawData => {
-
-            // Parses the raw instruction
-            const originalInstruction = new Z80Instruction(
-                rawData[0], // instructionSet
-                rawData[1], // raw instruction
-                rawData[2], // z80Timing
-                rawData[3], // msxTiming
-                rawData[4], // cpcTiming
-                rawData[5], // opcode
-                rawData[6]); // size
-
-            originalInstruction.expanded().forEach(instruction => {
-                // Prepares a map by mnemonic for performance reasons
-                const mnemonic = instruction.getMnemonic();
-                if (!this.instructionByMnemonic[mnemonic]) {
-                    this.instructionByMnemonic[mnemonic] = [];
-                }
-                this.instructionByMnemonic[mnemonic].push(instruction);
-
-                // Prepares a map by opcode for single byte instructions
-                if (instruction.size === 1) {
-                    const opcode = instruction.bytes[0];
-                    this.instructionByOpcode[opcode] = instruction;
-                }
-            });
-        });
-    }
-
-    get isEnabled(): boolean {
-        return true;
-    }
-
-    parse(s: SourceCode): Meterable | undefined {
-
-        return this.parseInstruction(s.instruction);
-    }
-
-    parseInstruction(instruction: string): Meterable | undefined {
-
-        // Locates candidate instructions
-        const mnemonic = extractMnemonicOf(instruction);
-        const candidates = this.instructionByMnemonic[mnemonic];
-        if (candidates) {
-            return this.findBestCandidate(instruction, candidates);
-        }
-
-        // (unknown mnemonic/instruction)
-        return undefined;
-    }
-
-    parseOpcode(opcode: number): Z80Instruction | undefined {
-
-        return this.instructionByOpcode[formatHexadecimalByte(opcode)];
-    }
-
-    private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
-            Z80Instruction | undefined {
-
-        // (for performance reasons)
-        const instructionSets = config.instructionSets;
-
-        // Locates instruction
-        let bestCandidate;
-        let bestScore = 0;
-        for (const candidate of candidates) {
-            if (!instructionSets.includes(candidate.instructionSet)) {
-                // Invalid instruction set
-                continue;
-            }
-            const score = candidate.match(instruction);
-            if (score === 1) {
-                // Exact match
-                return candidate;
-            }
-            if (score > bestScore) {
-                bestCandidate = candidate;
-                bestScore = score;
-            }
-        }
-        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
-    }
-}
-
-export const z80InstructionParser = new Z80InstructionParser();
-
+export const z80InstructionParser = new Z80InstructionParserSingleton();

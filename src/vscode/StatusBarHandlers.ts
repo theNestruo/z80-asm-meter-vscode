@@ -79,7 +79,7 @@ class StatusBarHandler extends SelfDisposable {
 		}
 
 		// Parses the source code
-		const metered = mainParser.parse(linesToSourceCode(lines));
+		const metered = mainParser.instance.parse(linesToSourceCode(lines));
 		if (!metered) {
 			return undefined;
 		}

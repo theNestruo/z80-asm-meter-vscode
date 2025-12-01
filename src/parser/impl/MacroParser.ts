@@ -6,6 +6,82 @@ import { parseTimingsLenient, parteIntLenient } from "../../utils/ParserUtils";
 import { linesToSourceCode } from '../../utils/SourceCodeUtils';
 import { mainParserWithoutMacro } from "../MainParser";
 import { InstructionParser } from "../Parsers";
+import { LazyOptionalSingleton } from '../../utils/Lifecycle';
+
+class MacroParserSingleton extends LazyOptionalSingleton<MacroParser> {
+
+	// Macro maps
+	private definitionByMnemonic: Record<string, MacroDefinition> = {};
+
+	override activate(context: vscode.ExtensionContext): void {
+		super.activate(context);
+
+		context.subscriptions.push(
+			// Subscribe to configuration change event
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
+		);
+
+        // Initializes definitions
+		this.definitionByMnemonic = this.reloadDefinitions();
+	}
+
+	override dispose() {
+		this.definitionByMnemonic = {};
+		super.dispose();
+	}
+
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+		super.onConfigurationChange(e);
+
+		// Re-initializes definitions
+		if (e.affectsConfiguration("z80-asm-meter.macros")) {
+			this.definitionByMnemonic = this.reloadDefinitions();
+		}
+	}
+
+	protected override get enabled(): boolean {
+		return Object.keys(this.definitionByMnemonic).length !== 0;
+	}
+
+	protected override createInstance(): MacroParser {
+		return new MacroParser(this.definitionByMnemonic);
+	}
+
+	private reloadDefinitions(): Record<string, MacroDefinition> {
+
+		// Initializes macro maps
+		const map: Record<string, MacroDefinition> = {};
+
+		// Locates macro definitions
+		config.macros?.forEach(macroDefinition => {
+
+			// Prepares a map by mnemonic for performance reasons
+			const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
+			map[mnemonic] = macroDefinition;
+		});
+
+		return map;
+	}
+}
+
+class MacroParser implements InstructionParser {
+
+	constructor(
+		private readonly definitionByMnemonic: Record<string, MacroDefinition>) {
+	}
+
+	parse(s: SourceCode): Meterable | undefined {
+
+		// Locates macro definition
+		const mnemonic = extractMnemonicOf(s.instruction);
+		const macroDefinition = this.definitionByMnemonic[mnemonic];
+		if (!macroDefinition) {
+			return undefined;
+		}
+
+		return new Macro(macroDefinition);
+	}
+}
 
 class Macro extends MeterableCollection {
 
@@ -117,7 +193,7 @@ class Macro extends MeterableCollection {
 		}
 
 		if (this.providedSourceCode) {
-			const meterable = mainParserWithoutMacro.parse(linesToSourceCode(this.providedSourceCode));
+			const meterable = mainParserWithoutMacro.instance.parse(linesToSourceCode(this.providedSourceCode));
 			this.add(meterable);
 		}
 
@@ -125,66 +201,5 @@ class Macro extends MeterableCollection {
 	}
 }
 
-class MacroParser implements InstructionParser {
-
-    private readonly disposable: vscode.Disposable;
-
-	// Macro maps
-	private definitionByMnemonic: Record<string, MacroDefinition>;
-
-	constructor() {
-
-		// Subscribe to configuration change event
-		this.disposable = vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
-
-        // Initializes definitions
-		this.definitionByMnemonic = this.reloadDefinitions();
-	}
-
-	dispose() {
-        this.disposable.dispose();
-	}
-
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-
-        // Re-initializes definitions
-		if (e.affectsConfiguration("z80-asm-meter.macros")) {
-			this.definitionByMnemonic = this.reloadDefinitions();
-		}
-	}
-
-	private reloadDefinitions(): Record<string, MacroDefinition> {
-
-		// Initializes macro maps
-		const map: Record<string, MacroDefinition> = {};
-
-		// Locates macro definitions
-		config.macros?.forEach(macroDefinition => {
-
-			// Prepares a map by mnemonic for performance reasons
-			const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
-			map[mnemonic] = macroDefinition;
-		});
-
-		return map;
-	}
-
-	get isEnabled(): boolean {
-		return Object.keys(this.definitionByMnemonic).length !== 0;
-	}
-
-	parse(s: SourceCode): Meterable | undefined {
-
-		// Locates macro definition
-		const mnemonic = extractMnemonicOf(s.instruction);
-		const macroDefinition = this.definitionByMnemonic[mnemonic];
-		if (!macroDefinition) {
-			return undefined;
-		}
-
-		return new Macro(macroDefinition);
-	}
-}
-
-export const macroParser = new MacroParser();
+export const macroParser = new MacroParserSingleton();
 

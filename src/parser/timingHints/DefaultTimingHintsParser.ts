@@ -1,17 +1,25 @@
 import { config } from "../../config";
 import { SourceCode } from "../../types";
+import { LazyOptionalSingleton } from "../../utils/Lifecycle";
 import { parseTimingLenient } from "../../utils/ParserUtils";
 import { TimingHintsParser } from "../Parsers";
 import { TimingHints } from "../timingHints/TimingHints";
 
-// (precompiled RegExp for performance reasons)
-const timingHintsRegexp = /\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g;
+class DefaultTimingHintsParserSingleton extends LazyOptionalSingleton<DefaultTimingHintsParser> {
+
+	protected override get enabled(): boolean {
+		return config.timing.hints.enabled;
+	}
+
+	protected override createInstance(): DefaultTimingHintsParser {
+		return new DefaultTimingHintsParser();
+	}
+}
 
 class DefaultTimingHintsParser implements TimingHintsParser {
 
-	get isEnabled(): boolean {
-		return config.timing.hints.enabled;
-	}
+	// (precompiled RegExp for performance reasons)
+	private readonly timingHintsRegexp = /\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g;
 
 	parse(s: SourceCode): TimingHints | undefined {
 
@@ -23,7 +31,7 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		}
 
 		// Checks timing hint comment
-		const matches = rawComment.matchAll(timingHintsRegexp);
+		const matches = rawComment.matchAll(this.timingHintsRegexp);
 		if (!matches) {
 			return undefined;
 		}
@@ -53,4 +61,4 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 	}
 }
 
-export const defaultTimingHintsParser = new DefaultTimingHintsParser();
+export const defaultTimingHintsParser = new DefaultTimingHintsParserSingleton();

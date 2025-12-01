@@ -2,8 +2,88 @@ import { config } from "../../config";
 import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
 import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
+import { LazyOptionalSingleton } from "../../utils/Lifecycle";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
+
+class SjasmplusFakeInstructionParserSingleton extends LazyOptionalSingleton<SjasmplusFakeInstructionParser> {
+
+    override get enabled(): boolean {
+        return config.syntax.sjasmplusFakeInstructions;
+    }
+
+    override createInstance(): SjasmplusFakeInstructionParser {
+        return new SjasmplusFakeInstructionParser();
+    }
+}
+
+class SjasmplusFakeInstructionParser implements InstructionParser {
+
+    // Instruction maps
+    private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
+
+    constructor() {
+
+        // Initializes instruction maps
+        this.instructionByMnemonic = {};
+        sjasmplusFakeInstructionSet.forEach(rawData => {
+
+            // Parses the raw instruction
+            const instruction = new SjasmplusFakeInstruction(
+                rawData[0], // instructionSet
+                rawData[1], // fake instruction
+                rawData.slice(2)); // actual instructions
+
+            // Prepares a map by mnemonic for performance reasons
+            const mnemonic = instruction.getMnemonic();
+            if (!this.instructionByMnemonic[mnemonic]) {
+                this.instructionByMnemonic[mnemonic] = [];
+            }
+            this.instructionByMnemonic[mnemonic].push(instruction);
+        });
+    }
+
+    parse(s: SourceCode): Meterable | undefined {
+
+        // Locates candidate instructions
+        const instruction = s.instruction;
+        const mnemonic = extractMnemonicOf(instruction);
+        const candidates = this.instructionByMnemonic[mnemonic];
+        if (candidates) {
+            return this.findBestCandidate(instruction, candidates);
+        }
+
+        // (unknown mnemonic/instruction)
+        return undefined;
+    }
+
+    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
+            SjasmplusFakeInstruction | undefined {
+
+        // (for performance reasons)
+        const instructionSets = config.instructionSets;
+
+        // Locates instruction
+        let bestCandidate;
+        let bestScore = 0;
+        for (const candidate of candidates) {
+            if (!instructionSets.includes(candidate.getInstructionSet())) {
+                // Invalid instruction set
+                continue;
+            }
+            const score = candidate.match(instruction);
+            if (score === 1) {
+                // Exact match
+                return candidate;
+            }
+            if (score > bestScore) {
+                bestCandidate = candidate;
+                bestScore = score;
+            }
+        }
+        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
+    }
+}
 
 /**
  * A sjasmplus fake instruction
@@ -99,7 +179,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 
         if (!this.ready) {
             this.rawInstructions.forEach(rawInstruction => {
-                const instruction = z80InstructionParser.parseInstruction(rawInstruction);
+                const instruction = z80InstructionParser.instance.parseInstruction(rawInstruction);
                 this.add(instruction);
             });
             this.ready = true;
@@ -204,83 +284,20 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     }
 }
 
-class SjasmplusFakeInstructionParser implements InstructionParser {
+//
 
-    // Instruction maps
-    private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
+class SjasmplusRegisterListInstructionParserSingleton extends LazyOptionalSingleton<SjasmplusRegisterListInstructionParser> {
 
-    constructor() {
-
-        // Initializes instruction maps
-        this.instructionByMnemonic = {};
-        sjasmplusFakeInstructionSet.forEach(rawData => {
-
-            // Parses the raw instruction
-            const instruction = new SjasmplusFakeInstruction(
-                rawData[0], // instructionSet
-                rawData[1], // fake instruction
-                rawData.slice(2)); // actual instructions
-
-            // Prepares a map by mnemonic for performance reasons
-            const mnemonic = instruction.getMnemonic();
-            if (!this.instructionByMnemonic[mnemonic]) {
-                this.instructionByMnemonic[mnemonic] = [];
-            }
-            this.instructionByMnemonic[mnemonic].push(instruction);
-        });
+    override get enabled(): boolean {
+        return config.syntax.sjasmplusRegisterListInstructions;
     }
 
-    get isEnabled(): boolean {
-        return config.syntax.sjasmplusFakeInstructions;
-    }
-
-    parse(s: SourceCode): Meterable | undefined {
-
-        // Locates candidate instructions
-        const instruction = s.instruction;
-        const mnemonic = extractMnemonicOf(instruction);
-        const candidates = this.instructionByMnemonic[mnemonic];
-        if (candidates) {
-            return this.findBestCandidate(instruction, candidates);
-        }
-
-        // (unknown mnemonic/instruction)
-        return undefined;
-    }
-
-    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
-            SjasmplusFakeInstruction | undefined {
-
-        // (for performance reasons)
-        const instructionSets = config.instructionSets;
-
-        // Locates instruction
-        let bestCandidate;
-        let bestScore = 0;
-        for (const candidate of candidates) {
-            if (!instructionSets.includes(candidate.getInstructionSet())) {
-                // Invalid instruction set
-                continue;
-            }
-            const score = candidate.match(instruction);
-            if (score === 1) {
-                // Exact match
-                return candidate;
-            }
-            if (score > bestScore) {
-                bestCandidate = candidate;
-                bestScore = score;
-            }
-        }
-        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
+    override createInstance(): SjasmplusRegisterListInstructionParser {
+        return new SjasmplusRegisterListInstructionParser();
     }
 }
 
 class SjasmplusRegisterListInstructionParser implements InstructionParser {
-
-    get isEnabled(): boolean {
-        return config.syntax.sjasmplusRegisterListInstructions;
-    }
 
     parse(s: SourceCode): Meterable | undefined {
 
@@ -299,7 +316,7 @@ class SjasmplusRegisterListInstructionParser implements InstructionParser {
             const partialInstruction = `${mnemonic} ${operand}`;
 
             // Tries to parse Z80 instruction
-            const z80Instruction = z80InstructionParser.parseInstruction(partialInstruction);
+            const z80Instruction = z80InstructionParser.instance.parseInstruction(partialInstruction);
             if (!z80Instruction) {
                 // (unknown mnemonic/instruction)
                 return undefined;
@@ -311,14 +328,37 @@ class SjasmplusRegisterListInstructionParser implements InstructionParser {
     }
 }
 
+//
+
+class SjasmplusDupRepetitionParserSingleton extends LazyOptionalSingleton<SjasmplusDupRepetitionParser> {
+
+    override get enabled(): boolean {
+        return config.syntax.sjasmplusDupEdupRepetition;
+    }
+
+    override createInstance(): SjasmplusDupRepetitionParser {
+        return new SjasmplusDupRepetitionParser();
+    }
+}
+
 class SjasmplusDupRepetitionParser extends AbstractRepetitionParser {
 
     constructor() {
         super("DUP", "EDUP");
     }
 
-    get isEnabled(): boolean {
-        return config.syntax.sjasmplusDupEdupRepetition;
+}
+
+//
+
+class SjasmplusReptRepetitionParserSingleton extends LazyOptionalSingleton<SjasmplusReptRepetitionParser> {
+
+    override get enabled(): boolean {
+        return config.syntax.sjasmplusReptEndrRepetition;
+    }
+
+    override createInstance(): SjasmplusReptRepetitionParser {
+        return new SjasmplusReptRepetitionParser();
     }
 }
 
@@ -327,14 +367,11 @@ class SjasmplusReptRepetitionParser extends AbstractRepetitionParser {
     constructor() {
         super("REPT", "ENDR");
     }
-
-    get isEnabled(): boolean {
-        return config.syntax.sjasmplusReptEndrRepetition;
-    }
 }
 
-export const sjasmplusFakeInstructionParser = new SjasmplusFakeInstructionParser();
-export const sjasmplusRegisterListInstructionParser = new SjasmplusRegisterListInstructionParser();
-export const sjasmplusDupRepetitionParser = new SjasmplusDupRepetitionParser();
-export const sjasmplusReptRepetitionParser = new SjasmplusReptRepetitionParser();
+//
 
+export const sjasmplusFakeInstructionParser = new SjasmplusFakeInstructionParserSingleton();
+export const sjasmplusRegisterListInstructionParser = new SjasmplusRegisterListInstructionParserSingleton();
+export const sjasmplusDupRepetitionParser = new SjasmplusDupRepetitionParserSingleton();
+export const sjasmplusReptRepetitionParser = new SjasmplusReptRepetitionParserSingleton();

@@ -40,7 +40,7 @@ function isCommentedOutSourceCode(sourceCode: SourceCode): boolean {
 
 	return !sourceCode.instruction // non empty line (should never happen)
 		&& !!sourceCode.lineComment // no comment (should never happen)
-		&& !!mainParserWithoutTimingHints.parse(
+		&& !!mainParserWithoutTimingHints.instance.parse(
 			lineToSourceCode(sourceCode.lineComment, config.syntax.lineSeparatorCharacter));
 }
 

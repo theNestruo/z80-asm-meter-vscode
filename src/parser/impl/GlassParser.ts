@@ -1,14 +1,22 @@
 import { config } from "../../config";
 import { Meterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
+import { LazyOptionalSingleton } from "../../utils/Lifecycle";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
-class GlassFakeInstructionParser implements InstructionParser {
+class GlassFakeInstructionParserSingleton extends LazyOptionalSingleton<GlassFakeInstructionParser> {
 
-    get isEnabled(): boolean {
+    override get enabled(): boolean {
         return config.syntax.glassNegativeConditions;
     }
+
+    override createInstance(): GlassFakeInstructionParser {
+        return new GlassFakeInstructionParser();
+    }
+}
+
+class GlassFakeInstructionParser implements InstructionParser {
 
     parse(s: SourceCode): Meterable | undefined {
 
@@ -26,7 +34,7 @@ class GlassFakeInstructionParser implements InstructionParser {
         // Replaces with non-negated condition equivalent instruction
         operands[0] = this.not(negatedCondition);
         const equivalentInstruction = mnemonic + " " + operands.join(",");
-        return z80InstructionParser.parseInstruction(equivalentInstruction);
+        return z80InstructionParser.instance.parseInstruction(equivalentInstruction);
     }
 
     private isNegatedConditionalInstruction(mnemonic: string, operands: string[]): string | undefined {
@@ -62,17 +70,28 @@ class GlassFakeInstructionParser implements InstructionParser {
     }
 }
 
+//
+
+class GlassReptRepetitionParserSingleton extends LazyOptionalSingleton<GlassReptRepetitionParser> {
+
+    override get enabled(): boolean {
+        return config.syntax.glassReptEndmRepetition;
+    }
+
+    override createInstance(): GlassReptRepetitionParser {
+        return new GlassReptRepetitionParser();
+    }
+}
+
 class GlassReptRepetitionParser extends AbstractRepetitionParser {
 
     constructor() {
         super("REPT", "ENDM");
     }
-
-    get isEnabled(): boolean {
-        return config.syntax.glassReptEndmRepetition;
-    }
 }
 
-export const glassFakeInstructionParser = new GlassFakeInstructionParser();
-export const glassReptRepetitionParser = new GlassReptRepetitionParser();
+//
+
+export const glassFakeInstructionParser = new GlassFakeInstructionParserSingleton();
+export const glassReptRepetitionParser = new GlassReptRepetitionParserSingleton();
 
