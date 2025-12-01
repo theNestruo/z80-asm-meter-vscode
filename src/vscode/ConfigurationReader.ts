@@ -65,11 +65,11 @@ class CachedConfigurationReader extends DisposableActivable {
 		);
 	}
 
-	dispose() {
+	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
 		this.cache.clear();
 	}
 
-	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+	dispose() {
 		this.cache.clear();
 	}
 
@@ -105,11 +105,11 @@ class ExtensionConfigurationReader extends DisposableActivable implements Config
 	private delegate: ConfigurationReader = DirectConfigurationReader.instance;
 
 	override activate(context: vscode.ExtensionContext): void {
-		const instance = new CachedConfigurationReader(context);
-		instance.activate(context);
+		const cachedConfigurationReader = new CachedConfigurationReader(context);
+		cachedConfigurationReader.activate(context);
 
 		// Sets the CachedConfigurationReader instance
-		this.delegate = instance;
+		this.delegate = cachedConfigurationReader;
 	}
 
 	override dispose(): void {

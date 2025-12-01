@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
 import { mainParser } from "../parser/MainParser";
-import { readSourceCodeFromActiveTextEditorSelecion } from './SourceCodeReader';
 import { TotalTimings } from '../totalTiming/TotalTimings';
-import { formatTiming, printableTimingSuffix, printTiming } from '../utils/FormatterUtils';
 import { SourceCode } from '../types';
+import { formatTiming, printableTimingSuffix, printTiming } from '../utils/FormatterUtils';
+import { readSourceCodeFromActiveTextEditorSelecion } from './SourceCodeReader';
 
 export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
 
@@ -104,17 +104,13 @@ export class CopyFromActiveTextEditorSelecionToClipboardCommand extends Abstract
 
     override readonly command = "z80-asm-meter.copyToClipboard";
 
-    private readonly disposable: vscode.Disposable;
-
-    constructor() {
+    constructor(context: vscode.ExtensionContext) {
         super();
 
-        // Registers as a command
-        this.disposable = vscode.commands.registerCommand(this.command, this.onExecute, this);
-    }
-
-    dispose() {
-        this.disposable.dispose();
+        context.subscriptions.push(
+            // Registers as a command
+            vscode.commands.registerCommand(this.command, this.onExecute, this)
+        );
     }
 
     onExecute(): void {

@@ -9,6 +9,18 @@ export interface Activable {
 }
 
 /**
+ * Base class for classes that will be automatically disposed if they are created
+ */
+export abstract class SelfDisposable implements vscode.Disposable {
+
+	constructor(context: vscode.ExtensionContext) {
+		context.subscriptions.push(this);
+	}
+
+	abstract dispose(): void;
+}
+
+/**
  * Base class for classes that will be automatically disposed if they are activated
  */
 export abstract class DisposableActivable implements Activable, vscode.Disposable {

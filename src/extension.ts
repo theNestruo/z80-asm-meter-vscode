@@ -15,26 +15,18 @@ import { configurationReader } from './vscode/ConfigurationReader';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
+	// Activates singletons
 	configurationReader.activate(context);
 
-	const copyFromActiveTextEditorSelecionCommand =
-			new CopyFromActiveTextEditorSelecionToClipboardCommand();
-
-	const internalStatusBarHandler =
-			new CachedStatusBarHandler(copyFromActiveTextEditorSelecionCommand);
-	const statusBarHandler =
-			new DebouncedStatusBarHandler(internalStatusBarHandler);
-
-	const inlayHintsProvider = new InlayHintsProvider();
+	// Instantiates VS Code integrations
+	const command = new CopyFromActiveTextEditorSelecionToClipboardCommand(context);
+	const internalStatusBarHandler = new CachedStatusBarHandler(context, command);
+	new DebouncedStatusBarHandler(context, internalStatusBarHandler);
+	new InlayHintsProvider(context);
 
 	context.subscriptions.push(
-		copyFromActiveTextEditorSelecionCommand,
-		internalStatusBarHandler,
-		statusBarHandler,
-		inlayHintsProvider,
 
 		// subscribe to configuration change event
-		configurationReader,
 		mainParser,
 		mainParserWithoutMacro,
 		mainParserWithoutTimingHints,
