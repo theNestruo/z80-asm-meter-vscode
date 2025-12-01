@@ -123,7 +123,7 @@ These settings allow to fine-tune the information to be shown in the status bar 
 
 * [`z80-asm-meter.statusBar.timingsIcon`](vscode://settings/z80-asm-meter.statusBar.timingsIcon): The icon to identify the timings in the status bar. Any [product icon](https://code.visualstudio.com/api/references/icons-in-labels), [Unicode character](https://home.unicode.org/), or plaint text can be used.
 
-    Defaults to: `$(watch)`.
+    Defaults to: `$(clock)`.
 
     ![](media/images/statusBar.timingsIcon.png)
 
@@ -814,7 +814,7 @@ The main issue is that, when using the default configuration, the extension uses
 It is possible to use text instead of icons via configuration settings:
 
 ```json
-"z80-asm-meter.statusBar.timingsIcon": "$(watch) Ts ",
+"z80-asm-meter.statusBar.timingsIcon": "$(clock) Ts ",
 "z80-asm-meter.statusBar.sizeIcon": ", Sz ",
 "z80-asm-meter.timing.executionFlow.icon": "↓", // UNICODE Downwards Arrow (U+2193)
 "z80-asm-meter.timing.atExit.retIcon": "←",     // UNICODE Leftwards Arrow (U+2190)
@@ -828,7 +828,7 @@ Or, when showing the processed instruction in the status bar:
 
 ```json
 "z80-asm-meter.statusBar.showInstruction": true,
-"z80-asm-meter.statusBar.instructionIcon": "$(watch)",
+"z80-asm-meter.statusBar.instructionIcon": "$(clock)",
 "z80-asm-meter.statusBar.timingsIcon": "Ts ",
 "z80-asm-meter.statusBar.sizeIcon": ", Sz ",
 "z80-asm-meter.timing.executionFlow.icon": "↓", // UNICODE Downwards Arrow (U+2193)

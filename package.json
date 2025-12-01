@@ -312,12 +312,12 @@
 						"order": 80,
 						"type": "string",
 						"minLength": 1,
-						"default": "$(watch)",
+						"default": "$(clock)",
 						"description": "The icon to identify the timings in the status bar",
 						"examples": [
 							"$(clock)",
 							"$(dashboard)",
-							"$(watch)",
+							"$(clock)",
 							"$(zap)",
 							"Ts "
 						]

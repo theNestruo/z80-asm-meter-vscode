@@ -188,7 +188,7 @@ export function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] 
 			return;
 		}
 
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(watch)");
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clock)");
 		const value = formatTiming(totalTiming.z80Timing);
 		const m1Value = formatTiming(totalTiming.msxTiming);
 		if (!value && (!hasM1 || !m1Value)) {
