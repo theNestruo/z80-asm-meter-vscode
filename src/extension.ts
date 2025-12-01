@@ -20,7 +20,7 @@ import { assemblyDirectiveParser } from './parser/impl/AssemblyDirectiveParser';
 export function activate(context: vscode.ExtensionContext) {
 
 	// Invokes activation
-	for (const activable of [
+	[
 		configurationReader,
 
 		z80InstructionParser,
@@ -41,9 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 		mainParser,
 		mainParserWithoutMacro,
 		mainParserWithoutTimingHints,
-	]) {
-		activable.activate(context);
-	};
+	].forEach(activable => activable.activate(context));
 
 	// VS Code integrations
 	const command = new CopyFromActiveTextEditorSelecionToClipboardCommand(context);
