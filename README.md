@@ -749,6 +749,8 @@ The following table compares the time took to meter 11&nbsp;179 lines of source 
 | 5.6.2 (preview)<br>5.6.3 | `200` (new default value) | ~207&nbsp;ms |
 | 5.6.4 | `250` (new default value) | 165&nbsp;ms |
 
+From version 6.2.0 onwards, the extension size has been improved. The images in the documentation contribute the most to the size of the extension. Using better compression have reduced the size of the images to ~150 KB, and the extension total size is about ~220 KB.
+
 </details>
 
 
@@ -843,8 +845,12 @@ Or, when showing the processed instruction in the status bar:
 ## Credits
 
 Coded by [**theNestruo**](https://github.com/theNestruo) (Néstor Sancho).
-* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide), [**Kris Borowinski**](https://github.com/kborowinski), [**alexanderk23**](https://github.com/alexanderk23), [**RenaudLottiaux**](https://github.com/RenaudLottiaux)
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
+* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide), [**Kris Borowinski**](https://github.com/kborowinski), [**alexanderk23**](https://github.com/alexanderk23), [**RenaudLottiaux**](https://github.com/RenaudLottiaux)
+* "Least Recently Used" (LRU) cache implementation: [hashlru](https://www.npmjs.com/package/hashlru) by [Dominic Tarr](https://github.com/dominictarr)
+
+Data sources:
+
 * [Z80 Instruction Set](http://map.grauw.nl/resources/z80instr.php) from Grauw [MSX Assembly Page](http://map.grauw.nl).
 * Amstrad CPC timing information from [Z80 CPC Timings - Cheat sheet](https://wiki.octoate.de/lib/exe/fetch.php/amstradcpc:z80_cpc_timings_cheat_sheet.20131019.pdf) made by cpcitor/findyway from data at http://www.cpctech.org.uk/docs/instrtim.html.<!-- * Amstrad CPC timing information from [Rasm Z80 assembler](http://www.cpcwiki.eu/forum/programming/rasm-z80-assembler-in-beta/) documentation. -->
 * ZX Spectrum Next [Extended Z80 Instruction Set](https://wiki.specnext.dev/Extended_Z80_instruction_set) from [Sinclair ZX Spectrum Next Official Developer Wiki](https://wiki.specnext.dev).
