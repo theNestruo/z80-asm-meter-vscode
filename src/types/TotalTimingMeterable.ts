@@ -1,18 +1,20 @@
-import { Meterable } from "../types";
+import { Meterable } from "./Meterable";
 
+/**
+ * Decorates a Meterable (likely a MeterableCollection) to compute its total timings
+ */
 export abstract class TotalTimingMeterable implements Meterable {
-
-	// The original meterable instance
-	protected originalMeterable: Meterable;
 
 	// Derived information (will be cached for performance reasons)
 	private cachedZ80Timing?: number[];
 	private cachedMsxTiming?: number[];
 	private cachedCpcTiming?: number[];
 
-	protected constructor(meterable: Meterable) {
-
-		this.originalMeterable = meterable;
+	/**
+	 * Constructor
+	 * @param originalMeterable The original meterable instance
+	 */
+	protected constructor(protected originalMeterable: Meterable) {
 	}
 
 	abstract get name(): string;

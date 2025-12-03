@@ -1,102 +1,7 @@
-/**
- * A container for source code:
- * an instruction, and an optional trailing comment of the entire line
- */
-export class SourceCode {
-
-    /** The instruction (the actual source code) */
-    readonly instruction: string;
-
-    /** The optional label */
-    readonly label: string | undefined;
-
-	/** The position where the optional label ends */
-	readonly afterLabelPosition: number | undefined;
-
-    /** The optional line repetition count */
-    readonly repetitions: number;
-
-    /** The position where the optional trailing comment of the entire line starts */
-    readonly beforeLineCommentPosition: number | undefined;
-
-    /** The position where the optional trailing comment of the entire line starts */
-    readonly afterLineCommentPosition: number | undefined;
-
-    /** The optional trailing comment of the entire line */
-    readonly lineComment: string | undefined;
-
-    constructor(instruction: string,
-			label?: string, afterLabelPosition?: number,
-			repetitions?: number,
-			beforeLineCommentPosition?: number,
-			afterLineCommentPosition?: number,
-			lineComment?: string) {
-
-		this.instruction = instruction;
-
-        this.label = label;
-		this.afterLabelPosition = afterLabelPosition;
-
-        this.repetitions = repetitions !== undefined ? repetitions : 1;
-
-		this.beforeLineCommentPosition = beforeLineCommentPosition;
-		this.afterLineCommentPosition = afterLineCommentPosition;
-        this.lineComment = lineComment;
-    }
-}
+import { Meterable } from "./Meterable";
 
 /**
- * Anything that can be metered: Z80 Instructions, ASM directives, sjasmplus fake instructions...
- */
-export interface Meterable {
-
-    /**
-     * @returns the normalized Z80 instruction, ASM directive, sjasmplus fake instruction...
-     */
-    get instruction(): string;
-
-    /**
-     * @returns the Z80 timing, in time (T) cycles
-     */
-    get z80Timing(): number[];
-
-    /**
-     * @returns the Z80 timing with the M1 wait cycles required by the MSX standard
-     */
-    get msxTiming(): number[];
-
-    /**
-     * @returns the CPC timing, in NOPS
-     */
-    get cpcTiming(): number[];
-
-    /**
-     * @returns the bytes, logically grouped
-     */
-    get bytes(): string[];
-
-    /**
-     * @returns the size in bytes
-     */
-    get size(): number;
-
-    /**
-     * @returns the flattened array of the finer-grained meterables
-	 * that compose this meterable (when the meterable is composed);
-	 * an array with this meterable otherwise.
-     * For displaying instructions and bytes purposes only!
-     */
-    flatten(): Meterable[];
-
-    /**
-     * @returns if the meterable is composed of finer-grained meterables
-     */
-    get isComposed(): boolean;
-}
-
-
-/**
- * Anything that can be metered by aggregation of meterables
+ * Any aggregation of meterables
  */
 abstract class AggregatedMeterable implements Meterable {
 
@@ -120,21 +25,21 @@ abstract class AggregatedMeterable implements Meterable {
 	/** true; this meterable is composed */
 	isComposed = true;
 }
-
 /**
- * A meterable collection of Meterables
+ * A collection of Meterables as a single Meterable
  */
+
 export class MeterableCollection extends AggregatedMeterable {
 
 	// The collection of meterable instances
 	protected meterables: Meterable[] = [];
 
-    // Derived information (will be cached for performance reasons)
-    private cachedZ80Timing?: number[];
-    private cachedMsxTiming?: number[];
-    private cachedCpcTiming?: number[];
-    private cachedBytes?: string[];
-    private cachedSize?: number;
+	// Derived information (will be cached for performance reasons)
+	private cachedZ80Timing?: number[];
+	private cachedMsxTiming?: number[];
+	private cachedCpcTiming?: number[];
+	private cachedBytes?: string[];
+	private cachedSize?: number;
 	private cachedMeterables?: Meterable[];
 
 	/**
@@ -245,8 +150,9 @@ export class MeterableCollection extends AggregatedMeterable {
 }
 
 /**
- * A repetition of a Meterables
+ * A repetition of a Meterables as a single Meterable
  */
+
 export class RepeatedMeterable extends AggregatedMeterable {
 
 	/**
@@ -276,7 +182,7 @@ export class RepeatedMeterable extends AggregatedMeterable {
 	 * @param meterable The repeated meterable instance
 	 * @param repetitions The number of times the meterable instance is repeated
 	 */
-	private constructor(
+	constructor(
 		private meterable: Meterable,
 		private repetitions: number) {
 		super();
@@ -365,3 +271,4 @@ export class RepeatedMeterable extends AggregatedMeterable {
 		return meterables;
 	}
 }
+

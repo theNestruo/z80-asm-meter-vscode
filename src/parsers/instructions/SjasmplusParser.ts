@@ -1,10 +1,13 @@
 import * as vscode from 'vscode';
 import { config } from "../../config";
-import { sjasmplusFakeInstructionSet } from "../../data/SjasmplusFakeInstructionSet";
-import { Meterable, MeterableCollection, SourceCode } from "../../types";
+import { sjasmplusFakeInstructionSet } from "../../datasets/SjasmplusFakeInstructionSet";
+import { MeterableCollection } from "../../types/AggregatedMeterable";
+import { InstructionParser } from "../../types/InstructionParser";
+import { Meterable } from "../../types/Meterable";
+import { AbstractRepetitionParser } from "../../types/RepetitionParser";
+import { SourceCode } from "../../types/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { OptionalSingletonHolderImpl } from "../../utils/Lifecycle";
-import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
 class SjasmplusFakeInstructionParserHolder extends OptionalSingletonHolderImpl<SjasmplusFakeInstructionParser> {

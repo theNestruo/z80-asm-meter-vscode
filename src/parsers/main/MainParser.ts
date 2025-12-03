@@ -1,18 +1,21 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
-import { config } from '../config';
-import { Meterable, MeterableCollection, RepeatedMeterable, SourceCode } from '../types';
-import { OptionalSingletonHolder, SingletonHolderImpl } from '../utils/Lifecycle';
-import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
-import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
-import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
-import { macroParser } from './impl/MacroParser';
-import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './impl/SjasmplusParser';
-import { z80InstructionParser } from './impl/Z80InstructionParser';
-import { defaultTimingHintsParser } from './timingHints/DefaultTimingHintsParser';
-import { regExpTimingHintsParser } from './timingHints/RegExpTimingHintsParser';
-import { timingHintedMeterable } from './timingHints/TimingHintedMeterable';
-import { TimingHints } from './timingHints/TimingHints';
+import { config } from '../../config';
+import { MeterableCollection, RepeatedMeterable } from "../../types/AggregatedMeterable";
+import { InstructionParser } from "../../types/InstructionParser";
+import { Meterable } from "../../types/Meterable";
+import { RepetitionParser } from "../../types/RepetitionParser";
+import { SourceCode } from "../../types/SourceCode";
+import { TimingHintedMeterable, TimingHints } from '../../types/TimingHintedMeterable';
+import { TimingHintsParser } from "../../types/TimingHintsParser";
+import { OptionalSingletonHolder, SingletonHolderImpl } from '../../utils/Lifecycle';
+import { assemblyDirectiveParser } from '../instructions/AssemblyDirectiveParser';
+import { glassFakeInstructionParser, glassReptRepetitionParser } from '../instructions/GlassParser';
+import { macroParser } from '../instructions/MacroParser';
+import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from '../instructions/SjasmplusParser';
+import { z80InstructionParser } from '../instructions/Z80InstructionParser';
+import { defaultTimingHintsParser } from '../timingHints/DefaultTimingHintsParser';
+import { regExpTimingHintsParser } from '../timingHints/RegExpTimingHintsParser';
 
 class MainParserHolder extends SingletonHolderImpl<MainParser> {
 
@@ -167,7 +170,7 @@ class MainParser implements vscode.Disposable {
             let meterable = this.parseInstruction(sourceCode);
             const timingHints = this.parseTimingHints(sourceCode);
             if (timingHints) {
-                meterable = timingHintedMeterable(meterable, timingHints, sourceCode);
+                meterable = TimingHintedMeterable.from(meterable, timingHints, sourceCode);
             }
             if (!meterable) {
                 return;

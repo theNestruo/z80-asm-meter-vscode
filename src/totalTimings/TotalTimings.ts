@@ -1,23 +1,26 @@
 import { config } from "../config";
-import { Meterable } from "../types";
-import { TotalTimingMeterable } from "./TotalTimingMeterable";
-import { AtExitTotalTimingsMeterable, calculateAtExitTotalTiming } from "./impl/AtExitTotalTiming";
-import { calculateDefaultTotalTiming } from "./impl/DefaultTotalTiming";
-import { calculateExecutionFlowTotalTiming } from "./impl/ExecutionFlowTotalTiming";
+import { Meterable } from "../types/Meterable";
+import { TotalTimingMeterable } from "../types/TotalTimingMeterable";
+import { AtExitTotalTimingsMeterable } from "./AtExitTotalTiming";
+import { DefaultTotalTimingsMeterable } from "./DefaultTotalTiming";
+import { ExecutionFlowTotalTimingsMeterable } from "./ExecutionFlowTotalTiming";
 
+/**
+ * Groups default total timings, execution flow total timings,
+ * and execution flow to the selected exit point total timings
+ * in a single object
+ */
 export class TotalTimings {
 
 	readonly default: TotalTimingMeterable;
-
-	readonly executionFlow: TotalTimingMeterable | undefined;
-
-	readonly atExit: AtExitTotalTimingsMeterable | undefined;
+	readonly executionFlow?: TotalTimingMeterable;
+	readonly atExit?: AtExitTotalTimingsMeterable;
 
 	constructor(meterable: Meterable) {
 
-		this.default = calculateDefaultTotalTiming(meterable);
-		this.executionFlow = calculateExecutionFlowTotalTiming(meterable);
-		this.atExit = calculateAtExitTotalTiming(meterable);
+		this.default = DefaultTotalTimingsMeterable.calculate(meterable);
+		this.executionFlow = ExecutionFlowTotalTimingsMeterable.calculate(meterable);
+		this.atExit = AtExitTotalTimingsMeterable.calculate(meterable);
 	}
 
 	best(): TotalTimingMeterable {

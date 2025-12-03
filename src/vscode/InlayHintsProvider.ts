@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { mainParser } from '../parser/MainParser';
-import { TotalTimings } from '../totalTiming/TotalTimings';
-import { Meterable, SourceCode } from '../types';
+import { mainParser } from '../parsers/main/MainParser';
+import { TotalTimings } from "../totalTimings/TotalTimings";
+import { Meterable } from "../types/Meterable";
+import { SourceCode } from "../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
 import { formatTiming, hrMarkdown, printableTimingSuffix, printRange, printTiming } from '../utils/FormatterUtils';
 import { lineToSourceCode } from '../utils/SourceCodeUtils';

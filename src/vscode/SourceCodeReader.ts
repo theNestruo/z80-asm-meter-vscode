@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { SourceCode } from '../types';
+import { SourceCode } from "../types/SourceCode";
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
 
 export function readSourceCodeFromActiveTextEditorSelecion(): SourceCode[] {

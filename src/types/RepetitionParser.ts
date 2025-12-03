@@ -1,23 +1,11 @@
-import { Meterable, SourceCode } from "../types";
 import { extractMnemonicOf, extractOperandsOf } from "../utils/AssemblyUtils";
 import { parseNumericExpression } from "../utils/ParserUtils";
-import { TimingHints } from "./timingHints/TimingHints";
-
-export interface InstructionParser {
-
-	parse(s: SourceCode): Meterable | undefined;
-}
 
 export interface RepetitionParser {
 
 	parse(instruction: string): number | undefined;
 
 	parseEnd(instruction: string): boolean;
-}
-
-export interface TimingHintsParser {
-
-	parse(s: SourceCode): TimingHints | undefined;
 }
 
 export abstract class AbstractRepetitionParser implements RepetitionParser {
@@ -40,8 +28,8 @@ export abstract class AbstractRepetitionParser implements RepetitionParser {
 			return undefined;
 		}
 
-        const repetitions = parseNumericExpression(operands[0]);
-        return repetitions !== undefined && repetitions >= 0 ? repetitions : 1;
+		const repetitions = parseNumericExpression(operands[0]);
+		return repetitions !== undefined && repetitions >= 0 ? repetitions : 1;
 	}
 
 	parseEnd(instruction: string): boolean {
@@ -49,3 +37,4 @@ export abstract class AbstractRepetitionParser implements RepetitionParser {
 		return extractMnemonicOf(instruction) === this.endMnemonic;
 	}
 }
+

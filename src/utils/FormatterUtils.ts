@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { config } from "../config";
-import { Meterable } from '../types';
-import { TotalTimingMeterable } from '../totalTiming/TotalTimingMeterable';
-import { TotalTimings } from '../totalTiming/TotalTimings';
+import { Meterable } from "../types/Meterable";
+import { TotalTimingMeterable } from "../types/TotalTimingMeterable";
+import { TotalTimings } from "../totalTimings/TotalTimings";
 import { spaceIfNotInfix, pluralize, validateCodicon } from "./TextUtils";
 
 // Numbers

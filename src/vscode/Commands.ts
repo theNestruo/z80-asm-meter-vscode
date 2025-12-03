@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { mainParser } from "../parser/MainParser";
-import { TotalTimings } from '../totalTiming/TotalTimings';
-import { SourceCode } from '../types';
+import { mainParser } from "../parsers/main/MainParser";
+import { TotalTimings } from "../totalTimings/TotalTimings";
+import { SourceCode } from "../types/SourceCode";
 import { formatTiming, printableTimingSuffix, printTiming } from '../utils/FormatterUtils';
 import { readSourceCodeFromActiveTextEditorSelecion } from './SourceCodeReader';
 

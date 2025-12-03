@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
 import { config } from "../../config";
-import { z80InstructionSet } from "../../data/Z80InstructionSet";
-import { Meterable, SourceCode } from "../../types";
+import { z80InstructionSet } from "../../datasets/Z80InstructionSet";
+import { InstructionParser } from '../../types/InstructionParser';
+import { Meterable } from "../../types/Meterable";
+import { SourceCode } from "../../types/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte, formatTiming } from '../../utils/FormatterUtils';
 import { SingletonHolderImpl } from '../../utils/Lifecycle';
 import { parseTiming } from "../../utils/ParserUtils";
-import { InstructionParser } from "../Parsers";
 
 class Z80InstructionParserHolder extends SingletonHolderImpl<Z80InstructionParser> {
 

@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { SourceCode } from '../types';
+import { SourceCode } from "../types/SourceCode";
 import { parseNumericExpression } from './ParserUtils';
 
 // (used instead of /\s/ for performance reasons)

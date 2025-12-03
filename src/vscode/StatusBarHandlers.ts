@@ -1,8 +1,8 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from "../config";
-import { mainParser } from "../parser/MainParser";
-import { TotalTimings } from '../totalTiming/TotalTimings';
+import { mainParser } from "../parsers/main/MainParser";
+import { TotalTimings } from "../totalTimings/TotalTimings";
 import { hrMarkdown, printMarkdownInstructionsAndBytes, printMarkdownTotalTimingsAndSize, printStatusBarText } from '../utils/FormatterUtils';
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
 import { hashCode } from "../utils/TextUtils";
