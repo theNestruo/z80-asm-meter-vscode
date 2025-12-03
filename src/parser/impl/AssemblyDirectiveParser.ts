@@ -1,6 +1,5 @@
 import { config } from "../../config";
-import { repeatMeterable } from "../../model/RepeatedMeterable";
-import { Meterable, SourceCode } from "../../types";
+import { Meterable, RepeatedMeterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/FormatterUtils";
 import { SingletonHolderImpl as SingletonHolderImpl } from "../../utils/Lifecycle";
@@ -139,7 +138,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 				: 0x00; // (defaults to NOP)
 			const instruction = z80InstructionParser.instance.parseOpcode(opcode);
 			if (instruction) {
-				return repeatMeterable(instruction, count);
+				return RepeatedMeterable.of(instruction, count);
 			}
 		}
 

@@ -1,8 +1,7 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { repeatMeterable } from '../model/RepeatedMeterable';
-import { Meterable, MeterableCollection, SourceCode } from '../types';
+import { Meterable, MeterableCollection, RepeatedMeterable, SourceCode } from '../types';
 import { OptionalSingletonHolder, SingletonHolderImpl } from '../utils/Lifecycle';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
 import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
@@ -151,7 +150,7 @@ class MainParser implements vscode.Disposable {
                 const previousMeterables = meterables;
                 meterablesStack.push(meterables);
                 meterables = new MeterableCollection();
-                previousMeterables.add(repeatMeterable(meterables, newRepetitions));
+                previousMeterables.add(RepeatedMeterable.of(meterables, newRepetitions));
                 repetitionsStack.push(repetitions);
                 repetitions *= newRepetitions;
                 return;
@@ -174,7 +173,7 @@ class MainParser implements vscode.Disposable {
                 return;
             }
 
-            meterables.add(repeatMeterable(meterable, sourceCode.repetitions));
+            meterables.add(RepeatedMeterable.of(meterable, sourceCode.repetitions));
             isEmpty = false;
         });
 
