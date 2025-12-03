@@ -6,9 +6,8 @@ import { TotalTimings } from '../totalTiming/TotalTimings';
 import { hrMarkdown, printMarkdownInstructionsAndBytes, printMarkdownTotalTimingsAndSize, printStatusBarText } from '../utils/FormatterUtils';
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
 import { hashCode } from "../utils/TextUtils";
-import { AbstractCopyToClipboardCommand } from './Commands';
+import { CopyToClipboardCommand } from './Commands';
 import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
-import { SelfDisposable } from '../utils/Lifecycle';
 
 /**
  * A container for the data to be displayed in the StatusBarItem
@@ -24,20 +23,18 @@ class StatusBarItemContents {
 /**
  * Base implementation of the StatusBarItem handler
  */
-class StatusBarHandler extends SelfDisposable {
+class StatusBarHandler implements vscode.Disposable {
+
+	private readonly _disposable: vscode.Disposable;
 
 	private statusBarItem?: vscode.StatusBarItem;
 
 	protected constructor(
-		context: vscode.ExtensionContext,
-		protected readonly command: AbstractCopyToClipboardCommand) {
+		protected readonly command: CopyToClipboardCommand) {
 
-		super(context);
-
-		context.subscriptions.push(
+		this._disposable =
 			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
-		);
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 		this.create();
 	}
@@ -52,6 +49,7 @@ class StatusBarHandler extends SelfDisposable {
 	}
 
 	dispose() {
+		this._disposable.dispose();
 		this.destroy();
 	}
 
@@ -158,10 +156,9 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 	private cache;
 
 	constructor(
-		context: vscode.ExtensionContext,
-		command: AbstractCopyToClipboardCommand) {
+		command: CopyToClipboardCommand) {
 
-		super(context, command);
+		super(command);
 
 		this.cache = HLRU(config.statusBar.cacheSize);
 	}
@@ -169,7 +166,13 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 		super.onConfigurationChange(e);
 
+        // Re-initializes cache
 		this.cache = HLRU(config.statusBar.cacheSize);
+	}
+
+	override dispose(): void {
+        this.cache.clear();
+		super.dispose();
 	}
 
 	protected override parseAndBuildStatusBarItemContents(lines: string[]): StatusBarItemContents | undefined {
@@ -200,22 +203,28 @@ export class CachedStatusBarHandler extends StatusBarHandler {
  * Decorator for any implementation of StatusBarItem handler
  * that prevents the metering to be triggered too frequently (debouncing)
  */
-export class DebouncedStatusBarHandler {
+export class DebouncedStatusBarHandler implements vscode.Disposable {
+
+	private readonly _disposable: vscode.Disposable;
 
 	private isLeadingEvent: boolean = true;
 	private previousEventTimestamp?: number = undefined;
 	private updateStatusBarTimeout?: NodeJS.Timeout;
 
 	constructor(
-		context: vscode.ExtensionContext,
 		private readonly delegate: StatusBarHandler) {
 
-		context.subscriptions.push(
+		this._disposable = vscode.Disposable.from(
 			// Subscribe to selection change and editor activation events
 			vscode.window.onDidChangeTextEditorSelection(this.onUpdateRequest, this),
 			vscode.window.onDidChangeActiveTextEditor(this.onUpdateRequest, this),
 			vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this),
 		);
+	}
+
+	dispose() {
+		clearTimeout(this.updateStatusBarTimeout);
+		this._disposable.dispose();
 	}
 
 	onUpdateRequest() {

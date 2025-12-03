@@ -4,66 +4,67 @@ import { Meterable, MeterableCollection, SourceCode } from "../../types";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { parseTimingsLenient, parteIntLenient } from "../../utils/ParserUtils";
 import { linesToSourceCode } from '../../utils/SourceCodeUtils';
-import { mainParserWithoutMacro } from "../MainParser";
+import { mainParserForMacroParser } from "../MainParser";
 import { InstructionParser } from "../Parsers";
-import { LazyOptionalSingleton } from '../../utils/Lifecycle';
+import { OptionalSingletonHolderImpl as OptionalSingletonHolderImpl } from '../../utils/Lifecycle';
 
-class MacroParserSingleton extends LazyOptionalSingleton<MacroParser> {
+class MacroParserHolder extends OptionalSingletonHolderImpl<MacroParser> {
 
 	// Macro maps
-	private definitionByMnemonic: Record<string, MacroDefinition> = {};
-
-	override activate(context: vscode.ExtensionContext): void {
-		super.activate(context);
-
-		context.subscriptions.push(
-			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
-		);
-
-        // Initializes definitions
-		this.definitionByMnemonic = this.reloadDefinitions();
-	}
+	private _definitionByMnemonic?: Record<string, MacroDefinition> = undefined;
 
 	override dispose() {
-		this.definitionByMnemonic = {};
+		this._definitionByMnemonic = undefined;
 		super.dispose();
 	}
 
 	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 		super.onConfigurationChange(e);
 
-		// Re-initializes definitions
+        // Forces re-creation on macro definitions change
 		if (e.affectsConfiguration("z80-asm-meter.macros")) {
-			this.definitionByMnemonic = this.reloadDefinitions();
+			this._instance = undefined;
+			this._definitionByMnemonic = undefined;
 		}
 	}
 
-	protected override get enabled(): boolean {
+	protected get enabled(): boolean {
 		return Object.keys(this.definitionByMnemonic).length !== 0;
 	}
 
-	protected override createInstance(): MacroParser {
+	protected createInstance(): MacroParser {
 		return new MacroParser(this.definitionByMnemonic);
 	}
 
-	private reloadDefinitions(): Record<string, MacroDefinition> {
+	private get definitionByMnemonic(): Record<string, MacroDefinition> {
 
-		// Initializes macro maps
-		const map: Record<string, MacroDefinition> = {};
+		if (this._definitionByMnemonic === undefined) {
 
-		// Locates macro definitions
-		config.macros?.forEach(macroDefinition => {
+			// Initializes macro maps
+			const map: Record<string, MacroDefinition> = {};
 
-			// Prepares a map by mnemonic for performance reasons
-			const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
-			map[mnemonic] = macroDefinition;
-		});
+			// Locates macro definitions
+			config.macros?.forEach(macroDefinition => {
 
-		return map;
+				// Prepares a map by mnemonic for performance reasons
+				const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
+				map[mnemonic] = macroDefinition;
+			});
+
+			this._definitionByMnemonic = map;
+		}
+
+		return this._definitionByMnemonic;
 	}
 }
 
+export const macroParser = new MacroParserHolder();
+
+//
+
+/**
+ * Actual implementation of the macros parser
+ */
 class MacroParser implements InstructionParser {
 
 	constructor(
@@ -83,6 +84,9 @@ class MacroParser implements InstructionParser {
 	}
 }
 
+/**
+ * A macro
+ */
 class Macro extends MeterableCollection {
 
 	// User-provided information
@@ -193,13 +197,10 @@ class Macro extends MeterableCollection {
 		}
 
 		if (this.providedSourceCode) {
-			const meterable = mainParserWithoutMacro.instance.parse(linesToSourceCode(this.providedSourceCode));
+			const meterable = mainParserForMacroParser.instance.parse(linesToSourceCode(this.providedSourceCode));
 			this.add(meterable);
 		}
 
 		this.ready = true;
 	}
 }
-
-export const macroParser = new MacroParserSingleton();
-

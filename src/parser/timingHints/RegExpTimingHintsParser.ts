@@ -1,44 +1,34 @@
 import * as vscode from 'vscode';
 import { config } from "../../config";
 import { SourceCode } from "../../types";
+import { OptionalSingletonHolderImpl } from '../../utils/Lifecycle';
 import { parseTimingsLenient } from '../../utils/ParserUtils';
 import { TimingHintsParser } from "../Parsers";
 import { TimingHints } from "../timingHints/TimingHints";
-import { LazyOptionalSingleton } from '../../utils/Lifecycle';
 
-class RegExpTimingHintsParserSingleton extends LazyOptionalSingleton<RegExpTimingHintsParser> {
+class RegExpTimingHintsParserHolder extends OptionalSingletonHolderImpl<RegExpTimingHintsParser> {
 
 	// Timing hints maps
-	private regExpTimingHints: { regExp: RegExp, timingHints: TimingHints }[] = [];
-
-	override activate(context: vscode.ExtensionContext): void {
-		super.activate(context);
-
-		context.subscriptions.push(
-			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
-		);
-
-		// Initializes definitions
-		this.regExpTimingHints = this.reloadDefinitions();
-	}
+	private _regExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
 
 	override dispose() {
-        this.regExpTimingHints = [];
+        this._regExpTimingHints = undefined;
 		super.dispose();
 	}
 
 	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 		super.onConfigurationChange(e);
 
-        // Re-initializes definitions
+        // Forces re-creation on RegExp-based timing hints definitions change
 		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
-			this.regExpTimingHints = this.reloadDefinitions();
+			this._instance = undefined;
+			this._regExpTimingHints = undefined;
 		}
 	}
 
 	protected override get enabled(): boolean {
-		return this.regExpTimingHints.length !== 0;
+		return config.timing.hints.enabled
+				&& (this.regExpTimingHints?.length !== 0);
 	}
 
 	protected override createInstance(): RegExpTimingHintsParser {
@@ -47,47 +37,57 @@ class RegExpTimingHintsParserSingleton extends LazyOptionalSingleton<RegExpTimin
 
 	private readonly emptyRegExpSource = new RegExp("").source;
 
-	private reloadDefinitions(): { regExp: RegExp, timingHints: TimingHints }[] {
+	private get regExpTimingHints(): { regExp: RegExp, timingHints: TimingHints }[] {
 
-		// Initializes macro maps
-		const array: { regExp: RegExp, timingHints: TimingHints }[] = [];
+		if (this._regExpTimingHints === undefined) {
 
-		// Locates macro definitions
-		config.timing.hints.regexps?.forEach(source => {
+			// Initializes macro maps
+			const array: { regExp: RegExp, timingHints: TimingHints }[] = [];
 
-			if (!source.pattern) {
-				return;
-			}
-			let regExp: RegExp;
-			try {
-				regExp = new RegExp(source.pattern, source.flags);
-			} catch (ignored) {
-				return;
-			}
-			if (regExp.source === this.emptyRegExpSource) {
-				return;
-			}
+			// Locates macro definitions
+			config.timing.hints.regexps?.forEach(source => {
 
-			const z80Timing =
-				parseTimingsLenient(source.z80, source.ts, source.t);
-			const msxTiming = config.platform === "msx"
-				? (parseTimingsLenient(source.msx, source.m1, source.ts, source.t))
-				: (parseTimingsLenient(source.m1, source.msx, source.ts, source.t));
-			const cpcTiming =
-				parseTimingsLenient(source.cpc, source.ts, source.t);
+				if (!source.pattern) {
+					return;
+				}
+				let regExp: RegExp;
+				try {
+					regExp = new RegExp(source.pattern, source.flags);
+				} catch (ignored) {
+					return;
+				}
+				if (regExp.source === this.emptyRegExpSource) {
+					return;
+				}
 
-			if (z80Timing || msxTiming || cpcTiming) {
-				array.push({
-					regExp: regExp,
-					timingHints: new TimingHints(z80Timing, msxTiming, cpcTiming)
-				});
-			}
-		});
+				const z80Timing =
+					parseTimingsLenient(source.z80, source.ts, source.t);
+				const msxTiming = config.platform === "msx"
+					? (parseTimingsLenient(source.msx, source.m1, source.ts, source.t))
+					: (parseTimingsLenient(source.m1, source.msx, source.ts, source.t));
+				const cpcTiming =
+					parseTimingsLenient(source.cpc, source.ts, source.t);
 
-		return array;
+				if (z80Timing || msxTiming || cpcTiming) {
+					array.push({
+						regExp: regExp,
+						timingHints: new TimingHints(z80Timing, msxTiming, cpcTiming)
+					});
+				}
+			});
+
+			this._regExpTimingHints = array;
+		}
+
+		return this._regExpTimingHints;
 	}
 }
 
+export const regExpTimingHintsParser = new RegExpTimingHintsParserHolder();
+
+/**
+ * Actual implementation of the RegExp-based timing hints parser
+ */
 class RegExpTimingHintsParser implements TimingHintsParser {
 
 	constructor(
@@ -112,5 +112,3 @@ class RegExpTimingHintsParser implements TimingHintsParser {
 		return undefined;
 	}
 }
-
-export const regExpTimingHintsParser = new RegExpTimingHintsParserSingleton();

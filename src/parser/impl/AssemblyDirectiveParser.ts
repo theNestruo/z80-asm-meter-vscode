@@ -1,20 +1,27 @@
 import { config } from "../../config";
-import { repeatedMeterable } from "../../model/RepeatedMeterable";
+import { repeatMeterable } from "../../model/RepeatedMeterable";
 import { Meterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/FormatterUtils";
-import { LazySingleton } from "../../utils/Lifecycle";
+import { SingletonHolderImpl as SingletonHolderImpl } from "../../utils/Lifecycle";
 import { parseNumericExpression } from "../../utils/ParserUtils";
-import { InstructionParser } from "../Parsers";
+import { InstructionParser as InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
-class AssemblyDirectiveParserSingleton extends LazySingleton<AssemblyDirectiveParser> {
+class AssemblyDirectiveParserHolder extends SingletonHolderImpl<AssemblyDirectiveParser> {
 
-	override createInstance(): AssemblyDirectiveParser {
+	protected createInstance(): AssemblyDirectiveParser {
 		return new AssemblyDirectiveParser();
 	}
 }
 
+export const assemblyDirectiveParser = new AssemblyDirectiveParserHolder();
+
+//
+
+/**
+ * Actual implementation of the assembly directive parser
+ */
 class AssemblyDirectiveParser implements InstructionParser {
 
 	get isEnabled(): boolean {
@@ -132,7 +139,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 				: 0x00; // (defaults to NOP)
 			const instruction = z80InstructionParser.instance.parseOpcode(opcode);
 			if (instruction) {
-				return repeatedMeterable(instruction, count);
+				return repeatMeterable(instruction, count);
 			}
 		}
 
@@ -213,6 +220,4 @@ class AssemblyDirective implements Meterable {
 
 	readonly isComposed = false;
 }
-
-export const assemblyDirectiveParser = new AssemblyDirectiveParserSingleton();
 

@@ -1,35 +1,70 @@
+import * as vscode from 'vscode';
 import { config } from "../../config";
 import { z80InstructionSet } from "../../data/Z80InstructionSet";
 import { Meterable, SourceCode } from "../../types";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte, formatTiming } from '../../utils/FormatterUtils';
-import { LazySingleton } from "../../utils/Lifecycle";
+import { SingletonHolderImpl } from '../../utils/Lifecycle';
 import { parseTiming } from "../../utils/ParserUtils";
 import { InstructionParser } from "../Parsers";
 
-class Z80InstructionParserSingleton extends LazySingleton<Z80InstructionParser> {
+class Z80InstructionParserHolder extends SingletonHolderImpl<Z80InstructionParser> {
 
-    override createInstance(): Z80InstructionParser {
-        return new Z80InstructionParser();
+    private readonly _disposable: vscode.Disposable;
+
+    constructor() {
+        super();
+
+        this._disposable =
+            // Subscribe to configuration change event
+            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+    }
+
+    onConfigurationChange(event: vscode.ConfigurationChangeEvent) {
+
+        // Forces re-creation on instruction set change
+        if (event.affectsConfiguration("z80-asm-meter.platform")) {
+            this._instance = undefined;
+        }
+    }
+
+    override dispose() {
+        this._disposable.dispose();
+        super.dispose();
+    }
+
+    protected override createInstance(): Z80InstructionParser {
+        return new Z80InstructionParser(config.instructionSets);
     }
 }
 
+export const z80InstructionParser = new Z80InstructionParserHolder();
+
+//
+
+/**
+ * Actual implementation of the Z80 instruction parser
+ */
 class Z80InstructionParser implements InstructionParser {
 
     // Instruction maps
     private instructionByMnemonic: Record<string, Z80Instruction[]>;
     private instructionByOpcode: Record<string, Z80Instruction>;
 
-    constructor() {
+    constructor(instructionSets: string[]) {
 
         // Initializes instruction maps
         this.instructionByMnemonic = {};
         this.instructionByOpcode = {};
         z80InstructionSet.forEach(rawData => {
 
+            // Discard invalid instruction set instructions
+            if (!instructionSets.includes(rawData[0])) {
+                return;
+            }
+
             // Parses the raw instruction
             const originalInstruction = new Z80Instruction(
-                rawData[0], // instructionSet
                 rawData[1], // raw instruction
                 rawData[2], // z80Timing
                 rawData[3], // msxTiming
@@ -80,17 +115,10 @@ class Z80InstructionParser implements InstructionParser {
     private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
             Z80Instruction | undefined {
 
-        // (for performance reasons)
-        const instructionSets = config.instructionSets;
-
         // Locates instruction
         let bestCandidate;
         let bestScore = 0;
         for (const candidate of candidates) {
-            if (!instructionSets.includes(candidate.instructionSet)) {
-                // Invalid instruction set
-                continue;
-            }
             const score = candidate.match(instruction);
             if (score === 1) {
                 // Exact match
@@ -110,15 +138,10 @@ class Z80InstructionParser implements InstructionParser {
  */
 class Z80Instruction implements Meterable {
 
-    /** The instruction set this instruction belongs to */
-    readonly instructionSet: string;
-
     // Information
-    readonly instruction: string;
     readonly z80Timing: number[];
     readonly msxTiming: number[];
     readonly cpcTiming: number[];
-    private readonly opcodes: string;
     readonly size: number;
 
     // Derived information (will be cached for performance reasons)
@@ -128,17 +151,17 @@ class Z80Instruction implements Meterable {
     private explicitAccumulatorSyntaxAllowed?: boolean;
 
     constructor(
-        instructionSet: string, instruction: string,
-        z80Timing: string, msxTiming: string, cpcTiming: string,
-        opcodes: string, size: string) {
-
-        this.instructionSet = instructionSet;
+        readonly instruction: string,
+        z80Timing: string,
+        msxTiming: string,
+        cpcTiming: string,
+        private readonly opcodes: string,
+        size: string) {
 
         this.instruction = instruction;
         this.z80Timing = parseTiming(z80Timing);
         this.msxTiming = parseTiming(msxTiming);
         this.cpcTiming = parseTiming(cpcTiming);
-        this.opcodes = opcodes;
         this.size = parseInt(size, 10);
     }
 
@@ -156,18 +179,14 @@ class Z80Instruction implements Meterable {
      * @returns the mnemonic
      */
     getMnemonic(): string {
-        return this.mnemonic
-            ? this.mnemonic
-            : this.mnemonic = extractMnemonicOf(this.instruction);
+        return this.mnemonic ??= extractMnemonicOf(this.instruction);
     }
 
     /**
      * @returns the operands
      */
     getOperands(): string[] {
-        return this.operands
-            ? this.operands
-            : this.operands = extractOperandsOf(this.instruction);
+        return this.operands ??= extractOperandsOf(this.instruction);
     }
 
     /**
@@ -313,7 +332,6 @@ class Z80Instruction implements Meterable {
         const expandedOpcodes = prefix + formatHexadecimalByte(baseValue + factor * addend) + infix + suffix;
 
         return new Z80Instruction(
-            base.instructionSet,
             expandedInstruction,
             formatTiming(base.z80Timing),
             formatTiming(base.msxTiming),
@@ -499,5 +517,3 @@ class Z80Instruction implements Meterable {
             : 0;
     }
 }
-
-export const z80InstructionParser = new Z80InstructionParserSingleton();

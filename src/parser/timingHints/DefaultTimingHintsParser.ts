@@ -1,11 +1,11 @@
 import { config } from "../../config";
 import { SourceCode } from "../../types";
-import { LazyOptionalSingleton } from "../../utils/Lifecycle";
+import { OptionalSingletonHolderImpl } from "../../utils/Lifecycle";
 import { parseTimingLenient } from "../../utils/ParserUtils";
 import { TimingHintsParser } from "../Parsers";
 import { TimingHints } from "../timingHints/TimingHints";
 
-class DefaultTimingHintsParserSingleton extends LazyOptionalSingleton<DefaultTimingHintsParser> {
+class DefaultTimingHintsParserHolder extends OptionalSingletonHolderImpl<DefaultTimingHintsParser> {
 
 	protected override get enabled(): boolean {
 		return config.timing.hints.enabled;
@@ -16,6 +16,11 @@ class DefaultTimingHintsParserSingleton extends LazyOptionalSingleton<DefaultTim
 	}
 }
 
+export const defaultTimingHintsParser = new DefaultTimingHintsParserHolder();
+
+/**
+ * Actual implementation of the default timing hints parser
+ */
 class DefaultTimingHintsParser implements TimingHintsParser {
 
 	// (precompiled RegExp for performance reasons)
@@ -60,5 +65,3 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		return new TimingHints(z80TimingHint, msxTimingHint, cpcTimingHint);
 	}
 }
-
-export const defaultTimingHintsParser = new DefaultTimingHintsParserSingleton();

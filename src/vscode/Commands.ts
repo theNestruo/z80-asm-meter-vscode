@@ -6,7 +6,12 @@ import { SourceCode } from '../types';
 import { formatTiming, printableTimingSuffix, printTiming } from '../utils/FormatterUtils';
 import { readSourceCodeFromActiveTextEditorSelecion } from './SourceCodeReader';
 
-export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
+export interface CopyToClipboardCommand extends vscode.Command {
+
+    buildDescription(totalTimings: TotalTimings): string | undefined;
+}
+
+abstract class AbstractCopyToClipboardCommand implements CopyToClipboardCommand {
 
     abstract title: string;
 
@@ -98,19 +103,24 @@ export abstract class AbstractCopyToClipboardCommand implements vscode.Command {
     }
 }
 
-export class CopyFromActiveTextEditorSelecionToClipboardCommand extends AbstractCopyToClipboardCommand {
+export class FromActiveTextEditorSelecionCopyToClipboardCommand extends AbstractCopyToClipboardCommand implements vscode.Disposable {
 
     override readonly title = "Z80 Assembly Meter: copy to clipboard";
 
     override readonly command = "z80-asm-meter.copyToClipboard";
 
-    constructor(context: vscode.ExtensionContext) {
+    private readonly _disposable: vscode.Disposable;
+
+    constructor() {
         super();
 
-        context.subscriptions.push(
+        this._disposable =
             // Registers as a command
-            vscode.commands.registerCommand(this.command, this.onExecute, this)
-        );
+            vscode.commands.registerCommand(this.command, this.onExecute, this);
+    }
+
+    dispose() {
+        this._disposable.dispose();
     }
 
     onExecute(): void {

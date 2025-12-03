@@ -1,21 +1,43 @@
 import { config } from "../../config";
 import { Meterable, SourceCode } from "../../types";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
-import { LazyOptionalSingleton } from "../../utils/Lifecycle";
+import { OptionalSingletonHolderImpl as OptionalSingletonHolderImpl } from "../../utils/Lifecycle";
 import { AbstractRepetitionParser, InstructionParser } from "../Parsers";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
-class GlassFakeInstructionParserSingleton extends LazyOptionalSingleton<GlassFakeInstructionParser> {
+class GlassFakeInstructionParserHolder extends OptionalSingletonHolderImpl<GlassFakeInstructionParser> {
 
-    override get enabled(): boolean {
+    protected get enabled(): boolean {
         return config.syntax.glassNegativeConditions;
     }
 
-    override createInstance(): GlassFakeInstructionParser {
+    protected createInstance(): GlassFakeInstructionParser {
         return new GlassFakeInstructionParser();
     }
 }
 
+export const glassFakeInstructionParser = new GlassFakeInstructionParserHolder();
+
+//
+
+class GlassReptRepetitionParserHolder extends OptionalSingletonHolderImpl<GlassReptRepetitionParser> {
+
+    protected get enabled(): boolean {
+        return config.syntax.glassReptEndmRepetition;
+    }
+
+    protected createInstance(): GlassReptRepetitionParser {
+        return new GlassReptRepetitionParser();
+    }
+}
+
+export const glassReptRepetitionParser = new GlassReptRepetitionParserHolder();
+
+//
+
+/**
+ * Actual implementation of the Glass fake instruction parser
+ */
 class GlassFakeInstructionParser implements InstructionParser {
 
     parse(s: SourceCode): Meterable | undefined {
@@ -70,28 +92,13 @@ class GlassFakeInstructionParser implements InstructionParser {
     }
 }
 
-//
-
-class GlassReptRepetitionParserSingleton extends LazyOptionalSingleton<GlassReptRepetitionParser> {
-
-    override get enabled(): boolean {
-        return config.syntax.glassReptEndmRepetition;
-    }
-
-    override createInstance(): GlassReptRepetitionParser {
-        return new GlassReptRepetitionParser();
-    }
-}
-
+/**
+ * Actual implementation of the Glass REPT/ENDM repetition parser
+ */
 class GlassReptRepetitionParser extends AbstractRepetitionParser {
 
     constructor() {
         super("REPT", "ENDM");
     }
 }
-
-//
-
-export const glassFakeInstructionParser = new GlassFakeInstructionParserSingleton();
-export const glassReptRepetitionParser = new GlassReptRepetitionParserSingleton();
 

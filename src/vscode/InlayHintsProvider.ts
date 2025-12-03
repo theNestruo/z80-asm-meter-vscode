@@ -20,31 +20,31 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
 	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
 
-	private disposable: vscode.Disposable;
+	private registerInlayHintsProviderDisposable: vscode.Disposable;
+	private readonly _disposable: vscode.Disposable;
 
-	constructor(context: vscode.ExtensionContext) {
-
-		this.candidatesLocator = new InlayHintCandidatesLocator(context);
+	constructor() {
+		this.candidatesLocator = new InlayHintCandidatesLocator();
 		this.candidatesResolver = new InlayHintsCandidatesResolver();
 
-		// Registers as a inlay hints provider
-		this.disposable = this.registerInlayHintsProvider();
-
-		context.subscriptions.push(
+		this._disposable = vscode.Disposable.from(
+			this.candidatesLocator,
+			this.onDidChangeInlayHintsEmitter,
 
 			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this),
-
-			this.onDidChangeInlayHintsEmitter
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
 		);
+
+		// Registers as a inlay hints provider
+		this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
 	}
 
 	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
 
 		// Re-registers as a inlay hints provider
 		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
-			this.disposable.dispose();
-			this.disposable = this.registerInlayHintsProvider();
+			this.registerInlayHintsProviderDisposable.dispose();
+			this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
 		}
 	}
 
@@ -62,7 +62,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	}
 
 	dispose() {
-		this.disposable.dispose();
+		this.registerInlayHintsProviderDisposable.dispose();
+		this._disposable.dispose();
 	}
 
 	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken):
@@ -91,18 +92,18 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	}
 }
 
-export class InlayHintCandidatesLocator {
+export class InlayHintCandidatesLocator implements vscode.Disposable {
+
+	private readonly _disposable: vscode.Disposable;
 
 	// (for performance reasons)
 	private conditionalExitPointMnemonics: string[];
 
-	constructor(context: vscode.ExtensionContext) {
+	constructor() {
 
-		context.subscriptions.push(
-
+		this._disposable =
 			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this),
-		);
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 	}
@@ -112,6 +113,10 @@ export class InlayHintCandidatesLocator {
  		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
 			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 		}
+	}
+
+	dispose() {
+		this._disposable.dispose();
 	}
 
 	private initalizeConditionalExitPointMnemonics() {

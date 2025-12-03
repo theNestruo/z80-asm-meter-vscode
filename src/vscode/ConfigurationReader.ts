@@ -1,18 +1,6 @@
 import * as vscode from 'vscode';
-import { DisposableActivable } from '../utils/Lifecycle';
 
-interface ConfigurationReader {
-
-	read<T>(section: string): T;
-
-	readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T;
-}
-
-class DirectConfigurationReader implements ConfigurationReader {
-
-	static readonly instance = new DirectConfigurationReader();
-
-	private constructor() {}
+class ConfigurationReader {
 
 	read<T>(section: string): T {
 
@@ -43,26 +31,18 @@ class DirectConfigurationReader implements ConfigurationReader {
 	}
 }
 
-class CachedConfigurationReader extends DisposableActivable {
+class CachedConfigurationReader implements vscode.Disposable {
+
+	private readonly _disposable: vscode.Disposable;
 
 	private cache = new Map<string, any>();
 
 	constructor(
-		context: vscode.ExtensionContext,
-		private readonly delegate: ConfigurationReader = DirectConfigurationReader.instance) {
+		private readonly delegate: ConfigurationReader) {
 
-		super();
-
-		this.activate(context);
-	}
-
-	override activate(context: vscode.ExtensionContext): void {
-		super.activate(context);
-
-		context.subscriptions.push(
+		this._disposable =
 			// Subscribe to configuration change event
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
-		);
+			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
 	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
@@ -70,6 +50,7 @@ class CachedConfigurationReader extends DisposableActivable {
 	}
 
 	dispose() {
+        this._disposable.dispose();
 		this.cache.clear();
 	}
 
@@ -100,30 +81,4 @@ class CachedConfigurationReader extends DisposableActivable {
 	}
 }
 
-class ExtensionConfigurationReader extends DisposableActivable implements ConfigurationReader {
-
-	private delegate: ConfigurationReader = DirectConfigurationReader.instance;
-
-	override activate(context: vscode.ExtensionContext): void {
-		const cachedConfigurationReader = new CachedConfigurationReader(context);
-		cachedConfigurationReader.activate(context);
-
-		// Sets the CachedConfigurationReader instance
-		this.delegate = cachedConfigurationReader;
-	}
-
-	override dispose(): void {
-		// Removes the CachedConfigurationReader instance
-		this.delegate = DirectConfigurationReader.instance;
-	}
-
-	read<T>(section: string): T {
-		return this.delegate.read(section);
-	}
-
-	readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
-		return this.delegate.readWithDefaultValue(section, actualDefaultValue);
-	}
-}
-
-export const configurationReader = new ExtensionConfigurationReader();
+export const configurationReader = new CachedConfigurationReader(new ConfigurationReader());

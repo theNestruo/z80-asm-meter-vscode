@@ -2,55 +2,57 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { mainParser, mainParserWithoutMacro, mainParserWithoutTimingHints } from './parser/MainParser';
-import { macroParser } from './parser/impl/MacroParser';
-import { regExpTimingHintsParser } from './parser/timingHints/RegExpTimingHintsParser';
-import { CopyFromActiveTextEditorSelecionToClipboardCommand } from './vscode/Commands';
+import { FromActiveTextEditorSelecionCopyToClipboardCommand } from './vscode/Commands';
+import { configurationReader } from './vscode/ConfigurationReader';
 import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
-import { configurationReader } from './vscode/ConfigurationReader';
-import { z80InstructionParser } from './parser/impl/Z80InstructionParser';
-import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './parser/impl/SjasmplusParser';
 import { glassFakeInstructionParser, glassReptRepetitionParser } from './parser/impl/GlassParser';
-import { assemblyDirectiveParser } from './parser/impl/AssemblyDirectiveParser';
+import { macroParser } from './parser/impl/MacroParser';
+import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './parser/impl/SjasmplusParser';
+import { defaultTimingHintsParser } from './parser/timingHints/DefaultTimingHintsParser';
+import { regExpTimingHintsParser } from './parser/timingHints/RegExpTimingHintsParser';
+import { mainParser, mainParserForMacroParser, mainParserForTimingHintsParsers } from './parser/MainParser';
 
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Invokes activation
-	[
+	// (vscode.Disposables)
+	context.subscriptions.push(
 		configurationReader,
-
-		z80InstructionParser,
-		assemblyDirectiveParser,
-
+		//
+		glassFakeInstructionParser,
+		glassReptRepetitionParser,
+		macroParser,
 		sjasmplusFakeInstructionParser,
 		sjasmplusRegisterListInstructionParser,
 		sjasmplusDupRepetitionParser,
 		sjasmplusReptRepetitionParser,
-
-		glassFakeInstructionParser,
-		glassReptRepetitionParser,
-
+		defaultTimingHintsParser,
 		regExpTimingHintsParser,
-
-		macroParser,
-
+		//
 		mainParser,
-		mainParserWithoutMacro,
-		mainParserWithoutTimingHints,
-	].forEach(activable => activable.activate(context));
+		mainParserForMacroParser,
+		mainParserForTimingHintsParsers
+	);
 
 	// VS Code integrations
-	const command = new CopyFromActiveTextEditorSelecionToClipboardCommand(context);
-	const internalStatusBarHandler = new CachedStatusBarHandler(context, command);
-	new DebouncedStatusBarHandler(context, internalStatusBarHandler);
-	new InlayHintsProvider(context);
+	const command = new FromActiveTextEditorSelecionCopyToClipboardCommand();
+	const statusBarHandler = new CachedStatusBarHandler(command);
+	const debouncedStatusBarHandler = new DebouncedStatusBarHandler(statusBarHandler);
+	const inlayHintsProvider = new InlayHintsProvider();
 
-	// First execution
-	internalStatusBarHandler.onUpdateRequest();
+	// (vscode.Disposables)
+	context.subscriptions.push(
+		command,
+		statusBarHandler,
+		debouncedStatusBarHandler,
+		inlayHintsProvider
+	);
+
+	// Triggers the first execution
+	statusBarHandler.onUpdateRequest();
 }
 
 // this method is called when your extension is deactivated

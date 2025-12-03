@@ -1,9 +1,9 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { repeatedMeterable } from '../model/RepeatedMeterable';
+import { repeatMeterable } from '../model/RepeatedMeterable';
 import { Meterable, MeterableCollection, SourceCode } from '../types';
-import { LazySingleton, OptionalSingleton } from '../utils/Lifecycle';
+import { OptionalSingletonHolder, SingletonHolderImpl } from '../utils/Lifecycle';
 import { InstructionParser, RepetitionParser, TimingHintsParser } from './Parsers';
 import { assemblyDirectiveParser } from './impl/AssemblyDirectiveParser';
 import { glassFakeInstructionParser, glassReptRepetitionParser } from './impl/GlassParser';
@@ -15,45 +15,90 @@ import { regExpTimingHintsParser } from './timingHints/RegExpTimingHintsParser';
 import { timingHintedMeterable } from './timingHints/TimingHintedMeterable';
 import { TimingHints } from './timingHints/TimingHints';
 
-class MainParserSingleton extends LazySingleton<MainParser> {
+class MainParserHolder extends SingletonHolderImpl<MainParser> {
+
+    private readonly _disposable: vscode.Disposable;
 
     constructor(
-        private readonly instructionParsers: OptionalSingleton<InstructionParser>[],
-        private readonly repetitionParsers: OptionalSingleton<RepetitionParser>[],
-        private readonly timingHintParsers: OptionalSingleton<TimingHintsParser>[]) {
+        private readonly instructionParserHolders: OptionalSingletonHolder<InstructionParser>[],
+        private readonly repetitionParserHolders: OptionalSingletonHolder<RepetitionParser>[],
+        private readonly timingHintParserHolders: OptionalSingletonHolder<TimingHintsParser>[]) {
 
         super();
-    }
 
-    override activate(context: vscode.ExtensionContext): void {
-        super.activate(context);
-
-        context.subscriptions.push(
-		    // Subscribe to configuration change event
-            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
-        );
+        this._disposable =
+            // Subscribe to configuration change event
+            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
     }
 
     onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
 
-        // Forces instance re-creation
+        // Forces re-creation
 		this._instance?.dispose();
         this._instance = undefined;
+    }
+
+    override dispose() {
+        this._disposable.dispose();
+
+        super.dispose();
     }
 
     protected override createInstance(): MainParser {
 
         return new MainParser(
-            this.instructionParsers.map(singleton => singleton.instance).filter(instance => !!instance),
-            this.repetitionParsers.map(singleton => singleton.instance).filter(instance => !!instance),
-            this.timingHintParsers.map(singleton => singleton.instance).filter(instance => !!instance)
+            this.instructionParserHolders.map(holder => holder.instance).filter(instance => !!instance),
+            this.repetitionParserHolders.map(holder => holder.instance).filter(instance => !!instance),
+            this.timingHintParserHolders.map(holder => holder.instance).filter(instance => !!instance)
         );
     }
 }
 
-class MainParser {
 
-    private readonly disposable: vscode.Disposable;
+const allInstructionParsers = [
+    sjasmplusFakeInstructionParser,
+    sjasmplusRegisterListInstructionParser,
+    glassFakeInstructionParser,
+    z80InstructionParser, // (after SjASMPlus and Glass Z80 assembler parsers)
+    macroParser,
+    assemblyDirectiveParser
+];
+
+const allRepetitionParsers = [
+    sjasmplusDupRepetitionParser,
+    sjasmplusReptRepetitionParser,
+    glassReptRepetitionParser
+];
+
+const allTimingHintsParsers = [
+    defaultTimingHintsParser,
+    regExpTimingHintsParser
+];
+
+
+export const mainParser = new MainParserHolder(
+    allInstructionParsers,
+    allRepetitionParsers,
+    allTimingHintsParsers);
+
+export const mainParserForMacroParser = new MainParserHolder(
+    allInstructionParsers.filter(parser => parser !== macroParser), // (prevent circular nesting)
+    allRepetitionParsers,
+    allTimingHintsParsers);
+
+export const mainParserForTimingHintsParsers = new MainParserHolder(
+    allInstructionParsers,
+    allRepetitionParsers,
+    []); // (do not use timing hint parsers)
+
+//
+
+/**
+ * Actual implementation of the main parser
+ */
+class MainParser implements vscode.Disposable {
+
+    private readonly _disposable: vscode.Disposable;
 
     private instructionsCache;
 
@@ -62,10 +107,9 @@ class MainParser {
         private readonly repetitionParsers: RepetitionParser[],
         private readonly timingHintsParsers: TimingHintsParser[]) {
 
-        this.disposable = vscode.Disposable.from(
+        this._disposable =
 		    // Subscribe to configuration change event
-            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
-        );
+            vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
         // Initializes cache
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
@@ -73,7 +117,7 @@ class MainParser {
 
 	dispose() {
         this.instructionsCache.clear();
-        this.disposable.dispose();
+        this._disposable.dispose();
 	}
 
     onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
@@ -107,7 +151,7 @@ class MainParser {
                 const previousMeterables = meterables;
                 meterablesStack.push(meterables);
                 meterables = new MeterableCollection();
-                previousMeterables.add(repeatedMeterable(meterables, newRepetitions));
+                previousMeterables.add(repeatMeterable(meterables, newRepetitions));
                 repetitionsStack.push(repetitions);
                 repetitions *= newRepetitions;
                 return;
@@ -130,7 +174,7 @@ class MainParser {
                 return;
             }
 
-            meterables.add(repeatedMeterable(meterable, sourceCode.repetitions));
+            meterables.add(repeatMeterable(meterable, sourceCode.repetitions));
             isEmpty = false;
         });
 
@@ -201,42 +245,3 @@ class MainParser {
         return undefined;
     }
 }
-
-
-const allInstructionParsers = [
-    sjasmplusFakeInstructionParser,
-    sjasmplusRegisterListInstructionParser,
-    glassFakeInstructionParser,
-    z80InstructionParser, // (after SjASMPlus and Glass Z80 assembler parsers)
-    macroParser,
-    assemblyDirectiveParser
-];
-
-const allInstructionParsersButMacro = [
-    sjasmplusFakeInstructionParser,
-    sjasmplusRegisterListInstructionParser,
-    glassFakeInstructionParser,
-    z80InstructionParser, // (after SjASMPlus and Glass Z80 assembler parsers)
-    assemblyDirectiveParser
-];
-
-const allRepetitionParsers = [
-    sjasmplusDupRepetitionParser,
-    sjasmplusReptRepetitionParser,
-    glassReptRepetitionParser
-];
-
-const allTimingHintsParsers = [
-    defaultTimingHintsParser,
-    regExpTimingHintsParser
-];
-
-
-export const mainParser = new MainParserSingleton(
-    allInstructionParsers, allRepetitionParsers, allTimingHintsParsers);
-
-export const mainParserWithoutMacro = new MainParserSingleton(
-    allInstructionParsersButMacro, allRepetitionParsers, allTimingHintsParsers);
-
-export const mainParserWithoutTimingHints = new MainParserSingleton(
-    allInstructionParsers, allRepetitionParsers, []);
