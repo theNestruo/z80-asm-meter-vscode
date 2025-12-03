@@ -1,10 +1,10 @@
 import { config } from "../../config";
-import { InstructionParser } from "../../types/InstructionParser";
 import { Meterable } from "../../types/Meterable";
-import { AbstractRepetitionParser } from "../../types/RepetitionParser";
 import { SourceCode } from "../../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../utils/AssemblyUtils";
 import { OptionalSingletonHolderImpl } from "../../utils/Lifecycle";
+import { InstructionParser } from "../InstructionParser";
+import { AbstractRepetitionParser } from "../RepetitionParser";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
 class GlassFakeInstructionParserHolder extends OptionalSingletonHolderImpl<GlassFakeInstructionParser> {

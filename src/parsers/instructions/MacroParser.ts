@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import { MacroDefinition, config } from "../../config";
 import { MeterableCollection } from "../../types/AggregatedMeterable";
-import { InstructionParser } from "../../types/InstructionParser";
 import { Meterable } from "../../types/Meterable";
 import { SourceCode } from "../../types/SourceCode";
 import { extractMnemonicOf } from "../../utils/AssemblyUtils";
 import { OptionalSingletonHolderImpl } from '../../utils/Lifecycle';
 import { parseTimingsLenient, parteIntLenient } from "../../utils/ParserUtils";
 import { linesToSourceCode } from '../../utils/SourceCodeUtils';
+import { InstructionParser } from "../InstructionParser";
 import { mainParserForMacroParser } from "../main/MainParser";
 
 class MacroParserHolder extends OptionalSingletonHolderImpl<MacroParser> {

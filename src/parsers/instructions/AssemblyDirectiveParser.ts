@@ -1,12 +1,12 @@
 import { config } from "../../config";
 import { RepeatedMeterable } from "../../types/AggregatedMeterable";
-import { InstructionParser } from "../../types/InstructionParser";
 import { Meterable } from "../../types/Meterable";
 import { SourceCode } from "../../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../utils/FormatterUtils";
 import { SingletonHolderImpl } from "../../utils/Lifecycle";
 import { parseNumericExpression } from "../../utils/ParserUtils";
+import { InstructionParser } from "../InstructionParser";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
 class AssemblyDirectiveParserHolder extends SingletonHolderImpl<AssemblyDirectiveParser> {

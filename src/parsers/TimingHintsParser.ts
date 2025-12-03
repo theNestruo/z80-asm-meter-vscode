@@ -1,5 +1,5 @@
 import { SourceCode } from "../types/SourceCode";
-import { TimingHints } from "./TimingHintedMeterable";
+import { TimingHints } from "../types/TimingHintedMeterable";
 
 export interface TimingHintsParser {
 

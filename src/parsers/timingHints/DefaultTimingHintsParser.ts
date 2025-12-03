@@ -1,9 +1,9 @@
 import { config } from "../../config";
 import { SourceCode } from "../../types/SourceCode";
 import { TimingHints } from "../../types/TimingHintedMeterable";
-import { TimingHintsParser } from "../../types/TimingHintsParser";
 import { OptionalSingletonHolderImpl } from "../../utils/Lifecycle";
 import { parseTimingLenient } from "../../utils/ParserUtils";
+import { TimingHintsParser } from "../TimingHintsParser";
 
 class DefaultTimingHintsParserHolder extends OptionalSingletonHolderImpl<DefaultTimingHintsParser> {
 

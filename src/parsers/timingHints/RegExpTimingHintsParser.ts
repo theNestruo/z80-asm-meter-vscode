@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import { config } from "../../config";
 import { SourceCode } from "../../types/SourceCode";
 import { TimingHints } from "../../types/TimingHintedMeterable";
-import { TimingHintsParser } from '../../types/TimingHintsParser';
 import { OptionalSingletonHolderImpl } from '../../utils/Lifecycle';
 import { parseTimingsLenient } from '../../utils/ParserUtils';
+import { TimingHintsParser } from '../TimingHintsParser';
 
 class RegExpTimingHintsParserHolder extends OptionalSingletonHolderImpl<RegExpTimingHintsParser> {
 
