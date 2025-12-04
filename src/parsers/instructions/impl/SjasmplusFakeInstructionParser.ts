@@ -12,20 +12,20 @@ import { z80InstructionParser } from './Z80InstructionParser';
 class SjasmplusFakeInstructionParserRef
         extends OptionalSingletonRefImpl<InstructionParser, SjasmplusFakeInstructionParser> {
 
-    override onConfigurationChange(event: vscode.ConfigurationChangeEvent) {
-
-        // Forces re-creation on instruction set change
-        if (event.affectsConfiguration("z80-asm-meter.platform")) {
-            this.destroyInstance();
-        }
-    }
-
     protected get enabled(): boolean {
         return config.syntax.sjasmplusFakeInstructions;
     }
 
     protected createInstance(): SjasmplusFakeInstructionParser {
         return new SjasmplusFakeInstructionParser(config.instructionSets);
+    }
+
+    override onConfigurationChange(event: vscode.ConfigurationChangeEvent) {
+
+        // Forces re-creation on instruction set change
+        if (event.affectsConfiguration("z80-asm-meter.platform")) {
+            this.destroyInstance();
+        }
     }
 }
 

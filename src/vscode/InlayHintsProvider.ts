@@ -44,15 +44,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 		this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-
-		// Re-registers as a inlay hints provider
-		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
-			this.registerInlayHintsProviderDisposable.dispose();
-			this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
-		}
-	}
-
 	private registerInlayHintsProvider() {
 		return vscode.languages.registerInlayHintsProvider(this.documentSelector(), this);
 	}
@@ -64,11 +55,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 			// Always enabled if it is a Z80 assembly file
 			{ language: "z80-asm-meter" }
 		];
-	}
-
-	dispose() {
-		this.registerInlayHintsProviderDisposable.dispose();
-		this._disposable.dispose();
 	}
 
 	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken):
@@ -95,6 +81,20 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 				? hint.resolve()
 				: undefined;
 	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+		// Re-registers as a inlay hints provider
+		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
+			this.registerInlayHintsProviderDisposable.dispose();
+			this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
+		}
+	}
+
+	dispose() {
+		this.registerInlayHintsProviderDisposable.dispose();
+		this._disposable.dispose();
+	}
 }
 
 class InlayHintCandidatesLocator implements vscode.Disposable {
@@ -111,17 +111,6 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
-	}
-
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-
- 		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
-			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
-		}
-	}
-
-	dispose() {
-		this._disposable.dispose();
 	}
 
 	private initalizeConditionalExitPointMnemonics() {
@@ -283,6 +272,17 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 			return false;
 		}
 	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+ 		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
+			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
+		}
+	}
+
+	dispose() {
+		this._disposable.dispose();
+	}
 }
 
 class InlayHintsCandidatesResolver {
@@ -414,13 +414,9 @@ class InlayHintsCandidatesResolver {
  */
 class OngoingInlayHintCandidate {
 
-	readonly startLine: vscode.TextLine;
-
-	readonly sourceCode: SourceCode[];
-
-	constructor(startLine: vscode.TextLine, sourceCode: SourceCode[]) {
-		this.startLine = startLine;
-		this.sourceCode = sourceCode;
+	constructor(
+		readonly startLine: vscode.TextLine,
+		readonly sourceCode: SourceCode[]) {
 	}
 
 	withEndLine(endLine: vscode.TextLine, conditional: boolean) {
@@ -433,39 +429,31 @@ class OngoingInlayHintCandidate {
  */
 class InlayHintCandidate extends OngoingInlayHintCandidate {
 
-	readonly endLine: vscode.TextLine;
-	readonly conditional: boolean;
-
 	// Derived information (will be cached for performance reasons)
 	private cachedTotalTimings?: TotalTimings;
 
-	constructor(startLine: vscode.TextLine, sourceCode: SourceCode[], endLine: vscode.TextLine, conditional: boolean) {
+	constructor(
+		startLine: vscode.TextLine,
+		sourceCode: SourceCode[],
+		readonly endLine: vscode.TextLine,
+		readonly conditional: boolean) {
 		super(startLine, [...sourceCode]);
-		this.endLine = endLine;
-		this.conditional = conditional;
 	}
 
 	get range(): vscode.Range {
-
 		return new vscode.Range(this.startLine.range.start, this.endLine.range.end);
 	}
 
 	get sourceCodeWithLabel(): SourceCode {
-
 		return this.sourceCode[0];
 	}
 
 	get sourceCodeWithExitPoint(): SourceCode {
-
 		return this.sourceCode[this.sourceCode.length - 1];
 	}
 
 	get totalTimings(): TotalTimings {
-
-		if (!this.cachedTotalTimings) {
-			this.cachedTotalTimings = new TotalTimings(mainParser.instance.parse(this.sourceCode)!);
-		}
-		return this.cachedTotalTimings;
+		return this.cachedTotalTimings ??= new TotalTimings(mainParser.instance.parse(this.sourceCode)!);
 	}
 }
 
@@ -484,10 +472,6 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 		return `${timing} ${timingSuffix}${ellipsisSuffix}`;
 	}
 
-	protected referenceCandidate: InlayHintCandidate;
-	protected candidates: InlayHintCandidate[];
-	protected displayLimit: number;
-
 	// (for performance reasons)
 	protected readonly platform: "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
 	protected readonly hasM1: boolean;
@@ -495,16 +479,13 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 
 	constructor(
 		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
-		referenceCandidate: InlayHintCandidate,
-		candidates: InlayHintCandidate[], displayLimit: number) {
+		protected readonly referenceCandidate: InlayHintCandidate,
+		protected readonly candidates: InlayHintCandidate[],
+		protected readonly displayLimit: number) {
 
 		super(position, ResolvableInlayHint.buildLabel(referenceCandidate, candidates, displayLimit));
 		this.paddingLeft = paddingLeft;
 		this.paddingRight = paddingRight;
-
-		this.referenceCandidate = referenceCandidate;
-		this.candidates = candidates;
-		this.displayLimit = displayLimit;
 
 		// (for performance reasons)
 		this.platform = config.platform;

@@ -25,10 +25,6 @@ export const assemblyDirectiveParser = new AssemblyDirectiveParserRef();
  */
 class AssemblyDirectiveParser implements InstructionParser {
 
-	get isEnabled(): boolean {
-		return true;
-	}
-
 	parseInstruction(s: SourceCode): Meterable | undefined {
 
 		const instruction = s.instruction;

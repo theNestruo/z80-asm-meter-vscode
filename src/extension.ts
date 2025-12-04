@@ -16,11 +16,9 @@ export function activate(context: vscode.ExtensionContext) {
 	// (vscode.Disposables)
 	context.subscriptions.push(
 		configurationReader,
-		//
-		...availableInstructionParsers.filter(i => i instanceof vscode.Disposable),
-		...availableRepetitionParsers.filter(i => i instanceof vscode.Disposable),
-		...availableTimingHintsParsers.filter(i => i instanceof vscode.Disposable),
-		//
+		...availableInstructionParsers,
+		...availableRepetitionParsers,
+		...availableTimingHintsParsers,
 		mainParser,
 		mainParserForMacroParser,
 		mainParserForTimingHintsParsers

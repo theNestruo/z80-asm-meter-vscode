@@ -47,20 +47,6 @@ class StatusBarHandler implements vscode.Disposable {
 		this.create();
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-
-		// Recreates StatusBarItem on alignment change
-		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
-			this.destroy();
-			this.create();
-		}
-	}
-
-	dispose() {
-		this._disposable.dispose();
-		this.destroy();
-	}
-
 	onUpdateRequest() {
 
 		// Reads the source code
@@ -116,12 +102,6 @@ class StatusBarHandler implements vscode.Disposable {
 				: Number.MIN_SAFE_INTEGER);
 	}
 
-	private destroy() {
-
-		this.statusBarItem?.dispose();
-		this.statusBarItem = undefined;
-	}
-
 	private show(contents: StatusBarItemContents) {
 		this.create();
 		this.statusBarItem!.text = contents.text;
@@ -131,7 +111,6 @@ class StatusBarHandler implements vscode.Disposable {
 	}
 
 	private hide() {
-
 		this.statusBarItem?.hide();
 	}
 
@@ -150,6 +129,25 @@ class StatusBarHandler implements vscode.Disposable {
 		}
 
 		return new vscode.MarkdownString(markdown.join("\n"), true);
+	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+
+		// Recreates StatusBarItem on alignment change
+		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
+			this.destroy();
+			this.create();
+		}
+	}
+
+	dispose() {
+		this._disposable.dispose();
+		this.destroy();
+	}
+
+	private destroy() {
+		this.statusBarItem?.dispose();
+		this.statusBarItem = undefined;
 	}
 }
 
@@ -170,18 +168,6 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		super(command);
 
 		this.cache = HLRU(config.statusBar.cacheSize);
-	}
-
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-		super.onConfigurationChange(e);
-
-        // Re-initializes cache
-		this.cache = HLRU(config.statusBar.cacheSize);
-	}
-
-	override dispose(): void {
-        this.cache.clear();
-		super.dispose();
 	}
 
 	protected override parseAndBuildStatusBarItemContents(lines: string[]): StatusBarItemContents | undefined {
@@ -206,6 +192,18 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 
 		return contents;
 	}
+
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+		super.onConfigurationChange(e);
+
+        // Re-initializes cache
+		this.cache = HLRU(config.statusBar.cacheSize);
+	}
+
+	override dispose(): void {
+        this.cache.clear();
+		super.dispose();
+	}
 }
 
 /**
@@ -229,11 +227,6 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 			vscode.window.onDidChangeActiveTextEditor(this.onUpdateRequest, this),
 			vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this),
 		);
-	}
-
-	dispose() {
-		clearTimeout(this.updateStatusBarTimeout);
-		this._disposable.dispose();
 	}
 
 	onUpdateRequest() {
@@ -271,6 +264,11 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 		this.updateStatusBarTimeout = setTimeout(() => {
 			this.delegate.onUpdateRequest();
 		}, debounce);
+	}
+
+	dispose() {
+		clearTimeout(this.updateStatusBarTimeout);
+		this._disposable.dispose();
 	}
 }
 

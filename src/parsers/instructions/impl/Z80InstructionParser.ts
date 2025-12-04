@@ -22,6 +22,10 @@ class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80
             vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
     }
 
+    protected override createInstance(): Z80InstructionParserImpl {
+        return new Z80InstructionParserImpl(config.instructionSets);
+    }
+
     onConfigurationChange(event: vscode.ConfigurationChangeEvent) {
 
         // Forces re-creation on instruction set change
@@ -33,10 +37,6 @@ class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80
     override dispose() {
         this._disposable.dispose();
         super.dispose();
-    }
-
-    protected override createInstance(): Z80InstructionParserImpl {
-        return new Z80InstructionParserImpl(config.instructionSets);
     }
 }
 

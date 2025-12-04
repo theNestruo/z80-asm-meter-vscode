@@ -51,15 +51,6 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
-	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
-		this.cache.clear();
-	}
-
-	dispose() {
-        this._disposable.dispose();
-		this.cache.clear();
-	}
-
 	override read<T>(section: string): T {
 
 		if (this.cache.has(section)) {
@@ -84,6 +75,15 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 		const value: T = super.readWithDefaultValue(section, actualDefaultValue);
 		this.cache.set(section, value);
 		return value;
+	}
+
+	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+		this.cache.clear();
+	}
+
+	dispose() {
+        this._disposable.dispose();
+		this.cache.clear();
 	}
 }
 

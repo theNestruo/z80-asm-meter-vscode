@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
  * The instance may be present or absent depending on the configuration
  * @param I the instance type
  */
-export interface OptionalSingletonRef<I> {
+export interface OptionalSingletonRef<I> extends vscode.Disposable {
 
 	get instance(): I | undefined;
 }
@@ -17,8 +17,7 @@ export interface OptionalSingletonRef<I> {
  * @param I the instance type (interface)
  * @param T the actual instance type (implementation)
  */
-export abstract class OptionalSingletonRefImpl<I, T extends I>
-		implements OptionalSingletonRef<I>, vscode.Disposable {
+export abstract class OptionalSingletonRefImpl<I, T extends I> implements OptionalSingletonRef<I> {
 
 	private readonly _disposable: vscode.Disposable;
 	protected _instance?: I = undefined;
@@ -28,6 +27,16 @@ export abstract class OptionalSingletonRefImpl<I, T extends I>
 			// Subscribe to configuration change event
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
+
+	get instance(): I | undefined {
+		return this._instance ??= this.enabled
+				? this.createInstance()
+				: undefined;
+	}
+
+	protected abstract get enabled(): boolean;
+
+	protected abstract createInstance(): T;
 
 	onConfigurationChange(_: vscode.ConfigurationChangeEvent) {
 
@@ -41,15 +50,6 @@ export abstract class OptionalSingletonRefImpl<I, T extends I>
 		this._disposable.dispose();
 		this.destroyInstance();
 	}
-
-	get instance(): I | undefined {
-		return this._instance ??= this.enabled
-				? this.createInstance()
-				: undefined;
-	}
-
-	protected abstract get enabled(): boolean;
-	protected abstract createInstance(): T;
 
 	protected destroyInstance() {
 
@@ -77,19 +77,19 @@ export interface SingletonRef<I> extends OptionalSingletonRef<I> {
  * @param I the instance type (interface)
  * @param T the actual instance type (implementation)
  */
-export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I>, vscode.Disposable {
+export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I> {
 
 	protected _instance?: I = undefined;
-
-	dispose() {
-		this.destroyInstance();
-	}
 
 	get instance(): I {
 		return this._instance ??= this.createInstance();
 	}
 
 	protected abstract createInstance(): T;
+
+	dispose() {
+		this.destroyInstance();
+	}
 
 	protected destroyInstance() {
 

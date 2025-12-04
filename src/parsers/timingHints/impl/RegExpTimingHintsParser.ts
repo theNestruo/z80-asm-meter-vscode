@@ -11,21 +11,6 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 	// Timing hints maps
 	private _regExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
 
-	override dispose() {
-        this._regExpTimingHints = undefined;
-		super.dispose();
-	}
-
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-		super.onConfigurationChange(e);
-
-        // Forces re-creation on RegExp-based timing hints definitions change
-		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
-			this._instance = undefined;
-			this._regExpTimingHints = undefined;
-		}
-	}
-
 	protected override get enabled(): boolean {
 		return config.timing.hints.enabled
 				&& (this.regExpTimingHints?.length !== 0);
@@ -80,6 +65,21 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 		}
 
 		return this._regExpTimingHints;
+	}
+
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+		super.onConfigurationChange(e);
+
+        // Forces re-creation on RegExp-based timing hints definitions change
+		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
+			this._instance = undefined;
+			this._regExpTimingHints = undefined;
+		}
+	}
+
+	override dispose() {
+        this._regExpTimingHints = undefined;
+		super.dispose();
 	}
 }
 

@@ -17,21 +17,6 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 	// Macro maps
 	private _definitionByMnemonic?: Record<string, MacroDefinitionConfiguration> = undefined;
 
-	override dispose() {
-		this._definitionByMnemonic = undefined;
-		super.dispose();
-	}
-
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
-		super.onConfigurationChange(e);
-
-        // Forces re-creation on macro definitions change
-		if (e.affectsConfiguration("z80-asm-meter.macros")) {
-			this.destroyInstance();
-			this._definitionByMnemonic = undefined;
-		}
-	}
-
 	protected get enabled(): boolean {
 		return Object.keys(this.definitionByMnemonic).length !== 0;
 	}
@@ -59,6 +44,21 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 		}
 
 		return this._definitionByMnemonic;
+	}
+
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+		super.onConfigurationChange(e);
+
+        // Forces re-creation on macro definitions change
+		if (e.affectsConfiguration("z80-asm-meter.macros")) {
+			this.destroyInstance();
+			this._definitionByMnemonic = undefined;
+		}
+	}
+
+	override dispose() {
+		this._definitionByMnemonic = undefined;
+		super.dispose();
 	}
 }
 

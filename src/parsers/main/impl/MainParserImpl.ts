@@ -20,7 +20,6 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
         private readonly instructionParserRefs: OptionalSingletonRef<InstructionParser>[],
         private readonly repetitionParserRefs: OptionalSingletonRef<RepetitionParser>[],
         private readonly timingHintParserRefs: OptionalSingletonRef<TimingHintsParser>[]) {
-
         super();
 
         this._disposable =
@@ -28,25 +27,23 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
             vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
     }
 
-    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
-
-        // Forces re-creation
-        this.destroyInstance();
-    }
-
-    override dispose() {
-        this._disposable.dispose();
-
-        super.dispose();
-    }
-
     protected override createInstance(): MainParserImpl {
-
         return new MainParserImpl(
             this.instructionParserRefs.map(ref => ref.instance).filter(instance => !!instance),
             this.repetitionParserRefs.map(ref => ref.instance).filter(instance => !!instance),
             this.timingHintParserRefs.map(ref => ref.instance).filter(instance => !!instance)
         );
+    }
+
+    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+
+        // Forces instance re-creation
+        this.destroyInstance();
+    }
+
+    override dispose() {
+        this._disposable.dispose();
+        super.dispose();
     }
 }
 
@@ -71,17 +68,6 @@ class MainParserImpl implements MainParser, vscode.Disposable {
             vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
         // Initializes cache
-		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
-    }
-
-	dispose() {
-        this.instructionsCache.clear();
-        this._disposable.dispose();
-	}
-
-    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
-
-        // Re-initializes cache
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
     }
 
@@ -203,4 +189,15 @@ class MainParserImpl implements MainParser, vscode.Disposable {
         // (no timing hints)
         return undefined;
     }
+
+    onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+
+        // Re-initializes cache
+		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
+    }
+
+	dispose() {
+        this.instructionsCache.clear();
+        this._disposable.dispose();
+	}
 }
