@@ -23,6 +23,14 @@ export function readLinesFromActiveTextEditorSelection(): string[] {
 	return readLinesFrom(editor.document, editor.selection, config.expandSelectionToLine);
 }
 
+export function isExtensionEnabledFor(document: vscode.TextDocument): boolean {
+
+	const languageId = document.languageId;
+	return config.languageIds.includes(languageId)
+		// Always enabled if it is a Z80 assembly file
+		|| (languageId === "z80-asm-meter");
+}
+
 function readLinesFrom(
 	document: vscode.TextDocument, range: vscode.Range, expandRangeToLine: boolean = true): string[] {
 
@@ -51,12 +59,4 @@ function readLinesFrom(
 		}
 	}
 	return lines;
-}
-
-export function isExtensionEnabledFor(document: vscode.TextDocument): boolean {
-
-	const languageId = document.languageId;
-	return config.languageIds.includes(languageId)
-		// Always enabled if it is a Z80 assembly file
-		|| (languageId === "z80-asm-meter");
 }

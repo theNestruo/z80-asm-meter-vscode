@@ -1,15 +1,21 @@
 import HLRU from 'hashlru';
 import * as vscode from 'vscode';
 import { config } from "../config";
-import { mainParser } from "../parsers/main/MainParser";
-import { TotalTimings } from "../totalTimings/TotalTimings";
-import { formatTiming, hrMarkdown, printableTimingSuffix, printBytes, printSize, printTiming } from '../utils/FormatterUtils';
+import { mainParser } from '../parsers/parsers';
+import { TotalTimings } from '../totalTimings/TotalTimings';
+import { TotalTiming } from '../totalTimings/types/TotalTiming';
+import { Meterable } from '../types/Meterable';
+import { hrMarkdown } from '../utils/TextUtils';
+import { printBytes } from '../utils/BytesUtils';
+import { printSize } from '../utils/SizeUtils';
+import { printInstructions } from '../utils/InstructionsUtils';
+import { printTiming } from '../utils/TimingUtils';
+import { printableTimingSuffix } from '../utils/TimingUtils';
+import { formatTiming } from '../utils/TimingUtils';
 import { linesToSourceCode } from '../utils/SourceCodeUtils';
 import { hashCode, pluralize, spaceIfNotInfix, validateCodicon } from "../utils/TextUtils";
-import { CopyToClipboardCommand } from './Commands';
+import { CopyToClipboardCommand } from './CopyToClipboardCommands';
 import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
-import { Meterable } from '../types/Meterable';
-import { TotalTimingMeterable } from '../types/TotalTimingMeterable';
 
 /**
  * A container for the data to be displayed in the StatusBarItem
@@ -79,7 +85,8 @@ class StatusBarHandler implements vscode.Disposable {
 		}
 
 		// Parses the source code
-		const metered = mainParser.instance.parse(linesToSourceCode(lines));
+		const metered = mainParser
+		.instance.parse(linesToSourceCode(lines));
 		if (!metered) {
 			return undefined;
 		}
@@ -267,15 +274,13 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 	}
 }
 
-// Status bar
-
 function printStatusBarText(totalTimings: TotalTimings): string {
 
 	// Builds the statur bar text
 	let text = "";
 
 	if (config.statusBar.showInstruction) {
-		text += printStatusBarInstructions(totalTimings.default);
+		text += printStatusBarInstructions(totalTimings.defaultTotalTiming);
 	}
 
 	const timing = printStatusBarTotalTimings(totalTimings);
@@ -284,11 +289,11 @@ function printStatusBarText(totalTimings: TotalTimings): string {
 		text += `${timingsIcon}${timing}`;
 	}
 
-	const size = totalTimings.default.size;
+	const size = totalTimings.defaultTotalTiming.size;
 	if (size) {
 		text += printStatusBarSize(size);
 		if (config.statusBar.showBytes) {
-			const bytes = printBytes(totalTimings.default);
+			const bytes = printBytes(totalTimings.defaultTotalTiming);
 			if (bytes) {
 				text += ` (${bytes})`;
 			}
@@ -319,7 +324,7 @@ function printStatusBarTotalTimings(totalTimings: TotalTimings): string {
 		case "smart":
 		case "combineSmart": {
 			const [a, b, c, d] = totalTimings.ordered();
-			return (totalTimings.executionFlow || totalTimings.atExit)
+			return (totalTimings.executionFlowTotalTiming || totalTimings.atExitTotalTiming)
 				? printStatusBarTotalTimingsArray([b, c, d])
 				: printStatusBarTotalTimingsArray([a]);
 		}
@@ -329,11 +334,11 @@ function printStatusBarTotalTimings(totalTimings: TotalTimings): string {
 
 		case "default":
 		default:
-			return printStatusBarTotalTimingsArray([totalTimings.default]);
+			return printStatusBarTotalTimingsArray([totalTimings.defaultTotalTiming]);
 	}
 }
 
-function printStatusBarTotalTimingsArray(totalTimings: (TotalTimingMeterable | undefined)[]): string {
+function printStatusBarTotalTimingsArray(totalTimings: (TotalTiming | undefined)[]): string {
 
 	let text = "";
 
@@ -381,13 +386,11 @@ function printStatusBarSize(n: number): string {
 	return `${sizeIcon}${formattedSize}${sizeSuffix}`;
 }
 
-// Status bar / Inlay hint: tooltip (Markdown)
-
 function printMarkdownTotalTimingsAndSize(totalTimings: TotalTimings): string[] {
 
 	const table = printMarkdownTotalTimings(totalTimings);
 
-	const size = totalTimings.default.size;
+	const size = totalTimings.defaultTotalTiming.size;
 	if (size) {
 		const sizeIcon = validateCodicon(config.statusBar.sizeIcon, "$(file-binary)");
 		const formattedSize = printSize(size);
@@ -463,7 +466,7 @@ function printMarkdownInstructionsAndBytes(totalTimings: TotalTimings): string[]
 	const table = [];
 
 	// Instruction and/or bytes
-	const totalTiming = totalTimings.default;
+	const totalTiming = totalTimings.defaultTotalTiming;
 	const instruction = printInstructions(totalTiming);
 	const bytes = printBytes(totalTiming);
 	if (instruction || bytes) {
@@ -480,49 +483,3 @@ function printMarkdownInstructionsAndBytes(totalTimings: TotalTimings): string[]
 
 	return table;
 }
-
-// Instructions
-
-function printInstructions(meterable: Meterable): string | undefined {
-
-	const meterables = [...meterable.flatten()];
-	const firstInstruction = shiftFirstInstruction(meterables);
-
-	// (empty)
-	if (!firstInstruction) {
-		return undefined;
-	}
-
-	const lastInstruction = popLastInstruction(meterables);
-	let text = firstInstruction;
-	if (lastInstruction) {
-		if (meterables.length) {
-			text += " ...";
-		}
-		text += ` ${lastInstruction}`;
-	}
-	return text;
-}
-
-function shiftFirstInstruction(meterables: Meterable[]): string | undefined {
-
-	while (meterables.length) {
-		const instruction = meterables.shift()?.instruction;
-		if (instruction) {
-			return instruction;
-		}
-	}
-	return undefined;
-}
-
-function popLastInstruction(meterables: Meterable[]): string | undefined {
-
-	while (meterables.length) {
-		const instruction = meterables.pop()?.instruction;
-		if (instruction) {
-			return instruction;
-		}
-	}
-	return undefined;
-}
-

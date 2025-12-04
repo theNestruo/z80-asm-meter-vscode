@@ -2,39 +2,24 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { FromActiveTextEditorSelecionCopyToClipboardCommand } from './vscode/Commands';
+import { availableInstructionParsers, availableRepetitionParsers, availableTimingHintsParsers, mainParser, mainParserForMacroParser, mainParserForTimingHintsParsers } from './parsers/parsers';
 import { configurationReader } from './vscode/ConfigurationReader';
+import { FromActiveTextEditorSelecionCopyToClipboardCommand } from './vscode/CopyToClipboardCommands';
 import { InlayHintsProvider } from './vscode/InlayHintsProvider';
 import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/StatusBarHandlers";
-import { glassFakeInstructionParser, glassReptRepetitionParser } from './parsers/instructions/GlassParser';
-import { macroParser } from './parsers/instructions/MacroParser';
-import { sjasmplusDupRepetitionParser, sjasmplusFakeInstructionParser, sjasmplusRegisterListInstructionParser, sjasmplusReptRepetitionParser } from './parsers/instructions/SjasmplusParser';
-import { defaultTimingHintsParser } from './parsers/timingHints/DefaultTimingHintsParser';
-import { regExpTimingHintsParser } from './parsers/timingHints/RegExpTimingHintsParser';
-import { mainParser, mainParserForMacroParser, mainParserForTimingHintsParsers } from './parsers/main/MainParser';
 
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	console.log("before");
-
-	try {
-
 	// (vscode.Disposables)
 	context.subscriptions.push(
 		configurationReader,
 		//
-		glassFakeInstructionParser,
-		glassReptRepetitionParser,
-		macroParser,
-		sjasmplusFakeInstructionParser,
-		sjasmplusRegisterListInstructionParser,
-		sjasmplusDupRepetitionParser,
-		sjasmplusReptRepetitionParser,
-		defaultTimingHintsParser,
-		regExpTimingHintsParser,
+		...availableInstructionParsers.filter(i => i instanceof vscode.Disposable),
+		...availableRepetitionParsers.filter(i => i instanceof vscode.Disposable),
+		...availableTimingHintsParsers.filter(i => i instanceof vscode.Disposable),
 		//
 		mainParser,
 		mainParserForMacroParser,
@@ -57,12 +42,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Triggers the first execution
 	statusBarHandler.onUpdateRequest();
-
-	console.log("after");
-
-	} catch (e) {
-		console.error("error", e);
-	}
 }
 
 // this method is called when your extension is deactivated

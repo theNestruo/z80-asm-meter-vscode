@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
 import { config } from '../config';
-import { mainParser } from '../parsers/main/MainParser';
-import { TotalTimings } from "../totalTimings/TotalTimings";
+import { mainParser } from '../parsers/parsers';
+import { TotalTimings } from '../totalTimings/TotalTimings';
 import { Meterable } from "../types/Meterable";
 import { SourceCode } from "../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
-import { formatTiming, hrMarkdown, printableTimingSuffix, printRange, printTiming } from '../utils/FormatterUtils';
+import { printRange } from '../utils/PositionRangeUtils';
+import { hrMarkdown } from '../utils/TextUtils';
+import { printTiming } from '../utils/TimingUtils';
+import { printableTimingSuffix } from '../utils/TimingUtils';
+import { formatTiming } from '../utils/TimingUtils';
 import { lineToSourceCode } from '../utils/SourceCodeUtils';
 import { positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from '../utils/TextUtils';
 import { isExtensionEnabledFor } from './SourceCodeReader';
@@ -93,7 +97,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	}
 }
 
-export class InlayHintCandidatesLocator implements vscode.Disposable {
+class InlayHintCandidatesLocator implements vscode.Disposable {
 
 	private readonly _disposable: vscode.Disposable;
 
@@ -281,7 +285,7 @@ export class InlayHintCandidatesLocator implements vscode.Disposable {
 	}
 }
 
-export class InlayHintsCandidatesResolver {
+class InlayHintsCandidatesResolver {
 
 	resolveSubroutineInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[] {
 

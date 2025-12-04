@@ -65,3 +65,5 @@ export function validateCodicon(ps: string | undefined, defaultCodicon: string):
     const s = ps?.trim();
     return (s && s?.startsWith("$(") && s?.endsWith(")")) ? s : defaultCodicon;
 }
+
+export const hrMarkdown = "\n---\n\n";

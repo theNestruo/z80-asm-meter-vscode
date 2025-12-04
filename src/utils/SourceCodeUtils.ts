@@ -1,6 +1,6 @@
 import { config } from '../config';
 import { SourceCode } from "../types/SourceCode";
-import { parseNumericExpression } from './ParserUtils';
+import { parseNumericExpression } from './NumberUtils';
 
 // (used instead of /\s/ for performance reasons)
 const whitespaceCharacters = "\f\n\r\t\v\u0020\u00a0\u1680"

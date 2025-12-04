@@ -1,4 +1,4 @@
-import { parseNumericExpression } from "./ParserUtils";
+import { parseNumericExpression } from "./NumberUtils";
 import { splitNormalizeQuotesAware } from "./SourceCodeUtils";
 
 export function extractMnemonicOf(s: string): string {
@@ -24,6 +24,7 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
  * @returns true if the candidate operand must match verbatim the operand of the instruction
  */
 export function isVerbatimOperand(operand: string): boolean {
+
     return ["A", "AF", "AF'", "B", "BC", "C", "NC",
         "D", "DE", "E", "H", "HL", "L",
         "I", "IX", "IY", "R", "SP",
@@ -37,6 +38,7 @@ export function isVerbatimOperand(operand: string): boolean {
  * 0 if the candidate operand is not valid
  */
 export function verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
+
     return (candidateOperand === expectedOperand) ? 1 : 0;
 }
 
@@ -83,6 +85,7 @@ export function sdccIndexRegisterIndirectionScore(expectedOperand: string, candi
  * @returns the expression inside the indirection
  */
 export function extractIndirection(operand: string): string {
+
     return operand.substring(1, operand.length - 1).trim();
 }
 
@@ -91,6 +94,7 @@ export function extractIndirection(operand: string): string {
  * @returns 1 if the operand is one of the 8 bit general purpose registers, 0 otherwise
  */
 export function is8bitRegisterScore(operand: string): number {
+
     return ["A", "B", "C", "D", "E", "H", "L"].includes(operand)? 1 : 0;
 }
 
@@ -102,6 +106,7 @@ const ixRegisterWithOffsetRegexp = /^IX\b/; // "IX..."
  * @returns 1 if the operand is the IX index register with an optional offset, 0 otherwise
  */
 export function isIXWithOffsetScore(operand: string): number {
+
     return ixRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
@@ -113,6 +118,7 @@ const iyRegisterWithOffsetRegexp = /^IY\b/; // "IY..."
  * @returns 1 if the operand is the IY index register with an optional offset, 0 otherwise
  */
 export function isIYWithOffsetScore(operand: string): number {
+
     return iyRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
@@ -121,6 +127,7 @@ export function isIYWithOffsetScore(operand: string): number {
  * @returns 1 if the operand is the high part of the IX index register, 0 otherwise
  */
 export function isIXhScore(operand: string): number {
+
     return ["IXH", "IXU", "XH", "HX"].includes(operand) ? 1 : 0;
 }
 
@@ -129,6 +136,7 @@ export function isIXhScore(operand: string): number {
  * @returns 1 if the operand is the low part of the IX index register, 0 otherwise
  */
 export function isIXlScore(operand: string): number {
+
     return ["IXL", "XL", "LX"].includes(operand) ? 1 : 0;
 }
 
@@ -137,6 +145,7 @@ export function isIXlScore(operand: string): number {
  * @returns 1 if the operand is the high or low part of the IX index register, 0 otherwise
  */
 export function isIX8bitScore(operand: string): number {
+
     return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].includes(operand) ? 1 : 0;
 }
 
@@ -145,6 +154,7 @@ export function isIX8bitScore(operand: string): number {
  * @returns 1 if the operand is the high part of the IY index register, 0 otherwise
  */
 export function isIYhScore(operand: string): number {
+
     return ["IYH", "IYU", "YH", "HY"].includes(operand) ? 1 : 0;
 }
 
@@ -153,6 +163,7 @@ export function isIYhScore(operand: string): number {
  * @returns 1 if the operand is the low part of the IY index register, 0 otherwise
  */
 export function isIYlScore(operand: string): number {
+
     return ["IYL", "YL", "LY"].includes(operand) ? 1 : 0;
 }
 
@@ -161,6 +172,7 @@ export function isIYlScore(operand: string): number {
  * @returns 1 if the operand is the high or low part of the IY index register, 0 otherwise
  */
 export function isIY8bitScore(operand: string): number {
+
     return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].includes(operand) ? 1 : 0;
 }
 
@@ -169,6 +181,7 @@ export function isIY8bitScore(operand: string): number {
  * @returns 1 if the operand is a register where H and L have been replaced by IXh and IXl, 0 otherwise
  */
 export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
+
     return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIX8bitScore(operand);
 }
 
@@ -177,6 +190,7 @@ export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number 
  * @returns 1 if the operand is a register where H and L have been replaced by IYh and IYl, 0 otherwise
  */
 export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
+
     return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIY8bitScore(operand);
 }
 
@@ -189,6 +203,7 @@ const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
  * false otherwise
  */
 export function isAnyRegister(operand: string): boolean {
+
     return ["A", "AF", "AF'", "B", "BC", "C", "D", "DE", "E", "H", "HL", "L",
             "I", "IX", "IXU", "IXH", "IXL", "IY", "IYU", "IYH", "IYL",
             "R", "SP"].includes(operand)
@@ -200,6 +215,7 @@ export function isAnyRegister(operand: string): boolean {
  * @returns true if the operand is a flag for conditional operations
  */
 export function isAnyCondition(operand: string): boolean {
+
     return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
 }
 
@@ -208,6 +224,7 @@ export function isAnyCondition(operand: string): boolean {
  * @returns true if the operand is a flag for conditional JR
  */
 export function isJrCondition(operand: string): boolean {
+
     return ["C", "NC", "Z", "NZ"].includes(operand);
 }
 
