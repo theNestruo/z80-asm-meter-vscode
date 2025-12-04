@@ -65,7 +65,7 @@ export class ExecutionFlowTotalTimingsMeterable extends AbstractTotalTimingMeter
 		super(meterable);
 	}
 
-	name = "Execution flow timing";
+	readonly name = "Execution flow timing";
 
 	get statusBarIcon(): string {
 		return config.timing.executionFlow.icon;

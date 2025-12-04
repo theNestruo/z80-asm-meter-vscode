@@ -14,7 +14,6 @@ export class DefaultTotalTimingsMeterable extends AbstractTotalTimingMeterable {
 	private constructor(
 		meterable: Meterable,
 		private readonly isAtLeastTwoInstructions: boolean) {
-
 		super(meterable);
 	}
 
@@ -22,9 +21,7 @@ export class DefaultTotalTimingsMeterable extends AbstractTotalTimingMeterable {
 		return this.isAtLeastTwoInstructions ? "Aggregated timing" : "Timing";
 	}
 
-	get statusBarIcon(): string {
-		return "";
-	}
+	readonly statusBarIcon = "";
 
 	protected modifiedTimingsOf(timing: number[], _i: number, _n: number, _instruction: string): number[] {
 		return timing;

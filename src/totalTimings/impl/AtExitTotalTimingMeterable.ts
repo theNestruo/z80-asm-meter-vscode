@@ -32,11 +32,13 @@ export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable im
 	 */
 	private static canCalculate(meterables: Meterable[]): boolean {
 
+		if (!config.statusBar.totalTimingsEnabled) {
+			return false;
+		}
 		const retEnabled = config.timing.atExit.retEnabled;
 		const jumpEnabled = config.timing.atExit.jumpEnabled;
 		const callEnabled = config.timing.atExit.callEnabled;
-		const anyEnabled = retEnabled || jumpEnabled || callEnabled;
-		if (!(config.statusBar.totalTimingsEnabled && anyEnabled)) {
+		if (!(retEnabled || jumpEnabled || callEnabled)) {
 			return false;
 		}
 
@@ -103,7 +105,6 @@ export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable im
 		private readonly lastInstruction: string) {
 		super(originalMeterable);
 
-		this.lastInstruction = lastInstruction;
 		this.isLastInstructionRet = isRetInstruction(lastInstruction);
 		this.isLastInstructionJump = isJumpInstruction(lastInstruction);
 		this.isLastInstructionCall = isCallInstruction(lastInstruction);

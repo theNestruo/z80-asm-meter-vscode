@@ -56,6 +56,7 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		this.meterables.push(meterable);
 
+		// Forces re-calculation
 		this.cachedZ80Timing = undefined;
 		this.cachedMsxTiming = undefined;
 		this.cachedCpcTiming = undefined;
@@ -185,17 +186,11 @@ export class RepeatedMeterable extends AggregatedMeterable {
 		private meterable: Meterable,
 		private repetitions: number) {
 		super();
-
-		this.meterable = meterable;
-		this.repetitions = repetitions;
 	}
 
 	get instruction(): string {
 
-		if (!this.cachedInstruction) {
-			this.cachedInstruction = this.meterable.instruction;
-		}
-		return this.cachedInstruction;
+		return this.cachedInstruction ??= this.meterable.instruction;
 	}
 
 	get z80Timing(): number[] {
@@ -248,10 +243,7 @@ export class RepeatedMeterable extends AggregatedMeterable {
 
 	get size(): number {
 
-		if (!this.cachedSize) {
-			this.cachedSize = this.meterable.size * this.repetitions;
-		}
-		return this.cachedSize;
+		return this.cachedSize ??= this.meterable.size * this.repetitions;
 	}
 
 	flatten(): Meterable[] {

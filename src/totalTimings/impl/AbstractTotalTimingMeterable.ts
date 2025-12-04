@@ -16,7 +16,8 @@ export abstract class AbstractTotalTimingMeterable implements TotalTiming {
 	 * Constructor
 	 * @param originalMeterable The original meterable instance
 	 */
-	protected constructor(protected originalMeterable: Meterable) {
+	protected constructor(
+		protected originalMeterable: Meterable) {
 	}
 
 	abstract get name(): string;
