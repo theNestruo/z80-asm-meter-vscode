@@ -77,7 +77,7 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 		return value;
 	}
 
-	onConfigurationChange(_e: vscode.ConfigurationChangeEvent) {
+	onConfigurationChange(_: vscode.ConfigurationChangeEvent) {
 		this.cache.clear();
 	}
 

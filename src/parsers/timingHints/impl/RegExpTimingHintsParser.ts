@@ -38,7 +38,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 				let regExp: RegExp;
 				try {
 					regExp = new RegExp(source.pattern, source.flags);
-				} catch (ignored) {
+				} catch (_) {
 					return;
 				}
 				if (regExp.source === this.emptyRegExpSource) {
