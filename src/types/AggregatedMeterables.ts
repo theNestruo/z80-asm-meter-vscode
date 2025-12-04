@@ -126,7 +126,7 @@ export class MeterableCollection extends AggregatedMeterable {
 	get size(): number {
 
 		if (!this.cachedSize) {
-			let size: number = 0;
+			let size = 0;
 			this.meterables.forEach(meterable => size += meterable.size);
 			this.cachedSize = size;
 		}

@@ -40,7 +40,7 @@ export class ExecutionFlowTotalTimingsMeterable extends AbstractTotalTimingMeter
 		const isStopOnUnconditionalJump = config.timing.executionFlow.stopOnUnconditionalJump;
 
 		// Checks the instructions
-		let anyConditionalJump: boolean = false;
+		let anyConditionalJump = false;
 		for (let i = 0, n = meterables.length; i < n; i++) {
 			const instruction = meterables[i].instruction;
 			const lastInstruction = i === n - 1;

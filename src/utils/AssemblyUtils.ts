@@ -234,7 +234,7 @@ export function isJrCondition(operand: string): boolean {
  * @returns 0.75 if the operand is any constant, label, or expression,
  * or 0 or 0.25 if the constant
  */
-export function anySymbolOperandScore(operand: string, allowRegisters: boolean = false): number {
+export function anySymbolOperandScore(operand: string, allowRegisters = false): number {
 
     return isAnyRegister(
             isIndirectionOperand(operand, false)

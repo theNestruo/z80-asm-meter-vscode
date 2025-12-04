@@ -32,7 +32,7 @@ export function isExtensionEnabledFor(document: vscode.TextDocument): boolean {
 }
 
 function readLinesFrom(
-	document: vscode.TextDocument, range: vscode.Range, expandRangeToLine: boolean = true): string[] {
+	document: vscode.TextDocument, range: vscode.Range, expandRangeToLine = true): string[] {
 
 	// Single line selection?
 	if (range.isSingleLine) {

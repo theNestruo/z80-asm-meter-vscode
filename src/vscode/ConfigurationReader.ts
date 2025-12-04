@@ -7,7 +7,7 @@ class ConfigurationReader {
 
 	read<T>(section: string): T {
 
-		return <T>vscode.workspace.getConfiguration("z80-asm-meter").get(section);
+		return vscode.workspace.getConfiguration("z80-asm-meter").get(section) as T;
 	}
 
 	readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
@@ -15,7 +15,7 @@ class ConfigurationReader {
 		if (actualDefaultValue === undefined) {
 			return this.read(section);
 		}
-		return <T>this.readIgnoreDefault(section) ?? actualDefaultValue;
+		return this.readIgnoreDefault(section) as T ?? actualDefaultValue;
 	}
 
 	private readIgnoreDefault<T>(section: string): T | undefined {
@@ -30,7 +30,7 @@ class ConfigurationReader {
 				|| info.globalLanguageValue
 				|| info.workspaceLanguageValue
 				|| info.workspaceFolderLanguageValue);
-		return isSet ? <T>config.get(section) : undefined;
+		return isSet ? config.get(section) as T : undefined;
 	}
 }
 
@@ -41,7 +41,7 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 
 	private readonly _disposable: vscode.Disposable;
 
-	private cache = new Map<string, any>();
+	private cache = new Map<string, unknown>();
 
 	constructor() {
 		super();
@@ -54,7 +54,7 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 	override read<T>(section: string): T {
 
 		if (this.cache.has(section)) {
-			return this.cache.get(section);
+			return this.cache.get(section) as T;
 		}
 
 		const value: T = super.read(section);
@@ -69,7 +69,7 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 		}
 
 		if (this.cache.has(section)) {
-			return this.cache.get(section);
+			return this.cache.get(section) as T;
 		}
 
 		const value: T = super.readWithDefaultValue(section, actualDefaultValue);

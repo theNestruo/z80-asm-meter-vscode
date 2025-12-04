@@ -48,7 +48,7 @@ const numericParsers: NumericExpressionParser[] = [
     new NumericExpressionParser(/^([0-9]+)$/, 10)
 ];
 
-export function parseNumericExpression(s: string, includeNegatives: boolean = true): number | undefined {
+export function parseNumericExpression(s: string, includeNegatives = true): number | undefined {
 
     const negative = s.startsWith("-");
     if ((!includeNegatives) && negative) {

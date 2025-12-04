@@ -109,7 +109,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
     // Derived information (will be cached for performance reasons)
     private mnemonic?: string;
     private operands?: string[];
-    private ready: boolean = false;
+    private ready = false;
 
     constructor(
         private readonly fakeInstruction: string,

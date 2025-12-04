@@ -14,7 +14,7 @@ const compat = new FlatCompat({
 });
 
 export default [
-    ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended"),
+    ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/strict", "plugin:@typescript-eslint/stylistic"),
     {
         plugins: {
             "@typescript-eslint": typescriptEslint,
@@ -26,10 +26,16 @@ export default [
 
         rules: {
             semi: [2, "always"],
-            "@typescript-eslint/no-unused-vars": 0,
-            "@typescript-eslint/no-explicit-any": 0,
-            "@typescript-eslint/explicit-module-boundary-types": 0,
-            "@typescript-eslint/no-non-null-assertion": 0,
+            "@typescript-eslint/no-non-null-assertion": "off", // "plugin:@typescript-eslint/strict"
+            "@typescript-eslint/no-unused-vars": [ // "plugin:@typescript-eslint/recommended"
+                "warn",
+                {
+                    "argsIgnorePattern": "_\\w*",
+                    "caughtErrorsIgnorePattern": "_\\w*"
+                }
+            ],
+            "@typescript-eslint/class-literal-property-style": "off", // "plugin:@typescript-eslint/stylistic"
+            "@typescript-eslint/no-empty-function": "warn", // "plugin:@typescript-eslint/stylistic"
         },
     },
 ];

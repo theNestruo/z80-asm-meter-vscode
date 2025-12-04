@@ -214,7 +214,7 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 
 	private readonly _disposable: vscode.Disposable;
 
-	private isLeadingEvent: boolean = true;
+	private isLeadingEvent = true;
 	private previousEventTimestamp?: number = undefined;
 	private updateStatusBarTimeout?: NodeJS.Timeout;
 

@@ -47,7 +47,7 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	[ label, afterLabelPosition, line ] = extractLabel(line);
 
 	// Extracts and removes repetitions
-	let repetitions: number = 1;
+	let repetitions = 1;
 	[ repetitions, line ] = extractRepetitions(line);
 
 	// Splits

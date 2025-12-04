@@ -141,7 +141,7 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 		const candidates: InlayHintCandidate[] = [];
 
 		let ongoingCandidates: OngoingInlayHintCandidate[] = [];
-		let didContainCode: boolean = false;
+		let didContainCode = false;
 		for (let i = 0, n = document.lineCount; i < n; i++) {
 			const line = document.lineAt(i);
 

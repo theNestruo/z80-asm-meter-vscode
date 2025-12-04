@@ -51,7 +51,7 @@ export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable im
 		const stopOnUnconditionalJump = config.timing.atExit.stopOnUnconditionalJump;
 
 		// Checks the instructions
-		let anyConditionalJump: boolean = false;
+		let anyConditionalJump = false;
 		// (reverse order for performance reasons: check last instruction first)
 		for (let n = meterables.length, i = n - 1; i >= 0; i--) {
 			const instruction = meterables[i].instruction;
