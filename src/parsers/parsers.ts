@@ -44,14 +44,20 @@ export const mainParser = new MainParserRef(
 	availableRepetitionParsers,
 	availableTimingHintsParsers);
 
-/** Main parser instance for macro parsers */
+/**
+ * Main parser instance for macro parsers.
+ * Used to parse provided source code in macro definitions
+ */
 export const mainParserForMacroParser = new MainParserRef(
-	availableInstructionParsers.filter(parser => parser !== macroParser), // (prevent circular nesting)
-	availableRepetitionParsers,
-	availableTimingHintsParsers);
+	availableInstructionParsers.filter(parser => parser !== macroParser), // (prevent circular references)
+	availableRepetitionParsers, // (allow repetitions within macro definitions)
+	availableTimingHintsParsers); // (allow timing hints within macro definitions)
 
-/** Main parser instance for timing hint parsers */
+/**
+ * Main parser instance for timing hint parsers.
+ * Used only for commented out code detection
+ */
 export const mainParserForTimingHintsParsers = new MainParserRef(
-	availableInstructionParsers,
-	availableRepetitionParsers,
-	[]); // (do not use timing hint parsers)
+	availableInstructionParsers, // (just for instructions)
+	[],
+	[]);
