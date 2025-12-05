@@ -1,26 +1,20 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		// For Node.js >=14 or modern browsers, ES2020 or newer is typically safe
 		"target": "es2020",
-		"lib": ["es2020"],
+
+		// commonjs: Node.js with require()
+		"module": "commonjs",
+
+		// ES2020: Includes JS built-ins like Map, Set, Promise
+		"lib": ["ES2020"],
+
+		"rootDir": "src",
 		"outDir": "out",
 		"sourceMap": true,
-		"rootDir": "src",
 
 		// Enable all strict type-checking options
-		"strict": true,
-
-		// Additional checks: Strict Typing
-		"noImplicitAny": true,
-		"strictNullChecks": true,
-		"strictFunctionTypes": true,
-
-		// Other additional checks
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
+		"strict": true
 	},
 	"exclude": ["node_modules"]
 }

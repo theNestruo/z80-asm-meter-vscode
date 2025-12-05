@@ -1,78 +1,80 @@
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+// reference: https://typescript-eslint.io/getting-started
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-	recommendedConfig: js.configs.recommended,
-	allConfig: js.configs.all
-});
+import eslint from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import tseslint from 'typescript-eslint';
 
-export default [
-	...compat.extends(
-		"eslint:recommended",
-		"plugin:@typescript-eslint/strict-type-checked",
-		"plugin:@typescript-eslint/stylistic-type-checked"),
+export default defineConfig(
+
+	// eslint's recommended config
+	eslint.configs.recommended,
+
+	// recommended: recommended rules for code correctness
+	// recommended-type-checked: recommended + additional recommended rules that require type information
+	// strict: superset of recommended with more opinionated rules which may also catch bugs
+	// strict-type-checked: strict + additional strict rules require type information
+	tseslint.configs.strictTypeChecked,
+
+	// stylistic: additional stylistic rules that enforce consistent styling
+	// stylistic-type-checked: stylistic + additional stylistic rules that require type information
+	tseslint.configs.stylisticTypeChecked,
+
 	{
-		plugins: {
-			"@typescript-eslint": typescriptEslint,
-		},
-
 		languageOptions: {
-			parser: tsParser,
 			parserOptions: {
+				// ask TypeScript's type checking service for each source file's type information
 				projectService: true,
-				tsconfigRootDir: __dirname,
 			},
 		},
 
 		rules: {
-			semi: [2, "always"],
-			//
-			// @typescript-eslint/recommended --:
+			semi: ["error", "always"],
+
+			// lowers recommended "error" to "warn"
+			"@typescript-eslint/no-unused-expressions": "warn",
 			"@typescript-eslint/no-unused-vars": [
 				"warn",
 				{
-					"argsIgnorePattern": "_\\w*",
-					"caughtErrorsIgnorePattern": "_\\w*"
+					"args": "all",
+					"argsIgnorePattern": "^_",
+					"caughtErrors": "all",
+					"caughtErrorsIgnorePattern": "^_"
 				}
 			],
-			//
-			// @typescript-eslint/recommended-type-checked --:
+
+			// lowers recommended-type-checked "error" to "warn"
 			"@typescript-eslint/no-unnecessary-type-assertion": "warn",
 			"@typescript-eslint/no-unsafe-argument": "warn",
 			"@typescript-eslint/no-unsafe-return": "warn",
 			"@typescript-eslint/restrict-template-expressions": "warn",
 			"@typescript-eslint/unbound-method": "warn",
-			//
-			// @typescript-eslint/strict --:
+
+			// lowers strict "error" to "warn"
 			"@typescript-eslint/no-non-null-assertion": "warn",
-			//
-			// @typescript-eslint/strict-type-checked --:
+
+			// lowers strict-type-checked "error" to "warn" or "off"
 			"@typescript-eslint/no-unnecessary-condition": "warn",
 			"@typescript-eslint/no-unnecessary-type-parameters": "off",
-			//
-			// @typescript-eslint/stylistic --:
+
+			// lowers stylistic "error" to "warn"
 			"@typescript-eslint/class-literal-property-style": "warn",
 			"@typescript-eslint/no-empty-function": "warn",
-			//
-			// @typescript-eslint/stylistic-type-checked --:
+
+			// lowers stylistic-type-checked "error" to "warn"
 			"@typescript-eslint/prefer-string-starts-ends-with": "warn",
 			"@typescript-eslint/prefer-nullish-coalescing": "warn",
 			"@typescript-eslint/prefer-optional-chain": "warn",
-			//
-			// ++:
+
+			// additional "error"
+			"@typescript-eslint/no-unnecessary-parameter-property-assignment": "error",
+			"@typescript-eslint/no-useless-empty-export": "error",
+
+			// additional "warn"
 			"@typescript-eslint/consistent-type-exports": "warn",
 			"@typescript-eslint/consistent-type-imports": "warn",
 			"@typescript-eslint/explicit-function-return-type": "warn",
-			"@typescript-eslint/no-unnecessary-parameter-property-assignment": "error",
-			"@typescript-eslint/no-useless-empty-export": "error",
+			"@typescript-eslint/no-unused-private-class-members": "warn",
 			"@typescript-eslint/prefer-readonly": "warn",
-		},
-	},
-];
+		}
+	}
+);
