@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * Default implementation of the extension configuration reader
@@ -22,14 +22,13 @@ class ConfigurationReader {
 
 		const config = vscode.workspace.getConfiguration("z80-asm-meter");
 		const info = config.inspect(section);
-		const isSet = info
-			&& (info.globalValue
-				|| info.workspaceValue
-				|| info.workspaceFolderValue
-				|| info.defaultLanguageValue
-				|| info.globalLanguageValue
-				|| info.workspaceLanguageValue
-				|| info.workspaceFolderLanguageValue);
+		const isSet = info?.globalValue
+			?? info?.workspaceValue
+			?? info?.workspaceFolderValue
+			?? info?.defaultLanguageValue
+			?? info?.globalLanguageValue
+			?? info?.workspaceLanguageValue
+			?? info?.workspaceFolderLanguageValue;
 		return isSet ? config.get(section) as T : undefined;
 	}
 }
@@ -40,14 +39,14 @@ class ConfigurationReader {
 class CachedConfigurationReader extends ConfigurationReader implements vscode.Disposable {
 
 	private readonly _disposable: vscode.Disposable;
-
-	private cache = new Map<string, unknown>();
+	private readonly cache = new Map<string, unknown>();
 
 	constructor() {
 		super();
 
 		this._disposable =
 			// Subscribe to configuration change event
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
@@ -77,12 +76,12 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 		return value;
 	}
 
-	onConfigurationChange(_: vscode.ConfigurationChangeEvent) {
+	onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
 		this.cache.clear();
 	}
 
-	dispose() {
-        this._disposable.dispose();
+	dispose(): void {
+		this._disposable.dispose();
 		this.cache.clear();
 	}
 }

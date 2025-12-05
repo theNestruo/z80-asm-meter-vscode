@@ -10,7 +10,12 @@
 		// Enable all strict type-checking options
 		"strict": true,
 
-		// Additional Checks
+		// Additional checks: Strict Typing
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+
+		// Other additional checks
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,

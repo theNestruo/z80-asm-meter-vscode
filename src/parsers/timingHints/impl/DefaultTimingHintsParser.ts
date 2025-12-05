@@ -1,9 +1,9 @@
 import { config } from "../../../config";
-import { SourceCode } from "../../../types/SourceCode";
 import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { SourceCode } from "../../../types/SourceCode";
 import { parseTimingLenient } from "../../../utils/TimingUtils";
-import { TimingHintsParser } from "../types/TimingHintsParser";
 import { TimingHints } from "../types/TimingHints";
+import type { TimingHintsParser } from "../types/TimingHintsParser";
 
 class DefaultTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsParser, DefaultTimingHintsParser> {
 
@@ -30,20 +30,14 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 
 	parseTimingHints(s: SourceCode): TimingHints | undefined {
 
-		const rawComment = s.lineComment;
-
 		// (sanity check)
+		const rawComment = s.lineComment;
 		if (!rawComment) {
 			return undefined;
 		}
 
-		// Checks timing hint comment
-		const matches = rawComment.matchAll(this.timingHintsRegexp);
-		if (!matches) {
-			return undefined;
-		}
-
 		// Parses timing hint comment
+		const matches = rawComment.matchAll(this.timingHintsRegexp);
 		const timingHints = new Map<string, number[]>();
 		for (const match of matches) {
 			const parsedTimingHint = parseTimingLenient(match[2]);

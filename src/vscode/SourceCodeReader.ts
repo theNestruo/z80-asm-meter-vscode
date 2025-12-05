@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
-import { config } from '../config';
-import { SourceCode } from "../types/SourceCode";
-import { linesToSourceCode } from '../utils/SourceCodeUtils';
+import * as vscode from "vscode";
+import { config } from "../config";
+import type { SourceCode } from "../types/SourceCode";
+import { linesToSourceCode } from "../utils/SourceCodeUtils";
 
 export function readSourceCodeFromActiveTextEditorSelecion(): SourceCode[] {
 
@@ -17,7 +17,7 @@ export function readLinesFromActiveTextEditorSelection(): string[] {
 
 	// No selection; uses cursor position
 	if (editor.selection.isEmpty) {
-		return [ editor.document.lineAt(editor.selection.active.line).text ];
+		return [editor.document.lineAt(editor.selection.active.line).text];
 	}
 
 	return readLinesFrom(editor.document, editor.selection, config.expandSelectionToLine);
@@ -32,12 +32,14 @@ export function isExtensionEnabledFor(document: vscode.TextDocument): boolean {
 }
 
 function readLinesFrom(
-	document: vscode.TextDocument, range: vscode.Range, expandRangeToLine = true): string[] {
+	document: vscode.TextDocument,
+	range: vscode.Range,
+	expandRangeToLine = true): string[] {
 
 	// Single line selection?
 	if (range.isSingleLine) {
 		// Expand single line selection to line?
-		return [ config.expandSelectionToLine ? document.lineAt(range.start).text : document.getText(range) ];
+		return [config.expandSelectionToLine ? document.lineAt(range.start).text : document.getText(range)];
 	}
 
 	const lines = [];

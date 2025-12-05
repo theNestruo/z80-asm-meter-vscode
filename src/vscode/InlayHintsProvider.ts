@@ -1,18 +1,17 @@
-import * as vscode from 'vscode';
-import { config } from '../config';
-import { mainParser } from '../parsers/parsers';
-import { TotalTimings } from '../totalTimings/TotalTimings';
-import { Meterable } from "../types/Meterable";
-import { SourceCode } from "../types/SourceCode";
-import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from '../utils/AssemblyUtils';
-import { printRange } from '../utils/PositionRangeUtils';
-import { hrMarkdown } from '../utils/TextUtils';
-import { printTiming } from '../utils/TimingUtils';
-import { printableTimingSuffix } from '../utils/TimingUtils';
-import { formatTiming } from '../utils/TimingUtils';
-import { lineToSourceCode } from '../utils/SourceCodeUtils';
-import { positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from '../utils/TextUtils';
-import { isExtensionEnabledFor } from './SourceCodeReader';
+import * as vscode from "vscode";
+import type { platformType } from "../config";
+import { config } from "../config";
+import { mainParser } from "../parsers/parsers";
+import { TotalTimings } from "../totalTimings/TotalTimings";
+import type { Meterable } from "../types/Meterable";
+import type { SourceCode } from "../types/SourceCode";
+import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
+import { printRange } from "../utils/PositionRangeUtils";
+import { lineToSourceCode } from "../utils/SourceCodeUtils";
+import { hrMarkdown, positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from "../utils/TextUtils";
+import { formatTiming, printableTimingSuffix, printTiming } from "../utils/TimingUtils";
+import { isExtensionEnabledFor } from "./SourceCodeReader";
+import type { inlayHintPositionType } from "./config/InlayHintsConfiguration";
 
 /**
  * InlayHintsProvider that shows timing of the execution flow of subroutines
@@ -37,6 +36,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 			this.onDidChangeInlayHintsEmitter,
 
 			// Subscribe to configuration change event
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
 		);
 
@@ -44,21 +44,25 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 		this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
 	}
 
-	private registerInlayHintsProvider() {
+	private registerInlayHintsProvider(): vscode.Disposable {
 		return vscode.languages.registerInlayHintsProvider(this.documentSelector(), this);
 	}
 
 	private documentSelector(): readonly vscode.DocumentFilter[] {
 
 		return [
-			...config.languageIds.map(languageId => { return { language: languageId }; }),
+			...config.languageIds.map(languageId => {
+				return { language: languageId };
+			}),
 			// Always enabled if it is a Z80 assembly file
 			{ language: "z80-asm-meter" }
 		];
 	}
 
-	provideInlayHints(document: vscode.TextDocument, range: vscode.Range, _token: vscode.CancellationToken):
-			vscode.ProviderResult<vscode.InlayHint[]> {
+	provideInlayHints(
+		document: vscode.TextDocument,
+		range: vscode.Range,
+		_token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint[]> {
 
 		if (!config.inlayHints.enabled || !isExtensionEnabledFor(document)) {
 			return undefined;
@@ -78,11 +82,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 
 		// Resolves the inlay hints
 		return (hint instanceof ResolvableInlayHint)
-				? hint.resolve()
-				: undefined;
+			? hint.resolve()
+			: undefined;
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		// Re-registers as a inlay hints provider
 		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
@@ -91,7 +95,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 		}
 	}
 
-	dispose() {
+	dispose(): void {
 		this.registerInlayHintsProviderDisposable.dispose();
 		this._disposable.dispose();
 	}
@@ -108,12 +112,13 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 
 		this._disposable =
 			// Subscribe to configuration change event
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 	}
 
-	private initalizeConditionalExitPointMnemonics() {
+	private initalizeConditionalExitPointMnemonics(): string[] {
 
 		const mnemonics = [];
 		if (config.inlayHints.exitPointRet) {
@@ -158,15 +163,15 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 			const sourceCode = sourceCodes[0];
 
 			// (saves source code on each previously found candidate)
-			ongoingCandidates.forEach(ongoingCandidate => {
+			for (const ongoingCandidate of ongoingCandidates) {
 				ongoingCandidate.sourceCode.push(...sourceCodes);
-			});
+			}
 
 			// Checks labels for subroutine starts (if not after the range)
 			if (!isAfterRange && this.isValidLabel(sourceCode, ongoingCandidates)) {
 				if (!didContainCode) {
 					// Discards any previous candidates (labels) because they did not contain code
-					ongoingCandidates = [ new OngoingInlayHintCandidate(line, sourceCodes) ];
+					ongoingCandidates = [new OngoingInlayHintCandidate(line, sourceCodes)];
 
 				} else if (fallthroughSubroutines) {
 					// Creates a new candidate on "falls through" labels
@@ -182,7 +187,7 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 
 			// Creates a new candidate on unlabelled code
 			if (!didContainCode && !ongoingCandidates.length && unlabelledSubroutines) {
-				ongoingCandidates = [ new OngoingInlayHintCandidate(line, sourceCodes) ];
+				ongoingCandidates = [new OngoingInlayHintCandidate(line, sourceCodes)];
 			}
 
 			didContainCode = true;
@@ -193,23 +198,29 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 			if (isUnconditionalJumpOrRetInstruction(metered.instruction)) {
 				// Ends all incomplete subroutines (if not before the range)
 				if (!isBeforeRange) {
-					ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line, false)));
+					for (const ongoingCandidate of ongoingCandidates) {
+						candidates.push(ongoingCandidate.withEndLine(line, false));
+					}
 				}
 
 				// (restarts subroutine lookup)
 				ongoingCandidates = [];
 				didContainCode = false;
 
-			// Checks subroutine conditional exit point (if not before the range)
+				// Checks subroutine conditional exit point (if not before the range)
 			} else if (!isBeforeRange && this.isValidConditionalExitPoint(metered.instruction)) {
-				ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line, true)));
+				for (const ongoingCandidate of ongoingCandidates) {
+					candidates.push(ongoingCandidate.withEndLine(line, true));
+				}
 			}
 		}
 
 		// Completes trailing code as subroutine
 		if (ongoingCandidates.length && didContainCode) {
 			const line = document.lineAt(document.lineCount - 1);
-			ongoingCandidates.forEach(ongoingCandidate => candidates.push(ongoingCandidate.withEndLine(line, false)));
+			for (const ongoingCandidate of ongoingCandidates) {
+				candidates.push(ongoingCandidate.withEndLine(line, false));
+			}
 		}
 
 		return candidates;
@@ -243,10 +254,10 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 		// timing depending on the platform
 		const timing =
 			config.platform === "msx" ? meterable.msxTiming
-			: config.platform === "cpc" ? meterable.cpcTiming
-			: meterable.z80Timing;
+				: config.platform === "cpc" ? meterable.cpcTiming
+					: meterable.z80Timing;
 
-		return timing && !!timing[0];
+		return !!timing[0];
 	}
 
 	private isValidConditionalExitPoint(instruction: string): boolean {
@@ -259,28 +270,28 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 		const operands = extractOperandsOf(instruction);
 
 		switch (mnemonic) {
-		case "RET":
-			return (operands.length === 1) && isAnyCondition(operands[0]);
-		case "JP":
-			return (operands.length === 2) && isAnyCondition(operands[0]);
-		case "JR":
-			return (operands.length === 2) && isJrCondition(operands[0]);
-		case "DJNZ":
-			return (operands.length === 1);
-		default:
-			// (should never happen)
-			return false;
+			case "RET":
+				return (operands.length === 1) && isAnyCondition(operands[0]);
+			case "JP":
+				return (operands.length === 2) && isAnyCondition(operands[0]);
+			case "JR":
+				return (operands.length === 2) && isJrCondition(operands[0]);
+			case "DJNZ":
+				return (operands.length === 1);
+			default:
+				// (should never happen)
+				return false;
 		}
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
- 		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
+		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
 			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
 		}
 	}
 
-	dispose() {
+	dispose(): void {
 		this._disposable.dispose();
 	}
 }
@@ -294,14 +305,14 @@ class InlayHintsCandidatesResolver {
 
 		// Groups by start line
 		const inlayHints: vscode.InlayHint[] = [];
-		new Set(allCandidates.map(candidate => candidate.startLine)).forEach(startLine => {
+		for (const startLine of new Set(allCandidates.map(candidate => candidate.startLine))) {
 
 			// (convenience local variables)
 			const candidates = allCandidates.filter(candidate => candidate.startLine === startLine);
 			const referenceCandidate = candidates[candidates.length - 1];
 
 			// Computes the InlayHint position in the first line
-			const [ position, paddingLeft, paddingRight ] = this.computePosition(
+			const [position, paddingLeft, paddingRight] = this.computePosition(
 				referenceCandidate.startLine, referenceCandidate.sourceCodeWithLabel, subroutinesPosition);
 
 			// Builds the InlayHint
@@ -309,12 +320,12 @@ class InlayHintsCandidatesResolver {
 				position, paddingLeft, paddingRight, referenceCandidate, candidates);
 
 			inlayHints.push(inlayHint);
-		});
+		}
 
 		return inlayHints;
 	}
 
-	resolveExitPointInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[]  {
+	resolveExitPointInlayHints(allCandidates: InlayHintCandidate[]): vscode.InlayHint[] {
 
 		// (for performance reasons)
 		const exitPointPosition = config.inlayHints.exitPointPosition;
@@ -325,7 +336,7 @@ class InlayHintsCandidatesResolver {
 
 		// Groups by end line
 		const inlayHints: vscode.InlayHint[] = [];
-		new Set(allCandidates.map(candidate => candidate.endLine)).forEach(endLine => {
+		for (const endLine of new Set(allCandidates.map(candidate => candidate.endLine))) {
 
 			// (convenience local variables)
 			const candidates = allCandidates.filter(candidate => candidate.endLine === endLine);
@@ -341,11 +352,11 @@ class InlayHintsCandidatesResolver {
 				// ...or is far enough from the subroutine label
 				|| (this.lineCount(referenceCandidate) >= exitPointLinesThreshold);
 			if (!visible) {
-				return;
+				continue;
 			}
 
 			// Computes the InlayHint position in the last line
-			const [ position, paddingLeft, paddingRight ] = this.computePosition(
+			const [position, paddingLeft, paddingRight] = this.computePosition(
 				referenceCandidate.endLine, referenceCandidate.sourceCodeWithExitPoint, exitPointPosition);
 
 			// Builds the InlayHint
@@ -353,7 +364,7 @@ class InlayHintsCandidatesResolver {
 				position, paddingLeft, paddingRight, referenceCandidate, candidates);
 
 			inlayHints.push(inlayHint);
-		});
+		}
 
 		return inlayHints;
 	}
@@ -364,13 +375,14 @@ class InlayHintsCandidatesResolver {
 	}
 
 	private computePosition(
-		line: vscode.TextLine, sourceCode: SourceCode,
-		positionType: "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd"):
-		[ vscode.Position, boolean, boolean ] {
+		line: vscode.TextLine,
+		sourceCode: SourceCode,
+		position: inlayHintPositionType)
+		: [vscode.Position, boolean, boolean] {
 
-		switch (positionType) {
+		switch (position) {
 			case "lineStart":
-				return [ line.range.start, false, true ];
+				return [line.range.start, false, true];
 
 			case "afterLabel":
 				return [
@@ -403,7 +415,7 @@ class InlayHintsCandidatesResolver {
 				];
 
 			case "lineEnd":
-				return [ line.range.end, true, false ];
+				return [line.range.end, true, false];
 		}
 	}
 }
@@ -419,7 +431,7 @@ class OngoingInlayHintCandidate {
 		readonly sourceCode: SourceCode[]) {
 	}
 
-	withEndLine(endLine: vscode.TextLine, conditional: boolean) {
+	withEndLine(endLine: vscode.TextLine, conditional: boolean): InlayHintCandidate {
 		return new InlayHintCandidate(this.startLine, this.sourceCode, endLine, conditional);
 	}
 }
@@ -453,7 +465,9 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 	}
 
 	get totalTimings(): TotalTimings {
-		return this.cachedTotalTimings ??= new TotalTimings(mainParser.instance.parse(this.sourceCode)!);
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const meterable = mainParser.instance.parse(this.sourceCode)!;
+		return this.cachedTotalTimings ??= new TotalTimings(meterable);
 	}
 }
 
@@ -473,7 +487,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 	}
 
 	// (for performance reasons)
-	protected readonly platform: "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
+	protected readonly platform: platformType;
 	protected readonly hasM1: boolean;
 	protected readonly timingSuffix: string;
 
@@ -495,15 +509,12 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 
 	resolve(): vscode.InlayHint {
 
-		// (sanity check)
-		if (!this.tooltip) {
-			this.tooltip = new vscode.MarkdownString(this.buildTooltip().join("\n"), true);
-		}
+		this.tooltip ??= new vscode.MarkdownString(this.buildTooltip().join("\n"), true);
 
 		return this;
 	}
 
-	private buildTooltip(): string [] {
+	private buildTooltip(): string[] {
 
 		if ((this.candidates.length == 1) || (this.displayLimit <= 1)) {
 			return this.buildTooltipHeader(this.referenceCandidate);
@@ -543,12 +554,12 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 	private buildTooltipTable(): string[] {
 
 		const entries: string[] = [];
-		this.candidates.forEach(candidate => {
+		for (const candidate of this.candidates) {
 			const entry = this.buildTooltipTableEntry(candidate);
 			if (entry) {
 				entries.push(entry);
 			}
-		});
+		}
 
 		// (sanity check)
 		if (entries.length <= 1) {
@@ -625,11 +636,8 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 	buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
-		if (!totalTiming) {
-			return;
-		}
 
-		const range = `_&hellip;&nbsp;#${candidate.endLine.lineNumber + 1}_&nbsp;`;
+		const range = `_&hellip;&nbsp;#${String(candidate.endLine.lineNumber + 1)}_&nbsp;`;
 
 		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clock)");
 		const value = formatTiming(totalTiming.z80Timing);
@@ -695,12 +703,9 @@ class ResolvableExitPointInlayHint extends ResolvableInlayHint {
 	buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
-		if (!totalTiming) {
-			return;
-		}
 
-		const range = `_#${candidate.startLine.lineNumber + 1}&nbsp;&hellip;_&nbsp;`;
-		const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":") ?? '';
+		const range = `_#${String(candidate.startLine.lineNumber + 1)}&nbsp;&hellip;_&nbsp;`;
+		const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":") ?? "";
 
 		const value = formatTiming(totalTiming.z80Timing);
 		const m1Value = formatTiming(totalTiming.msxTiming);

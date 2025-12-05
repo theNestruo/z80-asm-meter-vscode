@@ -1,31 +1,28 @@
-import HLRU from 'hashlru';
-import * as vscode from 'vscode';
+import HLRU from "hashlru";
+import * as vscode from "vscode";
 import { config } from "../config";
-import { mainParser } from '../parsers/parsers';
-import { TotalTimings } from '../totalTimings/TotalTimings';
-import { TotalTiming } from '../totalTimings/types/TotalTiming';
-import { Meterable } from '../types/Meterable';
-import { hrMarkdown } from '../utils/TextUtils';
-import { printBytes } from '../utils/BytesUtils';
-import { printSize } from '../utils/SizeUtils';
-import { printInstructions } from '../utils/InstructionsUtils';
-import { printTiming } from '../utils/TimingUtils';
-import { printableTimingSuffix } from '../utils/TimingUtils';
-import { formatTiming } from '../utils/TimingUtils';
-import { linesToSourceCode } from '../utils/SourceCodeUtils';
-import { hashCode, pluralize, spaceIfNotInfix, validateCodicon } from "../utils/TextUtils";
-import { CopyToClipboardCommand } from './CopyToClipboardCommands';
-import { readLinesFromActiveTextEditorSelection } from './SourceCodeReader';
+import { mainParser } from "../parsers/parsers";
+import { TotalTimings } from "../totalTimings/TotalTimings";
+import type { TotalTiming } from "../totalTimings/types/TotalTiming";
+import type { Meterable } from "../types/Meterable";
+import { printBytes } from "../utils/BytesUtils";
+import { printInstructions } from "../utils/InstructionsUtils";
+import { printSize } from "../utils/SizeUtils";
+import { linesToSourceCode } from "../utils/SourceCodeUtils";
+import { hashCode, hrMarkdown, pluralize, spaceIfNotInfix, validateCodicon } from "../utils/TextUtils";
+import { formatTiming, printableTimingSuffix, printTiming } from "../utils/TimingUtils";
+import type { CopyToClipboardCommand } from "./CopyToClipboardCommands";
+import { readLinesFromActiveTextEditorSelection } from "./SourceCodeReader";
 
 /**
  * A container for the data to be displayed in the StatusBarItem
  */
 class StatusBarItemContents {
 	constructor(
-			readonly text: string,
-			/** The optional line repetition count */
-			readonly tooltip: vscode.MarkdownString) {
-    }
+		readonly text: string,
+		/** The optional line repetition count */
+		readonly tooltip: vscode.MarkdownString) {
+	}
 }
 
 /**
@@ -42,12 +39,25 @@ class StatusBarHandler implements vscode.Disposable {
 
 		this._disposable =
 			// Subscribe to configuration change event
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
-		this.create();
+		this.createStatusBarItem();
 	}
 
-	onUpdateRequest() {
+	private createStatusBarItem(): vscode.StatusBarItem {
+
+		const alignment = config.statusBar.alignment;
+		return this.statusBarItem ??= vscode.window.createStatusBarItem(
+			["leftmost", "left"].includes(alignment)
+				? vscode.StatusBarAlignment.Left
+				: vscode.StatusBarAlignment.Right,
+			["leftmost", "right"].includes(alignment)
+				? Number.MAX_SAFE_INTEGER
+				: Number.MIN_SAFE_INTEGER);
+	}
+
+	onUpdateRequest(): void {
 
 		// Reads the source code
 		const lines = readLinesFromActiveTextEditorSelection();
@@ -72,7 +82,7 @@ class StatusBarHandler implements vscode.Disposable {
 
 		// Parses the source code
 		const metered = mainParser
-		.instance.parse(linesToSourceCode(lines));
+			.instance.parse(linesToSourceCode(lines));
 		if (!metered) {
 			return undefined;
 		}
@@ -82,36 +92,8 @@ class StatusBarHandler implements vscode.Disposable {
 
 		// Builds the status bar item contents
 		return new StatusBarItemContents(
-				printStatusBarText(totalTimings),
-				this.buildTooltip(totalTimings));
-	}
-
-	private create() {
-
-		if (this.statusBarItem) {
-			return;
-		}
-
-		const alignment = config.statusBar.alignment;
-		this.statusBarItem = vscode.window.createStatusBarItem(
-			["leftmost", "left"].includes(alignment)
-				? vscode.StatusBarAlignment.Left
-				: vscode.StatusBarAlignment.Right,
-			["leftmost", "right"].includes(alignment)
-				? Number.MAX_SAFE_INTEGER
-				: Number.MIN_SAFE_INTEGER);
-	}
-
-	private show(contents: StatusBarItemContents) {
-		this.create();
-		this.statusBarItem!.text = contents.text;
-		this.statusBarItem!.tooltip = contents.tooltip;
-		this.statusBarItem!.command = this.command;
-		this.statusBarItem!.show();
-	}
-
-	private hide() {
-		this.statusBarItem?.hide();
+			printStatusBarText(totalTimings),
+			this.buildTooltip(totalTimings));
 	}
 
 	private buildTooltip(totalTimings: TotalTimings): vscode.MarkdownString {
@@ -131,21 +113,33 @@ class StatusBarHandler implements vscode.Disposable {
 		return new vscode.MarkdownString(markdown.join("\n"), true);
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	private show(contents: StatusBarItemContents): void {
+		const statusBarItem = this.createStatusBarItem();
+		statusBarItem.text = contents.text;
+		statusBarItem.tooltip = contents.tooltip;
+		statusBarItem.command = this.command;
+		statusBarItem.show();
+	}
+
+	private hide(): void {
+		this.statusBarItem?.hide();
+	}
+
+	onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		// Recreates StatusBarItem on alignment change
 		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
-			this.destroy();
-			this.create();
+			this.destroyStatusBarItem();
+			this.createStatusBarItem();
 		}
 	}
 
-	dispose() {
+	dispose(): void {
 		this._disposable.dispose();
-		this.destroy();
+		this.destroyStatusBarItem();
 	}
 
-	private destroy() {
+	private destroyStatusBarItem(): void {
 		this.statusBarItem?.dispose();
 		this.statusBarItem = undefined;
 	}
@@ -179,7 +173,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 
 		// Checks cache
 		const currentHashCode = hashCode(lines.join("\n"));
-		const cachedContents = this.cache.get(currentHashCode);
+		const cachedContents = this.cache.get(currentHashCode) as StatusBarItemContents | undefined;
 		if (cachedContents) {
 			return cachedContents !== this.empty ? cachedContents : undefined;
 		}
@@ -193,15 +187,15 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		return contents;
 	}
 
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);
 
-        // Re-initializes cache
+		// Re-initializes cache
 		this.cache = HLRU(config.statusBar.cacheSize);
 	}
 
 	override dispose(): void {
-        this.cache.clear();
+		this.cache.clear();
 		super.dispose();
 	}
 }
@@ -223,13 +217,16 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 
 		this._disposable = vscode.Disposable.from(
 			// Subscribe to selection change and editor activation events
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.window.onDidChangeTextEditorSelection(this.onUpdateRequest, this),
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.window.onDidChangeActiveTextEditor(this.onUpdateRequest, this),
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this),
 		);
 	}
 
-	onUpdateRequest() {
+	onUpdateRequest(): void {
 
 		// Checks debounce configuration
 		const debounce = config.statusBar.debounce;
@@ -266,7 +263,7 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 		}, debounce);
 	}
 
-	dispose() {
+	dispose(): void {
 		clearTimeout(this.updateStatusBarTimeout);
 		this._disposable.dispose();
 	}
@@ -342,9 +339,9 @@ function printStatusBarTotalTimingsArray(totalTimings: (TotalTiming | undefined)
 
 	let previousIcon = "";
 	let previousValue = "";
-	totalTimings.forEach(totalTiming => {
+	for (const totalTiming of totalTimings) {
 		if (!totalTiming) {
-			return;
+			continue;
 		}
 		const icon = totalTiming.statusBarIcon;
 		const value = printTiming(totalTiming) ?? "0";
@@ -352,24 +349,23 @@ function printStatusBarTotalTimingsArray(totalTimings: (TotalTiming | undefined)
 		// Combines when the previous timing when they have the same values
 		if (!config.statusBar.totalTimingsCombined) {
 			text += `${icon}${value} `;
-
-		} else {
-			// Same as previous timing?
-			if (value === previousValue) {
-				// Combines the decoration
-				previousIcon += icon;
-
-			} else {
-				// Preserves the previous timing entry
-				if (previousIcon || previousValue) {
-					text += `${previousIcon}${previousValue} `;
-				}
-				// Aggregates a new timing entry
-				previousIcon = icon;
-				previousValue = value;
-			}
+			continue;
 		}
-	});
+
+		// Same as previous timing? Combines the decoration
+		if (value === previousValue) {
+			previousIcon += icon;
+			continue;
+		}
+
+		// Preserves the previous timing entry
+		if (previousIcon || previousValue) {
+			text += `${previousIcon}${previousValue} `;
+		}
+		// Aggregates a new timing entry
+		previousIcon = icon;
+		previousValue = value;
+	}
 	if (config.statusBar.totalTimingsCombined) {
 		text += `${previousIcon}${previousValue} `;
 	}
@@ -428,16 +424,16 @@ function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] {
 					"|:-:|---|--:|---|"
 				];
 
-	totalTimings.ordered().forEach(totalTiming => {
+	for (const totalTiming of totalTimings.ordered()) {
 		if (!totalTiming) {
-			return;
+			continue;
 		}
 
 		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clock)");
 		const value = formatTiming(totalTiming.z80Timing);
 		const m1Value = formatTiming(totalTiming.msxTiming);
 		if (!value && (!hasM1 || !m1Value)) {
-			return;
+			continue;
 		}
 
 		switch (platform) {
@@ -454,7 +450,7 @@ function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] {
 				table.push(`|${timingIcon}|${totalTiming.name}|**${value}**|${timingSuffix}|`);
 				break;
 		}
-	});
+	}
 
 	return table;
 }

@@ -1,12 +1,18 @@
 import { configurationReader } from "../ConfigurationReader";
 
+export type inlayHintPositionType = "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd";
+
+export type nesteSubroutinesType = "disabled" | "enabled" | "entryPoint";
+
+export type exitPointLabelType = "first" | "closest";
+
 export class InlayHintsConfiguration {
 
 	get enabled(): boolean {
 		return configurationReader.read("inlayHints.enabled");
 	}
 
-	get subroutinesPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd" {
+	get subroutinesPosition(): inlayHintPositionType {
 		return configurationReader.read("inlayHints.subroutines.position");
 	}
 
@@ -18,7 +24,7 @@ export class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.unlabelled");
 	}
 
-	get nestedSubroutines(): "disabled" | "enabled" | "entryPoint" {
+	get nestedSubroutines(): nesteSubroutinesType {
 		return configurationReader.read("inlayHints.subroutines.nested");
 	}
 
@@ -26,7 +32,7 @@ export class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.subroutines.fallthrough");
 	}
 
-	get exitPointPosition(): "lineStart" | "afterLabel" | "beforeCode" | "afterCode" | "beforeComment" | "insideComment" | "lineEnd" {
+	get exitPointPosition(): inlayHintPositionType {
 		return configurationReader.read("inlayHints.exitPoint.position");
 	}
 
@@ -58,7 +64,7 @@ export class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.exitPoint.djnz");
 	}
 
-	get exitPointLabel(): "first" | "closest" {
+	get exitPointLabel(): exitPointLabelType {
 		return configurationReader.read("inlayHints.exitPoint.label");
 	}
 }

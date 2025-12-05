@@ -1,19 +1,21 @@
 import { config } from "../../../config";
 import { MeterableCollection } from "../../../types/AggregatedMeterables";
-import { Meterable } from "../../../types/Meterable";
-import { SourceCode } from "../../../types/SourceCode";
+import type { Meterable } from "../../../types/Meterable";
+import type { SourceCode } from "../../../types/SourceCode";
 import { isConditionalInstruction, isJumpOrCallInstruction } from "../../../utils/AssemblyUtils";
 import { lineToSourceCode } from "../../../utils/SourceCodeUtils";
 import { mainParserForTimingHintsParsers } from "../../parsers";
-import { TimingHints } from "./TimingHints";
+import type { TimingHints } from "./TimingHints";
+
 /**
- * A meterable decorated with a timing hint
+ * A meterable decorated with timing hints
  */
 export class TimingHintedMeterable implements Meterable {
 
 	public static from(
-		meterable: Meterable | undefined, timingHints: TimingHints, sourceCode: SourceCode):
-		Meterable | undefined {
+		meterable: Meterable | undefined,
+		timingHints: TimingHints,
+		sourceCode: SourceCode): Meterable | undefined {
 
 		switch (config.timing.hints.enabledValue) {
 			case "disabled":
@@ -50,19 +52,15 @@ export class TimingHintedMeterable implements Meterable {
 				lineToSourceCode(sourceCode.lineComment, config.syntax.lineSeparatorCharacter));
 	}
 
-	// The meterable instance
-	private meterable: Meterable;
+	private readonly conditional: boolean;
 
-	// The hinted meterable instance
-	private timingHints: TimingHints;
-
-	// Information
-	private conditional: boolean;
-
-	constructor(meterable: Meterable, timingHints: TimingHints) {
-
-		this.meterable = meterable;
-		this.timingHints = timingHints;
+	/**
+	 * @param meterable The meterable instance to be decorated
+	 * @param timingHints The timing hints to decorate
+	 */
+	constructor(
+		private readonly meterable: Meterable,
+		private readonly timingHints: TimingHints) {
 
 		this.conditional = isConditionalInstruction(meterable.instruction);
 	}
@@ -72,27 +70,22 @@ export class TimingHintedMeterable implements Meterable {
 	}
 
 	get z80Timing(): number[] {
-
 		return this.modifiedTimingOf(this.meterable.z80Timing, this.timingHints.z80Timing);
 	}
 
 	get msxTiming(): number[] {
-
 		return this.modifiedTimingOf(this.meterable.msxTiming, this.timingHints.msxTiming);
 	}
 
 	get cpcTiming(): number[] {
-
 		return this.modifiedTimingOf(this.meterable.cpcTiming, this.timingHints.cpcTiming);
 	}
 
 	get bytes(): string[] {
-
 		return this.meterable.bytes;
 	}
 
 	get size(): number {
-
 		return this.meterable.size;
 	}
 
@@ -100,6 +93,7 @@ export class TimingHintedMeterable implements Meterable {
 		return [this];
 	}
 
+	// eslint-disable-next-line @typescript-eslint/class-literal-property-style
 	get isComposed(): boolean {
 		return false;
 	}
@@ -117,4 +111,3 @@ export class TimingHintedMeterable implements Meterable {
 			: [timing[0] + addend[0], timing[1] + addend[1]];
 	}
 }
-

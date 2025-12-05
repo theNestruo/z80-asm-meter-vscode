@@ -6,7 +6,7 @@ export interface TimingHintsDefinitionConfiguration {
 	/**
 	 * The pattern of the regular expression to match against the line comment
 	 */
-	pattern: RegExp;
+	pattern: RegExp | undefined;
 
 	/**
 	 * The string indicating the flags of the regular expression

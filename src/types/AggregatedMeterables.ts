@@ -1,4 +1,4 @@
-import { Meterable } from "./Meterable";
+import type { Meterable } from "./Meterable";
 
 /**
  * Any aggregation of meterables
@@ -67,6 +67,7 @@ export class MeterableCollection extends AggregatedMeterable {
 		return true;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/class-literal-property-style
 	get instruction(): string {
 		return "";
 	}
@@ -75,11 +76,11 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		if (!this.cachedZ80Timing) {
 			const totalZ80Timing: number[] = [0, 0];
-			this.meterables.forEach(meterable => {
+			for (const meterable of this.meterables) {
 				const z80Timing = meterable.z80Timing;
 				totalZ80Timing[0] += z80Timing[0];
 				totalZ80Timing[1] += z80Timing[1];
-			});
+			}
 			this.cachedZ80Timing = totalZ80Timing;
 		}
 		return this.cachedZ80Timing;
@@ -89,11 +90,11 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		if (!this.cachedMsxTiming) {
 			const totalMsxTiming: number[] = [0, 0];
-			this.meterables.forEach(meterable => {
+			for (const meterable of this.meterables) {
 				const msxTiming = meterable.msxTiming;
 				totalMsxTiming[0] += msxTiming[0];
 				totalMsxTiming[1] += msxTiming[1];
-			});
+			}
 			this.cachedMsxTiming = totalMsxTiming;
 		}
 		return this.cachedMsxTiming;
@@ -103,11 +104,11 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		if (!this.cachedCpcTiming) {
 			const totalCpcTiming: number[] = [0, 0];
-			this.meterables.forEach(meterable => {
+			for (const meterable of this.meterables) {
 				const cpcTiming = meterable.cpcTiming;
 				totalCpcTiming[0] += cpcTiming[0];
 				totalCpcTiming[1] += cpcTiming[1];
-			});
+			}
 			this.cachedCpcTiming = totalCpcTiming;
 		}
 		return this.cachedCpcTiming;
@@ -117,7 +118,9 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		if (!this.cachedBytes) {
 			const bytes: string[] = [];
-			this.meterables.forEach(meterable => bytes.push(...meterable.bytes));
+			for (const meterable of this.meterables) {
+				bytes.push(...meterable.bytes);
+			}
 			this.cachedBytes = bytes;
 		}
 		return this.cachedBytes;
@@ -127,7 +130,9 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		if (!this.cachedSize) {
 			let size = 0;
-			this.meterables.forEach(meterable => size += meterable.size);
+			for (const meterable of this.meterables) {
+				size += meterable.size;
+			}
 			this.cachedSize = size;
 		}
 		return this.cachedSize;
@@ -137,13 +142,13 @@ export class MeterableCollection extends AggregatedMeterable {
 
 		if (!this.cachedMeterables?.length) {
 			const meterables: Meterable[] = [];
-			this.meterables.forEach(meterable => {
+			for (const meterable of this.meterables) {
 				if (meterable.isComposed) {
 					meterables.push(...meterable.flatten());
 				} else {
 					meterables.push(meterable);
 				}
-			});
+			}
 			this.cachedMeterables = meterables;
 		}
 		return this.cachedMeterables;
@@ -183,13 +188,12 @@ export class RepeatedMeterable extends AggregatedMeterable {
 	 * @param repetitions The number of times the meterable instance is repeated
 	 */
 	constructor(
-		private meterable: Meterable,
-		private repetitions: number) {
+		private readonly meterable: Meterable,
+		private readonly repetitions: number) {
 		super();
 	}
 
 	get instruction(): string {
-
 		return this.cachedInstruction ??= this.meterable.instruction;
 	}
 
@@ -242,7 +246,6 @@ export class RepeatedMeterable extends AggregatedMeterable {
 	}
 
 	get size(): number {
-
 		return this.cachedSize ??= this.meterable.size * this.repetitions;
 	}
 
@@ -250,7 +253,7 @@ export class RepeatedMeterable extends AggregatedMeterable {
 
 		// Nested meterable is simple
 		if (!this.meterable.isComposed) {
-			return new Array(this.repetitions).fill(this.meterable);
+			return Array.from<Meterable>({ length: this.repetitions }).fill(this.meterable);
 		}
 
 		// Nested meterable is composed

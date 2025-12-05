@@ -1,12 +1,18 @@
 import { configurationReader } from "../../../vscode/ConfigurationReader";
 
+export type syntaxType = "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "spasm-ng" | "tniasm";
+
+export type lineSeparatorType = "disabled" | "backslash" | "colon" | "pipe";
+
+export type repeatType = "disabled" | "brackets" | "dot";
+
 export class SyntaxConfiguration {
 
-	get syntax(): "default" | "glass" | "pasmo" | "sjasm" | "sjasmplus" | "spasm-ng" | "tniasm" {
+	get syntax(): syntaxType {
 		return configurationReader.read("syntax");
 	}
 
-	private get lineSeparator(): "disabled" | "backslash" | "colon" | "pipe" {
+	private get lineSeparator(): lineSeparatorType {
 
 		return configurationReader.readWithDefaultValue("syntaxFeature.lineSeparator",
 			this.syntax === "spasm-ng" ? "backslash" // (derived)
@@ -39,7 +45,7 @@ export class SyntaxConfiguration {
 			: /(^\s*[^\s:]+:)/;
 	}
 
-	private get repeat(): "disabled" | "brackets" | "dot" {
+	private get repeat(): repeatType {
 
 		return configurationReader.readWithDefaultValue("syntaxFeature.repeat",
 			(this.syntax === "sjasm") ? "brackets" // (derived)

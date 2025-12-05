@@ -1,6 +1,6 @@
 import { extractMnemonicOf, extractOperandsOf } from "../../../utils/AssemblyUtils";
 import { parseNumericExpression } from "../../../utils/NumberUtils";
-import { RepetitionParser } from "../types/RepetitionParser";
+import type { RepetitionParser } from "../types/RepetitionParser";
 
 /**
  * Base class for repetition parser implementations

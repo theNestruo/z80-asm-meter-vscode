@@ -1,17 +1,17 @@
 import { config } from "../../../config";
 import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { RepetitionParser } from "../types/RepetitionParser";
 import { AbstractRepetitionParser } from "./AbstractRepetitionParser";
-import { RepetitionParser } from "../types/RepetitionParser";
 
 class GlassReptRepetitionParserRef extends OptionalSingletonRefImpl<RepetitionParser, GlassReptRepetitionParser> {
 
-    protected get enabled(): boolean {
-        return config.syntax.glassReptEndmRepetition;
-    }
+	protected get enabled(): boolean {
+		return config.syntax.glassReptEndmRepetition;
+	}
 
-    protected createInstance(): GlassReptRepetitionParser {
-        return new GlassReptRepetitionParser();
-    }
+	protected createInstance(): GlassReptRepetitionParser {
+		return new GlassReptRepetitionParser();
+	}
 }
 
 export const glassReptRepetitionParser = new GlassReptRepetitionParserRef();
@@ -23,8 +23,8 @@ export const glassReptRepetitionParser = new GlassReptRepetitionParserRef();
  */
 export class GlassReptRepetitionParser extends AbstractRepetitionParser {
 
-    constructor() {
-        super("REPT", "ENDM");
-    }
+	constructor() {
+		super("REPT", "ENDM");
+	}
 }
 

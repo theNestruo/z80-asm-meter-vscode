@@ -1,13 +1,13 @@
-import { config } from '../config';
-import { Meterable } from '../types/Meterable';
+import { config } from "../config";
+import type { Meterable } from "../types/Meterable";
 
 /*
  * Print
  */
 
-export function printableTimingSuffix() {
+export function printableTimingSuffix(): string {
 
-	return config.platform === "cpc" ? " NOPs" : "clock cycles";
+	return config.platform === "cpc" ? "NOPs" : "clock cycles";
 }
 
 export function printTiming(meterable: Meterable): string | undefined {
@@ -18,7 +18,7 @@ export function printTiming(meterable: Meterable): string | undefined {
 			: meterable.z80Timing;
 
 	// (no data)
-	if (!timing) {
+	if (!timing.length) {
 		return undefined;
 	}
 
@@ -39,7 +39,7 @@ export function printTiming(meterable: Meterable): string | undefined {
 
 export function formatTiming(t: number[]): string {
 
-	return t[0] === t[1] ? t[0].toString() : t[0] + "/" + t[1];
+	return t[0] === t[1] ? String(t[0]) : `${String(t[0])}/${String(t[1])}`;
 }
 
 /*
@@ -48,25 +48,25 @@ export function formatTiming(t: number[]): string {
 
 export function parseTimingsLenient(...array: unknown[]): number[] | undefined {
 
-    for (const o of array) {
-        const t = parseTimingLenient(o);
-        if (t !== undefined) {
-            return t;
-        }
-    }
-    return undefined;
+	for (const o of array) {
+		const t = parseTimingLenient(o);
+		if (t !== undefined) {
+			return t;
+		}
+	}
+	return undefined;
 }
 
 export function parseTiming(s: string): number[] {
 
-    const ss = s.split("/");
-    const t0 = parseInt(ss[0], 10);
-    return ss.length === 1 ? [t0, t0] : [t0, parseInt(ss[1], 10)];
+	const ss = s.split("/");
+	const t0 = Number(ss[0]);
+	return ss.length === 1 ? [t0, t0] : [t0, Number(ss[1])];
 }
 
 export function parseTimingLenient(o: unknown): number[] | undefined {
 
-    return (typeof o === "number") ? [o, o]
-        : (typeof o === "string") ? parseTiming(o)
-            : undefined;
+	return (typeof o === "number") ? [o, o]
+		: (typeof o === "string") ? parseTiming(o)
+			: undefined;
 }

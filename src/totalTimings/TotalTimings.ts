@@ -1,10 +1,10 @@
 import { config } from "../config";
-import { Meterable } from "../types/Meterable";
+import type { Meterable } from "../types/Meterable";
 import { AtExitTotalTimingsMeterable } from "./impl/AtExitTotalTimingMeterable";
 import { DefaultTotalTimingsMeterable } from "./impl/DefaultTotalTimingsMeterable";
 import { ExecutionFlowTotalTimingsMeterable } from "./impl/ExecutionFlowTotalTimingsMeterable";
-import { AtExitTotalTiming } from "./types/AtExitTotalTiming";
-import { TotalTiming } from "./types/TotalTiming";
+import type { AtExitTotalTiming } from "./types/AtExitTotalTiming";
+import type { TotalTiming } from "./types/TotalTiming";
 
 /**
  * Computes and stores:
@@ -29,7 +29,9 @@ export class TotalTimings {
 	 * The total timing calculation that best fits the selection
 	 */
 	best(): TotalTiming {
-		return this.atExitTotalTiming || this.executionFlowTotalTiming || this.defaultTotalTiming;
+		return this.atExitTotalTiming
+			?? this.executionFlowTotalTiming
+			?? this.defaultTotalTiming;
 	}
 
 	/**

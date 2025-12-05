@@ -3,20 +3,20 @@ import { splitNormalizeQuotesAware } from "./SourceCodeUtils";
 
 export function extractMnemonicOf(s: string): string {
 
-    const i = s.indexOf(" ");
-    return i === -1 ? s : s.substring(0, i);
+	const i = s.indexOf(" ");
+	return i === -1 ? s : s.substring(0, i);
 }
 
 export function extractOperandsOf(s: string): string[] {
 
-    const i = s.indexOf(" ");
-    return i === -1 ? [] : s.substring(i + 1).split(",").map(ss => ss.trim());
+	const i = s.indexOf(" ");
+	return i === -1 ? [] : s.substring(i + 1).split(",").map(ss => ss.trim());
 }
 
 export function extractOperandsOfQuotesAware(s: string): string[] {
 
-    const i = s.indexOf(" ");
-    return i === -1 ? [] : splitNormalizeQuotesAware(s.substring(i + 1), ",");
+	const i = s.indexOf(" ");
+	return i === -1 ? [] : splitNormalizeQuotesAware(s.substring(i + 1), ",");
 }
 
 /**
@@ -25,10 +25,10 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
  */
 export function isVerbatimOperand(operand: string): boolean {
 
-    return ["A", "AF", "AF'", "B", "BC", "C", "NC",
-        "D", "DE", "E", "H", "HL", "L",
-        "I", "IX", "IY", "R", "SP",
-        "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
+	return ["A", "AF", "AF'", "B", "BC", "C", "NC",
+		"D", "DE", "E", "H", "HL", "L",
+		"I", "IX", "IY", "R", "SP",
+		"Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
 }
 
 /**
@@ -39,7 +39,7 @@ export function isVerbatimOperand(operand: string): boolean {
  */
 export function verbatimOperandScore(expectedOperand: string, candidateOperand: string): number {
 
-    return (candidateOperand === expectedOperand) ? 1 : 0;
+	return (candidateOperand === expectedOperand) ? 1 : 0;
 }
 
 /**
@@ -48,13 +48,13 @@ export function verbatimOperandScore(expectedOperand: string, candidateOperand: 
  */
 export function isIndirectionOperand(operand: string, strict: boolean): boolean {
 
-    if (operand.startsWith("(") && operand.endsWith(")")) {
-        return true;
-    }
-    if (strict) {
-        return false;
-    }
-    return (operand.startsWith("[") && operand.endsWith("]"));
+	if (operand.startsWith("(") && operand.endsWith(")")) {
+		return true;
+	}
+	if (strict) {
+		return false;
+	}
+	return (operand.startsWith("[") && operand.endsWith("]"));
 }
 
 // (precompiled RegExp for performance reasons)
@@ -69,15 +69,15 @@ const sdccIyRegisterWithOffsetRegexp = /(?:\(\s*IY\s*\)|\[\s*IY\s*\])$/; // "...
  */
 export function sdccIndexRegisterIndirectionScore(expectedOperand: string, candidateOperand: string): number | undefined {
 
-    // Depending on the expected indirection...
-    switch (expectedOperand) {
-        case "(IX+o)":
-            return sdccIxRegisterWithOffsetRegexp.test(candidateOperand) ? 1 : undefined;
-        case "(IY+o)":
-            return sdccIyRegisterWithOffsetRegexp.test(candidateOperand) ? 1 : undefined;
-        default:
-            return undefined;
-    }
+	// Depending on the expected indirection...
+	switch (expectedOperand) {
+		case "(IX+o)":
+			return sdccIxRegisterWithOffsetRegexp.test(candidateOperand) ? 1 : undefined;
+		case "(IY+o)":
+			return sdccIyRegisterWithOffsetRegexp.test(candidateOperand) ? 1 : undefined;
+		default:
+			return undefined;
+	}
 }
 
 /**
@@ -86,7 +86,7 @@ export function sdccIndexRegisterIndirectionScore(expectedOperand: string, candi
  */
 export function extractIndirection(operand: string): string {
 
-    return operand.substring(1, operand.length - 1).trim();
+	return operand.substring(1, operand.length - 1).trim();
 }
 
 /**
@@ -95,7 +95,7 @@ export function extractIndirection(operand: string): string {
  */
 export function is8bitRegisterScore(operand: string): number {
 
-    return ["A", "B", "C", "D", "E", "H", "L"].includes(operand)? 1 : 0;
+	return ["A", "B", "C", "D", "E", "H", "L"].includes(operand) ? 1 : 0;
 }
 
 // (precompiled RegExp for performance reasons)
@@ -107,7 +107,7 @@ const ixRegisterWithOffsetRegexp = /^IX\b/; // "IX..."
  */
 export function isIXWithOffsetScore(operand: string): number {
 
-    return ixRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
+	return ixRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
 // (precompiled RegExp for performance reasons)
@@ -119,7 +119,7 @@ const iyRegisterWithOffsetRegexp = /^IY\b/; // "IY..."
  */
 export function isIYWithOffsetScore(operand: string): number {
 
-    return iyRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
+	return iyRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
 /**
@@ -128,7 +128,7 @@ export function isIYWithOffsetScore(operand: string): number {
  */
 export function isIXhScore(operand: string): number {
 
-    return ["IXH", "IXU", "XH", "HX"].includes(operand) ? 1 : 0;
+	return ["IXH", "IXU", "XH", "HX"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -137,7 +137,7 @@ export function isIXhScore(operand: string): number {
  */
 export function isIXlScore(operand: string): number {
 
-    return ["IXL", "XL", "LX"].includes(operand) ? 1 : 0;
+	return ["IXL", "XL", "LX"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -146,7 +146,7 @@ export function isIXlScore(operand: string): number {
  */
 export function isIX8bitScore(operand: string): number {
 
-    return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].includes(operand) ? 1 : 0;
+	return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -155,7 +155,7 @@ export function isIX8bitScore(operand: string): number {
  */
 export function isIYhScore(operand: string): number {
 
-    return ["IYH", "IYU", "YH", "HY"].includes(operand) ? 1 : 0;
+	return ["IYH", "IYU", "YH", "HY"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -164,7 +164,7 @@ export function isIYhScore(operand: string): number {
  */
 export function isIYlScore(operand: string): number {
 
-    return ["IYL", "YL", "LY"].includes(operand) ? 1 : 0;
+	return ["IYL", "YL", "LY"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -173,7 +173,7 @@ export function isIYlScore(operand: string): number {
  */
 export function isIY8bitScore(operand: string): number {
 
-    return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].includes(operand) ? 1 : 0;
+	return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].includes(operand) ? 1 : 0;
 }
 
 /**
@@ -182,7 +182,7 @@ export function isIY8bitScore(operand: string): number {
  */
 export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
 
-    return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIX8bitScore(operand);
+	return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIX8bitScore(operand);
 }
 
 /**
@@ -191,7 +191,7 @@ export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number 
  */
 export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
 
-    return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIY8bitScore(operand);
+	return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIY8bitScore(operand);
 }
 
 // (precompiled RegExp for performance reasons)
@@ -204,10 +204,10 @@ const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
  */
 export function isAnyRegister(operand: string): boolean {
 
-    return ["A", "AF", "AF'", "B", "BC", "C", "D", "DE", "E", "H", "HL", "L",
-            "I", "IX", "IXU", "IXH", "IXL", "IY", "IYU", "IYH", "IYL",
-            "R", "SP"].includes(operand)
-            || ixOrIyRegisterWithOffsetRegexp.test(operand);
+	return ["A", "AF", "AF'", "B", "BC", "C", "D", "DE", "E", "H", "HL", "L",
+		"I", "IX", "IXU", "IXH", "IXL", "IY", "IYU", "IYH", "IYL",
+		"R", "SP"].includes(operand)
+		|| ixOrIyRegisterWithOffsetRegexp.test(operand);
 }
 
 /**
@@ -216,7 +216,7 @@ export function isAnyRegister(operand: string): boolean {
  */
 export function isAnyCondition(operand: string): boolean {
 
-    return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
+	return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
 }
 
 /**
@@ -225,7 +225,7 @@ export function isAnyCondition(operand: string): boolean {
  */
 export function isJrCondition(operand: string): boolean {
 
-    return ["C", "NC", "Z", "NZ"].includes(operand);
+	return ["C", "NC", "Z", "NZ"].includes(operand);
 }
 
 /**
@@ -236,14 +236,14 @@ export function isJrCondition(operand: string): boolean {
  */
 export function anySymbolOperandScore(operand: string, allowRegisters = false): number {
 
-    return isAnyRegister(
-            isIndirectionOperand(operand, false)
-                ? extractIndirection(operand)
-                : operand)
-            ? (allowRegisters
-                ? 0.25
-                : 0)
-            : 0.75;
+	return isAnyRegister(
+		isIndirectionOperand(operand, false)
+			? extractIndirection(operand)
+			: operand)
+		? (allowRegisters
+			? 0.25
+			: 0)
+		: 0.75;
 }
 
 /**
@@ -254,85 +254,85 @@ export function anySymbolOperandScore(operand: string, allowRegisters = false): 
  */
 export function numericOperandScore(expectedOperand: string, candidateOperand: string): number {
 
-    // Compares as numeric expressions
-    const candidateNumber = parseNumericExpression(candidateOperand);
-    if (candidateNumber !== undefined) {
-        return (candidateNumber === parseNumericExpression(expectedOperand))
-            ? 1 // (exact match)
-            : 0; // (discards match; will default to unexpanded instruction if exists)
-    }
+	// Compares as numeric expressions
+	const candidateNumber = parseNumericExpression(candidateOperand);
+	if (candidateNumber !== undefined) {
+		return (candidateNumber === parseNumericExpression(expectedOperand))
+			? 1 // (exact match)
+			: 0; // (discards match; will default to unexpanded instruction if exists)
+	}
 
-    // (due possibility of using constants, labels, and expressions in the source code,
-    // uses a "best effort" to discard registers and indirections)
-    return isAnyRegister(
-            isIndirectionOperand(candidateOperand, false)
-                ? extractIndirection(candidateOperand)
-                : candidateOperand)
-            ? 0
-            : 0.25;
+	// (due possibility of using constants, labels, and expressions in the source code,
+	// uses a "best effort" to discard registers and indirections)
+	return isAnyRegister(
+		isIndirectionOperand(candidateOperand, false)
+			? extractIndirection(candidateOperand)
+			: candidateOperand)
+		? 0
+		: 0.25;
 }
 
 /**
  * @returns if the instruction is a conditional instruction
  */
-export function isConditionalInstruction(instruction: string) {
+export function isConditionalInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isConditionalJump(mnemonic, operands)
-        || isConditionalCall(mnemonic, operands)
-        || isConditionalRet(mnemonic, operands);
+	return isConditionalJump(mnemonic, operands)
+		|| isConditionalCall(mnemonic, operands)
+		|| isConditionalRet(mnemonic, operands);
 }
 
 /**
  * @returns if the instruction is a jump or a call instruction
  */
-export function isJumpOrCallInstruction(instruction: string) {
+export function isJumpOrCallInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isUnconditionalJump(mnemonic, operands)
-        || isConditionalJump(mnemonic, operands)
-        || isUnconditionalCall(mnemonic, operands)
-        || isConditionalCall(mnemonic, operands);
+	return isUnconditionalJump(mnemonic, operands)
+		|| isConditionalJump(mnemonic, operands)
+		|| isUnconditionalCall(mnemonic, operands)
+		|| isConditionalCall(mnemonic, operands);
 }
 
 /**
  * @returns if the instruction is an unconditional jump or return instruction
  */
-export function isUnconditionalJumpOrRetInstruction(instruction: string) {
+export function isUnconditionalJumpOrRetInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isUnconditionalJump(mnemonic, operands)
-        || isUnconditionalRet(mnemonic, operands);
+	return isUnconditionalJump(mnemonic, operands)
+		|| isUnconditionalRet(mnemonic, operands);
 }
 
 /**
  * @returns if the instruction is a conditional jump or return instruction
  */
-export function isConditionalJumpOrRetInstruction(instruction: string) {
+export function isConditionalJumpOrRetInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isConditionalJump(mnemonic, operands)
-        || isConditionalRet(mnemonic, operands);
+	return isConditionalJump(mnemonic, operands)
+		|| isConditionalRet(mnemonic, operands);
 }
 
 /**
  * @returns if the instruction is a jump instruction (DJNZ, JP or JR)
  */
-export function isJumpInstruction(instruction: string) {
+export function isJumpInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isUnconditionalJump(mnemonic, operands)
-        || isConditionalJump(mnemonic, operands);
+	return isUnconditionalJump(mnemonic, operands)
+		|| isConditionalJump(mnemonic, operands);
 }
 
 /**
@@ -340,8 +340,8 @@ export function isJumpInstruction(instruction: string) {
  */
 export function isUnconditionalJump(mnemonic: string, operands: string[]): boolean {
 
-    return ["JP", "JR"].includes(mnemonic)
-        && (operands.length === 1);
+	return ["JP", "JR"].includes(mnemonic)
+		&& (operands.length === 1);
 }
 
 /**
@@ -349,28 +349,28 @@ export function isUnconditionalJump(mnemonic: string, operands: string[]): boole
  */
 export function isConditionalJump(mnemonic: string, operands: string[]): boolean {
 
-    switch (mnemonic) {
-        case "DJNZ":
-            return (operands.length === 1);
-        case "JP":
-            return (operands.length === 2) && isAnyCondition(operands[0]);
-        case "JR":
-            return (operands.length === 2) && isJrCondition(operands[0]);
-        default:
-            return false;
-    }
+	switch (mnemonic) {
+		case "DJNZ":
+			return (operands.length === 1);
+		case "JP":
+			return (operands.length === 2) && isAnyCondition(operands[0]);
+		case "JR":
+			return (operands.length === 2) && isJrCondition(operands[0]);
+		default:
+			return false;
+	}
 }
 
 /**
  * @returns if the instruction is a call instruction (CALL or RST)
  */
-export function isCallInstruction(instruction: string) {
+export function isCallInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isUnconditionalCall(mnemonic, operands)
-        || isConditionalCall(mnemonic, operands);
+	return isUnconditionalCall(mnemonic, operands)
+		|| isConditionalCall(mnemonic, operands);
 }
 
 /**
@@ -378,8 +378,8 @@ export function isCallInstruction(instruction: string) {
  */
 export function isUnconditionalCall(mnemonic: string, operands: string[]): boolean {
 
-    return ["CALL", "RST"].includes(mnemonic)
-        && (operands.length === 1);
+	return ["CALL", "RST"].includes(mnemonic)
+		&& (operands.length === 1);
 }
 
 /**
@@ -387,21 +387,21 @@ export function isUnconditionalCall(mnemonic: string, operands: string[]): boole
  */
 export function isConditionalCall(mnemonic: string, operands: string[]): boolean {
 
-    return (mnemonic === "CALL")
-        && (operands.length === 2)
-        && isAnyCondition(operands[0]);
+	return (mnemonic === "CALL")
+		&& (operands.length === 2)
+		&& isAnyCondition(operands[0]);
 }
 
 /**
  * @returns if the instruction is a ret instruction (RET, RETI, or RETN)
  */
-export function isRetInstruction(instruction: string) {
+export function isRetInstruction(instruction: string): boolean {
 
-    const mnemonic = extractMnemonicOf(instruction);
-    const operands = extractOperandsOf(instruction);
+	const mnemonic = extractMnemonicOf(instruction);
+	const operands = extractOperandsOf(instruction);
 
-    return isUnconditionalRet(mnemonic, operands)
-        || isConditionalRet(mnemonic, operands);
+	return isUnconditionalRet(mnemonic, operands)
+		|| isConditionalRet(mnemonic, operands);
 }
 
 /**
@@ -409,8 +409,8 @@ export function isRetInstruction(instruction: string) {
  */
 export function isUnconditionalRet(mnemonic: string, operands: string[]): boolean {
 
-    return ["RET", "RETI", "RETN"].includes(mnemonic)
-        && (operands.length === 0);
+	return ["RET", "RETI", "RETN"].includes(mnemonic)
+		&& (operands.length === 0);
 }
 
 /**
@@ -418,7 +418,7 @@ export function isUnconditionalRet(mnemonic: string, operands: string[]): boolea
  */
 export function isConditionalRet(mnemonic: string, operands: string[]): boolean {
 
-    return (mnemonic === "RET")
-        && (operands.length === 1)
-        && isAnyCondition(operands[0]);
+	return (mnemonic === "RET")
+		&& (operands.length === 1)
+		&& isAnyCondition(operands[0]);
 }

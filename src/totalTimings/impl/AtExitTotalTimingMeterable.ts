@@ -1,7 +1,7 @@
 import { config } from "../../config";
-import { Meterable } from "../../types/Meterable";
+import type { Meterable } from "../../types/Meterable";
 import { isCallInstruction, isConditionalInstruction, isConditionalJumpOrRetInstruction, isJumpInstruction, isRetInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
-import { AtExitTotalTiming } from "../types/AtExitTotalTiming";
+import type { AtExitTotalTiming } from "../types/AtExitTotalTiming";
 import { AbstractTotalTimingMeterable } from "./AbstractTotalTimingMeterable";
 
 export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable implements AtExitTotalTiming {

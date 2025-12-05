@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * References an optional instance.
@@ -25,20 +25,21 @@ export abstract class OptionalSingletonRefImpl<I, T extends I> implements Option
 	constructor() {
 		this._disposable =
 			// Subscribe to configuration change event
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
 	get instance(): I | undefined {
 		return this._instance ??= this.enabled
-				? this.createInstance()
-				: undefined;
+			? this.createInstance()
+			: undefined;
 	}
 
 	protected abstract get enabled(): boolean;
 
 	protected abstract createInstance(): T;
 
-	onConfigurationChange(_: vscode.ConfigurationChangeEvent) {
+	onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
 
 		// Removes the implementation if disabled
 		if (!this.enabled) {
@@ -46,12 +47,12 @@ export abstract class OptionalSingletonRefImpl<I, T extends I> implements Option
 		}
 	}
 
-	dispose() {
+	dispose(): void {
 		this._disposable.dispose();
 		this.destroyInstance();
 	}
 
-	protected destroyInstance() {
+	protected destroyInstance(): void {
 
 		if (this._instance instanceof vscode.Disposable) {
 			this._instance.dispose();
@@ -79,7 +80,7 @@ export interface SingletonRef<I> extends OptionalSingletonRef<I> {
  */
 export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I> {
 
-	protected _instance?: I = undefined;
+	protected _instance?: T = undefined;
 
 	get instance(): I {
 		return this._instance ??= this.createInstance();
@@ -87,11 +88,11 @@ export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I
 
 	protected abstract createInstance(): T;
 
-	dispose() {
+	dispose(): void {
 		this.destroyInstance();
 	}
 
-	protected destroyInstance() {
+	protected destroyInstance(): void {
 
 		if (this._instance instanceof vscode.Disposable) {
 			this._instance.dispose();

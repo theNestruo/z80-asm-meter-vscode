@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
+import type * as vscode from "vscode";
 import { config } from "../../../config";
-import { OptionalSingletonRefImpl } from '../../../types/References';
-import { SourceCode } from "../../../types/SourceCode";
+import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { SourceCode } from "../../../types/SourceCode";
 import { parseTimingsLenient } from "../../../utils/TimingUtils";
-import { TimingHints } from '../types/TimingHints';
-import { TimingHintsParser } from '../types/TimingHintsParser';
+import { TimingHints } from "../types/TimingHints";
+import type { TimingHintsParser } from "../types/TimingHintsParser";
 
 class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsParser, RegExpTimingHintsParser> {
 
@@ -13,7 +13,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 
 	protected override get enabled(): boolean {
 		return config.timing.hints.enabled
-				&& (this.regExpTimingHints?.length !== 0);
+			&& !!this.regExpTimingHints.length;
 	}
 
 	protected override createInstance(): RegExpTimingHintsParser {
@@ -30,19 +30,19 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 			const array: { regExp: RegExp, timingHints: TimingHints }[] = [];
 
 			// Locates macro definitions
-			config.timing.hints.regexps?.forEach(source => {
+			for (const source of config.timing.hints.regexps) {
 
 				if (!source.pattern) {
-					return;
+					continue;
 				}
 				let regExp: RegExp;
 				try {
 					regExp = new RegExp(source.pattern, source.flags);
 				} catch (_) {
-					return;
+					continue;
 				}
 				if (regExp.source === this.emptyRegExpSource) {
-					return;
+					continue;
 				}
 
 				const z80Timing =
@@ -59,7 +59,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 						timingHints: new TimingHints(z80Timing, msxTiming, cpcTiming)
 					});
 				}
-			});
+			}
 
 			this._regExpTimingHints = array;
 		}
@@ -67,18 +67,18 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 		return this._regExpTimingHints;
 	}
 
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);
 
-        // Forces re-creation on RegExp-based timing hints definitions change
+		// Forces re-creation on RegExp-based timing hints definitions change
 		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
 			this._instance = undefined;
 			this._regExpTimingHints = undefined;
 		}
 	}
 
-	override dispose() {
-        this._regExpTimingHints = undefined;
+	override dispose(): void {
+		this._regExpTimingHints = undefined;
 		super.dispose();
 	}
 }

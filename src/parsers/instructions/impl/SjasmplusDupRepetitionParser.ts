@@ -1,18 +1,18 @@
-import { config } from '../../../config';
-import { OptionalSingletonRefImpl } from '../../../types/References';
-import { RepetitionParser } from '../types/RepetitionParser';
-import { AbstractRepetitionParser } from './AbstractRepetitionParser';
+import { config } from "../../../config";
+import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { RepetitionParser } from "../types/RepetitionParser";
+import { AbstractRepetitionParser } from "./AbstractRepetitionParser";
 
 class SjasmplusDupRepetitionParserRef
-    extends OptionalSingletonRefImpl<RepetitionParser, SjasmplusDupRepetitionParser> {
+	extends OptionalSingletonRefImpl<RepetitionParser, SjasmplusDupRepetitionParser> {
 
-    protected get enabled(): boolean {
-        return config.syntax.sjasmplusDupEdupRepetition;
-    }
+	protected get enabled(): boolean {
+		return config.syntax.sjasmplusDupEdupRepetition;
+	}
 
-    protected override createInstance(): SjasmplusDupRepetitionParser {
-        return new SjasmplusDupRepetitionParser();
-    }
+	protected override createInstance(): SjasmplusDupRepetitionParser {
+		return new SjasmplusDupRepetitionParser();
+	}
 }
 
 export const sjasmplusDupRepetitionParser = new SjasmplusDupRepetitionParserRef();
@@ -24,7 +24,7 @@ export const sjasmplusDupRepetitionParser = new SjasmplusDupRepetitionParserRef(
  */
 class SjasmplusDupRepetitionParser extends AbstractRepetitionParser {
 
-    constructor() {
-        super("DUP", "EDUP");
-    }
+	constructor() {
+		super("DUP", "EDUP");
+	}
 }

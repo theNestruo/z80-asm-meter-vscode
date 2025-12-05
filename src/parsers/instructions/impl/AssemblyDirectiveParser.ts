@@ -1,12 +1,11 @@
 import { config } from "../../../config";
 import { RepeatedMeterable } from "../../../types/AggregatedMeterables";
-import { Meterable } from "../../../types/Meterable";
-import { SourceCode } from "../../../types/SourceCode";
-import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../../utils/AssemblyUtils";
-import { formatHexadecimalByte } from '../../../utils/NumberUtils';
+import type { Meterable } from "../../../types/Meterable";
 import { SingletonRefImpl } from "../../../types/References";
-import { parseNumericExpression } from "../../../utils/NumberUtils";
-import { InstructionParser } from "../types/InstructionParser";
+import type { SourceCode } from "../../../types/SourceCode";
+import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../../utils/AssemblyUtils";
+import { formatHexadecimalByte, parseNumericExpression } from "../../../utils/NumberUtils";
+import type { InstructionParser } from "../types/InstructionParser";
 import { z80InstructionParser } from "./Z80InstructionParser";
 
 class AssemblyDirectiveParserRef extends SingletonRefImpl<InstructionParser, AssemblyDirectiveParser> {
@@ -60,11 +59,11 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Extracts bytes
 		const bytes: string[] = [];
-		operands.forEach(operand => {
+		for (const operand of operands) {
 			const length = operand.length;
 			if ((length >= 3)
-					&& "\"'".includes(operand.charAt(0))
-					&& (operand.charAt(0) == operand.charAt(operand.length - 1))) {
+				&& "\"'".includes(operand.charAt(0))
+				&& operand.endsWith(operand.charAt(0))) {
 				// String
 				const string = operand.substring(1, operand.length - 1);
 				for (let i = 0; i < string.length; i++) {
@@ -75,7 +74,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 				const value = parseNumericExpression(operand);
 				bytes.push(value !== undefined ? formatHexadecimalByte(value) : "n");
 			}
-		});
+		};
 
 		if (bytes.length === 0) {
 			return undefined;
@@ -94,7 +93,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Extracts bytes
 		const bytes: string[] = [];
-		operands.forEach(operand => {
+		for (const operand of operands) {
 			const value = parseNumericExpression(operand);
 			if (value !== undefined) {
 				bytes.push(formatHexadecimalByte(value & 0xff)
@@ -103,7 +102,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 			} else {
 				bytes.push("n n");
 			}
-		});
+		}
 
 		if (bytes.length === 0) {
 			return undefined;
@@ -131,9 +130,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Determines instruction
 		if (config.parser.directivesDefsAsInstructions) {
-			const opcode = value !== undefined
-				? value
-				: 0x00; // (defaults to NOP)
+			const opcode = value ?? 0x00; // (defaults to NOP)
 			const instruction = z80InstructionParser.instance.parseOpcode(opcode);
 			if (instruction) {
 				return RepeatedMeterable.of(instruction, count);
@@ -142,7 +139,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Returns as directive
 		const byte = value !== undefined ? formatHexadecimalByte(value) : "n";
-		const bytes = new Array(count).fill(byte);
+		const bytes = Array.from<string>({ length: count }).fill(byte);
 		return new AssemblyDirective("DEFS", bytes, count);
 	}
 
@@ -160,7 +157,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 		}
 
 		// Returns as directive
-		const bytes = new Array(count).fill("n");
+		const bytes = Array.from<string>({ length: count }).fill("n");
 		return new AssemblyDirective("RB", bytes, count);
 	}
 
@@ -178,7 +175,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 		}
 
 		// Returns as directive
-		const words = new Array(count).fill("nn");
+		const words = Array.from<string>({ length: count }).fill("nn");
 		return new AssemblyDirective("RW", words, count * 2);
 	}
 }

@@ -1,4 +1,4 @@
-import { MacroDefinitionConfiguration } from "./parsers/instructions/config/MacroDefinitionConfiguration";
+import type { MacroDefinitionConfiguration } from "./parsers/instructions/config/MacroDefinitionConfiguration";
 import { ParserConfiguration } from "./parsers/instructions/config/ParserConfiguration";
 import { SyntaxConfiguration } from "./parsers/instructions/config/SyntaxConfiguration";
 import { TimingHintsConfiguration } from "./parsers/timingHints/config/TimingHintsConfiguration";
@@ -8,25 +8,25 @@ import { InlayHintsConfiguration } from "./vscode/config/InlayHintsConfiguration
 import { StatusBarConfiguration } from "./vscode/config/StatusBarConfiguration";
 import { configurationReader } from "./vscode/ConfigurationReader";
 
+export type platformType = "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
+
 class Configuration {
 
 	get languageIds(): string[] {
 		return configurationReader.read("languageIds");
 	}
 
-	get platform(): "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n" {
+	get platform(): platformType {
 		return configurationReader.read("platform");
 	}
 
 	get instructionSets(): string[] {
-
 		return this.platform === "z80n"
 			? ["S", "N"]
 			: ["S"];
 	}
 
 	get expandSelectionToLine(): boolean {
-
 		return configurationReader.read("expandSelectionToLine");
 	}
 

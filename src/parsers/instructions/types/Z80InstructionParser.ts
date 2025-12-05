@@ -1,6 +1,6 @@
-import { Meterable } from '../../../types/Meterable';
-import { Z80Instruction } from '../impl/Z80InstructionParser';
-import { InstructionParser } from './InstructionParser';
+import type { Meterable } from "../../../types/Meterable";
+import type { Z80Instruction } from "../impl/Z80InstructionParser";
+import type { InstructionParser } from "./InstructionParser";
 
 /**
  * A Z80 instruction parser.
@@ -8,7 +8,7 @@ import { InstructionParser } from './InstructionParser';
  */
 export interface Z80InstructionParser extends InstructionParser {
 
-    parseRawInstruction(instruction: string): Meterable | undefined;
+	parseRawInstruction(instruction: string): Meterable | undefined;
 
-    parseOpcode(opcode: number): Z80Instruction | undefined;
+	parseOpcode(opcode: number): Z80Instruction | undefined;
 }

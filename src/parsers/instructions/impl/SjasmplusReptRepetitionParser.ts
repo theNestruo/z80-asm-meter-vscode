@@ -1,18 +1,18 @@
-import { config } from '../../../config';
-import { OptionalSingletonRefImpl } from '../../../types/References';
-import { RepetitionParser } from '../types/RepetitionParser';
-import { AbstractRepetitionParser } from './AbstractRepetitionParser';
+import { config } from "../../../config";
+import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { RepetitionParser } from "../types/RepetitionParser";
+import { AbstractRepetitionParser } from "./AbstractRepetitionParser";
 
 class SjasmplusReptRepetitionParserRef
-    extends OptionalSingletonRefImpl<RepetitionParser, SjasmplusReptRepetitionParser> {
+	extends OptionalSingletonRefImpl<RepetitionParser, SjasmplusReptRepetitionParser> {
 
-    override get enabled(): boolean {
-        return config.syntax.sjasmplusReptEndrRepetition;
-    }
+	override get enabled(): boolean {
+		return config.syntax.sjasmplusReptEndrRepetition;
+	}
 
-    override createInstance(): SjasmplusReptRepetitionParser {
-        return new SjasmplusReptRepetitionParser();
-    }
+	override createInstance(): SjasmplusReptRepetitionParser {
+		return new SjasmplusReptRepetitionParser();
+	}
 }
 
 export const sjasmplusReptRepetitionParser = new SjasmplusReptRepetitionParserRef();
@@ -24,7 +24,7 @@ export const sjasmplusReptRepetitionParser = new SjasmplusReptRepetitionParserRe
  */
 class SjasmplusReptRepetitionParser extends AbstractRepetitionParser {
 
-    constructor() {
-        super("REPT", "ENDR");
-    }
+	constructor() {
+		super("REPT", "ENDR");
+	}
 }

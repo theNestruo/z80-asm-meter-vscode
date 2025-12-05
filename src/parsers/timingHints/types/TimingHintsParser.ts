@@ -1,5 +1,5 @@
-import { SourceCode } from "../../../types/SourceCode";
-import { TimingHints } from "./TimingHints";
+import type { SourceCode } from "../../../types/SourceCode";
+import type { TimingHints } from "./TimingHints";
 
 /**
  * A timing hint parser

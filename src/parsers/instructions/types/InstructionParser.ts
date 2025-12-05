@@ -1,5 +1,5 @@
-import { Meterable } from "../../../types/Meterable";
-import { SourceCode } from "../../../types/SourceCode";
+import type { Meterable } from "../../../types/Meterable";
+import type { SourceCode } from "../../../types/SourceCode";
 
 /**
  * An instruction parser

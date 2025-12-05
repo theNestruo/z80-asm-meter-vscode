@@ -25,6 +25,6 @@ export class SourceCode {
 		readonly afterLineCommentPosition?: number,
 		readonly lineComment?: string) {
 
-		this.repetitions = repetitions !== undefined ? repetitions : 1;
+		this.repetitions = repetitions ?? 1;
 	}
 }

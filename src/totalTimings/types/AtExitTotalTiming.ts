@@ -1,4 +1,4 @@
-import { TotalTiming } from "./TotalTiming";
+import type { TotalTiming } from "./TotalTiming";
 
 /**
  * "Execution flow to the selected exit point" total timing calculation

@@ -1,4 +1,4 @@
-import { config } from '../config';
+import { config } from "../config";
 
 /*
  * Print
@@ -6,21 +6,21 @@ import { config } from '../config';
 
 export function printSize(n: number): string {
 
-	const dec = n.toString();
+	const decimal = String(n);
 	if (n < 10) {
-		return dec;
+		return decimal;
 	}
 
 	switch (config.statusBar.sizeNumericFormat) {
 		default:
 		case "decimal":
-			return dec;
+			return decimal;
 
 		case "hexadecimal":
 			return formatHexadecimalSize(n);
 
 		case "both":
-			return `${dec} (${formatHexadecimalSize(n)})`;
+			return `${decimal} (${formatHexadecimalSize(n)})`;
 	}
 }
 

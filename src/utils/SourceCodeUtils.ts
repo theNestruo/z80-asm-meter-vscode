@@ -1,6 +1,6 @@
-import { config } from '../config';
+import { config } from "../config";
 import { SourceCode } from "../types/SourceCode";
-import { parseNumericExpression } from './NumberUtils';
+import { parseNumericExpression } from "./NumberUtils";
 
 // (used instead of /\s/ for performance reasons)
 const whitespaceCharacters = "\f\n\r\t\v\u0020\u00a0\u1680"
@@ -33,8 +33,8 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	// Extracts trailing comments
 	const [ beforeLineCommentPosition, afterLineCommentPosition ] = indexOfTrailingCommentsQuotesAware(line, lineSeparatorCharacter);
 	const lineComment = afterLineCommentPosition !== undefined
-			? line.substring(afterLineCommentPosition).trim()
-			: undefined;
+		? line.substring(afterLineCommentPosition).trim()
+		: undefined;
 
 	// Removes trailing comments
 	if (beforeLineCommentPosition !== undefined) {
@@ -57,8 +57,8 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	if (!n) {
 		// Attempts to preserve label, or line comment for timing hints)
 		return (label || lineComment)
-				? [ new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, afterLineCommentPosition, lineComment) ]
-				: [];
+			? [ new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, afterLineCommentPosition, lineComment) ]
+			: [];
 	}
 
 	// Single fragment: will contain label, repetitions and trailing comments
@@ -137,7 +137,7 @@ function isTrailingCommentsStart(c: string, line: string, i: number, n: number):
 
 	return (c === ";") ? 1
 		: (c === "/") && (i + 1 < n) && (line.charAt(i + 1) === "/") ? 2
-		: 0;
+			: 0;
 }
 
 function extractLabel(line: string): [ string | undefined, number | undefined, string ] {
@@ -238,5 +238,5 @@ function isQuote(c: string, currentPart: string): string | undefined {
 		// Prevents considering "'" as a quote
 		// when parsing the instruction "ex af,af'"
 		: ((c === "'") && (!exAfAfRegexp.test(currentPart))) ? c
-		: undefined;
+			: undefined;
 }

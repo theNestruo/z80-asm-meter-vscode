@@ -1,4 +1,4 @@
-import { Meterable } from "../../types/Meterable";
+import type { Meterable } from "../../types/Meterable";
 import { AbstractTotalTimingMeterable } from "./AbstractTotalTimingMeterable";
 
 export class DefaultTotalTimingsMeterable extends AbstractTotalTimingMeterable {

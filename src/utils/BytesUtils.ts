@@ -1,4 +1,4 @@
-import { Meterable } from '../types/Meterable';
+import type { Meterable } from "../types/Meterable";
 
 /*
  * Print
@@ -29,7 +29,7 @@ function shiftFirstBytes(meterables: Meterable[]): string[] | undefined {
 
 	while (meterables.length) {
 		const bytes = meterables.shift()?.bytes;
-		if (bytes && bytes.length) {
+		if (bytes?.length) {
 			return bytes;
 		}
 	}
@@ -40,7 +40,7 @@ function popLastBytes(meterables: Meterable[]): string[] | undefined {
 
 	while (meterables.length) {
 		const bytes = meterables.pop()?.bytes;
-		if (bytes && bytes.length) {
+		if (bytes?.length) {
 			return bytes;
 		}
 	}

@@ -1,4 +1,4 @@
-import { Meterable } from '../types/Meterable';
+import type { Meterable } from "../types/Meterable";
 
 /*
  * Print

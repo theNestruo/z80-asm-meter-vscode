@@ -1,32 +1,32 @@
-import * as vscode from 'vscode';
-import { config } from '../../../config';
-import { MeterableCollection } from '../../../types/AggregatedMeterables';
-import { Meterable } from '../../../types/Meterable';
-import { SourceCode } from '../../../types/SourceCode';
-import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from '../../../utils/AssemblyUtils';
-import { OptionalSingletonRefImpl } from '../../../types/References';
-import { InstructionParser } from "../types/InstructionParser";
-import { sjasmplusFakeInstructionSet } from '../datasets/SjasmplusFakeInstructionSet';
-import { z80InstructionParser } from './Z80InstructionParser';
+import type * as vscode from "vscode";
+import { config } from "../../../config";
+import { MeterableCollection } from "../../../types/AggregatedMeterables";
+import type { Meterable } from "../../../types/Meterable";
+import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { SourceCode } from "../../../types/SourceCode";
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "../../../utils/AssemblyUtils";
+import { sjasmplusFakeInstructionSet } from "../datasets/SjasmplusFakeInstructionSet";
+import type { InstructionParser } from "../types/InstructionParser";
+import { z80InstructionParser } from "./Z80InstructionParser";
 
 class SjasmplusFakeInstructionParserRef
-        extends OptionalSingletonRefImpl<InstructionParser, SjasmplusFakeInstructionParser> {
+	extends OptionalSingletonRefImpl<InstructionParser, SjasmplusFakeInstructionParser> {
 
-    protected get enabled(): boolean {
-        return config.syntax.sjasmplusFakeInstructions;
-    }
+	protected get enabled(): boolean {
+		return config.syntax.sjasmplusFakeInstructions;
+	}
 
-    protected createInstance(): SjasmplusFakeInstructionParser {
-        return new SjasmplusFakeInstructionParser(config.instructionSets);
-    }
+	protected createInstance(): SjasmplusFakeInstructionParser {
+		return new SjasmplusFakeInstructionParser(config.instructionSets);
+	}
 
-    override onConfigurationChange(event: vscode.ConfigurationChangeEvent) {
+	override onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
 
-        // Forces re-creation on instruction set change
-        if (event.affectsConfiguration("z80-asm-meter.platform")) {
-            this.destroyInstance();
-        }
-    }
+		// Forces re-creation on instruction set change
+		if (event.affectsConfiguration("z80-asm-meter.platform")) {
+			this.destroyInstance();
+		}
+	}
 }
 
 export const sjasmplusFakeInstructionParser = new SjasmplusFakeInstructionParserRef();
@@ -38,67 +38,65 @@ export const sjasmplusFakeInstructionParser = new SjasmplusFakeInstructionParser
  */
 class SjasmplusFakeInstructionParser implements InstructionParser {
 
-    // Instruction maps
-    private instructionByMnemonic: Record<string, SjasmplusFakeInstruction[]>;
+	// Instruction maps
+	private readonly instructionByMnemonic: Record<string, SjasmplusFakeInstruction[] | undefined>;
 
-    constructor(instructionSets: string[]) {
+	constructor(instructionSets: string[]) {
 
-        // Initializes instruction maps
-        this.instructionByMnemonic = {};
-        sjasmplusFakeInstructionSet.forEach(rawData => {
+		// Initializes instruction maps
+		this.instructionByMnemonic = {};
+		for (const rawData of sjasmplusFakeInstructionSet) {
 
-            // Discard invalid instruction set instructions
-            if (!instructionSets.includes(rawData[0])) {
-                return;
-            }
+			// Discard invalid instruction set instructions
+			if (!instructionSets.includes(rawData[0])) {
+				continue;
+			}
 
-            // Parses the raw instruction
-            const instruction = new SjasmplusFakeInstruction(
-                rawData[1], // fake instruction
-                rawData.slice(2)); // actual instructions
+			// Parses the raw instruction
+			const instruction = new SjasmplusFakeInstruction(
+				rawData[1], // fake instruction
+				rawData.slice(2)); // actual instructions
 
-            // Prepares a map by mnemonic for performance reasons
-            const mnemonic = instruction.getMnemonic();
-            if (!this.instructionByMnemonic[mnemonic]) {
-                this.instructionByMnemonic[mnemonic] = [];
-            }
-            this.instructionByMnemonic[mnemonic].push(instruction);
-        });
-    }
+			// Prepares a map by mnemonic for performance reasons
+			const mnemonic = instruction.getMnemonic();
+			this.instructionByMnemonic[mnemonic] ??= [];
+			this.instructionByMnemonic[mnemonic].push(instruction);
+		}
+	}
 
-    parseInstruction(s: SourceCode): Meterable | undefined {
+	parseInstruction(s: SourceCode): Meterable | undefined {
 
-        // Locates candidate instructions
-        const instruction = s.instruction;
-        const mnemonic = extractMnemonicOf(instruction);
-        const candidates = this.instructionByMnemonic[mnemonic];
-        if (candidates) {
-            return this.findBestCandidate(instruction, candidates);
-        }
+		// Locates candidate instructions
+		const instruction = s.instruction;
+		const mnemonic = extractMnemonicOf(instruction);
+		const candidates = this.instructionByMnemonic[mnemonic];
+		if (candidates) {
+			return this.findBestCandidate(instruction, candidates);
+		}
 
-        // (unknown mnemonic/instruction)
-        return undefined;
-    }
+		// (unknown mnemonic/instruction)
+		return undefined;
+	}
 
-    private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
-            SjasmplusFakeInstruction | undefined {
+	private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
+		SjasmplusFakeInstruction | undefined {
 
-        // Locates instruction
-        let bestCandidate;
-        let bestScore = 0;
-        for (const candidate of candidates) {
-            const score = candidate.match(instruction);
-            if (score === 1) {
-                // Exact match
-                return candidate;
-            }
-            if (score > bestScore) {
-                bestCandidate = candidate;
-                bestScore = score;
-            }
-        }
-        return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
-    }
+		// Locates instruction
+		let bestCandidate;
+		let bestScore = 0;
+		for (const candidate of candidates) {
+			const score = candidate.match(instruction);
+			if (score === 1) {
+				// Exact match
+				return candidate;
+			}
+			if (score > bestScore) {
+				bestCandidate = candidate;
+				bestScore = score;
+			}
+		}
+		return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
+	}
 }
 
 /**
@@ -106,177 +104,177 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
  */
 class SjasmplusFakeInstruction extends MeterableCollection {
 
-    // Derived information (will be cached for performance reasons)
-    private mnemonic?: string;
-    private operands?: string[];
-    private ready = false;
+	// Derived information (will be cached for performance reasons)
+	private mnemonic?: string;
+	private operands?: string[];
+	private ready = false;
 
-    constructor(
-        private readonly fakeInstruction: string,
-        private readonly rawInstructions: string[]) {
-        super();
-    }
+	constructor(
+		private readonly fakeInstruction: string,
+		private readonly rawInstructions: string[]) {
+		super();
+	}
 
-    /**
-     * @returns The normalized sjasmplus fake instruction
-     */
-    override get instruction(): string {
-        return this.fakeInstruction;
-    }
+	/**
+	 * @returns The normalized sjasmplus fake instruction
+	 */
+	override get instruction(): string {
+		return this.fakeInstruction;
+	}
 
-    /**
-     * @returns the mnemonic
-     */
-    getMnemonic(): string {
-        return this.mnemonic ??= extractMnemonicOf(this.fakeInstruction);
-    }
+	/**
+	 * @returns the mnemonic
+	 */
+	getMnemonic(): string {
+		return this.mnemonic ??= extractMnemonicOf(this.fakeInstruction);
+	}
 
-    /**
-     * @returns the operands
-     */
-    private getOperands(): string[] {
-        return this.operands ??= extractOperandsOf(this.fakeInstruction);
-    }
+	/**
+	 * @returns the operands
+	 */
+	private getOperands(): string[] {
+		return this.operands ??= extractOperandsOf(this.fakeInstruction);
+	}
 
-    override get z80Timing(): number[] {
-        this.init();
-        return super.z80Timing;
-    }
+	override get z80Timing(): number[] {
+		this.init();
+		return super.z80Timing;
+	}
 
-    override get msxTiming(): number[] {
-        this.init();
-        return super.msxTiming;
-    }
+	override get msxTiming(): number[] {
+		this.init();
+		return super.msxTiming;
+	}
 
-    override get cpcTiming(): number[] {
-        this.init();
-        return super.cpcTiming;
-    }
+	override get cpcTiming(): number[] {
+		this.init();
+		return super.cpcTiming;
+	}
 
-    override get bytes(): string[] {
-        this.init();
-        return super.bytes;
-    }
+	override get bytes(): string[] {
+		this.init();
+		return super.bytes;
+	}
 
-    /**
-     * @returns The size in bytes
-     */
-    override get size(): number {
-        this.init();
-        return super.size;
-    }
+	/**
+	 * @returns The size in bytes
+	 */
+	override get size(): number {
+		this.init();
+		return super.size;
+	}
 
-    override flatten(): Meterable[] {
-        this.init();
-        return super.flatten();
-    }
+	override flatten(): Meterable[] {
+		this.init();
+		return super.flatten();
+	}
 
-    private init(): void {
+	private init(): void {
 
-        if (!this.ready) {
-            this.rawInstructions.forEach(rawInstruction => {
-                const instruction = z80InstructionParser.instance.parseRawInstruction(rawInstruction);
-                this.add(instruction);
-            });
-            this.ready = true;
-        }
-    }
+		if (!this.ready) {
+			for (const rawInstruction of this.rawInstructions) {
+				const instruction = z80InstructionParser.instance.parseRawInstruction(rawInstruction);
+				this.add(instruction);
+			}
+			this.ready = true;
+		}
+	}
 
-    /**
-     * @param candidateInstruction the cleaned-up line to match against the instruction
-     * @returns number between 0 and 1 with the score of the match,
-     * where 0 means the line is not this instruction,
-     * 1 means the line is this instruction,
-     * and intermediate values mean the line may be this instruction
-     */
-    match(candidateInstruction: string): number {
+	/**
+	 * @param candidateInstruction the cleaned-up line to match against the instruction
+	 * @returns number between 0 and 1 with the score of the match,
+	 * where 0 means the line is not this instruction,
+	 * 1 means the line is this instruction,
+	 * and intermediate values mean the line may be this instruction
+	 */
+	match(candidateInstruction: string): number {
 
-        // Compares mnemonic
-        if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {
-            return 0;
-        }
+		// Compares mnemonic
+		if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {
+			return 0;
+		}
 
-        // Extracts the candidate operands
-        const candidateOperands = extractOperandsOf(candidateInstruction);
-        if (candidateOperands.includes("")) {
-            return 0; // (incomplete candidate instruction, such as "LD A,")
-        }
+		// Extracts the candidate operands
+		const candidateOperands = extractOperandsOf(candidateInstruction);
+		if (candidateOperands.includes("")) {
+			return 0; // (incomplete candidate instruction, such as "LD A,")
+		}
 
-        const candidateOperandsLength = candidateOperands.length;
-        const expectedOperands = this.getOperands();
-        const expectedOperandsLength = expectedOperands.length;
+		const candidateOperandsLength = candidateOperands.length;
+		const expectedOperands = this.getOperands();
+		const expectedOperandsLength = expectedOperands.length;
 
-        // Compares operand count
-        if (candidateOperandsLength !== expectedOperandsLength) {
-            return 0;
-        }
+		// Compares operand count
+		if (candidateOperandsLength !== expectedOperandsLength) {
+			return 0;
+		}
 
-        // Compares operands
-        let score = 1;
-        for (let i = 0; i < expectedOperands.length; i++) {
-            score *= this.operandScore(expectedOperands[i], candidateOperands[i], true);
-            if (score === 0) {
-                return 0;
-            }
-        }
-        return score;
-    }
+		// Compares operands
+		let score = 1;
+		for (let i = 0; i < expectedOperands.length; i++) {
+			score *= this.operandScore(expectedOperands[i], candidateOperands[i], true);
+			if (score === 0) {
+				return 0;
+			}
+		}
+		return score;
+	}
 
-    /**
-     * @param expectedOperand the operand of the instruction
-     * @param candidateOperand the operand from the cleaned-up line
-     * @param indirectionAllowed true to allow indirection
-     * @returns number between 0 and 1 with the score of the match,
-     * where 0 means the candidate operand is not valid,
-     * 1 means the candidate operand is a perfect match,
-     * and intermediate values mean the operand is accepted
-     */
-    private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
+	/**
+	 * @param expectedOperand the operand of the instruction
+	 * @param candidateOperand the operand from the cleaned-up line
+	 * @param indirectionAllowed true to allow indirection
+	 * @returns number between 0 and 1 with the score of the match,
+	 * where 0 means the candidate operand is not valid,
+	 * 1 means the candidate operand is a perfect match,
+	 * and intermediate values mean the operand is accepted
+	 */
+	private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
 
-        // Must the candidate operand match verbatim the operand of the instruction?
-        if (isVerbatimOperand(expectedOperand)) {
-            return verbatimOperandScore(expectedOperand, candidateOperand);
-        }
+		// Must the candidate operand match verbatim the operand of the instruction?
+		if (isVerbatimOperand(expectedOperand)) {
+			return verbatimOperandScore(expectedOperand, candidateOperand);
+		}
 
-        // Must the candidate operand be an indirection?
-        if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
-            return this.indirectOperandScore(expectedOperand, candidateOperand);
-        }
+		// Must the candidate operand be an indirection?
+		if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
+			return this.indirectOperandScore(expectedOperand, candidateOperand);
+		}
 
-        // Depending on the expected operand...
-        switch (expectedOperand) {
-            case "IX+o":
-                return isIXWithOffsetScore(candidateOperand);
-            case "IY+o":
-                return isIYWithOffsetScore(candidateOperand);
-            case "IXh":
-                return isIXhScore(candidateOperand);
-            case "IXl":
-                return isIXlScore(candidateOperand);
-            case "IYh":
-                return isIYhScore(candidateOperand);
-            case "IYl":
-                return isIYlScore(candidateOperand);
-            // (due possibility of using constants, labels, and expressions in the source code,
-            // there is no proper way to discriminate: b, n, nn, o;
-            // but uses a "best effort" to discard registers)
-            default:
-                return anySymbolOperandScore(candidateOperand, true);
-        }
-    }
+		// Depending on the expected operand...
+		switch (expectedOperand) {
+			case "IX+o":
+				return isIXWithOffsetScore(candidateOperand);
+			case "IY+o":
+				return isIYWithOffsetScore(candidateOperand);
+			case "IXh":
+				return isIXhScore(candidateOperand);
+			case "IXl":
+				return isIXlScore(candidateOperand);
+			case "IYh":
+				return isIYhScore(candidateOperand);
+			case "IYl":
+				return isIYlScore(candidateOperand);
+			// (due possibility of using constants, labels, and expressions in the source code,
+			// there is no proper way to discriminate: b, n, nn, o;
+			// but uses a "best effort" to discard registers)
+			default:
+				return anySymbolOperandScore(candidateOperand, true);
+		}
+	}
 
-    /**
-     * @param expectedOperand the operand of the instruction
-     * @param candidateOperand the operand from the cleaned-up line
-     * @returns number between 0 and 1 with the score of the match,
-     * or 0 if the candidate operand is not valid
-     */
-    private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
+	/**
+	 * @param expectedOperand the operand of the instruction
+	 * @param candidateOperand the operand from the cleaned-up line
+	 * @returns number between 0 and 1 with the score of the match,
+	 * or 0 if the candidate operand is not valid
+	 */
+	private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
 
-        // Compares the expression inside the indirection
-        return isIndirectionOperand(candidateOperand, false)
-            ? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
-            : 0;
-    }
+		// Compares the expression inside the indirection
+		return isIndirectionOperand(candidateOperand, false)
+			? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
+			: 0;
+	}
 }
 

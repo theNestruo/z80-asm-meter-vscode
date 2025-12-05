@@ -1,9 +1,11 @@
 import { configurationReader } from "../../../vscode/ConfigurationReader";
-import { TimingHintsDefinitionConfiguration } from "./TimingHintsDefinitionConfiguration";
+import type { TimingHintsDefinitionConfiguration } from "./TimingHintsDefinitionConfiguration";
+
+type timingHintsEnabledType = "disabled" | "subroutines" | "any" | "ignoreCommentedOut";
 
 export class TimingHintsConfiguration {
 
-	get enabledValue(): "disabled" | "subroutines" | "any" | "ignoreCommentedOut" {
+	get enabledValue(): timingHintsEnabledType {
 		return configurationReader.read("timing.hints.enabled");
 	}
 

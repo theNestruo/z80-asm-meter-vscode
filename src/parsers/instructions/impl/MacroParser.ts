@@ -1,16 +1,16 @@
-import * as vscode from 'vscode';
-import { config } from '../../../config';
-import { MeterableCollection } from '../../../types/AggregatedMeterables';
-import { Meterable } from '../../../types/Meterable';
-import { OptionalSingletonRefImpl } from '../../../types/References';
-import { SourceCode } from '../../../types/SourceCode';
-import { extractMnemonicOf } from '../../../utils/AssemblyUtils';
+import type * as vscode from "vscode";
+import { config } from "../../../config";
+import { MeterableCollection } from "../../../types/AggregatedMeterables";
+import type { Meterable } from "../../../types/Meterable";
+import { OptionalSingletonRefImpl } from "../../../types/References";
+import type { SourceCode } from "../../../types/SourceCode";
+import { extractMnemonicOf } from "../../../utils/AssemblyUtils";
+import { parteIntLenient } from "../../../utils/NumberUtils";
+import { linesToSourceCode } from "../../../utils/SourceCodeUtils";
 import { parseTimingsLenient } from "../../../utils/TimingUtils";
-import { parteIntLenient } from '../../../utils/NumberUtils';
-import { linesToSourceCode } from '../../../utils/SourceCodeUtils';
-import { mainParserForMacroParser } from '../../parsers';
-import { MacroDefinitionConfiguration } from "../config/MacroDefinitionConfiguration";
-import { InstructionParser } from "../types/InstructionParser";
+import { mainParserForMacroParser } from "../../parsers";
+import type { MacroDefinitionConfiguration } from "../config/MacroDefinitionConfiguration";
+import type { InstructionParser } from "../types/InstructionParser";
 
 class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroParser> {
 
@@ -29,16 +29,14 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 
 		if (this._definitionByMnemonic === undefined) {
 
-			// Initializes macro maps
+			// Initializes macro definitions
 			const map: Record<string, MacroDefinitionConfiguration> = {};
-
-			// Locates macro definitions
-			config.macros?.forEach(macroDefinition => {
+			for (const macroDefinition of config.macros) {
 
 				// Prepares a map by mnemonic for performance reasons
 				const mnemonic = extractMnemonicOf(macroDefinition.name).toUpperCase();
 				map[mnemonic] = macroDefinition;
-			});
+			}
 
 			this._definitionByMnemonic = map;
 		}
@@ -46,17 +44,17 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 		return this._definitionByMnemonic;
 	}
 
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent) {
+	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);
 
-        // Forces re-creation on macro definitions change
+		// Forces re-creation on macro definitions change
 		if (e.affectsConfiguration("z80-asm-meter.macros")) {
 			this.destroyInstance();
 			this._definitionByMnemonic = undefined;
 		}
 	}
 
-	override dispose() {
+	override dispose(): void {
 		this._definitionByMnemonic = undefined;
 		super.dispose();
 	}
@@ -72,7 +70,7 @@ export const macroParser = new MacroParserRef();
 class MacroParser implements InstructionParser {
 
 	constructor(
-		private readonly definitionByMnemonic: Record<string, MacroDefinitionConfiguration>) {
+		private readonly definitionByMnemonic: Record<string, MacroDefinitionConfiguration | undefined>) {
 	}
 
 	parseInstruction(s: SourceCode): Meterable | undefined {
@@ -94,12 +92,12 @@ class MacroParser implements InstructionParser {
 class Macro extends MeterableCollection {
 
 	// User-provided information
-	private providedName: string;
-	private providedSourceCode: string[];
-	private providedZ80Timing?: number[];
-	private providedMsxTiming?: number[];
-	private providedCpcTiming?: number[];
-	private providedSize?: number;
+	private readonly providedName: string;
+	private readonly providedSourceCode: string[];
+	private readonly providedZ80Timing?: number[];
+	private readonly providedMsxTiming?: number[];
+	private readonly providedCpcTiming?: number[];
+	private readonly providedSize?: number;
 
 	constructor(source: MacroDefinitionConfiguration) {
 		super();
@@ -113,10 +111,8 @@ class Macro extends MeterableCollection {
 		this.providedCpcTiming = parseTimingsLenient(source.cpc, source.ts, source.t);
 		this.providedSize = parteIntLenient(source.size);
 
-		if (this.providedSourceCode) {
-			const meterable = mainParserForMacroParser.instance.parse(linesToSourceCode(this.providedSourceCode));
-			this.add(meterable);
-		}
+		const meterable = mainParserForMacroParser.instance.parse(linesToSourceCode(this.providedSourceCode));
+		this.add(meterable);
 	}
 
 	/** false; this meterable is not composed */
@@ -126,7 +122,6 @@ class Macro extends MeterableCollection {
 	 * @returns The name of the macro
 	 */
 	override get instruction(): string {
-
 		return this.providedName;
 	}
 
@@ -134,7 +129,6 @@ class Macro extends MeterableCollection {
 	 * @returns The Z80 timing, in time (T) cycles
 	 */
 	override get z80Timing(): number[] {
-
 		return this.providedZ80Timing ?? super.z80Timing;
 	}
 
@@ -142,7 +136,6 @@ class Macro extends MeterableCollection {
 	 * @returns The Z80 timing with the M1 wait cycles required by the MSX standard
 	 */
 	override get msxTiming(): number[] {
-
 		return this.providedMsxTiming ?? super.msxTiming;
 	}
 
@@ -150,7 +143,6 @@ class Macro extends MeterableCollection {
 	 * @returns The CPC timing, in NOPS
 	 */
 	override get cpcTiming(): number[] {
-
 		return this.providedCpcTiming ?? super.cpcTiming;
 	}
 
@@ -165,7 +157,7 @@ class Macro extends MeterableCollection {
 		}
 		const size = this.size;
 		return size
-			? new Array(size).fill("n")
+			? Array.from<string>({ length: size }).fill("n")
 			: [];
 	}
 

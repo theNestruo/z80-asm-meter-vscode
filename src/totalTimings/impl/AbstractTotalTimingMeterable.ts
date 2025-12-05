@@ -1,5 +1,5 @@
-import { Meterable } from "../../types/Meterable";
-import { TotalTiming } from "../types/TotalTiming";
+import type { Meterable } from "../../types/Meterable";
+import type { TotalTiming } from "../types/TotalTiming";
 
 /**
  * Base class for total timing calculation implementations
@@ -35,12 +35,12 @@ export abstract class AbstractTotalTimingMeterable implements TotalTiming {
 			let i = 0;
 			const n = meterables.length;
 			const totalZ80Timing: number[] = [0, 0];
-			meterables.forEach(meterable => {
+			for (const meterable of meterables) {
 				const z80Timing = this.modifiedTimingsOf(
 					meterable.z80Timing, i++, n, meterable.instruction);
 				totalZ80Timing[0] += z80Timing[0];
 				totalZ80Timing[1] += z80Timing[1];
-			});
+			}
 			this.cachedZ80Timing = totalZ80Timing;
 		}
 		return this.cachedZ80Timing;
@@ -53,12 +53,12 @@ export abstract class AbstractTotalTimingMeterable implements TotalTiming {
 			let i = 0;
 			const n = meterables.length;
 			const totalMsxTiming: number[] = [0, 0];
-			meterables.forEach(meterable => {
+			for (const meterable of meterables) {
 				const msxTiming = this.modifiedTimingsOf(
 					meterable.msxTiming, i++, n, meterable.instruction);
 				totalMsxTiming[0] += msxTiming[0];
 				totalMsxTiming[1] += msxTiming[1];
-			});
+			}
 			this.cachedMsxTiming = totalMsxTiming;
 		}
 		return this.cachedMsxTiming;
@@ -71,12 +71,12 @@ export abstract class AbstractTotalTimingMeterable implements TotalTiming {
 			let i = 0;
 			const n = meterables.length;
 			const totalCpcTiming: number[] = [0, 0];
-			meterables.forEach(meterable => {
+			for (const meterable of meterables) {
 				const cpcTiming = this.modifiedTimingsOf(
 					meterable.cpcTiming, i++, n, meterable.instruction);
 				totalCpcTiming[0] += cpcTiming[0];
 				totalCpcTiming[1] += cpcTiming[1];
-			});
+			}
 			this.cachedCpcTiming = totalCpcTiming;
 		}
 		return this.cachedCpcTiming;
