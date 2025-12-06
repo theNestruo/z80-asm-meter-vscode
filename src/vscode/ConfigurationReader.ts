@@ -5,20 +5,22 @@ import * as vscode from "vscode";
  */
 class ConfigurationReader {
 
-	read(section: string): unknown {
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+	read<T>(section: string): T {
 
-		return vscode.workspace.getConfiguration("z80-asm-meter").get(section);
+		return vscode.workspace.getConfiguration("z80-asm-meter").get(section) as T;
 	}
 
 	readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
 
 		if (actualDefaultValue === undefined) {
-			return this.read(section) as T;
+			return this.read(section);
 		}
 		return this.readIgnoreDefault(section) as T ?? actualDefaultValue;
 	}
 
-	private readIgnoreDefault(section: string): unknown {
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+	private readIgnoreDefault<T>(section: string): T | undefined {
 
 		const config = vscode.workspace.getConfiguration("z80-asm-meter");
 		const info = config.inspect(section);
@@ -29,7 +31,7 @@ class ConfigurationReader {
 			?? info?.globalLanguageValue
 			?? info?.workspaceLanguageValue
 			?? info?.workspaceFolderLanguageValue;
-		return isSet ? config.get(section) : undefined;
+		return isSet ? config.get(section) as T : undefined;
 	}
 }
 
@@ -38,25 +40,26 @@ class ConfigurationReader {
  */
 class CachedConfigurationReader extends ConfigurationReader implements vscode.Disposable {
 
-	private readonly disposable: vscode.Disposable;
+	private readonly _disposable: vscode.Disposable;
 	private readonly cache = new Map<string, unknown>();
 
 	constructor() {
 		super();
 
-		this.disposable =
+		this._disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
-	override read(section: string): unknown {
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+	override read<T>(section: string): T {
 
 		if (this.cache.has(section)) {
-			return this.cache.get(section);
+			return this.cache.get(section) as T;
 		}
 
-		const value = super.read(section);
+		const value: T = super.read(section);
 		this.cache.set(section, value);
 		return value;
 	}
@@ -64,7 +67,7 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 	override readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T {
 
 		if (actualDefaultValue === undefined) {
-			return this.read(section) as T;
+			return this.read(section);
 		}
 
 		if (this.cache.has(section)) {
@@ -81,7 +84,7 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 	}
 
 	dispose(): void {
-		this.disposable.dispose();
+		this._disposable.dispose();
 		this.cache.clear();
 	}
 }

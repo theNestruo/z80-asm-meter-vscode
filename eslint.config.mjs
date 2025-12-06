@@ -103,6 +103,8 @@ export default defineConfig(
 			// strict-type-checked:
 			// - allow explicit ! non-null assertion operator
 			"@typescript-eslint/no-non-null-assertion": "off",
+			// - allow explicit type parameters
+			"@typescript-eslint/no-unnecessary-type-parameters": "warn",
 
 			// stylistic-type-checked: uses "warn" instead of "error"
 			"@typescript-eslint/adjacent-overload-signatures": "warn",
