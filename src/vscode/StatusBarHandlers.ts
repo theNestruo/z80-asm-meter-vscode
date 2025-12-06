@@ -30,14 +30,14 @@ class StatusBarItemContents {
  */
 class StatusBarHandler implements vscode.Disposable {
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	private statusBarItem?: vscode.StatusBarItem;
 
 	protected constructor(
 		protected readonly command: CopyToClipboardCommand) {
 
-		this._disposable =
+		this.disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
@@ -135,7 +135,7 @@ class StatusBarHandler implements vscode.Disposable {
 	}
 
 	dispose(): void {
-		this._disposable.dispose();
+		this.disposable.dispose();
 		this.destroyStatusBarItem();
 	}
 
@@ -206,7 +206,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
  */
 export class DebouncedStatusBarHandler implements vscode.Disposable {
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	private isLeadingEvent = true;
 	private previousEventTimestamp?: number = undefined;
@@ -215,7 +215,7 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 	constructor(
 		private readonly delegate: StatusBarHandler) {
 
-		this._disposable = vscode.Disposable.from(
+		this.disposable = vscode.Disposable.from(
 			// Subscribe to selection change and editor activation events
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.window.onDidChangeTextEditorSelection(this.onUpdateRequest, this),
@@ -265,7 +265,7 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 
 	dispose(): void {
 		clearTimeout(this.updateStatusBarTimeout);
-		this._disposable.dispose();
+		this.disposable.dispose();
 	}
 }
 

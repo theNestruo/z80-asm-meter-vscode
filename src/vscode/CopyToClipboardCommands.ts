@@ -126,19 +126,19 @@ export class FromActiveTextEditorSelecionCopyToClipboardCommand
 
 	override readonly command = "z80-asm-meter.copyToClipboard";
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	constructor() {
 		super();
 
-		this._disposable =
+		this.disposable =
 			// Registers as a command
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.commands.registerCommand(this.command, this.onExecute, this);
 	}
 
 	dispose(): void {
-		this._disposable.dispose();
+		this.disposable.dispose();
 	}
 
 	onExecute(): void {

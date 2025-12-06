@@ -167,7 +167,7 @@ export class RepeatedMeterable extends AggregatedMeterable {
 	 * @return The repeated meterable instance, or a repetition of that Meterable,
 	 * depending on the value of repetitions
 	 */
-	public static of(meterable: Meterable, repetitions: number): Meterable {
+	static of(meterable: Meterable, repetitions: number): Meterable {
 
 		return repetitions <= 1
 			? meterable

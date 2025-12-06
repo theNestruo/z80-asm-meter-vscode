@@ -15,7 +15,7 @@ import type { MainParser } from "../types/MainParser";
 
 export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> {
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	constructor(
 		private readonly instructionParserRefs: OptionalSingletonRef<InstructionParser>[],
@@ -23,7 +23,7 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
 		private readonly timingHintParserRefs: OptionalSingletonRef<TimingHintsParser>[]) {
 		super();
 
-		this._disposable =
+		this.disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
@@ -44,7 +44,7 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
 	}
 
 	override dispose(): void {
-		this._disposable.dispose();
+		this.disposable.dispose();
 		super.dispose();
 	}
 }
@@ -56,7 +56,7 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
  */
 class MainParserImpl implements MainParser, vscode.Disposable {
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	private instructionsCache;
 
@@ -65,7 +65,7 @@ class MainParserImpl implements MainParser, vscode.Disposable {
 		private readonly repetitionParsers: RepetitionParser[],
 		private readonly timingHintsParsers: TimingHintsParser[]) {
 
-		this._disposable =
+		this.disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
@@ -198,6 +198,6 @@ class MainParserImpl implements MainParser, vscode.Disposable {
 
 	dispose(): void {
 		this.instructionsCache.clear();
-		this._disposable.dispose();
+		this.disposable.dispose();
 	}
 }

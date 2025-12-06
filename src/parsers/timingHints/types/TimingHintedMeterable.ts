@@ -12,7 +12,7 @@ import type { TimingHints } from "./TimingHints";
  */
 export class TimingHintedMeterable implements Meterable {
 
-	public static from(
+	static from(
 		meterable: Meterable | undefined,
 		timingHints: TimingHints,
 		sourceCode: SourceCode): Meterable | undefined {

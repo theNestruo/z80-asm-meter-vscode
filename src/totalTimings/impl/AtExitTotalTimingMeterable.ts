@@ -11,7 +11,7 @@ export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable im
 	 * @param meterable The meterable instance to be decorated
 	 * @return The "timing at exit" decorator, or undefined
 	 */
-	public static calculate(meterable: Meterable): AtExitTotalTimingsMeterable | undefined {
+	static calculate(meterable: Meterable): AtExitTotalTimingsMeterable | undefined {
 
 		// (for performance reasons)
 		const meterables = meterable.flatten();
@@ -123,8 +123,7 @@ export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable im
 					: ""; // (should never happen)
 	}
 
-	protected modifiedTimingsOf(timing: number[],
-		i: number, n: number, instruction: string): number[] {
+	protected modifiedTimingsOf(timing: number[], i: number, n: number, instruction: string): number[] {
 
 		// Last instruction?
 		if (i === n - 1) {

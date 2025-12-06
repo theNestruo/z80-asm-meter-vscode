@@ -19,18 +19,18 @@ export interface OptionalSingletonRef<I> extends vscode.Disposable {
  */
 export abstract class OptionalSingletonRefImpl<I, T extends I> implements OptionalSingletonRef<I> {
 
-	private readonly _disposable: vscode.Disposable;
-	protected _instance?: I = undefined;
+	private readonly disposable: vscode.Disposable;
+	protected theInstance?: I = undefined;
 
 	constructor() {
-		this._disposable =
+		this.disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
 	get instance(): I | undefined {
-		return this._instance ??= this.enabled
+		return this.theInstance ??= this.enabled
 			? this.createInstance()
 			: undefined;
 	}
@@ -48,16 +48,16 @@ export abstract class OptionalSingletonRefImpl<I, T extends I> implements Option
 	}
 
 	dispose(): void {
-		this._disposable.dispose();
+		this.disposable.dispose();
 		this.destroyInstance();
 	}
 
 	protected destroyInstance(): void {
 
-		if (this._instance instanceof vscode.Disposable) {
-			this._instance.dispose();
+		if (this.theInstance instanceof vscode.Disposable) {
+			this.theInstance.dispose();
 		}
-		this._instance = undefined;
+		this.theInstance = undefined;
 	}
 }
 
@@ -80,10 +80,10 @@ export interface SingletonRef<I> extends OptionalSingletonRef<I> {
  */
 export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I> {
 
-	protected _instance?: T = undefined;
+	protected theInstance?: T = undefined;
 
 	get instance(): I {
-		return this._instance ??= this.createInstance();
+		return this.theInstance ??= this.createInstance();
 	}
 
 	protected abstract createInstance(): T;
@@ -94,9 +94,9 @@ export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I
 
 	protected destroyInstance(): void {
 
-		if (this._instance instanceof vscode.Disposable) {
-			this._instance.dispose();
+		if (this.theInstance instanceof vscode.Disposable) {
+			this.theInstance.dispose();
 		}
-		this._instance = undefined;
+		this.theInstance = undefined;
 	}
 }

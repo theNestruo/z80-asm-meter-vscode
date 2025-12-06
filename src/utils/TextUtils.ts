@@ -34,7 +34,7 @@ export function removeSuffix(s: string | undefined, suffix: string): string | un
 		: s;
 }
 
-export function positionFromStart(_s: string, start?: number): number {
+export function positionFromStart(_: string, start?: number): number {
 
 	return (start === undefined) || (start < 0)
 		? 0

@@ -9,7 +9,7 @@ import type { TimingHintsParser } from "../types/TimingHintsParser";
 class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsParser, RegExpTimingHintsParser> {
 
 	// Timing hints maps
-	private _regExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
+	private theRegExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
 
 	protected override get enabled(): boolean {
 		return config.timing.hints.enabled
@@ -24,7 +24,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 
 	private get regExpTimingHints(): { regExp: RegExp, timingHints: TimingHints }[] {
 
-		if (this._regExpTimingHints === undefined) {
+		if (this.theRegExpTimingHints === undefined) {
 
 			// Initializes macro maps
 			const array: { regExp: RegExp, timingHints: TimingHints }[] = [];
@@ -61,10 +61,10 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 				}
 			}
 
-			this._regExpTimingHints = array;
+			this.theRegExpTimingHints = array;
 		}
 
-		return this._regExpTimingHints;
+		return this.theRegExpTimingHints;
 	}
 
 	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
@@ -72,13 +72,13 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 
 		// Forces re-creation on RegExp-based timing hints definitions change
 		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
-			this._instance = undefined;
-			this._regExpTimingHints = undefined;
+			this.theInstance = undefined;
+			this.theRegExpTimingHints = undefined;
 		}
 	}
 
 	override dispose(): void {
-		this._regExpTimingHints = undefined;
+		this.theRegExpTimingHints = undefined;
 		super.dispose();
 	}
 }

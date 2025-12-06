@@ -3,7 +3,7 @@ import { AbstractTotalTimingMeterable } from "./AbstractTotalTimingMeterable";
 
 export class DefaultTotalTimingsMeterable extends AbstractTotalTimingMeterable {
 
-	public static calculate(meterable: Meterable): DefaultTotalTimingsMeterable {
+	static calculate(meterable: Meterable): DefaultTotalTimingsMeterable {
 
 		// (for performance reasons)
 		const meterables = meterable.flatten();

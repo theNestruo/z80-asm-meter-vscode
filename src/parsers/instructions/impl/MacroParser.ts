@@ -15,19 +15,19 @@ import type { InstructionParser } from "../types/InstructionParser";
 class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroParser> {
 
 	// Macro maps
-	private _definitionByMnemonic?: Record<string, MacroDefinitionConfiguration> = undefined;
+	private theDefinitionsByMnemonic?: Record<string, MacroDefinitionConfiguration> = undefined;
 
 	protected get enabled(): boolean {
-		return Object.keys(this.definitionByMnemonic).length !== 0;
+		return Object.keys(this.definitionsByMnemonic).length !== 0;
 	}
 
 	protected createInstance(): MacroParser {
-		return new MacroParser(this.definitionByMnemonic);
+		return new MacroParser(this.definitionsByMnemonic);
 	}
 
-	private get definitionByMnemonic(): Record<string, MacroDefinitionConfiguration> {
+	private get definitionsByMnemonic(): Record<string, MacroDefinitionConfiguration> {
 
-		if (this._definitionByMnemonic === undefined) {
+		if (this.theDefinitionsByMnemonic === undefined) {
 
 			// Initializes macro definitions
 			const map: Record<string, MacroDefinitionConfiguration> = {};
@@ -38,10 +38,10 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 				map[mnemonic] = macroDefinition;
 			}
 
-			this._definitionByMnemonic = map;
+			this.theDefinitionsByMnemonic = map;
 		}
 
-		return this._definitionByMnemonic;
+		return this.theDefinitionsByMnemonic;
 	}
 
 	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
@@ -50,12 +50,12 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 		// Forces re-creation on macro definitions change
 		if (e.affectsConfiguration("z80-asm-meter.macros")) {
 			this.destroyInstance();
-			this._definitionByMnemonic = undefined;
+			this.theDefinitionsByMnemonic = undefined;
 		}
 	}
 
 	override dispose(): void {
-		this._definitionByMnemonic = undefined;
+		this.theDefinitionsByMnemonic = undefined;
 		super.dispose();
 	}
 }

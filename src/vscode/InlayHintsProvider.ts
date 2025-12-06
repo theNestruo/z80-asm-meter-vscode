@@ -25,13 +25,13 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
 
 	private registerInlayHintsProviderDisposable: vscode.Disposable;
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	constructor() {
 		this.candidatesLocator = new InlayHintCandidatesLocator();
 		this.candidatesResolver = new InlayHintsCandidatesResolver();
 
-		this._disposable = vscode.Disposable.from(
+		this.disposable = vscode.Disposable.from(
 			this.candidatesLocator,
 			this.onDidChangeInlayHintsEmitter,
 
@@ -62,7 +62,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	provideInlayHints(
 		document: vscode.TextDocument,
 		range: vscode.Range,
-		_token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint[]> {
+		_: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint[]> {
 
 		if (!config.inlayHints.enabled || !isExtensionEnabledFor(document)) {
 			return undefined;
@@ -78,7 +78,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 		];
 	}
 
-	resolveInlayHint(hint: vscode.InlayHint, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
+	resolveInlayHint(hint: vscode.InlayHint, _: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
 
 		// Resolves the inlay hints
 		return (hint instanceof ResolvableInlayHint)
@@ -97,20 +97,20 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 
 	dispose(): void {
 		this.registerInlayHintsProviderDisposable.dispose();
-		this._disposable.dispose();
+		this.disposable.dispose();
 	}
 }
 
 class InlayHintCandidatesLocator implements vscode.Disposable {
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	// (for performance reasons)
 	private conditionalExitPointMnemonics: string[];
 
 	constructor() {
 
-		this._disposable =
+		this.disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
@@ -292,7 +292,7 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 	}
 
 	dispose(): void {
-		this._disposable.dispose();
+		this.disposable.dispose();
 	}
 }
 
@@ -465,7 +465,6 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 	}
 
 	get totalTimings(): TotalTimings {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		return this.cachedTotalTimings ??= new TotalTimings(mainParser.instance.parse(this.sourceCode)!);
 	}
 }

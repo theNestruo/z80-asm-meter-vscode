@@ -10,7 +10,7 @@ export class ExecutionFlowTotalTimingsMeterable extends AbstractTotalTimingMeter
 	 * @param meterable The meterable instance to be decorated
 	 * @return The "execution flow timing" decorator, or undefined
 	 */
-	public static calculate(meterable: Meterable): ExecutionFlowTotalTimingsMeterable | undefined {
+	static calculate(meterable: Meterable): ExecutionFlowTotalTimingsMeterable | undefined {
 
 		// Builds the "execution flow timing" decorator
 		return this.canCalculate(meterable)
@@ -71,8 +71,7 @@ export class ExecutionFlowTotalTimingsMeterable extends AbstractTotalTimingMeter
 		return config.timing.executionFlow.icon;
 	}
 
-	protected modifiedTimingsOf(timing: number[],
-		_i: number, _n: number, instruction: string): number[] {
+	protected modifiedTimingsOf(timing: number[], _i: number, _n: number, instruction: string): number[] {
 
 		return isConditionalJumpOrRetInstruction(instruction)
 			? [timing[1], timing[1]]	// "Not taken" timing

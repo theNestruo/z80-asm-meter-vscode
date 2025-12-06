@@ -11,12 +11,12 @@ import type { Z80InstructionParser } from "../types/Z80InstructionParser";
 
 class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80InstructionParserImpl> {
 
-	private readonly _disposable: vscode.Disposable;
+	private readonly disposable: vscode.Disposable;
 
 	constructor() {
 		super();
 
-		this._disposable =
+		this.disposable =
 			// Subscribe to configuration change event
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
@@ -30,12 +30,12 @@ class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80
 
 		// Forces re-creation on instruction set change
 		if (event.affectsConfiguration("z80-asm-meter.platform")) {
-			this._instance = undefined;
+			this.theInstance = undefined;
 		}
 	}
 
 	override dispose(): void {
-		this._disposable.dispose();
+		this.disposable.dispose();
 		super.dispose();
 	}
 }
