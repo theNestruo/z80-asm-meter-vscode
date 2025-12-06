@@ -20,7 +20,7 @@ class SjasmplusFakeInstructionParserRef
 		return new SjasmplusFakeInstructionParser(config.instructionSets);
 	}
 
-	override onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
+	protected override onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
 
 		// Forces re-creation on instruction set change
 		if (event.affectsConfiguration("z80-asm-meter.platform")) {

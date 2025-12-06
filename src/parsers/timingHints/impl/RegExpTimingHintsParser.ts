@@ -67,7 +67,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 		return this.theRegExpTimingHints;
 	}
 
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);
 
 		// Forces re-creation on RegExp-based timing hints definitions change

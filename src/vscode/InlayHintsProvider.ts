@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { platformType } from "../config";
+import type { PlatformType } from "../config";
 import { config } from "../config";
 import { mainParser } from "../parsers/parsers";
 import { TotalTimings } from "../totalTimings/TotalTimings";
@@ -86,7 +86,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 			: undefined;
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		// Re-registers as a inlay hints provider
 		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
@@ -284,7 +284,7 @@ class InlayHintCandidatesLocator implements vscode.Disposable {
 		}
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
 			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
@@ -485,7 +485,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 	}
 
 	// (for performance reasons)
-	protected readonly platform: platformType;
+	protected readonly platform: PlatformType;
 	protected readonly hasM1: boolean;
 	protected readonly timingSuffix: string;
 

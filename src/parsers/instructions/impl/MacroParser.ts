@@ -44,7 +44,7 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 		return this.theDefinitionsByMnemonic;
 	}
 
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);
 
 		// Forces re-creation on macro definitions change

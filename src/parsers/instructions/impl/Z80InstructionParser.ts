@@ -26,7 +26,7 @@ class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80
 		return new Z80InstructionParserImpl(config.instructionSets);
 	}
 
-	onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
 
 		// Forces re-creation on instruction set change
 		if (event.affectsConfiguration("z80-asm-meter.platform")) {

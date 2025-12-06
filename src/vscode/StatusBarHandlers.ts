@@ -125,7 +125,7 @@ class StatusBarHandler implements vscode.Disposable {
 		this.statusBarItem?.hide();
 	}
 
-	onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		// Recreates StatusBarItem on alignment change
 		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
@@ -187,7 +187,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		return contents;
 	}
 
-	override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);
 
 		// Re-initializes cache

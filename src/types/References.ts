@@ -39,7 +39,7 @@ export abstract class OptionalSingletonRefImpl<I, T extends I> implements Option
 
 	protected abstract createInstance(): T;
 
-	onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
 
 		// Removes the implementation if disabled
 		if (!this.enabled) {

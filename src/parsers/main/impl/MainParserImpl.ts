@@ -37,7 +37,7 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
 		);
 	}
 
-	onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
 
 		// Forces instance re-creation
 		this.destroyInstance();
@@ -190,7 +190,7 @@ class MainParserImpl implements MainParser, vscode.Disposable {
 		return undefined;
 	}
 
-	onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
+	protected onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
 
 		// Re-initializes cache
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
