@@ -2,6 +2,7 @@
 
 ## 6.3.* (pre-release)
 
+- Code refactor
 - Performance improvements
 - `z80-asm-meter.statusBar.timingsIcon` (icon to identify the timings) setting default value changed from ~~`$(watch)`~~ to the new `$(clock)`
 

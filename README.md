@@ -751,6 +751,8 @@ The following table compares the time took to meter 11&nbsp;179 lines of source 
 
 From version 6.2.0 onwards, the extension size has been improved. The images in the documentation contribute the most to the size of the extension. Using better compression have reduced the size of the images to ~150 KB, and the extension total size is about ~220 KB.
 
+From version 6.4.0 onwards, the extension code has been refactored to reduce even further the activation time and resource consumption (e.g.: parsers that are not enabled will not be instantiated).
+
 </details>
 
 
