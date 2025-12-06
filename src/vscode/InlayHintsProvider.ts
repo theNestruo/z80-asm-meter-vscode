@@ -466,8 +466,7 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
 
 	get totalTimings(): TotalTimings {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const meterable = mainParser.instance.parse(this.sourceCode)!;
-		return this.cachedTotalTimings ??= new TotalTimings(meterable);
+		return this.cachedTotalTimings ??= new TotalTimings(mainParser.instance.parse(this.sourceCode)!);
 	}
 }
 
