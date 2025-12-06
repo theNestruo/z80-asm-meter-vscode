@@ -8,7 +8,7 @@ import { InlayHintsConfiguration } from "./vscode/config/InlayHintsConfiguration
 import { StatusBarConfiguration } from "./vscode/config/StatusBarConfiguration";
 import { configurationReader } from "./vscode/ConfigurationReader";
 
-export type platformType = "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
+export type PlatformType = "z80" | "cpc" | "msx" | "msxz80" | "pc8000" | "z80n";
 
 class Configuration {
 
@@ -16,7 +16,7 @@ class Configuration {
 		return configurationReader.read("languageIds");
 	}
 
-	get platform(): platformType {
+	get platform(): PlatformType {
 		return configurationReader.read("platform");
 	}
 

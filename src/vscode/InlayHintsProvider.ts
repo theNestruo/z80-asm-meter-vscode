@@ -11,7 +11,7 @@ import { lineToSourceCode } from "../utils/SourceCodeUtils";
 import { hrMarkdown, positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from "../utils/TextUtils";
 import { formatTiming, printableTimingSuffix, printTiming } from "../utils/TimingUtils";
 import { isExtensionEnabledFor } from "./SourceCodeReader";
-import type { inlayHintPositionType } from "./config/InlayHintsConfiguration";
+import type { InlayHintPositionType } from "./config/InlayHintsConfiguration";
 
 /**
  * InlayHintsProvider that shows timing of the execution flow of subroutines
@@ -377,7 +377,7 @@ class InlayHintsCandidatesResolver {
 	private computePosition(
 		line: vscode.TextLine,
 		sourceCode: SourceCode,
-		position: inlayHintPositionType)
+		position: InlayHintPositionType)
 		: [vscode.Position, boolean, boolean] {
 
 		switch (position) {
