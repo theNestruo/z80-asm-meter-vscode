@@ -1,32 +1,38 @@
 import * as vscode from "vscode";
+import type { Activable } from "./Activable";
 
 /**
  * References an optional instance.
  * The instance may be present or absent depending on the configuration
  * @param I the instance type
  */
-export interface OptionalSingletonRef<I> extends vscode.Disposable {
+export interface OptionalSingletonRef<I> extends Activable {
 
 	get instance(): I | undefined;
 }
 
 /**
- * References an optional singleton that is created lazily.
+ * References an optional singleton instance that is created lazily.
  * The singleton instance may be present or absent depending on the configuration,
- * and will be automatically removed if configuration changes and on disposal
+ * and will be automatically destroyed if configuration changes
  * @param I the instance type (interface)
  * @param T the actual instance type (implementation)
  */
 export abstract class OptionalSingletonRefImpl<I, T extends I> implements OptionalSingletonRef<I> {
 
-	private readonly disposable: vscode.Disposable;
-	protected theInstance?: I = undefined;
+	protected theInstance?: T = undefined;
 
-	constructor() {
-		this.disposable =
-			// Subscribe to configuration change event
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+	onActivate(): vscode.Disposable {
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		return vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+	}
+
+	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+
+		// Forces re-creation of the instance
+		if (e.affectsConfiguration("z80-asm-meter")) {
+			this.destroyInstance();
+		}
 	}
 
 	get instance(): I | undefined {
@@ -38,19 +44,6 @@ export abstract class OptionalSingletonRefImpl<I, T extends I> implements Option
 	protected abstract get enabled(): boolean;
 
 	protected abstract createInstance(): T;
-
-	protected onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
-
-		// Removes the implementation if disabled
-		if (!this.enabled) {
-			this.destroyInstance();
-		}
-	}
-
-	dispose(): void {
-		this.disposable.dispose();
-		this.destroyInstance();
-	}
 
 	protected destroyInstance(): void {
 
@@ -74,7 +67,6 @@ export interface SingletonRef<I> extends OptionalSingletonRef<I> {
 
 /**
  * References a singleton instance that is created lazily.
- * The singleton instance will be automatically removed on disposal
  * @param I the instance type (interface)
  * @param T the actual instance type (implementation)
  */
@@ -82,21 +74,32 @@ export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I
 
 	protected theInstance?: T = undefined;
 
+	onActivate(): vscode.Disposable {
+		// (empty disposable)
+		return vscode.Disposable.from();
+	}
+
 	get instance(): I {
 		return this.theInstance ??= this.createInstance();
 	}
 
 	protected abstract createInstance(): T;
+}
 
-	dispose(): void {
-		this.destroyInstance();
+/**
+ * References a singleton instance that is created lazily.
+ * and will be automatically destroyed if configuration changes,
+ * then lazily re-created
+ * @param I the instance type (interface)
+ * @param T the actual instance type (implementation)
+ */
+export abstract class ConfigurableSingletonRefImpl<I, T extends I> extends OptionalSingletonRefImpl<I, T> implements SingletonRef<I> {
+
+	get instance(): I {
+		return this.theInstance ??= this.createInstance();
 	}
 
-	protected destroyInstance(): void {
+	protected readonly enabled = true;
 
-		if (this.theInstance instanceof vscode.Disposable) {
-			this.theInstance.dispose();
-		}
-		this.theInstance = undefined;
-	}
+	protected abstract createInstance(): T;
 }

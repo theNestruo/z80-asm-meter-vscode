@@ -15,8 +15,17 @@ import type { InstructionParser } from "../types/InstructionParser";
 
 class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroParser> {
 
-	// Macro maps
+	// Cached user-provided macro definitions maps
 	private theDefinitionsByMnemonic?: Record<string, MacroDefinitionConfiguration> = undefined;
+
+	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+		super.onConfigurationChange(e);
+
+		// Forces re-initialization of user-provided macro definitions map
+		if (e.affectsConfiguration("z80-asm-meter.macros")) {
+			this.theDefinitionsByMnemonic = undefined;
+		}
+	}
 
 	protected get enabled(): boolean {
 		return Object.keys(this.definitionsByMnemonic).length !== 0;
@@ -43,21 +52,6 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 		}
 
 		return this.theDefinitionsByMnemonic;
-	}
-
-	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
-		super.onConfigurationChange(e);
-
-		// Forces re-creation on macro definitions change
-		if (e.affectsConfiguration("z80-asm-meter.macros")) {
-			this.destroyInstance();
-			this.theDefinitionsByMnemonic = undefined;
-		}
-	}
-
-	override dispose(): void {
-		this.theDefinitionsByMnemonic = undefined;
-		super.dispose();
 	}
 }
 

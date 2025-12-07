@@ -9,8 +9,19 @@ import type { TimingHintsParser } from "../types/TimingHintsParser";
 
 class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsParser, RegExpTimingHintsParser> {
 
-	// Timing hints maps
+	private static readonly EMPTY_REG_EXP_SOURCE = new RegExp("").source;
+
+	// Cached user-provided timing hints maps
 	private theRegExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
+
+	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+		super.onConfigurationChange(e);
+
+		// Forces re-initialization of user-provided timing hints maps
+		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
+			this.theRegExpTimingHints = undefined;
+		}
+	}
 
 	protected override get enabled(): boolean {
 		return config.timing.hints.enabled
@@ -20,8 +31,6 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 	protected override createInstance(): RegExpTimingHintsParser {
 		return new RegExpTimingHintsParser(this.regExpTimingHints);
 	}
-
-	private readonly emptyRegExpSource = new RegExp("").source;
 
 	private get regExpTimingHints(): { regExp: RegExp, timingHints: TimingHints }[] {
 
@@ -42,7 +51,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 				} catch (_) {
 					continue;
 				}
-				if (regExp.source === this.emptyRegExpSource) {
+				if (regExp.source === RegExpTimingHintsParserRef.EMPTY_REG_EXP_SOURCE) {
 					continue;
 				}
 
@@ -66,21 +75,6 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 		}
 
 		return this.theRegExpTimingHints;
-	}
-
-	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
-		super.onConfigurationChange(e);
-
-		// Forces re-creation on RegExp-based timing hints definitions change
-		if (e.affectsConfiguration("z80-asm-meter.timing.hints.regexps")) {
-			this.theInstance = undefined;
-			this.theRegExpTimingHints = undefined;
-		}
-	}
-
-	override dispose(): void {
-		this.theRegExpTimingHints = undefined;
-		super.dispose();
 	}
 }
 

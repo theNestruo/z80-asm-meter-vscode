@@ -13,8 +13,8 @@ import { CachedStatusBarHandler, DebouncedStatusBarHandler } from "./vscode/Stat
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
 
-	// (vscode.Disposables)
-	context.subscriptions.push(
+	// (vscode.Disposables from Activables)
+	for (const activable of [
 		configurationReader,
 		...availableInstructionParsers,
 		...availableRepetitionParsers,
@@ -22,7 +22,9 @@ export function activate(context: vscode.ExtensionContext): void {
 		mainParser,
 		mainParserForMacroParser,
 		mainParserForTimingHintsParsers
-	);
+	]) {
+		context.subscriptions.push(activable.onActivate());
+	}
 
 	// VS Code integrations
 	const command = new FromActiveTextEditorSelecionCopyToClipboardCommand();
@@ -30,7 +32,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	const debouncedStatusBarHandler = new DebouncedStatusBarHandler(statusBarHandler);
 	const inlayHintsProvider = new InlayHintsProvider();
 
-	// (vscode.Disposables)
+	// (vscode.Disposables from VS Code integrations)
 	context.subscriptions.push(
 		command,
 		statusBarHandler,

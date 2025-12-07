@@ -1,10 +1,10 @@
 import HLRU from "hashlru";
-import * as vscode from "vscode";
 import { config } from "../../../config";
+import type { Activable } from "../../../types/Activable";
 import { MeterableCollection, RepeatedMeterable } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
 import type { OptionalSingletonRef } from "../../../types/References";
-import { SingletonRefImpl } from "../../../types/References";
+import { ConfigurableSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import type { InstructionParser } from "../../instructions/types/InstructionParser";
 import type { RepetitionParser } from "../../instructions/types/RepetitionParser";
@@ -13,20 +13,13 @@ import type { TimingHints } from "../../timingHints/types/TimingHints";
 import type { TimingHintsParser } from "../../timingHints/types/TimingHintsParser";
 import type { MainParser } from "../types/MainParser";
 
-export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> {
-
-	private readonly disposable: vscode.Disposable;
+export class MainParserRef extends ConfigurableSingletonRefImpl<MainParser, MainParserImpl> implements Activable {
 
 	constructor(
 		private readonly instructionParserRefs: OptionalSingletonRef<InstructionParser>[],
 		private readonly repetitionParserRefs: OptionalSingletonRef<RepetitionParser>[],
 		private readonly timingHintParserRefs: OptionalSingletonRef<TimingHintsParser>[]) {
 		super();
-
-		this.disposable =
-			// Subscribe to configuration change event
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 	}
 
 	protected override createInstance(): MainParserImpl {
@@ -36,17 +29,6 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
 			this.timingHintParserRefs.map(ref => ref.instance).filter(instance => !!instance)
 		);
 	}
-
-	protected onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
-
-		// Forces instance re-creation
-		this.destroyInstance();
-	}
-
-	override dispose(): void {
-		this.disposable.dispose();
-		super.dispose();
-	}
 }
 
 //
@@ -54,21 +36,14 @@ export class MainParserRef extends SingletonRefImpl<MainParser, MainParserImpl> 
 /**
  * Actual implementation of the main parser
  */
-class MainParserImpl implements MainParser, vscode.Disposable {
+class MainParserImpl implements MainParser {
 
-	private readonly disposable: vscode.Disposable;
-
-	private instructionsCache;
+	private readonly instructionsCache;
 
 	constructor(
 		private readonly instructionParsers: InstructionParser[],
 		private readonly repetitionParsers: RepetitionParser[],
 		private readonly timingHintsParsers: TimingHintsParser[]) {
-
-		this.disposable =
-			// Subscribe to configuration change event
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 		// Initializes cache
 		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
@@ -188,16 +163,5 @@ class MainParserImpl implements MainParser, vscode.Disposable {
 
 		// (no timing hints)
 		return undefined;
-	}
-
-	protected onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
-
-		// Re-initializes cache
-		this.instructionsCache = HLRU(config.parser.instructionsCacheSize);
-	}
-
-	dispose(): void {
-		this.instructionsCache.clear();
-		this.disposable.dispose();
 	}
 }

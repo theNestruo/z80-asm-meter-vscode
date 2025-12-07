@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
+import type { Activable } from "../types/Activable";
 
-interface ConfigurationReader extends vscode.Disposable {
+/**
+ * Extension configuration reader
+ */
+interface ConfigurationReader {
 
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	read<T>(section: string): T;
@@ -50,18 +54,21 @@ class DefaultConfigurationReader implements ConfigurationReader {
 /**
  * Cached implementation of the extension configuration reader
  */
-class CachedConfigurationReader extends DefaultConfigurationReader implements vscode.Disposable {
+class CachedConfigurationReader extends DefaultConfigurationReader implements Activable {
 
-	private readonly _disposable: vscode.Disposable;
 	private readonly cache = new Map<string, unknown>();
 
-	constructor() {
-		super();
+	onActivate(): vscode.Disposable {
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		return vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+	}
 
-		this._disposable =
-			// Subscribe to configuration change event
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
+	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
+
+		// Clears cache
+		if (e.affectsConfiguration("z80-asm-meter")) {
+			this.cache.clear();
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -90,17 +97,7 @@ class CachedConfigurationReader extends DefaultConfigurationReader implements vs
 		this.cache.set(section, value);
 		return value;
 	}
-
-	onConfigurationChange(_: vscode.ConfigurationChangeEvent): void {
-		this.cache.clear();
-	}
-
-	dispose(): void {
-		this._disposable.dispose();
-		this.cache.clear();
-		super.dispose();
-	}
 }
 
 /** Extension configuration reader */
-export const configurationReader: ConfigurationReader = new CachedConfigurationReader();
+export const configurationReader: ConfigurationReader & Activable = new CachedConfigurationReader();

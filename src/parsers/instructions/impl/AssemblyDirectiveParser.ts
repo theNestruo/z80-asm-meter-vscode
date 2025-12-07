@@ -1,8 +1,7 @@
 import { config } from "../../../config";
 import { RepeatedMeterable } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
-import type { SingletonRef } from "../../../types/References";
-import { SingletonRefImpl } from "../../../types/References";
+import { SingletonRefImpl, type SingletonRef } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../../utils/AssemblyUtils";
 import { formatHexadecimalByte, parseNumericExpression } from "../../../utils/NumberUtils";
@@ -186,20 +185,14 @@ class AssemblyDirectiveParser implements InstructionParser {
  */
 class AssemblyDirective implements Meterable {
 
-	// Information
-	private readonly directive: string;
 	readonly z80Timing = [0, 0];
 	readonly msxTiming = [0, 0];
 	readonly cpcTiming = [0, 0];
-	readonly bytes: string[];
-	readonly size: number;
 
 	constructor(
-		directive: string, bytes: string[], size: number) {
-
-		this.directive = directive;
-		this.bytes = bytes;
-		this.size = size;
+		private readonly directive: string,
+		readonly bytes: string[],
+		readonly size: number) {
 	}
 
 	/**

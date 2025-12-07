@@ -1,4 +1,3 @@
-import type * as vscode from "vscode";
 import { config } from "../../../config";
 import { MeterableCollection } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
@@ -20,17 +19,10 @@ class SjasmplusFakeInstructionParserRef
 	protected createInstance(): SjasmplusFakeInstructionParser {
 		return new SjasmplusFakeInstructionParser(config.instructionSets);
 	}
-
-	protected override onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
-
-		// Forces re-creation on instruction set change
-		if (event.affectsConfiguration("z80-asm-meter.platform")) {
-			this.destroyInstance();
-		}
-	}
 }
 
-export const sjasmplusFakeInstructionParser: OptionalSingletonRef<InstructionParser> = new SjasmplusFakeInstructionParserRef();
+export const sjasmplusFakeInstructionParser: OptionalSingletonRef<InstructionParser> =
+	new SjasmplusFakeInstructionParserRef();
 
 //
 

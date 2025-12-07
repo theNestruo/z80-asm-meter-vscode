@@ -18,7 +18,8 @@ class GlassFakeInstructionParserRef extends OptionalSingletonRefImpl<Instruction
 	}
 }
 
-export const glassFakeInstructionParser: OptionalSingletonRef<InstructionParser> = new GlassFakeInstructionParserRef();
+export const glassFakeInstructionParser: OptionalSingletonRef<InstructionParser> =
+	new GlassFakeInstructionParserRef();
 
 //
 

@@ -20,7 +20,8 @@ class SjasmplusRegisterListInstructionParserRef
 	}
 }
 
-export const sjasmplusRegisterListInstructionParser: OptionalSingletonRef<InstructionParser> = new SjasmplusRegisterListInstructionParserRef();
+export const sjasmplusRegisterListInstructionParser: OptionalSingletonRef<InstructionParser> =
+	new SjasmplusRegisterListInstructionParserRef();
 
 //
 

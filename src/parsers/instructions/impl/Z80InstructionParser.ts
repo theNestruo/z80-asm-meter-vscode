@@ -1,8 +1,7 @@
-import * as vscode from "vscode";
 import { config } from "../../../config";
 import type { Meterable } from "../../../types/Meterable";
 import type { SingletonRef } from "../../../types/References";
-import { SingletonRefImpl } from "../../../types/References";
+import { ConfigurableSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../../utils/NumberUtils";
@@ -10,34 +9,10 @@ import { formatTiming, parseTiming } from "../../../utils/TimingUtils";
 import { z80InstructionSet } from "../datasets/Z80InstructionSet";
 import type { Z80InstructionParser } from "../types/Z80InstructionParser";
 
-class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80InstructionParserImpl> {
-
-	private readonly disposable: vscode.Disposable;
-
-	constructor() {
-		super();
-
-		this.disposable =
-			// Subscribe to configuration change event
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
-	}
+class Z80InstructionParserRef extends ConfigurableSingletonRefImpl<Z80InstructionParser, Z80InstructionParserImpl> {
 
 	protected override createInstance(): Z80InstructionParserImpl {
 		return new Z80InstructionParserImpl(config.instructionSets);
-	}
-
-	protected onConfigurationChange(event: vscode.ConfigurationChangeEvent): void {
-
-		// Forces re-creation on instruction set change
-		if (event.affectsConfiguration("z80-asm-meter.platform")) {
-			this.theInstance = undefined;
-		}
-	}
-
-	override dispose(): void {
-		this.disposable.dispose();
-		super.dispose();
 	}
 }
 
