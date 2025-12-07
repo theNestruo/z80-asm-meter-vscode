@@ -7,12 +7,15 @@
     "search.exclude": {
         "dist": true // set this to false to include "dist" folder in search results
     },
+
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
     "typescript.tsc.autoDetect": "off",
 
-    //
-
+    // Code style preferences
     "editor.detectIndentation": false,
     "editor.insertSpaces": false,
     "editor.tabSize": 4,
+
+	// No AI
+	"chat.disableAIFeatures": true,
 }
