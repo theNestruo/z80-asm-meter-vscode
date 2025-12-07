@@ -1,9 +1,17 @@
 import * as vscode from "vscode";
 
+interface ConfigurationReader extends vscode.Disposable {
+
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+	read<T>(section: string): T;
+
+	readWithDefaultValue<T>(section: string, actualDefaultValue: T | undefined): T;
+}
+
 /**
  * Default implementation of the extension configuration reader
  */
-class ConfigurationReader {
+class DefaultConfigurationReader implements ConfigurationReader {
 
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	read<T>(section: string): T {
@@ -33,12 +41,16 @@ class ConfigurationReader {
 			?? info?.workspaceFolderLanguageValue;
 		return isSet ? config.get(section) as T : undefined;
 	}
+
+	dispose(): void {
+		// (nop)
+	}
 }
 
 /**
  * Cached implementation of the extension configuration reader
  */
-class CachedConfigurationReader extends ConfigurationReader implements vscode.Disposable {
+class CachedConfigurationReader extends DefaultConfigurationReader implements vscode.Disposable {
 
 	private readonly _disposable: vscode.Disposable;
 	private readonly cache = new Map<string, unknown>();
@@ -86,8 +98,9 @@ class CachedConfigurationReader extends ConfigurationReader implements vscode.Di
 	dispose(): void {
 		this._disposable.dispose();
 		this.cache.clear();
+		super.dispose();
 	}
 }
 
 /** Extension configuration reader */
-export const configurationReader = new CachedConfigurationReader();
+export const configurationReader: ConfigurationReader = new CachedConfigurationReader();

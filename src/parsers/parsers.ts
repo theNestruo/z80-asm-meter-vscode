@@ -1,4 +1,4 @@
-import type { OptionalSingletonRef } from "../types/References";
+import type { OptionalSingletonRef, SingletonRef } from "../types/References";
 import { assemblyDirectiveParser } from "./instructions/impl/AssemblyDirectiveParser";
 import { glassFakeInstructionParser } from "./instructions/impl/GlassFakeInstructionParser";
 import { glassReptRepetitionParser } from "./instructions/impl/GlassReptRepetitionParser";
@@ -11,6 +11,7 @@ import { z80InstructionParser } from "./instructions/impl/Z80InstructionParser";
 import type { InstructionParser } from "./instructions/types/InstructionParser";
 import type { RepetitionParser } from "./instructions/types/RepetitionParser";
 import { MainParserRef } from "./main/impl/MainParserImpl";
+import type { MainParser } from "./main/types/MainParser";
 import { defaultTimingHintsParser } from "./timingHints/impl/DefaultTimingHintsParser";
 import { regExpTimingHintsParser } from "./timingHints/impl/RegExpTimingHintsParser";
 import type { TimingHintsParser } from "./timingHints/types/TimingHintsParser";
@@ -39,7 +40,7 @@ export const availableTimingHintsParsers: OptionalSingletonRef<TimingHintsParser
 ];
 
 /** Main parser default instance */
-export const mainParser = new MainParserRef(
+export const mainParser: SingletonRef<MainParser> = new MainParserRef(
 	availableInstructionParsers,
 	availableRepetitionParsers,
 	availableTimingHintsParsers);
@@ -48,7 +49,7 @@ export const mainParser = new MainParserRef(
  * Main parser instance for macro parsers.
  * Used to parse provided source code in macro definitions
  */
-export const mainParserForMacroParser = new MainParserRef(
+export const mainParserForMacroParser: SingletonRef<MainParser> = new MainParserRef(
 	availableInstructionParsers.filter(parser => parser !== macroParser), // (prevent circular references)
 	availableRepetitionParsers, // (allow repetitions within macro definitions)
 	availableTimingHintsParsers); // (allow timing hints within macro definitions)
@@ -57,7 +58,7 @@ export const mainParserForMacroParser = new MainParserRef(
  * Main parser instance for timing hint parsers.
  * Used only for commented out code detection
  */
-export const mainParserForTimingHintsParsers = new MainParserRef(
+export const mainParserForTimingHintsParsers: SingletonRef<MainParser> = new MainParserRef(
 	availableInstructionParsers, // (just for instructions)
 	[],
 	[]);

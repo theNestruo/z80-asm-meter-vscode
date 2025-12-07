@@ -2,6 +2,7 @@ import type * as vscode from "vscode";
 import { config } from "../../../config";
 import { MeterableCollection } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { extractMnemonicOf } from "../../../utils/AssemblyUtils";
@@ -60,7 +61,7 @@ class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroPa
 	}
 }
 
-export const macroParser = new MacroParserRef();
+export const macroParser: OptionalSingletonRef<InstructionParser> = new MacroParserRef();
 
 //
 

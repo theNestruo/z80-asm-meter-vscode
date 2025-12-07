@@ -1,5 +1,6 @@
 import { config } from "../../../config";
 import type { Meterable } from "../../../types/Meterable";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition } from "../../../utils/AssemblyUtils";
@@ -17,7 +18,7 @@ class GlassFakeInstructionParserRef extends OptionalSingletonRefImpl<Instruction
 	}
 }
 
-export const glassFakeInstructionParser = new GlassFakeInstructionParserRef();
+export const glassFakeInstructionParser: OptionalSingletonRef<InstructionParser> = new GlassFakeInstructionParserRef();
 
 //
 

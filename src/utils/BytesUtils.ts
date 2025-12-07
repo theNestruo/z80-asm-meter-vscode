@@ -9,7 +9,7 @@ export function printBytes(meterable: Meterable): string | undefined {
 	const meterables = [...meterable.flatten()];
 	const firstBytes = shiftFirstBytes(meterables);
 
-	// (empty)
+	// (sanity check)
 	if (!firstBytes) {
 		return undefined;
 	}

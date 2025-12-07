@@ -1,4 +1,5 @@
 import { config } from "../../../config";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { RepetitionParser } from "../types/RepetitionParser";
 import { AbstractRepetitionParser } from "./AbstractRepetitionParser";
@@ -14,7 +15,7 @@ class GlassReptRepetitionParserRef extends OptionalSingletonRefImpl<RepetitionPa
 	}
 }
 
-export const glassReptRepetitionParser = new GlassReptRepetitionParserRef();
+export const glassReptRepetitionParser: OptionalSingletonRef<RepetitionParser> = new GlassReptRepetitionParserRef();
 
 //
 

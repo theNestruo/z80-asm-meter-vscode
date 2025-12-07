@@ -9,7 +9,7 @@ export function printInstructions(meterable: Meterable): string | undefined {
 	const meterables = [...meterable.flatten()];
 	const firstInstruction = shiftFirstInstruction(meterables);
 
-	// (empty)
+	// (sanity check)
 	if (!firstInstruction) {
 		return undefined;
 	}

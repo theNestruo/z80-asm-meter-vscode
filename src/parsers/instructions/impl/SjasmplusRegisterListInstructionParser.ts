@@ -1,6 +1,7 @@
 import { config } from "../../../config";
 import { MeterableCollection } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf } from "../../../utils/AssemblyUtils";
@@ -19,7 +20,7 @@ class SjasmplusRegisterListInstructionParserRef
 	}
 }
 
-export const sjasmplusRegisterListInstructionParser = new SjasmplusRegisterListInstructionParserRef();
+export const sjasmplusRegisterListInstructionParser: OptionalSingletonRef<InstructionParser> = new SjasmplusRegisterListInstructionParserRef();
 
 //
 

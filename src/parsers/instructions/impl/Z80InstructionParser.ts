@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { config } from "../../../config";
 import type { Meterable } from "../../../types/Meterable";
+import type { SingletonRef } from "../../../types/References";
 import { SingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../../utils/AssemblyUtils";
@@ -40,7 +41,7 @@ class Z80InstructionParserRef extends SingletonRefImpl<Z80InstructionParser, Z80
 	}
 }
 
-export const z80InstructionParser = new Z80InstructionParserRef();
+export const z80InstructionParser: SingletonRef<Z80InstructionParser> = new Z80InstructionParserRef();
 
 //
 

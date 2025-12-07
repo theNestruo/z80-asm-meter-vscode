@@ -1,5 +1,6 @@
 import type * as vscode from "vscode";
 import { config } from "../../../config";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { parseTimingsLenient } from "../../../utils/TimingUtils";
@@ -83,7 +84,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 	}
 }
 
-export const regExpTimingHintsParser = new RegExpTimingHintsParserRef();
+export const regExpTimingHintsParser: OptionalSingletonRef<TimingHintsParser> = new RegExpTimingHintsParserRef();
 
 //
 

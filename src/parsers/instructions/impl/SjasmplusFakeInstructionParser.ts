@@ -2,6 +2,7 @@ import type * as vscode from "vscode";
 import { config } from "../../../config";
 import { MeterableCollection } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, isIndirectionOperand, isIXhScore, isIXlScore, isIXWithOffsetScore, isIYhScore, isIYlScore, isIYWithOffsetScore, isVerbatimOperand, verbatimOperandScore } from "../../../utils/AssemblyUtils";
@@ -29,7 +30,7 @@ class SjasmplusFakeInstructionParserRef
 	}
 }
 
-export const sjasmplusFakeInstructionParser = new SjasmplusFakeInstructionParserRef();
+export const sjasmplusFakeInstructionParser: OptionalSingletonRef<InstructionParser> = new SjasmplusFakeInstructionParserRef();
 
 //
 

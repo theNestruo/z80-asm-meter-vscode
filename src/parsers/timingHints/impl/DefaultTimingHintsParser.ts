@@ -1,4 +1,5 @@
 import { config } from "../../../config";
+import type { OptionalSingletonRef } from "../../../types/References";
 import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { parseTimingLenient } from "../../../utils/TimingUtils";
@@ -16,7 +17,7 @@ class DefaultTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPa
 	}
 }
 
-export const defaultTimingHintsParser = new DefaultTimingHintsParserRef();
+export const defaultTimingHintsParser: OptionalSingletonRef<TimingHintsParser> = new DefaultTimingHintsParserRef();
 
 //
 

@@ -1,6 +1,7 @@
 import { config } from "../../../config";
 import { RepeatedMeterable } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
+import type { SingletonRef } from "../../../types/References";
 import { SingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, extractOperandsOfQuotesAware } from "../../../utils/AssemblyUtils";
@@ -15,7 +16,7 @@ class AssemblyDirectiveParserRef extends SingletonRefImpl<InstructionParser, Ass
 	}
 }
 
-export const assemblyDirectiveParser = new AssemblyDirectiveParserRef();
+export const assemblyDirectiveParser: SingletonRef<InstructionParser> = new AssemblyDirectiveParserRef();
 
 //
 
