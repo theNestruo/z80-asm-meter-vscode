@@ -27,7 +27,7 @@ export const defaultTimingHintsParser: OptionalSingletonRef<TimingHintsParser> =
 class DefaultTimingHintsParser implements TimingHintsParser {
 
 	// (precompiled RegExp for performance reasons)
-	private readonly timingHintsRegexp = /\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g;
+	private readonly TIMING_HINTS_REGEXP = /\[(ts?|z80|cpc|msx|m1)\s*=\s*((?:-\s*)?\d+(?:\/(?:-\s*)?\d+)?)\]/g;
 
 	parseTimingHints(s: SourceCode): TimingHints | undefined {
 
@@ -38,7 +38,7 @@ class DefaultTimingHintsParser implements TimingHintsParser {
 		}
 
 		// Parses timing hint comment
-		const matches = rawComment.matchAll(this.timingHintsRegexp);
+		const matches = rawComment.matchAll(this.TIMING_HINTS_REGEXP);
 		const timingHints = new Map<string, number[]>();
 		for (const match of matches) {
 			const parsedTimingHint = parseTimingLenient(match[2]);

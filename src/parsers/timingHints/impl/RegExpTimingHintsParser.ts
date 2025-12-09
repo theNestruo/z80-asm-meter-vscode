@@ -9,7 +9,7 @@ import type { TimingHintsParser } from "../types/TimingHintsParser";
 
 class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsParser, RegExpTimingHintsParser> {
 
-	private static readonly EMPTY_REG_EXP_SOURCE = new RegExp("").source;
+	private readonly EMPTY_REGEXP_SOURCE = new RegExp("").source;
 
 	// Cached user-provided timing hints maps
 	private theRegExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
@@ -51,7 +51,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 				} catch (_) {
 					continue;
 				}
-				if (regExp.source === RegExpTimingHintsParserRef.EMPTY_REG_EXP_SOURCE) {
+				if (regExp.source === this.EMPTY_REGEXP_SOURCE) {
 					continue;
 				}
 

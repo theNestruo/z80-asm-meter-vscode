@@ -1,6 +1,9 @@
 /**
  * A container for source code:
- * an instruction, and an optional trailing comment of the entire line
+ * - an instruction
+ * - an optional label
+ * - an optional repetition count
+ * - an optional trailing comment of the entire line
  */
 export class SourceCode {
 

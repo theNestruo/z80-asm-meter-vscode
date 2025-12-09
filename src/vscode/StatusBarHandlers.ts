@@ -152,7 +152,7 @@ class StatusBarHandler implements vscode.Disposable {
 export class CachedStatusBarHandler extends StatusBarHandler {
 
 	// (for caching purposes)
-	private readonly empty = new StatusBarItemContents("", new vscode.MarkdownString());
+	private readonly EMPTY = new StatusBarItemContents("", new vscode.MarkdownString());
 
 	private cache;
 
@@ -175,14 +175,14 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		const currentHashCode = hashCode(lines.join("\n"));
 		const cachedContents = this.cache.get(currentHashCode) as StatusBarItemContents | undefined;
 		if (cachedContents) {
-			return cachedContents !== this.empty ? cachedContents : undefined;
+			return cachedContents !== this.EMPTY ? cachedContents : undefined;
 		}
 
 		// Parses the source code and builds the status bar item contents
 		const contents = super.parseAndBuildStatusBarItemContents(lines);
 
 		// Caches the status bar item contents
-		this.cache.set(currentHashCode, contents ?? this.empty);
+		this.cache.set(currentHashCode, contents ?? this.EMPTY);
 
 		return contents;
 	}

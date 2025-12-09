@@ -6,5 +6,10 @@ import type { SourceCode } from "../../../types/SourceCode";
  */
 export interface InstructionParser {
 
-	parseInstruction(s: SourceCode): Meterable | undefined;
+	/**
+	 * @param sourceCode the source code to be parsed
+	 * @returns a Meterable parsed from the source code,
+	 * or undefined if the source code contained no valid instructions
+	 */
+	parseInstruction(sourceCode: SourceCode): Meterable | undefined;
 }
