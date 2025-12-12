@@ -1,6 +1,6 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/main)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/main)
-[![Open VSX Version](https://img.shields.io/open-vsx/v/theNestruo/z80-asm-meter)](https://open-vsx.org/extension/theNestruo/z80-asm-meter)
 [![Visual Studio Marketplace](https://vsmarketplacebadges.dev/version-short/theNestruo.z80-asm-meter.png)](https://marketplace.visualstudio.com/items?itemName=theNestruo.z80-asm-meter)
+[![Open VSX Version](https://img.shields.io/open-vsx/v/theNestruo/z80-asm-meter)](https://open-vsx.org/extension/theNestruo/z80-asm-meter)
+[![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/main)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/main)
 
 # Z80 Assembly meter in Visual Studio Code
 
@@ -681,6 +681,7 @@ As most of the macro definition fields are optional, this extension uses a best-
 </details>
 
 
+
 ## Migration to version 5.x
 
 The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
@@ -722,6 +723,7 @@ Please find the deprecated settings, the last version where the setting was avai
 |         |                                                            | |
 
 </details>
+
 
 
 ## Performance and efficiency
@@ -842,6 +844,7 @@ Or, when showing the processed instruction in the status bar:
 ```
 
 ![](media/images/uxGuildelines.showInstruction=true.png)
+
 
 
 ## Credits
