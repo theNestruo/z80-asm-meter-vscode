@@ -936,10 +936,10 @@
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",
-		"@types/node": "^24.10.1",
-		"@types/vscode": "^1.106.1",
+		"@types/node": "^25.0.1",
+		"@types/vscode": "^1.107.0",
 		"eslint": "^9.39.1",
-		"typescript-eslint": "^8.48.1",
+		"typescript-eslint": "^8.49.0",
 		"esbuild": "^0.27.1"
 	},
 	"dependencies": {
