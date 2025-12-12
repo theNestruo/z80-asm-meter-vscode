@@ -1,15 +1,16 @@
+.vscodeignore
 .gitignore
 
 .vscode
 .github
 
-.vscodeignore
+src
+media/**/*.original.png
 esbuild.js
 eslint.config.mjs
 package-lock.json
 tsconfig.json
-node_modules
 
-src
+node_modules
 dist/**/*.map
-media/**/*.original.png
+*.vsix
