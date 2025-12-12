@@ -318,10 +318,10 @@ function printStatusBarTotalTimings(totalTimings: TotalTimings): string {
 
 		case "smart":
 		case "combineSmart": {
-			const [a, b, c, d] = totalTimings.ordered();
-			return (totalTimings.executionFlowTotalTiming || totalTimings.atExitTotalTiming)
-				? printStatusBarTotalTimingsArray([b, c, d])
-				: printStatusBarTotalTimingsArray([a]);
+			return printStatusBarTotalTimingsArray(
+				totalTimings.hasNonDefaultTotalTiming()
+					? totalTimings.ordered().slice(1)
+					: [totalTimings.defaultTotalTiming]);
 		}
 
 		case "best":

@@ -7,7 +7,7 @@ import type { TotalTiming } from "../types/TotalTiming";
  */
 export abstract class AbstractTotalTimingMeterable implements TotalTiming {
 
-	// Derived information (will be cached for performance reasons)
+	// (for performance reasons)
 	private cachedZ80Timing?: number[];
 	private cachedMsxTiming?: number[];
 	private cachedCpcTiming?: number[];

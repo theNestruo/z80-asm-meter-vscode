@@ -114,13 +114,12 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
  */
 export class Z80Instruction implements Meterable {
 
-	// Information
 	readonly z80Timing: number[];
 	readonly msxTiming: number[];
 	readonly cpcTiming: number[];
 	readonly size: number;
 
-	// Derived information (will be cached for performance reasons)
+	// (for performance reasons)
 	private mnemonic?: string;
 	private operands?: string[];
 	private implicitAccumulatorSyntaxAllowed?: boolean;

@@ -694,32 +694,32 @@ If you are migrating from any version prior to 5.x to version 5.x, some of your 
 
 Please find the deprecated settings, the last version where the setting was available, and the replacement setting or settings in the following table:
 
-| Version | Deprecated setting | Replacement setting(s) |
-| --: | --- | --- |
-| | | |
-| v4.3.0 | ~~`z80-asm-meter.viewInstruction`~~ | [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction) |
-| v4.3.0 | ~~`z80-asm-meter.timing.mode`~~ | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
-| v4.3.0 | ~~`z80-asm-meter.viewBytes`~~ | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
-| v4.3.0 | ~~`z80-asm-meter.debounce`~~ | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
-| v4.3.0 | ~~`z80-asm-meter.syntax.label`~~ | ~~`z80-asm-meter.syntax.label.colonOptional`~~ |
-| v4.3.0 | ~~`z80-asm-meter.directivesAsInstructions`~~ | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
-| v4.3.0 | ~~`z80-asm-meter.timing.threshold`~~ | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
-| v4.3.0 | ~~`z80-asm-meter.timing.hints`~~ | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
-| | | |
-| v5.1.0 | ~~`z80-asm-meter.statusBar.compactSize`~~ | [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix) |
-| v5.1.0 | ~~`z80-asm-meter.timing.atExit.enabled`~~ | [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled)<br>[`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled)<br>[`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled) |
-| v5.1.0 | ~~`z80-asm-meter.timing.atExit.icon`~~ | [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon)<br>[`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon) |
-| | | |
-| v5.3.0 | ~~`z80-asm-meter.syntax.label.colonOptional`~~ | [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.repeat`~~ | [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.lineSeparator`~~ | [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.enable.fakeInstructions`~~ | [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.enable.registerListInstructions`~~ | [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.enable.negativeConditions`~~ | [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.enable.dupEdup`~~ | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.enable.reptEndr`~~ | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
-| v5.3.0 | ~~`z80-asm-meter.syntax.enable.reptEndm`~~ | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
-| | | |
+| Version | Deprecated setting                                         | Replacement setting(s) |
+| --:     | ---                                                        | --- |
+|         |                                                            | |
+| v4.3.0  | ~~`z80-asm-meter.viewInstruction`~~                        | [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction) |
+| v4.3.0  | ~~`z80-asm-meter.timing.mode`~~                            | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
+| v4.3.0  | ~~`z80-asm-meter.viewBytes`~~                              | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
+| v4.3.0  | ~~`z80-asm-meter.debounce`~~                               | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
+| v4.3.0  | ~~`z80-asm-meter.syntax.label`~~                           | ~~`z80-asm-meter.syntax.label.colonOptional`~~ |
+| v4.3.0  | ~~`z80-asm-meter.directivesAsInstructions`~~               | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
+| v4.3.0  | ~~`z80-asm-meter.timing.threshold`~~                       | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
+| v4.3.0  | ~~`z80-asm-meter.timing.hints`~~                           | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
+|         |                                                            | |
+| v5.1.0  | ~~`z80-asm-meter.statusBar.compactSize`~~                  | [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix) |
+| v5.1.0  | ~~`z80-asm-meter.timing.atExit.enabled`~~                  | [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled)<br>[`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled)<br>[`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled) |
+| v5.1.0  | ~~`z80-asm-meter.timing.atExit.icon`~~                     | [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon)<br>[`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon) |
+|         |                                                            | |
+| v5.3.0  | ~~`z80-asm-meter.syntax.label.colonOptional`~~             | [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.repeat`~~                          | [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.lineSeparator`~~                   | [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.enable.fakeInstructions`~~         | [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.enable.registerListInstructions`~~ | [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.enable.negativeConditions`~~       | [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.enable.dupEdup`~~                  | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.enable.reptEndr`~~                 | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
+| v5.3.0  | ~~`z80-asm-meter.syntax.enable.reptEndm`~~                 | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
+|         |                                                            | |
 
 </details>
 

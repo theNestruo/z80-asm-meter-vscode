@@ -1,8 +1,16 @@
 import type { Meterable } from "../../types/Meterable";
 import { AbstractTotalTimingMeterable } from "./AbstractTotalTimingMeterable";
 
+/**
+ * "Default total timing" calculation
+ */
 export class DefaultTotalTimingsMeterable extends AbstractTotalTimingMeterable {
 
+	/**
+	 * Builds an instance of the "default total timing" decorator
+	 * @param meterable The meterable instance to be decorated
+	 * @returns the "default total timing" decorator
+	 */
 	static calculate(meterable: Meterable): DefaultTotalTimingsMeterable {
 
 		// (for performance reasons)

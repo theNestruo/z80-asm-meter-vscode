@@ -97,7 +97,7 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
  */
 class SjasmplusFakeInstruction extends MeterableCollection {
 
-	// Derived information (will be cached for performance reasons)
+	// (for performance reasons)
 	private mnemonic?: string;
 	private operands?: string[];
 	private ready = false;

@@ -14,28 +14,21 @@ import type { TotalTiming } from "./types/TotalTiming";
  */
 export class TotalTimings {
 
-	readonly defaultTotalTiming: TotalTiming;
-	readonly executionFlowTotalTiming?: TotalTiming;
-	readonly atExitTotalTiming?: AtExitTotalTiming;
+	// (for performance reasons)
+	private theDefaultTotalTiming?: TotalTiming;
+	private theExecutionFlowTotalTiming?: TotalTiming | null;
+	private theAtExitTotalTiming?: AtExitTotalTiming | null;
 
-	constructor(meterable: Meterable) {
+	constructor(
+		private readonly meterable: Meterable) {
+	}
 
-		this.defaultTotalTiming = DefaultTotalTimingsMeterable.calculate(meterable);
-		this.executionFlowTotalTiming = ExecutionFlowTotalTimingsMeterable.calculate(meterable);
-		this.atExitTotalTiming = AtExitTotalTimingsMeterable.calculate(meterable);
+	hasNonDefaultTotalTiming(): boolean {
+		return !!(this.executionFlowTotalTiming ?? this.atExitTotalTiming);
 	}
 
 	/**
-	 * The total timing calculation that best fits the selection
-	 */
-	best(): TotalTiming {
-		return this.atExitTotalTiming
-			?? this.executionFlowTotalTiming
-			?? this.defaultTotalTiming;
-	}
-
-	/**
-	 * The total timings calculations for the status bar,
+	 * @returns the total timings calculations for the status bar,
 	 * in the order specified in the extension configuration
 	 */
 	ordered(): (TotalTiming | undefined)[] {
@@ -59,5 +52,45 @@ export class TotalTimings {
 				// (should never happen)
 				return [this.defaultTotalTiming, undefined, undefined, undefined];
 		}
+	}
+
+	/**
+	 * @returns the total timing calculation that best fits the selection
+	 */
+	best(): TotalTiming {
+		return this.atExitTotalTiming
+			?? this.executionFlowTotalTiming
+			?? this.defaultTotalTiming;
+	}
+
+	/**
+	 * @returns the "default total timing" decorator, lazily evaluated
+	 */
+	get defaultTotalTiming(): TotalTiming {
+		return this.theDefaultTotalTiming ??= DefaultTotalTimingsMeterable.calculate(this.meterable);
+	}
+
+	/**
+	 * @returns The "execution flow timing" decorator, or undefined, lazily evaluated
+	 */
+	private get executionFlowTotalTiming(): TotalTiming | undefined {
+		if (this.theExecutionFlowTotalTiming === undefined) {
+			// (uses null when there is no "execution flow timing")
+			this.theExecutionFlowTotalTiming = ExecutionFlowTotalTimingsMeterable.calculate(this.meterable) ?? null;
+		}
+		// (returns undefined instead of null)
+		return this.theExecutionFlowTotalTiming ?? undefined;
+	}
+
+	/**
+	 * @returns the "timing at exit" decorator, or undefined, lazily evaluated
+	 */
+	private get atExitTotalTiming(): AtExitTotalTiming | undefined {
+		if (this.theAtExitTotalTiming === undefined) {
+			// (uses null when there is no "timing at exit")
+			this.theAtExitTotalTiming = AtExitTotalTimingsMeterable.calculate(this.meterable) ?? null;
+		}
+		// (returns undefined instead of null)
+		return this.theAtExitTotalTiming ?? undefined;
 	}
 }

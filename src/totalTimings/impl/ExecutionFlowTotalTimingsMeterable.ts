@@ -3,12 +3,15 @@ import type { Meterable } from "../../types/Meterable";
 import { isConditionalInstruction, isConditionalJumpOrRetInstruction, isUnconditionalJumpOrRetInstruction } from "../../utils/AssemblyUtils";
 import { AbstractTotalTimingMeterable } from "./AbstractTotalTimingMeterable";
 
+/**
+ * "Execution flow timing" calculation
+ */
 export class ExecutionFlowTotalTimingsMeterable extends AbstractTotalTimingMeterable {
 
 	/**
 	 * Conditionaly builds an instance of the "execution flow timing" decorator
 	 * @param meterable The meterable instance to be decorated
-	 * @return The "execution flow timing" decorator, or undefined
+	 * @returns the "execution flow timing" decorator, or undefined
 	 */
 	static calculate(meterable: Meterable): ExecutionFlowTotalTimingsMeterable | undefined {
 

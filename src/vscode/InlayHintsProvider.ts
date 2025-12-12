@@ -424,7 +424,7 @@ class OngoingInlayHintCandidate {
  */
 class InlayHintCandidate extends OngoingInlayHintCandidate {
 
-	// Derived information (will be cached for performance reasons)
+	// (for performance reasons)
 	private cachedTotalTimings?: TotalTimings;
 
 	constructor(

@@ -4,12 +4,15 @@ import { isCallInstruction, isConditionalInstruction, isConditionalJumpOrRetInst
 import type { AtExitTotalTiming } from "../types/AtExitTotalTiming";
 import { AbstractTotalTimingMeterable } from "./AbstractTotalTimingMeterable";
 
+/**
+ * "Timing at exit" calculation
+ */
 export class AtExitTotalTimingsMeterable extends AbstractTotalTimingMeterable implements AtExitTotalTiming {
 
 	/**
 	 * Conditionaly builds an instance of the "timing at exit" decorator
 	 * @param meterable The meterable instance to be decorated
-	 * @return The "timing at exit" decorator, or undefined
+	 * @returns the "timing at exit" decorator, or undefined
 	 */
 	static calculate(meterable: Meterable): AtExitTotalTimingsMeterable | undefined {
 

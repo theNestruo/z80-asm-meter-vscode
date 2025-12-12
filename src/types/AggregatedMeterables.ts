@@ -34,7 +34,7 @@ export class MeterableCollection extends AggregatedMeterable {
 	// The collection of meterable instances
 	protected meterables: Meterable[] = [];
 
-	// Derived information (will be cached for performance reasons)
+	// (for performance reasons)
 	private cachedZ80Timing?: number[];
 	private cachedMsxTiming?: number[];
 	private cachedCpcTiming?: number[];
@@ -174,7 +174,7 @@ export class RepeatedMeterable extends AggregatedMeterable {
 			: new RepeatedMeterable(meterable, repetitions);
 	}
 
-	// Derived information (will be cached for performance reasons)
+	// (for performance reasons)
 	private cachedInstruction?: string;
 	private cachedZ80Timing?: number[];
 	private cachedMsxTiming?: number[];
