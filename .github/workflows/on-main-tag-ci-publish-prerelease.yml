@@ -1,11 +1,11 @@
-name: ci and publish on master tags
+name: CI and publish prerelease on tag
 
 permissions:
   contents: read
 
 on:
   push:
-    tags-ignore:
+    tags:
     - "*-prerelease"
 
 jobs:
@@ -27,9 +27,11 @@ jobs:
       uses: HaaLeo/publish-vscode-extension@v2
       with:
         pat: ${{ secrets.OPEN_VSX_TOKEN }}
+        preRelease: true
 
     - name: Publish to Visual Studio Marketplace
       uses: HaaLeo/publish-vscode-extension@v2
       with:
         pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
         registryUrl: https://marketplace.visualstudio.com
+        preRelease: true

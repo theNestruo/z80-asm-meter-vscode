@@ -1,4 +1,4 @@
-name: ci on pull request
+name: CI on pull request
 
 permissions:
   contents: read
@@ -6,7 +6,7 @@ permissions:
 on:
   pull_request:
     branches:
-    - master
+    - main
 
 jobs:
   build:

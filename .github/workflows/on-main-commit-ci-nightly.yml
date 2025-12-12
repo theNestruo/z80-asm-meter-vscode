@@ -1,4 +1,4 @@
-name: ci and upload nightly on branches
+name: CI and nightly build on main
 
 permissions:
   contents: read
@@ -7,8 +7,7 @@ permissions:
 on:
   push:
     branches:
-    - master
-    - prerelease
+    - main
 
 jobs:
   build:
