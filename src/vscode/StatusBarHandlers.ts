@@ -81,8 +81,7 @@ class StatusBarHandler implements vscode.Disposable {
 		}
 
 		// Parses the source code
-		const metered = mainParser
-			.instance.parse(linesToSourceCode(lines));
+		const metered = mainParser.instance.parse(linesToSourceCode(lines));
 		if (!metered) {
 			return undefined;
 		}
@@ -429,7 +428,7 @@ function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] {
 			continue;
 		}
 
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clock)");
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
 		const value = formatTiming(totalTiming.z80Timing);
 		const m1Value = formatTiming(totalTiming.msxTiming);
 		if (!value && (!hasM1 || !m1Value)) {

@@ -1,17 +1,24 @@
 import HLRU from "hashlru";
-import { config } from "../../../config";
-import type { Activable } from "../../../types/Activable";
-import { MeterableCollection, RepeatedMeterable } from "../../../types/AggregatedMeterables";
-import type { Meterable } from "../../../types/Meterable";
-import type { OptionalSingletonRef } from "../../../types/References";
-import { ConfigurableSingletonRefImpl } from "../../../types/References";
-import type { SourceCode } from "../../../types/SourceCode";
-import type { InstructionParser } from "../../instructions/types/InstructionParser";
-import type { RepetitionParser } from "../../instructions/types/RepetitionParser";
-import { TimingHintedMeterable } from "../../timingHints/types/TimingHintedMeterable";
-import type { TimingHints } from "../../timingHints/types/TimingHints";
-import type { TimingHintsParser } from "../../timingHints/types/TimingHintsParser";
-import type { MainParser } from "../types/MainParser";
+import { config } from "../../config";
+import type { Activable } from "../../types/Activable";
+import { MeterableCollection, RepeatedMeterable } from "../../types/AggregatedMeterables";
+import type { Meterable } from "../../types/Meterable";
+import type { OptionalSingletonRef } from "../../types/References";
+import { ConfigurableSingletonRefImpl } from "../../types/References";
+import type { SourceCode } from "../../types/SourceCode";
+import type { InstructionParser } from "../instructions/types/InstructionParser";
+import type { RepetitionParser } from "../instructions/types/RepetitionParser";
+import { TimingHintedMeterable } from "../timingHints/types/TimingHintedMeterable";
+import type { TimingHints } from "../timingHints/types/TimingHints";
+import type { TimingHintsParser } from "../timingHints/types/TimingHintsParser";
+
+/**
+ * The main parser
+ */
+export interface MainParser extends InstructionParser, RepetitionParser, TimingHintsParser {
+
+	parse(sourceCodes: SourceCode[]): MeterableCollection | undefined;
+}
 
 export class MainParserRef extends ConfigurableSingletonRefImpl<MainParser, MainParserImpl> implements Activable {
 

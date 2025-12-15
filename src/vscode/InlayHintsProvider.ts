@@ -518,7 +518,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 
 		const totalTimings = candidate.totalTimings;
 		const totalTiming = totalTimings.best();
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clock)");
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
 		const timing = printTiming(totalTiming) ?? "0";
 		const timingText = `**${timing}** ${this.timingSuffix}`;
 
@@ -620,7 +620,7 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 
 		const range = `_&hellip;&nbsp;#${String(candidate.endLine.lineNumber + 1)}_&nbsp;`;
 
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clock)");
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
 		const value = formatTiming(totalTiming.z80Timing);
 		const m1Value = formatTiming(totalTiming.msxTiming);
 		if (!value && (!this.hasM1 || !m1Value)) {

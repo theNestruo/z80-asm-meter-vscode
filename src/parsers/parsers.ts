@@ -10,8 +10,8 @@ import { sjasmplusReptRepetitionParser } from "./instructions/impl/SjasmplusRept
 import { z80InstructionParser } from "./instructions/impl/Z80InstructionParser";
 import type { InstructionParser } from "./instructions/types/InstructionParser";
 import type { RepetitionParser } from "./instructions/types/RepetitionParser";
-import { MainParserRef } from "./main/impl/MainParserImpl";
-import type { MainParser } from "./main/types/MainParser";
+import type { MainParser } from "./main/MainParser";
+import { MainParserRef } from "./main/MainParser";
 import { defaultTimingHintsParser } from "./timingHints/impl/DefaultTimingHintsParser";
 import { regExpTimingHintsParser } from "./timingHints/impl/RegExpTimingHintsParser";
 import type { TimingHintsParser } from "./timingHints/types/TimingHintsParser";
