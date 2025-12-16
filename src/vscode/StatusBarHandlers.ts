@@ -20,7 +20,6 @@ import { readLinesFromActiveTextEditorSelection } from "./SourceCodeReader";
 class StatusBarItemContents {
 	constructor(
 		readonly text: string,
-		/** The optional line repetition count */
 		readonly tooltip: vscode.MarkdownString) {
 	}
 }
