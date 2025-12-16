@@ -25,6 +25,7 @@ jobs:
 
     - name: Publish to Open VSX Registry
       uses: HaaLeo/publish-vscode-extension@v2
+      id: publishToOpenVSX
       with:
         pat: ${{ secrets.OPEN_VSX_TOKEN }}
         preRelease: true
@@ -34,6 +35,7 @@ jobs:
       with:
         pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
         registryUrl: https://marketplace.visualstudio.com
+        extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
         preRelease: true
 
     - name: Draft a GitHub Pre-release
@@ -41,5 +43,5 @@ jobs:
       with:
         draft: true
         prerelease: true
-        files: ${{ vsixPath }}
+        files: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
         fail_on_unmatched_files: true
