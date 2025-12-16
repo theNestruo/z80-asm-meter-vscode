@@ -1,5 +1,6 @@
 [![Visual Studio Marketplace](https://vsmarketplacebadges.dev/version-short/theNestruo.z80-asm-meter.png)](https://marketplace.visualstudio.com/items?itemName=theNestruo.z80-asm-meter)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/theNestruo/z80-asm-meter)](https://open-vsx.org/extension/theNestruo/z80-asm-meter)
+[![CodeQL](https://github.com/theNestruo/z80-asm-meter-vscode/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/theNestruo/z80-asm-meter-vscode/actions/workflows/github-code-scanning/codeql)
 [![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/main)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/main)
 
 # Z80 Assembly meter in Visual Studio Code
