@@ -47,14 +47,12 @@ export const z80InstructionParser: SingletonRef<Z80InstructionParser> = new Z80I
 class Z80InstructionParserImpl implements Z80InstructionParser {
 
 	// Instruction maps
-	private readonly instructionByMnemonic: Record<string, Z80Instruction[] | undefined>;
-	private readonly instructionByOpcode: Record<string, Z80Instruction | undefined>;
+	private readonly instructionByMnemonic: Record<string, Z80Instruction[] | undefined> = {};
+	private readonly instructionByOpcode: Record<string, Z80Instruction | undefined> = {};
 
 	constructor(instructionSets: string[]) {
 
 		// Initializes instruction maps
-		this.instructionByMnemonic = {};
-		this.instructionByOpcode = {};
 		for (const rawData of z80InstructionSet) {
 
 			// Discard invalid instruction set instructions

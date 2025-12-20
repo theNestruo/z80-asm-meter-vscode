@@ -20,7 +20,7 @@ export interface OptionalSingletonRef<I> extends Activable {
  */
 export abstract class OptionalSingletonRefImpl<I, T extends I> implements OptionalSingletonRef<I> {
 
-	protected theInstance?: T = undefined;
+	protected theInstance?: T;
 
 	onActivate(): vscode.Disposable {
 		// eslint-disable-next-line @typescript-eslint/unbound-method
@@ -70,7 +70,7 @@ export interface SingletonRef<I> extends OptionalSingletonRef<I> {
  */
 export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I> {
 
-	protected theInstance?: T = undefined;
+	protected theInstance?: T;
 
 	onActivate(): vscode.Disposable {
 		// (empty disposable to fulfil interface)

@@ -16,7 +16,7 @@ import type { InstructionParser } from "../types/InstructionParser";
 class MacroParserRef extends OptionalSingletonRefImpl<InstructionParser, MacroParser> {
 
 	// Cached user-provided macro definitions maps
-	private theDefinitionsByMnemonic?: Record<string, MacroDefinitionConfiguration> = undefined;
+	private theDefinitionsByMnemonic?: Record<string, MacroDefinitionConfiguration>;
 
 	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);

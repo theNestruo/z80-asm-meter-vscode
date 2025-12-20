@@ -32,12 +32,11 @@ export const sjasmplusFakeInstructionParser: OptionalSingletonRef<InstructionPar
 class SjasmplusFakeInstructionParser implements InstructionParser {
 
 	// Instruction maps
-	private readonly instructionByMnemonic: Record<string, SjasmplusFakeInstruction[] | undefined>;
+	private readonly instructionByMnemonic: Record<string, SjasmplusFakeInstruction[] | undefined> = {};
 
 	constructor(instructionSets: string[]) {
 
 		// Initializes instruction maps
-		this.instructionByMnemonic = {};
 		for (const rawData of sjasmplusFakeInstructionSet) {
 
 			// Discard invalid instruction set instructions

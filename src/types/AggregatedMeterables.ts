@@ -183,7 +183,6 @@ export class RepeatedMeterable extends AggregatedMeterable {
 	private cachedSize?: number;
 
 	/**
-	 * Constructor
 	 * @param meterable The repeated meterable instance
 	 * @param repetitions The number of times the meterable instance is repeated
 	 */

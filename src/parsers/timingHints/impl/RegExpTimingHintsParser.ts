@@ -12,7 +12,7 @@ class RegExpTimingHintsParserRef extends OptionalSingletonRefImpl<TimingHintsPar
 	private readonly EMPTY_REGEXP_SOURCE = new RegExp("").source;
 
 	// Cached user-provided timing hints maps
-	private theRegExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[] = undefined;
+	private theRegExpTimingHints?: { regExp: RegExp, timingHints: TimingHints }[];
 
 	protected override onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 		super.onConfigurationChange(e);

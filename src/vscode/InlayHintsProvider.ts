@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import type { PlatformType } from "../config";
 import { config } from "../config";
 import { mainParser } from "../parsers/parsers";
 import { TotalTimings } from "../totalTimings/TotalTimings";
@@ -18,17 +17,14 @@ import type { InlayHintPositionType } from "./config/InlayHintsConfiguration";
  */
 export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Disposable {
 
-	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
-	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
+	private readonly onDidChangeInlayHintsEmitter =
+		new vscode.EventEmitter<void>();
 
-	private readonly disposable: vscode.Disposable;
-	private registerInlayHintsProviderDisposable: vscode.Disposable;
+	readonly onDidChangeInlayHints: vscode.Event<void> =
+		this.onDidChangeInlayHintsEmitter.event;
 
-	// (for performance reasons)
-	private conditionalExitPointMnemonics: string[];
-
-	constructor() {
-		this.disposable = vscode.Disposable.from(
+	private readonly disposable: vscode.Disposable =
+		vscode.Disposable.from(
 			this.onDidChangeInlayHintsEmitter,
 
 			// Subscribe to configuration change event
@@ -36,25 +32,25 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
 		);
 
-		// Registers as a inlay hints provider
-		this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
+	private registerInlayHintsProviderDisposable: vscode.Disposable =
+		this.registerInlayHintsProvider();
 
-		this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
-	}
+	// (for performance reasons)
+	private conditionalExitPointMnemonics: string[] =
+		this.initalizeConditionalExitPointMnemonics();
 
 	private registerInlayHintsProvider(): vscode.Disposable {
-		return vscode.languages.registerInlayHintsProvider(this.documentSelector(), this);
-	}
-
-	private documentSelector(): readonly vscode.DocumentFilter[] {
-
-		return [
-			...config.languageIds.map(languageId => {
-				return { language: languageId };
-			}),
-			// Always enabled if it is a Z80 assembly file
-			{ language: "z80-asm-meter" }
-		];
+		return vscode.languages.registerInlayHintsProvider(
+			[
+				...config.languageIds.map(languageId => {
+					return { language: languageId };
+				}),
+				// Always enabled if it is a Z80 assembly file
+				{
+					language: "z80-asm-meter"
+				}
+			],
+			this);
 	}
 
 	private initalizeConditionalExitPointMnemonics(): string[] {
@@ -467,9 +463,9 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 	}
 
 	// (for performance reasons)
-	protected readonly platform: PlatformType;
-	protected readonly hasM1: boolean;
-	protected readonly timingSuffix: string;
+	protected readonly platform = config.platform;
+	protected readonly hasM1 = this.platform === "msx" || this.platform === "msxz80" || this.platform === "pc8000";
+	protected readonly timingSuffix = printableTimingSuffix();
 
 	constructor(
 		position: vscode.Position, paddingLeft: boolean, paddingRight: boolean,
@@ -480,11 +476,6 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 		super(position, ResolvableInlayHint.buildLabel(referenceCandidate, candidates, displayLimit));
 		this.paddingLeft = paddingLeft;
 		this.paddingRight = paddingRight;
-
-		// (for performance reasons)
-		this.platform = config.platform;
-		this.hasM1 = this.platform === "msx" || this.platform === "msxz80" || this.platform === "pc8000";
-		this.timingSuffix = printableTimingSuffix();
 	}
 
 	resolve(): vscode.InlayHint {
@@ -650,7 +641,7 @@ class ResolvableExitPointInlayHint extends ResolvableInlayHint {
 
 		super(position, paddingLeft, paddingRight,
 			referenceCandidate, candidates,
-			config.inlayHints.subroutinesExitPointsCount);
+			config.inlayHints.exitPointSubroutinesCount);
 	}
 
 	buildTooltipTableHeader(): string[] {

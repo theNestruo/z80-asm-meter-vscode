@@ -29,19 +29,16 @@ class StatusBarItemContents {
  */
 class StatusBarHandler implements vscode.Disposable {
 
-	private readonly disposable: vscode.Disposable;
+	// Subscribe to configuration change event
+	private readonly disposable: vscode.Disposable =
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);;
 
-	private statusBarItem?: vscode.StatusBarItem;
+	private statusBarItem?: vscode.StatusBarItem =
+		this.createStatusBarItem();
 
 	protected constructor(
 		protected readonly command: CopyToClipboardCommand) {
-
-		this.disposable =
-			// Subscribe to configuration change event
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
-
-		this.createStatusBarItem();
 	}
 
 	private createStatusBarItem(): vscode.StatusBarItem {
@@ -204,24 +201,22 @@ export class CachedStatusBarHandler extends StatusBarHandler {
  */
 export class DebouncedStatusBarHandler implements vscode.Disposable {
 
-	private readonly disposable: vscode.Disposable;
+	// Subscribe to selection change and editor activation events
+	private readonly disposable = vscode.Disposable.from(
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		vscode.window.onDidChangeTextEditorSelection(this.onUpdateRequest, this),
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		vscode.window.onDidChangeActiveTextEditor(this.onUpdateRequest, this),
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this),
+	);
 
 	private isLeadingEvent = true;
-	private previousEventTimestamp?: number = undefined;
+	private previousEventTimestamp?: number;
 	private updateStatusBarTimeout?: NodeJS.Timeout;
 
 	constructor(
 		private readonly delegate: StatusBarHandler) {
-
-		this.disposable = vscode.Disposable.from(
-			// Subscribe to selection change and editor activation events
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.window.onDidChangeTextEditorSelection(this.onUpdateRequest, this),
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.window.onDidChangeActiveTextEditor(this.onUpdateRequest, this),
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			vscode.workspace.onDidChangeTextDocument(this.onUpdateRequest, this),
-		);
 	}
 
 	onUpdateRequest(): void {

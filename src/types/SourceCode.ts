@@ -10,7 +10,6 @@ export class SourceCode {
 	readonly repetitions: number;
 
 	/**
-	 * Constructor
 	 * @param instruction The instruction (the actual source code)
 	 * @param label The optional label
 	 * @param afterLabelPosition The position where the optional label ends
