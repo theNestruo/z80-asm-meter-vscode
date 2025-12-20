@@ -21,9 +21,7 @@ class Configuration {
 	}
 
 	get instructionSets(): string[] {
-		return this.platform === "z80n"
-			? ["S", "N"]
-			: ["S"];
+		return this.platform === "z80n" ? ["S", "N"] : ["S"];
 	}
 
 	get expandSelectionToLine(): boolean {

@@ -3,9 +3,7 @@ import { config } from "../config";
 import { mainParser } from "../parsers/parsers";
 import { TotalTimings } from "../totalTimings/TotalTimings";
 import type { SourceCode } from "../types/SourceCode";
-import { printTiming } from "../utils/TimingUtils";
-import { printableTimingSuffix } from "../utils/TimingUtils";
-import { formatTiming } from "../utils/TimingUtils";
+import { formatTiming, printableTimingSuffix, printFullTiming } from "../utils/TimingUtils";
 import { readSourceCodeFromActiveTextEditorSelecion } from "./SourceCodeReader";
 
 /**
@@ -67,7 +65,7 @@ abstract class AbstractCopyToClipboardCommand implements CopyToClipboardCommand 
 
 		// Human readable
 		if (!config.statusBar.copyTimingsAsHints) {
-			let text = printTiming(timing);
+			let text = printFullTiming(timing);
 			if (text) {
 				text += ` ${printableTimingSuffix()}`;
 			} else {
@@ -85,20 +83,19 @@ abstract class AbstractCopyToClipboardCommand implements CopyToClipboardCommand 
 		}
 
 		// As timing hint
-		if (config.platform === "cpc") {
-			const cpcText = formatTiming(timing.cpcTiming);
-			return `[cpc=${cpcText}]`;
+		switch (config.platform) {
+			case "z80":
+			case "z80n":
+				return `[z80=${formatTiming(timing.z80Timing)}]`;
+			case "msx":
+				return `[msx=${formatTiming(timing.msxTiming)}]`;
+			case "msxz80":
+				return `[msx=${formatTiming(timing.msxTiming)}] [z80=${formatTiming(timing.z80Timing)}]`;
+			case "pc8000":
+				return `[z80=${formatTiming(timing.z80Timing)}] [m1=${formatTiming(timing.msxTiming)}]`;
+			case "cpc":
+				return `[cpc=${formatTiming(timing.cpcTiming)}]`;
 		}
-		if (config.platform === "msx") {
-			const msxText = formatTiming(timing.msxTiming);
-			return `[msx=${msxText}]`;
-		}
-		const z80text = formatTiming(timing.z80Timing);
-		if (config.platform === "pc8000") {
-			const m1Text = formatTiming(timing.msxTiming);
-			return `[z80=${z80text}] [m1=${m1Text}]`;
-		}
-		return `[z80=${z80text}]`;
 	}
 
 	buildDescription(totalTimings: TotalTimings): string | undefined {

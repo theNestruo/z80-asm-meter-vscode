@@ -36,9 +36,7 @@ export abstract class OptionalSingletonRefImpl<I, T extends I> implements Option
 	}
 
 	get instance(): I | undefined {
-		return this.theInstance ??= this.enabled
-			? this.createInstance()
-			: undefined;
+		return this.theInstance ??= this.enabled ? this.createInstance() : undefined;
 	}
 
 	protected abstract get enabled(): boolean;
@@ -75,7 +73,7 @@ export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I
 	protected theInstance?: T = undefined;
 
 	onActivate(): vscode.Disposable {
-		// (empty disposable)
+		// (empty disposable to fulfil interface)
 		return vscode.Disposable.from();
 	}
 
@@ -93,7 +91,8 @@ export abstract class SingletonRefImpl<I, T extends I> implements SingletonRef<I
  * @param I the instance type (interface)
  * @param T the actual instance type (implementation)
  */
-export abstract class ConfigurableSingletonRefImpl<I, T extends I> extends OptionalSingletonRefImpl<I, T> implements SingletonRef<I> {
+export abstract class ConfigurableSingletonRefImpl<I, T extends I>
+	extends OptionalSingletonRefImpl<I, T> implements SingletonRef<I> {
 
 	get instance(): I {
 		return this.theInstance ??= this.createInstance();

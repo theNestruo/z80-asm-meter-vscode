@@ -9,7 +9,7 @@ import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, is
 import { printRange } from "../utils/PositionRangeUtils";
 import { lineToSourceCode } from "../utils/SourceCodeUtils";
 import { hrMarkdown, positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from "../utils/TextUtils";
-import { formatTiming, printableTimingSuffix, printTiming } from "../utils/TimingUtils";
+import { printableTimingSuffix, printFullTiming, printM1Timing, printZ80Timing } from "../utils/TimingUtils";
 import { isExtensionEnabledFor } from "./SourceCodeReader";
 import type { InlayHintPositionType } from "./config/InlayHintsConfiguration";
 
@@ -102,9 +102,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 	resolveInlayHint(hint: vscode.InlayHint, _: vscode.CancellationToken): vscode.ProviderResult<vscode.InlayHint> {
 
 		// Resolves the inlay hints
-		return (hint instanceof ResolvableInlayHint)
-			? hint.resolve()
-			: undefined;
+		return (hint instanceof ResolvableInlayHint) ? hint.resolve() : undefined;
 	}
 
 	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
@@ -457,10 +455,11 @@ class InlayHintCandidate extends OngoingInlayHintCandidate {
  */
 abstract class ResolvableInlayHint extends vscode.InlayHint {
 
-	private static buildLabel(referenceCandidate: InlayHintCandidate, candidates: InlayHintCandidate[], displayLimit: number): string {
+	private static buildLabel(
+		referenceCandidate: InlayHintCandidate, candidates: InlayHintCandidate[], displayLimit: number): string {
 
 		const totalTiming = referenceCandidate.totalTimings.best();
-		const timing = printTiming(totalTiming) ?? "0";
+		const timing = printFullTiming(totalTiming) ?? "0";
 		const timingSuffix = printableTimingSuffix();
 		const ellipsisSuffix = (candidates.length == 1) || (displayLimit <= 1) ? "" : " ...";
 
@@ -519,7 +518,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 		const totalTimings = candidate.totalTimings;
 		const totalTiming = totalTimings.best();
 		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
-		const timing = printTiming(totalTiming) ?? "0";
+		const timing = printFullTiming(totalTiming) ?? "0";
 		const timingText = `**${timing}** ${this.timingSuffix}`;
 
 		return [
@@ -527,7 +526,7 @@ abstract class ResolvableInlayHint extends vscode.InlayHint {
 			"|:-:|---|",
 			label
 				? `||**${label}**|\n||_${rangeText}_|`
-				: "||_${rangeText}_|",
+				: `||_${rangeText}_|`,
 			`|${timingIcon}|${totalTiming.name}: ${timingText}|`
 		];
 	}
@@ -617,15 +616,16 @@ class ResolvableSubroutineInlayHint extends ResolvableInlayHint {
 	buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
+		const value = printZ80Timing(totalTiming) ?? "";
+		const m1Value = printM1Timing(totalTiming) ?? "";
 
-		const range = `_&hellip;&nbsp;#${String(candidate.endLine.lineNumber + 1)}_&nbsp;`;
-
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
-		const value = formatTiming(totalTiming.z80Timing);
-		const m1Value = formatTiming(totalTiming.msxTiming);
+		// (sanity check)
 		if (!value && (!this.hasM1 || !m1Value)) {
 			return;
 		}
+
+		const range = `_&hellip;&nbsp;#${String(candidate.endLine.lineNumber + 1)}_&nbsp;`;
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
 
 		switch (this.platform) {
 			case "msx":
@@ -684,15 +684,16 @@ class ResolvableExitPointInlayHint extends ResolvableInlayHint {
 	buildTooltipTableEntry(candidate: InlayHintCandidate): string | undefined {
 
 		const totalTiming = candidate.totalTimings.best();
+		const value = printZ80Timing(totalTiming) ?? "";
+		const m1Value = printM1Timing(totalTiming) ?? "";
 
-		const range = `_#${String(candidate.startLine.lineNumber + 1)}&nbsp;&hellip;_&nbsp;`;
-		const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":") ?? "";
-
-		const value = formatTiming(totalTiming.z80Timing);
-		const m1Value = formatTiming(totalTiming.msxTiming);
+		// (sanity check)
 		if (!value && (!this.hasM1 || !m1Value)) {
 			return;
 		}
+
+		const range = `_#${String(candidate.startLine.lineNumber + 1)}&nbsp;&hellip;_&nbsp;`;
+		const label = removeSuffix(candidate.sourceCodeWithLabel.label, ":") ?? "";
 
 		switch (this.platform) {
 			case "msx":

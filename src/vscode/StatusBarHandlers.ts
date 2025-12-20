@@ -10,7 +10,7 @@ import { printInstructions } from "../utils/InstructionsUtils";
 import { printSize } from "../utils/SizeUtils";
 import { linesToSourceCode } from "../utils/SourceCodeUtils";
 import { hashCode, hrMarkdown, pluralize, spaceIfNotInfix, validateCodicon } from "../utils/TextUtils";
-import { formatTiming, printableTimingSuffix, printTiming } from "../utils/TimingUtils";
+import { printableTimingSuffix, printFullTiming, printM1Timing, printZ80Timing } from "../utils/TimingUtils";
 import type { CopyToClipboardCommand } from "./CopyToClipboardCommands";
 import { readLinesFromActiveTextEditorSelection } from "./SourceCodeReader";
 
@@ -342,7 +342,7 @@ function printStatusBarTotalTimingsArray(totalTimings: (TotalTiming | undefined)
 			continue;
 		}
 		const icon = totalTiming.statusBarIcon;
-		const value = printTiming(totalTiming) ?? "0";
+		const value = printFullTiming(totalTiming) ?? "0";
 
 		// Combines when the previous timing when they have the same values
 		if (!config.statusBar.totalTimingsCombined) {
@@ -388,7 +388,7 @@ function printMarkdownTotalTimingsAndSize(totalTimings: TotalTimings): string[] 
 		const formattedSize = printSize(size);
 		const sizeSuffix = pluralize(" byte| bytes", size);
 		const platform = config.platform;
-		const hasBothZ80M1 = platform === "pc8000";
+		const hasBothZ80M1 = platform === "msxz80" || platform === "pc8000";
 		table.push(hasBothZ80M1
 			? `|${sizeIcon}|Size|**${formattedSize}**||${sizeSuffix}|`
 			: `|${sizeIcon}|Size|**${formattedSize}**|${sizeSuffix}|`);
@@ -423,16 +423,21 @@ function printMarkdownTotalTimings(totalTimings: TotalTimings): string[] {
 				];
 
 	for (const totalTiming of totalTimings.ordered()) {
+
+		// (sanity check)
 		if (!totalTiming) {
 			continue;
 		}
 
-		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
-		const value = formatTiming(totalTiming.z80Timing);
-		const m1Value = formatTiming(totalTiming.msxTiming);
+		const value = printZ80Timing(totalTiming) ?? "";
+		const m1Value = printM1Timing(totalTiming) ?? "";
+
+		// (sanity check)
 		if (!value && (!hasM1 || !m1Value)) {
 			continue;
 		}
+
+		const timingIcon = totalTiming.statusBarIcon || validateCodicon(config.statusBar.timingsIcon, "$(clockface)");
 
 		switch (platform) {
 			case "msx":

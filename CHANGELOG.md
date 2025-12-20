@@ -6,6 +6,7 @@
 - Performance improvements
 - `z80-asm-meter.statusBar.timingsIcon` (icon to identify the timings) setting default value changed from ~~`$(watch)`~~ to the new `$(clockface)`
 - GitHub Actions to automatically publish identical `.vsix` file to Open VSX Registry, Visual Studio Marketplace, and GitHub Release
+- Fixes CPC not using NOPs but clock cycles in tooltips
 
 ## 6.2.0
 
