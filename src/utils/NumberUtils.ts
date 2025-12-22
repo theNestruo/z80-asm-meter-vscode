@@ -29,7 +29,7 @@ class NumericExpressionParser {
 		const us = isNegative ? s.substring(1) : s;
 		const matches = this.regexp.exec(us);
 		return matches && matches.length >= 1
-			? (isNegative ? -1 : 1) * parseInt(matches[1], this.radix)
+			? parseInt(matches[1], this.radix) * (isNegative ? -1 : 1)
 			: undefined;
 	}
 }
@@ -48,7 +48,7 @@ const numericParsers: NumericExpressionParser[] = [
 export function parseNumericExpression(s: string, includeNegatives = true): number | undefined {
 
 	const negative = s.startsWith("-");
-	if ((!includeNegatives) && negative) {
+	if (negative && (!includeNegatives)) {
 		return undefined;
 	}
 
@@ -56,8 +56,7 @@ export function parseNumericExpression(s: string, includeNegatives = true): numb
 
 	for (const numericParser of numericParsers) {
 		const value = numericParser.parse(us);
-		if ((value !== undefined)
-			&& (!isNaN(value))) {
+		if ((value !== undefined) && (!isNaN(value))) {
 			return negative ? -value : value;
 		}
 	}

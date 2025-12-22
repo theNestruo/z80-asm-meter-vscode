@@ -7,6 +7,13 @@ on:
   pull_request:
     branches:
     - main
+    paths:
+    - 'src/**/*.ts'
+    - 'package.json'
+    - 'tsconfig.json'
+    - 'esbuild.js'
+    - 'eslint.config.mjs'
+    - '.github/**/*.yml'
 
 jobs:
   build:

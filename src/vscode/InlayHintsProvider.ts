@@ -17,11 +17,9 @@ import type { InlayHintPositionType } from "./config/InlayHintsConfiguration";
  */
 export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Disposable {
 
-	private readonly onDidChangeInlayHintsEmitter =
-		new vscode.EventEmitter<void>();
+	private readonly onDidChangeInlayHintsEmitter = new vscode.EventEmitter<void>();
 
-	readonly onDidChangeInlayHints: vscode.Event<void> =
-		this.onDidChangeInlayHintsEmitter.event;
+	readonly onDidChangeInlayHints: vscode.Event<void> = this.onDidChangeInlayHintsEmitter.event;
 
 	private readonly disposable: vscode.Disposable =
 		vscode.Disposable.from(
@@ -32,44 +30,10 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 			vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this)
 		);
 
-	private registerInlayHintsProviderDisposable: vscode.Disposable =
-		this.registerInlayHintsProvider();
+	private inlayHintsProviderRegistration: vscode.Disposable = this.registerInlayHintsProvider();
 
-	// (for performance reasons)
-	private conditionalExitPointMnemonics: string[] =
-		this.initalizeConditionalExitPointMnemonics();
-
-	private registerInlayHintsProvider(): vscode.Disposable {
-		return vscode.languages.registerInlayHintsProvider(
-			[
-				...config.languageIds.map(languageId => {
-					return { language: languageId };
-				}),
-				// Always enabled if it is a Z80 assembly file
-				{
-					language: "z80-asm-meter"
-				}
-			],
-			this);
-	}
-
-	private initalizeConditionalExitPointMnemonics(): string[] {
-
-		const mnemonics = [];
-		if (config.inlayHints.exitPointRet) {
-			mnemonics.push("RET");
-		}
-		if (config.inlayHints.exitPointJp) {
-			mnemonics.push("JP");
-		}
-		if (config.inlayHints.exitPointJr) {
-			mnemonics.push("JR");
-		}
-		if (config.inlayHints.exitPointDjnz) {
-			mnemonics.push("DJNZ");
-		}
-		return mnemonics;
-	}
+	private theCandidatesLocator?: InlayHintCandidatesLocator;
+	private theCandidatesResolver?: InlayHintCandidatesResolver;
 
 	provideInlayHints(
 		document: vscode.TextDocument, range: vscode.Range, _: vscode.CancellationToken)
@@ -80,18 +44,16 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 		}
 
 		// Locates the inlay hint candidates within the requested range
-		const candidatesLocator = new InlayHintCandidatesLocator(this.conditionalExitPointMnemonics);
-		const candidates = candidatesLocator.locateCandidates(document, range);
+		const candidates = this.candidatesLocator.locateCandidates(document, range);
 
 		if (!candidates.length) {
 			return undefined;
 		}
 
 		// Resolves the inlay hint candidates as subroutine inlay hints and exit point inlay hints
-		const candidatesResolver = new InlayHintCandidatesResolver();
 		return [
-			...candidatesResolver.resolveSubroutineInlayHints(candidates),
-			...candidatesResolver.resolveExitPointInlayHints(candidates)
+			...this.candidatesResolver.resolveSubroutineInlayHints(candidates),
+			...this.candidatesResolver.resolveExitPointInlayHints(candidates)
 		];
 	}
 
@@ -101,35 +63,61 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 		return (hint instanceof ResolvableInlayHint) ? hint.resolve() : undefined;
 	}
 
+	private get candidatesLocator(): InlayHintCandidatesLocator {
+		return this.theCandidatesLocator ??= new InlayHintCandidatesLocator();
+	}
+
+	private get candidatesResolver(): InlayHintCandidatesResolver {
+		return this.theCandidatesResolver ??= new InlayHintCandidatesResolver();
+	}
+
 	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		// Re-registers as a inlay hints provider
 		if (e.affectsConfiguration("z80-asm-meter.languageIds")) {
-			this.registerInlayHintsProviderDisposable.dispose();
-			this.registerInlayHintsProviderDisposable = this.registerInlayHintsProvider();
-		}
-
-		// Forces re-creation on configuration change
-		if (e.affectsConfiguration("z80-asm-meter.inlayHints.exitPoint")) {
-			this.conditionalExitPointMnemonics = this.initalizeConditionalExitPointMnemonics();
+			this.inlayHintsProviderRegistration.dispose();
+			this.inlayHintsProviderRegistration = this.registerInlayHintsProvider();
+			this.theCandidatesLocator = undefined;
+			this.theCandidatesResolver = undefined;
 		}
 	}
 
+	private registerInlayHintsProvider(): vscode.Disposable {
+
+		// (always enabled if it is a "z80-asm-meter" Z80 assembly file)
+		return vscode.languages.registerInlayHintsProvider([...config.languageIds, "z80-asm-meter"], this);
+	}
+
 	dispose(): void {
-		this.registerInlayHintsProviderDisposable.dispose();
+		this.inlayHintsProviderRegistration.dispose();
 		this.disposable.dispose();
+		this.theCandidatesLocator = undefined;
+		this.theCandidatesResolver = undefined;
 	}
 }
 
 class InlayHintCandidatesLocator {
 
 	// (for performance reasons)
+	private readonly conditionalExitPointMnemonics: string[] = [];
 	private readonly lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
 	private readonly unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
 	private readonly fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
 
-	constructor(
-		private readonly conditionalExitPointMnemonics: string[]) {
+	constructor() {
+
+		if (config.inlayHints.exitPointRet) {
+			this.conditionalExitPointMnemonics.push("RET");
+		}
+		if (config.inlayHints.exitPointJp) {
+			this.conditionalExitPointMnemonics.push("JP");
+		}
+		if (config.inlayHints.exitPointJr) {
+			this.conditionalExitPointMnemonics.push("JR");
+		}
+		if (config.inlayHints.exitPointDjnz) {
+			this.conditionalExitPointMnemonics.push("DJNZ");
+		}
 	}
 
 	locateCandidates(document: vscode.TextDocument, range: vscode.Range): InlayHintCandidate[] {

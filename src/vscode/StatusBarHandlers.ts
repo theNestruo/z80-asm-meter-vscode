@@ -29,22 +29,21 @@ class StatusBarItemContents {
  */
 class StatusBarHandler implements vscode.Disposable {
 
+	constructor(
+		protected readonly command: CopyToClipboardCommand) {
+	}
+
 	// Subscribe to configuration change event
 	private readonly disposable: vscode.Disposable =
 		// eslint-disable-next-line @typescript-eslint/unbound-method
 		vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);;
 
-	private statusBarItem?: vscode.StatusBarItem =
-		this.createStatusBarItem();
+	private theStatusBarItem?: vscode.StatusBarItem;
 
-	protected constructor(
-		protected readonly command: CopyToClipboardCommand) {
-	}
-
-	private createStatusBarItem(): vscode.StatusBarItem {
+	get statusBarItem(): vscode.StatusBarItem {
 
 		const alignment = config.statusBar.alignment;
-		return this.statusBarItem ??= vscode.window.createStatusBarItem(
+		return this.theStatusBarItem ??= vscode.window.createStatusBarItem(
 			["leftmost", "left"].includes(alignment)
 				? vscode.StatusBarAlignment.Left
 				: vscode.StatusBarAlignment.Right,
@@ -63,9 +62,12 @@ class StatusBarHandler implements vscode.Disposable {
 
 		// Shows or hides the actual status bar item
 		if (contents) {
-			this.show(contents);
+			this.statusBarItem.text = contents.text;
+			this.statusBarItem.tooltip = contents.tooltip;
+			this.statusBarItem.command = this.command;
+			this.statusBarItem.show();
 		} else {
-			this.hide();
+			this.theStatusBarItem?.hide();
 		}
 	}
 
@@ -108,25 +110,13 @@ class StatusBarHandler implements vscode.Disposable {
 		return new vscode.MarkdownString(markdown.join("\n"), true);
 	}
 
-	private show(contents: StatusBarItemContents): void {
-		const statusBarItem = this.createStatusBarItem();
-		statusBarItem.text = contents.text;
-		statusBarItem.tooltip = contents.tooltip;
-		statusBarItem.command = this.command;
-		statusBarItem.show();
-	}
-
-	private hide(): void {
-		this.statusBarItem?.hide();
-	}
-
 	protected onConfigurationChange(e: vscode.ConfigurationChangeEvent): void {
 
 		// Recreates StatusBarItem on alignment change
 		if (e.affectsConfiguration("z80-asm-meter.statusBar.alignment")) {
 			this.destroyStatusBarItem();
-			this.createStatusBarItem();
 		}
+		this.onUpdateRequest();
 	}
 
 	dispose(): void {
@@ -135,8 +125,8 @@ class StatusBarHandler implements vscode.Disposable {
 	}
 
 	private destroyStatusBarItem(): void {
-		this.statusBarItem?.dispose();
-		this.statusBarItem = undefined;
+		this.theStatusBarItem?.dispose();
+		this.theStatusBarItem = undefined;
 	}
 }
 
@@ -149,15 +139,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 	// (for caching purposes)
 	private readonly EMPTY = new StatusBarItemContents("", new vscode.MarkdownString());
 
-	private cache;
-
-	constructor(
-		command: CopyToClipboardCommand) {
-
-		super(command);
-
-		this.cache = HLRU(config.statusBar.cacheSize);
-	}
+	private readonly cache = HLRU(config.statusBar.cacheSize);
 
 	protected override parseAndBuildStatusBarItemContents(lines: string[]): StatusBarItemContents | undefined {
 
@@ -186,7 +168,7 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		super.onConfigurationChange(e);
 
 		// Re-initializes cache
-		this.cache = HLRU(config.statusBar.cacheSize);
+		this.cache.clear();
 	}
 
 	override dispose(): void {
@@ -201,6 +183,10 @@ export class CachedStatusBarHandler extends StatusBarHandler {
  */
 export class DebouncedStatusBarHandler implements vscode.Disposable {
 
+	constructor(
+		private readonly delegate: StatusBarHandler) {
+	}
+
 	// Subscribe to selection change and editor activation events
 	private readonly disposable = vscode.Disposable.from(
 		// eslint-disable-next-line @typescript-eslint/unbound-method
@@ -214,10 +200,6 @@ export class DebouncedStatusBarHandler implements vscode.Disposable {
 	private isLeadingEvent = true;
 	private previousEventTimestamp?: number;
 	private updateStatusBarTimeout?: NodeJS.Timeout;
-
-	constructor(
-		private readonly delegate: StatusBarHandler) {
-	}
 
 	onUpdateRequest(): void {
 
