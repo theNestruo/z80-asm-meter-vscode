@@ -940,7 +940,7 @@
 		"@types/node": "^25.0.1",
 		"@types/vscode": "^1.107.0",
 		"eslint": "^9.39.1",
-		"typescript-eslint": "^8.51.0",
+		"typescript-eslint": "^8.52.0",
 		"esbuild": "^0.27.1"
 	},
 	"dependencies": {
