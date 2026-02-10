@@ -3,7 +3,7 @@
 	"name": "z80-asm-meter",
 	"version": "6.5.0",
 	"engines": {
-		"vscode": "^1.108.0"
+		"vscode": "^1.109.0"
 	},
 	"displayName": "Z80 Assembly meter",
 	"description": "Z80 Assembly clock cycles and bytecode size meter",
@@ -939,7 +939,7 @@
 		"typescript": "^5.9.3",
 		"@types/node": "^25.2.2",
 		"@types/vscode": "^1.109.0",
-		"eslint": "^10.0.0",
+		"eslint": "^9.39.1",
 		"typescript-eslint": "^8.55.0",
 		"esbuild": "^0.27.3"
 	},
