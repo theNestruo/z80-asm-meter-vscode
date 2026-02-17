@@ -42,13 +42,12 @@ export function lineToSourceCode(originalLine: string, lineSeparatorCharacter: s
 	}
 
 	// Extracts and removes label
-	let label: string | undefined = undefined;
-	let afterLabelPosition: number | undefined = undefined;
-	[label, afterLabelPosition, line] = extractLabel(line);
+	const [label, afterLabelPosition, lineWithoutLabel] = extractLabel(line);
+	line = lineWithoutLabel;
 
 	// Extracts and removes repetitions
-	let repetitions = 1;
-	[repetitions, line] = extractRepetitions(line);
+	const [repetitions, lineWithoutRepetitions] = extractRepetitions(line);
+	line = lineWithoutRepetitions;
 
 	// Splits
 	const lineFragments = splitNormalizeQuotesAware(line, lineSeparatorCharacter);
