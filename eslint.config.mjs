@@ -1,13 +1,13 @@
 // reference: https://typescript-eslint.io/getting-started
 
-import eslint from "@eslint/js";
+import eslintjs from "@eslint/js";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
 
-	// eslint"s recommended config
-	eslint.configs.recommended,
+	// eslint's recommended config
+	eslintjs.configs.recommended,
 
 	// recommended: recommended rules for code correctness
 	// recommended-type-checked: recommended + additional recommended rules that require type information
