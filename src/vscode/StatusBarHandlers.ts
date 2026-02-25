@@ -36,7 +36,7 @@ class StatusBarHandler implements vscode.Disposable {
 	// Subscribe to configuration change event
 	private readonly disposable: vscode.Disposable =
 		// eslint-disable-next-line @typescript-eslint/unbound-method
-		vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);;
+		vscode.workspace.onDidChangeConfiguration(this.onConfigurationChange, this);
 
 	private theStatusBarItem?: vscode.StatusBarItem;
 
