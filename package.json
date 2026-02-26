@@ -771,7 +771,7 @@
 					"z80-asm-meter.inlayHints.enabled": {
 						"order": 10,
 						"type": "boolean",
-						"default": false,
+						"default": true,
 						"description": "Enables detection and metering of subroutines as inlay hints"
 					},
 					"z80-asm-meter.inlayHints.subroutines.position": {
@@ -822,7 +822,7 @@
 						"enumDescriptions": [
 							"Ignores any nested label",
 							"Considers that any nested label is a new subroutine",
-							"Considers that a nested label is a subroutine if it is a separate entry points"
+							"Considers that a nested label is a subroutine if it is a separate entry point"
 						]
 					},
 					"z80-asm-meter.inlayHints.subroutines.fallthrough": {

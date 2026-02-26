@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 6.5.0 (pre-release)
+
+- Inlay Hints enabled by default
+
 ## 6.4.0
 
 - Code refactor
