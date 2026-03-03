@@ -41,7 +41,7 @@ jobs:
       uses: martinbeentjes/npm-get-version-action@main
 
     - name: Upload nightly build
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: z80-asm-meter-${{ steps.get-version.outputs.current-version}}-nightly
         path: z80-asm-meter-${{ steps.get-version.outputs.current-version}}.vsix
