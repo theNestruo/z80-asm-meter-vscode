@@ -5,9 +5,6 @@ updates:
 - package-ecosystem: "npm"
   # Look for `package.json` and `lock` files in the `root` directory
   directory: "/"
-  # Check for updates once a week
-  schedule:
-    interval: "weekly"
   # Create a group of dependencies to be updated together in one pull request
   groups:
     # Specify a name for the group, which will be used in pull request titles
@@ -19,9 +16,16 @@ updates:
       patterns:
         - "*" # A wildcard that matches all dependencies in the package
               # ecosystem. Note: using "*" may open a large pull request
+  # Check for updates once a week, with a cooldown period of 7 days
+  schedule:
+    interval: "weekly"
+  cooldown:
+    default-days: 7
 
 - package-ecosystem: "github-actions"
   directory: "/"
+  # Check for updates to GitHub Actions every week, with a cooldown period of 7 days
   schedule:
-    # Check for updates to GitHub Actions every week
     interval: "weekly"
+  cooldown:
+    default-days: 7
