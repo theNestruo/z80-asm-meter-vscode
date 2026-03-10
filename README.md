@@ -1,15 +1,13 @@
+# Z80 Assembly meter in Visual Studio Code
+
 [![Visual Studio Marketplace](https://vsmarketplacebadges.dev/version-short/theNestruo.z80-asm-meter.png)](https://marketplace.visualstudio.com/items?itemName=theNestruo.z80-asm-meter)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/theNestruo/z80-asm-meter)](https://open-vsx.org/extension/theNestruo/z80-asm-meter)
 [![CodeQL](https://github.com/theNestruo/z80-asm-meter-vscode/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/theNestruo/z80-asm-meter-vscode/actions/workflows/github-code-scanning/codeql)
 [![CodeFactor](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/badge/main)](https://www.codefactor.io/repository/github/thenestruo/z80-asm-meter-vscode/overview/main)
 
-# Z80 Assembly meter in Visual Studio Code
-
 The **Z80 Assembly meter** extension for Visual Studio Code meters clock cycles and bytecode size from Z80 assembly source code.
 
 This extension meters timing in Z80 clock periods, referred to as T (time) cycles.
-
-
 
 ## Index
 
@@ -29,7 +27,7 @@ This extension meters timing in Z80 clock periods, referred to as T (time) cycle
 - [F.A.Q.](#faq)
 - [Credits](#credits)
 
-
+<br>
 
 ## Features
 
@@ -46,7 +44,7 @@ In Amstrad CPC architecture, all instruction timings are stretched so that they 
 
 ZX Spectrum Next Extended Z80 Instruction Set is supported.
 
-
+<br>
 
 ## Getting started
 
@@ -272,7 +270,7 @@ These settings allow to fine-tune the source code parsing and metering.
 
 </details>
 
-
+<br>
 
 ## Advanced usage
 
@@ -426,7 +424,7 @@ This extension can provide inlay hints (additional information about source code
 
 * [`z80-asm-meter.inlayHints.enabled`](vscode://settings/z80-asm-meter.inlayHints.enabled): Enables detection and metering of subroutines as inlay hints.
 
-    Disabled by default.
+    Enabled by default.
 
 * [`z80-asm-meter.inlayHints.subroutines.position`](vscode://settings/z80-asm-meter.inlayHints.subroutines.position): The position within the line for the inlay hints of subroutines.
 
@@ -681,7 +679,7 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 </details>
 
-
+<br>
 
 ## Migration to version 5.x
 
@@ -725,7 +723,7 @@ Please find the deprecated settings, the last version where the setting was avai
 
 </details>
 
-
+<br>
 
 ## Performance and efficiency
 
@@ -758,6 +756,7 @@ From version 6.4.0 onwards, the extension code has been refactored to reduce eve
 
 </details>
 
+<br>
 
 ## F.A.Q.
 
@@ -846,7 +845,7 @@ Or, when showing the processed instruction in the status bar:
 
 ![](media/images/uxGuildelines.showInstruction=true.png)
 
-
+<br>
 
 ## Credits
 
