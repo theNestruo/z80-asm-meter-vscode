@@ -9,27 +9,7 @@ The **Z80 Assembly meter** extension for Visual Studio Code meters clock cycles 
 
 This extension meters timing in Z80 clock periods, referred to as T (time) cycles.
 
-## Index
-
-- [Features](#features)
-- [Getting Started](#getting-started)
-    - [Main settings](#main-settings)
-    - [Status bar settings](#status-bar-settings)
-    - [Assembler syntax settings](#assembler-syntax-settings)
-    - [Parser settings](#parser-settings)
-- [Advanced usage](#advanced-usage)
-    - [Total timing calculations](#total-timing-calculations)
-    - [Inlay hints](#inlay-hints)
-    - [Timing hints](#timing-hints)
-    - [User-defined macros](#user-defined-macros)
-- [Migration to version 5.x](#migration-to-version-5x)
-- [Performance and efficiency](#performance-and-efficiency)
-- [F.A.Q.](#faq)
-- [Credits](#credits)
-
-<br>
-
-## Features
+### Features
 
 Select Z80 assembly source code to view clock cycles, mnemonic of the instruction, and/or bytecode size in the status bar. Click on either to copy the clock cycles and the bytecode size information to the clipboard.
 
@@ -681,83 +661,6 @@ As most of the macro definition fields are optional, this extension uses a best-
 
 <br>
 
-## Migration to version 5.x
-
-The _Z80 Assembly meter_ extension started as a simple extension. To support different platforms, assembler syntaxes, macros, fake instructions, repetition blocks, and different total timing calculations, the extension grew and its configuration became cumbersome: some settings affected too many things, some other settings were unintuitive and caused undesired behaviour, etc.
-
-Starting from version 5.0.0, the settings are properly grouped, are more fine grained, their default values make more sense for the majority of the users, and there are more customization options.
-
-If you are migrating from any version prior to 5.x to version 5.x, some of your existing _Z80 Assembly meter_ settings may have been moved or renamed, or may have changed its default value. Please update your settings accordingly by following the deprecation messages.
-
-<details>
-<summary>Deprecated settings</summary>
-
-Please find the deprecated settings, the last version where the setting was available, and the replacement setting or settings in the following table:
-
-| Version | Deprecated setting                                         | Replacement setting(s) |
-| --:     | ---                                                        | --- |
-|         |                                                            | |
-| v4.3.0  | ~~`z80-asm-meter.viewInstruction`~~                        | [`z80-asm-meter.statusBar.showInstruction`](vscode://settings/z80-asm-meter.statusBar.showInstruction) |
-| v4.3.0  | ~~`z80-asm-meter.timing.mode`~~                            | [`z80-asm-meter.statusBar.totalTimings`](vscode://settings/z80-asm-meter.statusBar.totalTimings) |
-| v4.3.0  | ~~`z80-asm-meter.viewBytes`~~                              | [`z80-asm-meter.statusBar.showBytes`](vscode://settings/z80-asm-meter.statusBar.showBytes) |
-| v4.3.0  | ~~`z80-asm-meter.debounce`~~                               | [`z80-asm-meter.statusBar.debounce`](vscode://settings/z80-asm-meter.statusBar.debounce) |
-| v4.3.0  | ~~`z80-asm-meter.syntax.label`~~                           | ~~`z80-asm-meter.syntax.label.colonOptional`~~ |
-| v4.3.0  | ~~`z80-asm-meter.directivesAsInstructions`~~               | [`z80-asm-meter.parser.directives.defsAsInstructions`](vscode://settings/z80-asm-meter.parser.directives.defsAsInstructions) |
-| v4.3.0  | ~~`z80-asm-meter.timing.threshold`~~                       | [`z80-asm-meter.timing.executionFlow.threshold`](vscode://settings/z80-asm-meter.timing.executionFlow.threshold)<br>[`z80-asm-meter.timing.atExit.threshold`](vscode://settings/z80-asm-meter.timing.atExit.threshold) |
-| v4.3.0  | ~~`z80-asm-meter.timing.hints`~~                           | [`z80-asm-meter.timing.hints.enabled`](vscode://settings/z80-asm-meter.timing.hints.enabled) |
-|         |                                                            | |
-| v5.1.0  | ~~`z80-asm-meter.statusBar.compactSize`~~                  | [`z80-asm-meter.statusBar.sizeSuffix`](vscode://settings/z80-asm-meter.statusBar.sizeSuffix) |
-| v5.1.0  | ~~`z80-asm-meter.timing.atExit.enabled`~~                  | [`z80-asm-meter.timing.atExit.retEnabled`](vscode://settings/z80-asm-meter.timing.atExit.retEnabled)<br>[`z80-asm-meter.timing.atExit.jumpEnabled`](vscode://settings/z80-asm-meter.timing.atExit.jumpEnabled)<br>[`z80-asm-meter.timing.atExit.callEnabled`](vscode://settings/z80-asm-meter.timing.atExit.callEnabled) |
-| v5.1.0  | ~~`z80-asm-meter.timing.atExit.icon`~~                     | [`z80-asm-meter.timing.atExit.jumpIcon`](vscode://settings/z80-asm-meter.timing.atExit.jumpIcon)<br>[`z80-asm-meter.timing.atExit.callIcon`](vscode://settings/z80-asm-meter.timing.atExit.callIcon) |
-|         |                                                            | |
-| v5.3.0  | ~~`z80-asm-meter.syntax.label.colonOptional`~~             | [`z80-asm-meter.syntaxFeature.labelColonOptional`](vscode://settings/z80-asm-meter.syntaxFeature.labelColonOptional) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.repeat`~~                          | [`z80-asm-meter.syntaxFeature.repeat`](vscode://settings/z80-asm-meter.syntaxFeature.repeat) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.lineSeparator`~~                   | [`z80-asm-meter.syntaxFeature.lineSeparator`](vscode://settings/z80-asm-meter.syntaxFeature.lineSeparator) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.enable.fakeInstructions`~~         | [`z80-asm-meter.syntaxFeature.fakeInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.fakeInstructions) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.enable.registerListInstructions`~~ | [`z80-asm-meter.syntaxFeature.registerListInstructions`](vscode://settings/z80-asm-meter.syntaxFeature.registerListInstructions) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.enable.negativeConditions`~~       | [`z80-asm-meter.syntaxFeature.negativeConditions`](vscode://settings/z80-asm-meter.syntaxFeature.negativeConditions) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.enable.dupEdup`~~                  | [`z80-asm-meter.syntaxFeature.dupEdup`](vscode://settings/z80-asm-meter.syntaxFeature.dupEdup) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.enable.reptEndr`~~                 | [`z80-asm-meter.syntaxFeature.reptEndr`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndr) |
-| v5.3.0  | ~~`z80-asm-meter.syntax.enable.reptEndm`~~                 | [`z80-asm-meter.syntaxFeature.reptEndm`](vscode://settings/z80-asm-meter.syntaxFeature.reptEndm) |
-|         |                                                            | |
-
-</details>
-
-<br>
-
-## Performance and efficiency
-
-Users are encouraged to update to the newer versions for a more performant and efficient source code metering.
-
-Roughly speaking, version 5.5.0 onwards the extension is about 15&times; to 20&times; faster than previous versions.
-
-<details>
-
-Early versions of this extension avoided metering more than once the same selection, and also prevented the metering to be triggered too frequently (debouncing).
-
-From version 5.4.0 onwards, development has focused on performance improvements: now it uses a "Least Recently Used" (LRU) cache for previously metered selections, expensive RegExps have been replaced by lighter alternatives, and, since version 5.5.0, another internal LRU cache for instructions improves the performance when metering large source code blocks.
-
-The following table compares the time took to meter 11&nbsp;179 lines of source code (the [fully annotated disassembly of King's Valley (&copy; Konami 1985)](https://github.com/GuillianSeed/Kings-Valley) by [Manuel Pazos](https://github.com/GuillianSeed)) using VS Code 1.92.1, Windows 10, AMD Ryzen 3 2200U:
-
-| Version | [`z80-asm-meter.parser.instructionsCacheSize`](vscode://settings/z80-asm-meter.parser.instructionsCacheSize) | Time |
-| :-: | :-- | --: |
-| 5.3.5 | (not available) | 4&nbsp;149&nbsp;ms |
-| 5.4.0 | (not available) | 3&nbsp;795&nbsp;ms |
-| 5.5.0<br>5.5.1 | `100` (default value) | ~398&nbsp;ms |
-| 5.5.2 | `100` (default value) | 242&nbsp;ms |
-| 5.6.0 (preview) | `100` (default value) | 252&nbsp;ms |
-| 5.6.1 (preview) | `100` (default value) | 230&nbsp;ms |
-| 5.6.2 (preview)<br>5.6.3 | `200` (new default value) | ~207&nbsp;ms |
-| 5.6.4 | `250` (new default value) | 165&nbsp;ms |
-
-From version 6.2.0 onwards, the extension size has been improved. The images in the documentation contribute the most to the size of the extension. Using better compression have reduced the size of the images to ~150 KB, and the extension total size is about ~220 KB.
-
-From version 6.4.0 onwards, the extension code has been refactored to reduce even further the activation time and resource consumption (e.g.: parsers that are not enabled will not be instantiated).
-
-</details>
-
-<br>
-
 ## F.A.Q.
 
 
@@ -789,61 +692,17 @@ The [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) s
 ```
 
 
-### Q: &lt;some feature&gt; stopped working after updating the extension.
-
-Double check your settings for any [deprecated setting](#migration-to-version-5x) that needs to be replaced.
-
-
-### Q: But that is your fault! You should support the deprecated settings for a few versions!
-
-VS Code API support for deprecated settings does conflict with default values. I did my best to keep the extension backwards compatible, but it ended up being a hard-to-debug mess that failed most of the times.
-
-From version 5.0.0 onwards I'll keep the [deprecated setting](#migration-to-version-5x) section updated.
-
-
 ### Q: The extension is too confusing; there are too many things in the status bar now.
 
-There are new features, such as [total timing calculations](#total-timing-calculations) and [timing hints](#timing-hints), that are now enabled by default. The default values should be appropriate for the majority of the users, but if you are uncomfortable with the new features, or find them confusing, you can still disable them.
+New features, such as [total timing calculations](#total-timing-calculations), [inlay hints](#inlay-hints), and [timing hints](#timing-hints), are now enabled by default. The default values should be appropriate for the majority of the users, but if you are uncomfortable with the new features, or find them confusing, you can still disable them.
 
-The shortest way to disable the new features is:
+The shortest way to disable these new features is:
 
 ```json
 "z80-asm-meter.statusBar.totalTimings": "default",
-"z80-asm-meter.timing.hints.enabled": "disabled"
+"z80-asm-meter.inlayHints.enabled": false,
+"z80-asm-meter.timing.hints.enabled": "none"
 ```
-
-
-### Q: The extension does not follow the VS Code [UX Guidelines](https://code.visualstudio.com/api/ux-guidelines/overview) given for the [Status Bar](https://code.visualstudio.com/api/ux-guidelines/status-bar).
-
-The main issue is that, when using the default configuration, the extension uses more than one icon.
-
-It is possible to use text instead of icons via configuration settings:
-
-```json
-"z80-asm-meter.statusBar.timingsIcon": "$(clockface) Ts ",
-"z80-asm-meter.statusBar.sizeIcon": ", Sz ",
-"z80-asm-meter.timing.executionFlow.icon": "↓", // UNICODE Downwards Arrow (U+2193)
-"z80-asm-meter.timing.atExit.retIcon": "←",     // UNICODE Leftwards Arrow (U+2190)
-"z80-asm-meter.timing.atExit.jumpIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
-"z80-asm-meter.timing.atExit.callIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
-```
-
-![](media/images/uxGuildelines.showInstruction=false.png)
-
-Or, when showing the processed instruction in the status bar:
-
-```json
-"z80-asm-meter.statusBar.showInstruction": true,
-"z80-asm-meter.statusBar.instructionIcon": "$(clockface)",
-"z80-asm-meter.statusBar.timingsIcon": "Ts ",
-"z80-asm-meter.statusBar.sizeIcon": ", Sz ",
-"z80-asm-meter.timing.executionFlow.icon": "↓", // UNICODE Downwards Arrow (U+2193)
-"z80-asm-meter.timing.atExit.retIcon": "←",     // UNICODE Leftwards Arrow (U+2190)
-"z80-asm-meter.timing.atExit.jumpIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
-"z80-asm-meter.timing.atExit.callIcon": "→",    // UNICODE Rightwards Arrow (U+2192)
-```
-
-![](media/images/uxGuildelines.showInstruction=true.png)
 
 <br>
 
