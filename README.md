@@ -601,44 +601,50 @@ As most of the macro definition fields are optional, this extension uses a best-
 1. Macro definition with instructions. Macro will be metered by aggregating the metrics of the instructions. For example:
 
     ```jsonc
-    "z80-asm-meter.macros": [
-        {
-            "name": "ADD_HL_A",
-            "instructions": [
-                "ADD A, L",
-                "LD L, A",
-                "JR NC, zz",
-                "INC H"
-            ]
-        }
-    ]
+	{
+		"z80-asm-meter.macros": [
+			{
+				"name": "ADD_HL_A",
+				"instructions": [
+					"ADD A, L",
+					"LD L, A",
+					"JR NC, zz",
+					"INC H"
+				]
+			}
+		]
+	}
     ```
 
 2. Macro definition with timing and size. Macro will be metered using the provided timing and/or size. For example:
 
     ```jsonc
-    "z80-asm-meter.macros": [
-        {
-            "name": "ADD_HL_A",
-            "z80": "24/19", // (note that there is no cpc timing,
-            "msx": "28/23", //    so this macro won't be metered
-            "size": 5       //    if platform=cpc)
-        }
-    ]
+	{
+		"z80-asm-meter.macros": [
+			{
+				"name": "ADD_HL_A",
+				"z80": "24/19", // (note that there is no cpc timing,
+				"msx": "28/23", //    so this macro won't be metered
+				"size": 5       //    if platform=cpc)
+			}
+		]
+	}
     ```
 
 3. Macro definition with both instructions and timing and/or size. Provided timing and/or size will override the metrics of the instructions. For example:
 
     ```jsonc
-    "z80-asm-meter.macros": [
-        {
-            "name": "ADD_HL_A",
-            "instructions": [
-                "ADD A, L", "LD L, A", "JR NC, zz", "INC H"
-            ],
-            "msx": "23" // (overrides actual timing for platform=msx)
-        }
-    ]
+	{
+		"z80-asm-meter.macros": [
+			{
+				"name": "ADD_HL_A",
+				"instructions": [
+					"ADD A, L", "LD L, A", "JR NC, zz", "INC H"
+				],
+				"msx": "23" // (overrides actual timing for platform=msx)
+			}
+		]
+	}
     ```
 
 </details>
@@ -679,7 +685,9 @@ Macro definitions are not read from actual source code, but from user settings. 
 Double check the [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) setting in your settings. It has to include `c`:
 
 ```json
-"z80-asm-meter.languageIds": [ "c" ]
+{
+	"z80-asm-meter.languageIds": [ "c" ]
+}
 ```
 
 
@@ -688,7 +696,9 @@ Double check the [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.l
 The [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) setting uses language IDs, not extensions. Check the language ID of your assembly files and replace `"s"` and `"asm"` with that extension ID. Or use the default language IDs, then add `"c"`:
 
 ```json
-"z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
+{
+	"z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
+}
 ```
 
 
@@ -699,9 +709,11 @@ New features, such as [total timing calculations](#total-timing-calculations), [
 The shortest way to disable these new features is:
 
 ```json
-"z80-asm-meter.statusBar.totalTimings": "default",
-"z80-asm-meter.inlayHints.enabled": false,
-"z80-asm-meter.timing.hints.enabled": "none"
+{
+	"z80-asm-meter.statusBar.totalTimings": "default",
+	"z80-asm-meter.inlayHints.enabled": false,
+	"z80-asm-meter.timing.hints.enabled": "none"
+}
 ```
 
 <br>
