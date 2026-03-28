@@ -2,6 +2,8 @@
 
 ## 6.7.0 (pre-release)
 
+- Simplified README.md
+
 ## 6.6.0
 
 - Inlay Hints enabled by default
