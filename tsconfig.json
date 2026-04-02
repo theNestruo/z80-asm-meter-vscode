@@ -6,6 +6,9 @@
 		// commonjs: Node.js with require()
 		"module": "commonjs",
 
+		// NodeJS namespace
+		"types": ["node"],
+
 		// ES2020: Includes JS built-ins like Map, Set, Promise
 		"lib": ["ES2020"],
 
