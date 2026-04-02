@@ -1,16 +1,14 @@
 {
 	"compilerOptions": {
-		// For Node.js >=14 or modern browsers, ES2020 or newer is typically safe
-		"target": "es2020",
+		// Matches VS Code configuration
+		// (https://github.com/microsoft/vscode/blob/main/src/tsconfig.base.json)
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"target": "ES2024",
+		"lib": ["ES2024"],
 
-		// commonjs: Node.js with require()
-		"module": "commonjs",
-
-		// NodeJS namespace
+		// (NodeJS namespace for NodeJS.Timeout)
 		"types": ["node"],
-
-		// ES2020: Includes JS built-ins like Map, Set, Promise
-		"lib": ["ES2020"],
 
 		"rootDir": "src",
 		"outDir": "out",
