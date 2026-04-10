@@ -95,7 +95,7 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 		const mnemonic = extractMnemonicOf(instruction);
 		const candidates = this.instructionByMnemonic[mnemonic];
 		if (candidates) {
-			return this.findBestCandidate(instruction, candidates);
+			return this.findBestCandidateIgnoreMnemonic(instruction, candidates);
 		}
 
 		// (unknown mnemonic/instruction)
@@ -107,18 +107,17 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 		return this.instructionByOpcode[formatHexadecimalByte(opcode)];
 	}
 
-	private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
+	private findBestCandidateIgnoreMnemonic(instruction: string, candidates: Z80Instruction[]):
 		Z80Instruction | undefined {
 
 		// (for performance reasons)
-		const mnemonic = extractMnemonicOf(instruction);
 		const operands = extractOperandsOf(instruction);
 
 		// Locates instruction
 		let bestCandidate;
 		let bestScore = 0;
 		for (const candidate of candidates) {
-			const score = candidate.match(mnemonic, operands);
+			const score = candidate.matchIgnoreMnemonic(operands);
 			if (score === 1) {
 				// Exact match
 				return candidate;
@@ -392,6 +391,18 @@ export class Z80Instruction implements Meterable {
 			return 0;
 		}
 
+		return this.matchIgnoreMnemonic(candidateOperands);
+	}
+
+	/**
+	 * @param candidateOperands the operands of the cleaned-up line to match against the instruction
+	 * @returns number between 0 and 1 with the score of the match,
+	 * where 0 means the line is not this instruction,
+	 * 1 means the line is this instruction,
+	 * and intermediate values mean the line may be this instruction
+	 */
+	matchIgnoreMnemonic(candidateOperands: string[]): number {
+
 		// Quick validation of the candidate operands
 		if (candidateOperands.includes("")) {
 			return 0; // (incomplete candidate instruction, such as "LD A,")
@@ -431,9 +442,15 @@ export class Z80Instruction implements Meterable {
 		for (let i = implicitAccumulatorSyntax ? 1 : 0, j = explicitAccumulatorSyntax ? 1 : 0;
 			i < expectedOperands.length;
 			i++, j++) {
-			score *= this.operandScore(expectedOperands[i], candidateOperands[j], true);
-			if (score === 0) {
-				return 0;
+			const operandScore = this.operandScore(expectedOperands[i], candidateOperands[j], true);
+			switch (operandScore) {
+				case 0:
+					return 0;
+				case 1:
+					break; // (avoids unnecessary multiplication)
+				default:
+					score *= operandScore;
+					break;
 			}
 		}
 		return score;
