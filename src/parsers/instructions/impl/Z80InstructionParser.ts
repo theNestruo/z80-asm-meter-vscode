@@ -110,11 +110,15 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 	private findBestCandidate(instruction: string, candidates: Z80Instruction[]):
 		Z80Instruction | undefined {
 
+		// (for performance reasons)
+		const mnemonic = extractMnemonicOf(instruction);
+		const operands = extractOperandsOf(instruction);
+
 		// Locates instruction
 		let bestCandidate;
 		let bestScore = 0;
 		for (const candidate of candidates) {
-			const score = candidate.match(instruction);
+			const score = candidate.match(mnemonic, operands);
 			if (score === 1) {
 				// Exact match
 				return candidate;
@@ -374,21 +378,21 @@ export class Z80Instruction implements Meterable {
 	}
 
 	/**
-	 * @param candidateInstruction the cleaned-up line to match against the instruction
+	 * @param candidateMnemonic the mnemonic of the cleaned-up line to match against the instruction
+	 * @param candidateOperands the operands of the cleaned-up line to match against the instruction
 	 * @returns number between 0 and 1 with the score of the match,
 	 * where 0 means the line is not this instruction,
 	 * 1 means the line is this instruction,
 	 * and intermediate values mean the line may be this instruction
 	 */
-	match(candidateInstruction: string): number {
+	match(candidateMnemonic: string, candidateOperands: string[]): number {
 
 		// Compares mnemonic
-		if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {
+		if (candidateMnemonic !== this.mnemonic) {
 			return 0;
 		}
 
-		// Extracts the candidate operands
-		const candidateOperands = extractOperandsOf(candidateInstruction);
+		// Quick validation of the candidate operands
 		if (candidateOperands.includes("")) {
 			return 0; // (incomplete candidate instruction, such as "LD A,")
 		}

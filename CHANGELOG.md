@@ -3,6 +3,7 @@
 ## 6.7.0 (pre-release)
 
 - Simplified README.md
+- Performance improvements
 
 ## 6.6.0
 
