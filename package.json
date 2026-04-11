@@ -288,7 +288,7 @@
 					"z80-asm-meter.statusBar.cacheSize": {
 						"order": 75,
 						"type": "integer",
-						"default": 150,
+						"default": 250,
 						"description": "Size of the cache, in selections, used to minimize metering calculations when navigating through previously metered code"
 					},
 					"z80-asm-meter.statusBar.instructionIcon": {
@@ -435,13 +435,13 @@
 					"z80-asm-meter.parser.instructionsCacheSize": {
 						"order": 20,
 						"type": "integer",
-						"default": 250,
+						"default": 500,
 						"description": "Size of the internal cache, in instructions, to lighten the metering calculations; particularly when metering large source code blocks"
 					},
 					"z80-asm-meter.parser.sourceCodeCacheSize": {
 						"order": 30,
 						"type": "integer",
-						"default": 250,
+						"default": 1000,
 						"description": "Size of the internal cache, in lines, to lighten the pre-processing of source code; particularly when providing inlay hints"
 					}
 				}

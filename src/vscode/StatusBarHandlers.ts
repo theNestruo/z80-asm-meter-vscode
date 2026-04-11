@@ -149,17 +149,17 @@ export class CachedStatusBarHandler extends StatusBarHandler {
 		}
 
 		// Checks cache
-		const currentHashCode = hashCode(lines.join("\n"));
-		const cachedContents = this.cache.get(currentHashCode) as StatusBarItemContents | undefined;
+		const cacheKey = hashCode(lines.join("\n"));
+		const cachedContents = this.cache.get(cacheKey) as StatusBarItemContents | undefined;
 		if (cachedContents) {
-			return cachedContents !== this.EMPTY ? cachedContents : undefined;
+			// return cachedContents !== this.EMPTY ? cachedContents : undefined;
 		}
 
 		// Parses the source code and builds the status bar item contents
 		const contents = super.parseAndBuildStatusBarItemContents(lines);
 
 		// Caches the status bar item contents
-		this.cache.set(currentHashCode, contents ?? this.EMPTY);
+		this.cache.set(cacheKey, contents ?? this.EMPTY);
 
 		return contents;
 	}

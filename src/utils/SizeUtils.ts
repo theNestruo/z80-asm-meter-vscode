@@ -42,13 +42,13 @@ function formatHexadecimalSize(n: number): string {
 
 		case "intel":
 		case "uppercaseIntel":
-			return "0123456789".includes(hex.charAt(0))
+			return "0123456789".includes(hex[0])
 				? `${hex}h`
 				: `0${hex}h`;
 
 		case "intelUppercase":
 		case "uppercaseIntelUppercase":
-			return "0123456789".includes(hex.charAt(0))
+			return "0123456789".includes(hex[0])
 				? `${hex}H`
 				: `0${hex}H`;
 

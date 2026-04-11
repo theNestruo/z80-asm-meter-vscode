@@ -62,8 +62,8 @@ class AssemblyDirectiveParser implements InstructionParser {
 		for (const operand of operands) {
 			const length = operand.length;
 			if ((length >= 3)
-				&& "\"'".includes(operand.charAt(0))
-				&& operand.endsWith(operand.charAt(0))) {
+				&& "\"'".includes(operand[0])
+				&& operand.endsWith(operand[0])) {
 				// String
 				const string = operand.substring(1, operand.length - 1);
 				for (let i = 0; i < string.length; i++) {

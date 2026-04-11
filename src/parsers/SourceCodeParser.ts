@@ -1,10 +1,9 @@
-import HLRU from "hashlru";
 import { config } from "../config";
 import type { SingletonRef } from "../types/References";
 import { ConfigurableSingletonRefImpl } from "../types/References";
 import { SourceCode } from "../types/SourceCode";
 import { parseNumericExpression } from "../utils/NumberUtils";
-import { isEmptyOrBlank, isQuote, whitespaceCharacters } from "../utils/SourceCodeUtils";
+import { isEmptyOrBlank, whitespaceCharacters } from "../utils/SourceCodeUtils";
 
 /**
  * The source code parser/extractor/pre-processor
@@ -16,10 +15,10 @@ export interface SourceCodeParser {
 	lineToSourceCode(line: string): SourceCode[];
 }
 
-class SourceCodeParserRef extends ConfigurableSingletonRefImpl<SourceCodeParser, CachedSourceCodeParserImpl> {
+class SourceCodeParserRef extends ConfigurableSingletonRefImpl<SourceCodeParser, SourceCodeParserImpl> {
 
-	protected override createInstance(): CachedSourceCodeParserImpl {
-		return new CachedSourceCodeParserImpl();
+	protected override createInstance(): SourceCodeParserImpl {
+		return new SourceCodeParserImpl();
 	}
 }
 
@@ -30,7 +29,7 @@ export const sourceCodeParser: SingletonRef<SourceCodeParser> = new SourceCodePa
 /**
  * Default implementation of the source code parser/extractor/pre-processor
  */
-class DefaultSourceCodeParserImpl implements SourceCodeParser {
+class SourceCodeParserImpl implements SourceCodeParser {
 
 	// (for performance reasons)
 	private readonly lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
@@ -146,15 +145,15 @@ class DefaultSourceCodeParserImpl implements SourceCodeParser {
 		for (let i = 0; i < n; i++) {
 
 			// For every part
-			let currentPart = ""; // (required for isQuote(c, currentPart))
+			const currentPartBuilder: string[] = []; // (avoids string concatenation for performance reasons)
 			let quoted = undefined;
-			let whitespace = -1; // (required for isQuote(c, currentPart))
+			let whitespace = -1;
 			for (; i < n; i++) {
-				const c = s.charAt(i);
+				const c = s[i];
 
 				// Inside quotes
 				if (quoted) {
-					currentPart += c;
+					currentPartBuilder.push(c);
 					if (c === quoted) {
 						quoted = undefined;
 					}
@@ -166,6 +165,7 @@ class DefaultSourceCodeParserImpl implements SourceCodeParser {
 				if (trailingCommentsDelimiterSize) {
 					const beforeLineCommentPosition = (offset ?? 0) + i;
 					const afterLineCommentPosition = beforeLineCommentPosition + trailingCommentsDelimiterSize;
+					fragments.push(currentPartBuilder.join("").trim());
 					return [s.substring(afterLineCommentPosition).trim(),
 						beforeLineCommentPosition, afterLineCommentPosition, fragments];
 				}
@@ -183,17 +183,17 @@ class DefaultSourceCodeParserImpl implements SourceCodeParser {
 
 				// Not whitespace
 				if (whitespace > 0) {
-					currentPart += " ";
+					currentPartBuilder.push(" ");
 				}
 				whitespace = 0;
 
 				// Quote?
-				quoted = isQuote(c, currentPart);
+				quoted = this.isQuote(c, currentPartBuilder);
 
-				currentPart += c.toUpperCase();
+				currentPartBuilder.push(c.toUpperCase());
 			}
 
-			fragments.push(currentPart.trim());
+			fragments.push(currentPartBuilder.join("").trim());
 		}
 
 		return [undefined, undefined, undefined, fragments];
@@ -202,42 +202,22 @@ class DefaultSourceCodeParserImpl implements SourceCodeParser {
 	private isTrailingCommentsStart(c: string, line: string, i: number, n: number): number {
 
 		return (c === ";") ? 1
-			: (c === "/") && (i + 1 < n) && (line.charAt(i + 1) === "/") ? 2
+			: (c === "/") && (i + 1 < n) && (line[i + 1] === "/") ? 2
 				: 0;
 	}
 
-}
+	// (precompiled RegExp for performance reasons)
+	private readonly exAfAfRegexp = /^ex af ?, ?af$/i;
 
-/**
- * Cached implementation of the source code parser/extractor/pre-processor
- */
-class CachedSourceCodeParserImpl extends DefaultSourceCodeParserImpl {
+	private isQuote(c: string, currentPartBuilder: string[]): string | undefined {
 
-	private readonly sourceCodeCache;
-
-	constructor() {
-		super();
-
-		// Initializes cache
-		this.sourceCodeCache = HLRU(config.parser.sourceCodeCacheSize);
-	}
-
-	override lineToSourceCode(line: string): SourceCode[] {
-
-		// (sanity check: ignore empty line)
-		if (!line.trim().length) {
-			return [];
-		}
-
-		// Uses the cached value
-		if (this.sourceCodeCache.has(line)) {
-			return this.sourceCodeCache.get(line) as SourceCode[];
-		}
-
-		const sourceCodes = super.lineToSourceCode(line);
-
-		// Caches value
-		this.sourceCodeCache.set(line, sourceCodes);
-		return sourceCodes;
+		return (c === "\"") ? c
+			// Prevents considering "'" as a quote
+			// when parsing the instruction "ex af,af'"
+			: ((c === "'")
+				&& ((currentPartBuilder.length < 8) // (too short; shortest is "ex af,af")
+					|| (currentPartBuilder.length > 10) // (too long; longest is "ex af , af")
+					|| (!this.exAfAfRegexp.test(currentPartBuilder.join(""))))) ? c
+				: undefined;
 	}
 }

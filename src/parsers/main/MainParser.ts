@@ -40,24 +40,6 @@ export class MainParserRef extends ConfigurableSingletonRefImpl<MainParser, Main
 
 //
 
-class EmptyMeterable implements Meterable {
-
-	readonly instruction = "";
-	readonly z80Timing = [0, 0];
-	readonly msxTiming = [0, 0];
-	readonly cpcTiming = [0, 0];
-	readonly bytes = [];
-	readonly size = 0;
-
-	flatten(): Meterable[] {
-		return [this];
-	}
-
-	readonly isComposed = false;
-}
-
-const CACHE_PLACEHOLDER = new EmptyMeterable();
-
 /**
  * Actual implementation of the main parser
  */
@@ -132,8 +114,7 @@ class MainParserImpl implements MainParser {
 
 		// Uses the cached value
 		if (this.instructionsCache.has(s.cacheKey)) {
-			const meterable = this.instructionsCache.get(s.cacheKey) as Meterable;
-			return (meterable === CACHE_PLACEHOLDER) ? undefined : meterable;
+			return this.instructionsCache.get(s.cacheKey) as Meterable;
 		}
 
 		// Tries to parse as an instruction
@@ -147,7 +128,6 @@ class MainParserImpl implements MainParser {
 		}
 
 		// (not an instruction)
-		this.instructionsCache.set(s.cacheKey, CACHE_PLACEHOLDER);
 		return undefined;
 	}
 

@@ -31,6 +31,6 @@ export class SourceCode {
 	}
 
 	get cacheKey(): string {
-		return `[${this.repetitions.toString()}] ${this.instruction}`;
+		return this.instruction;
 	}
 }

@@ -12,7 +12,7 @@ export function isEmptyOrBlank(s: string | undefined): boolean {
 
 	const n = s.length;
 	for (let i = 0; i < n; i++) {
-		if (!whitespaceCharacters.includes(s.charAt(i))) {
+		if (!whitespaceCharacters.includes(s[i])) {
 			return false;
 		}
 	}
@@ -31,7 +31,7 @@ export function splitNormalizeQuotesAware(s: string, separator: string | undefin
 		let quoted = undefined;
 		let whitespace = -1;
 		for (; i < n; i++) {
-			const c = s.charAt(i);
+			const c = s[i];
 
 			// Inside quotes
 			if (quoted) {
@@ -79,6 +79,9 @@ export function isQuote(c: string, currentPart: string): string | undefined {
 	return (c === "\"") ? c
 		// Prevents considering "'" as a quote
 		// when parsing the instruction "ex af,af'"
-		: ((c === "'") && (!exAfAfRegexp.test(currentPart))) ? c
+		: ((c === "'")
+			&& ((currentPart.length < 8) // (too short; shortest is "ex af,af")
+				|| (currentPart.length > 10) // (too long; longest is "ex af , af")
+				|| (!exAfAfRegexp.test(currentPart)))) ? c
 			: undefined;
 }

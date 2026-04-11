@@ -162,7 +162,7 @@ These settings allow to fine-tune the information to be shown in the status bar 
 
 * [`z80-asm-meter.statusBar.cacheSize`](vscode://settings/z80-asm-meter.statusBar.cacheSize): Size of the cache, in selections, used to minimize metering calculations when navigating through previously metered code.
 
-    Defaults to: `200` (200 selections).
+    Defaults to: `250` (250 selections).
 
 </details>
 
@@ -246,11 +246,11 @@ These settings allow to fine-tune the source code parsing and metering.
 
 * [`z80-asm-meter.parser.instructionsCacheSize`](vscode://settings/z80-asm-meter.parser.instructionsCacheSize): Size of the internal cache, in instructions, to lighten the metering calculations; particularly when metering large source code blocks.
 
-    Defaults to: `250` (250 instructions).
+    Defaults to: `500` (500 instructions).
 
 * [`z80-asm-meter.parser.sourceCodeCacheSize`](vscode://settings/z80-asm-meter.parser.sourceCodeCacheSize): Size of the internal cache, in lines, to lighten the pre-processing of source code; particularly when providing inlay hints.
 
-    Defaults to: `250` (250 lines).
+    Defaults to: `1000` (1000 lines).
 
 </details>
 
