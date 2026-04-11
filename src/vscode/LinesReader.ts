@@ -1,12 +1,5 @@
 import * as vscode from "vscode";
 import { config } from "../config";
-import type { SourceCode } from "../types/SourceCode";
-import { linesToSourceCode } from "../utils/SourceCodeUtils";
-
-export function readSourceCodeFromActiveTextEditorSelecion(): SourceCode[] {
-
-	return linesToSourceCode(readLinesFromActiveTextEditorSelection());
-}
 
 export function readLinesFromActiveTextEditorSelection(): string[] {
 

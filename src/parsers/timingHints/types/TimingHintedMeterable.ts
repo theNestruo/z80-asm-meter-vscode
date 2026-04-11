@@ -3,8 +3,8 @@ import { MeterableCollection } from "../../../types/AggregatedMeterables";
 import type { Meterable } from "../../../types/Meterable";
 import type { SourceCode } from "../../../types/SourceCode";
 import { isConditionalInstruction, isJumpOrCallInstruction } from "../../../utils/AssemblyUtils";
-import { lineToSourceCode } from "../../../utils/SourceCodeUtils";
 import { mainParserForTimingHintsParsers } from "../../parsers";
+import { sourceCodeParser } from "../../SourceCodeParser";
 import type { TimingHints } from "./TimingHints";
 
 /**
@@ -49,7 +49,7 @@ export class TimingHintedMeterable implements Meterable {
 		return !sourceCode.instruction // non empty line (should never happen)
 			&& !!sourceCode.lineComment // no comment (should never happen)
 			&& !!mainParserForTimingHintsParsers.instance.parse(
-				lineToSourceCode(sourceCode.lineComment, config.syntax.lineSeparatorCharacter));
+				sourceCodeParser.instance.lineToSourceCode(sourceCode.lineComment));
 	}
 
 	private readonly conditional: boolean;

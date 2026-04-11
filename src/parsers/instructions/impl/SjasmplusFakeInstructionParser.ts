@@ -62,22 +62,29 @@ class SjasmplusFakeInstructionParser implements InstructionParser {
 		const instruction = s.instruction;
 		const mnemonic = extractMnemonicOf(instruction);
 		const candidates = this.instructionByMnemonic[mnemonic];
-		if (candidates) {
-			return this.findBestCandidate(instruction, candidates);
+		if (!candidates?.length) {
+			// (unknown mnemonic/instruction)
+			return undefined;
 		}
 
-		// (unknown mnemonic/instruction)
-		return undefined;
+		// (moved here from SjasmplusFakeInstruction.operandScore for performance reasons)
+		// Quick validation of the candidate operands
+		const operands = extractOperandsOf(instruction);
+		if (operands.includes("")) {
+			return undefined; // (incomplete candidate instruction, such as "LD A,")
+		}
+
+		return this.findBestCandidateByOperands(candidates, operands);
 	}
 
-	private findBestCandidate(instruction: string, candidates: SjasmplusFakeInstruction[]):
+	private findBestCandidateByOperands(candidates: SjasmplusFakeInstruction[], operands: string[]):
 		SjasmplusFakeInstruction | undefined {
 
 		// Locates instruction
 		let bestCandidate;
 		let bestScore = 0;
 		for (const candidate of candidates) {
-			const score = candidate.match(instruction);
+			const score = candidate.matchOperands(operands);
 			if (score === 1) {
 				// Exact match
 				return candidate;
@@ -178,6 +185,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 	 * where 0 means the line is not this instruction,
 	 * 1 means the line is this instruction,
 	 * and intermediate values mean the line may be this instruction
+	 * @deprecated for performance reasons, use matchOperands() instead
 	 */
 	match(candidateInstruction: string): number {
 
@@ -186,11 +194,26 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 			return 0;
 		}
 
-		// Extracts the candidate operands
-		const candidateOperands = extractOperandsOf(candidateInstruction);
+		return this.matchOperands(extractOperandsOf(candidateInstruction));
+	}
+
+	/**
+	 * @param candidateOperands the operands of the cleaned-up line to match against the instruction
+	 * @returns number between 0 and 1 with the score of the match,
+	 * where 0 means the line is not this instruction,
+	 * 1 means the line is this instruction,
+	 * and intermediate values mean the line may be this instruction
+	 */
+	matchOperands(candidateOperands: string[]): number {
+
+		/*
+		 * Moved up for performance reasons
+		 *
+		// Quick validation of the candidate operands
 		if (candidateOperands.includes("")) {
 			return 0; // (incomplete candidate instruction, such as "LD A,")
 		}
+		 */
 
 		const candidateOperandsLength = candidateOperands.length;
 		const expectedOperands = this.getOperands();
@@ -204,9 +227,15 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 		// Compares operands
 		let score = 1;
 		for (let i = 0; i < expectedOperands.length; i++) {
-			score *= this.operandScore(expectedOperands[i], candidateOperands[i], true);
-			if (score === 0) {
-				return 0;
+			const operandScore = this.operandScore(expectedOperands[i], candidateOperands[i]);
+			switch (operandScore) {
+				case 0:
+					return 0;
+				case 1:
+					break; // (avoids unnecessary multiplication)
+				default:
+					score *= operandScore;
+					break;
 			}
 		}
 		return score;
@@ -215,13 +244,12 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 	/**
 	 * @param expectedOperand the operand of the instruction
 	 * @param candidateOperand the operand from the cleaned-up line
-	 * @param indirectionAllowed true to allow indirection
 	 * @returns number between 0 and 1 with the score of the match,
 	 * where 0 means the candidate operand is not valid,
 	 * 1 means the candidate operand is a perfect match,
 	 * and intermediate values mean the operand is accepted
 	 */
-	private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
+	private operandScore(expectedOperand: string, candidateOperand: string): number {
 
 		// Must the candidate operand match verbatim the operand of the instruction?
 		if (isVerbatimOperand(expectedOperand)) {
@@ -229,7 +257,7 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 		}
 
 		// Must the candidate operand be an indirection?
-		if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
+		if (isIndirectionOperand(expectedOperand, true)) {
 			return this.indirectOperandScore(expectedOperand, candidateOperand);
 		}
 
@@ -263,10 +291,28 @@ class SjasmplusFakeInstruction extends MeterableCollection {
 	 */
 	private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
 
+		if (!isIndirectionOperand(candidateOperand, false)) {
+			return 0;
+		}
+
 		// Compares the expression inside the indirection
-		return isIndirectionOperand(candidateOperand, false)
-			? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
-			: 0;
+		const expectedIndirection = extractIndirection(expectedOperand);
+		const candidateIndirection = extractIndirection(candidateOperand);
+
+		// Depending on the expected operand...
+		switch (expectedIndirection) {
+			case "BC":
+			case "DE":
+			case "HL":
+				return verbatimOperandScore(expectedIndirection, candidateIndirection);
+			case "IX+o":
+				return isIXWithOffsetScore(candidateIndirection);
+			case "IY+o":
+				return isIYWithOffsetScore(candidateIndirection);
+			// (should never happen)
+			default:
+				return 0;
+		}
 	}
 }
 

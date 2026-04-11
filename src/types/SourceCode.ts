@@ -29,4 +29,8 @@ export class SourceCode {
 
 		this.repetitions = repetitions ?? 1;
 	}
+
+	get cacheKey(): string {
+		return `[${this.repetitions.toString()}] ${this.instruction}`;
+	}
 }

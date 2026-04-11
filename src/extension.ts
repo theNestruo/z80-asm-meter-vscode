@@ -3,6 +3,7 @@
 import type * as vscode from "vscode";
 
 import { availableInstructionParsers, availableRepetitionParsers, availableTimingHintsParsers, mainParser, mainParserForMacroParser, mainParserForTimingHintsParsers } from "./parsers/parsers";
+import { sourceCodeParser } from "./parsers/SourceCodeParser";
 import { configurationReader } from "./vscode/ConfigurationReader";
 import { FromActiveTextEditorSelecionCopyToClipboardCommand } from "./vscode/CopyToClipboardCommands";
 import { InlayHintsProvider } from "./vscode/InlayHintsProvider";
@@ -16,6 +17,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// (vscode.Disposables from Activables)
 	for (const activable of [
 		configurationReader,
+		sourceCodeParser,
 		...availableInstructionParsers,
 		...availableRepetitionParsers,
 		...availableTimingHintsParsers,

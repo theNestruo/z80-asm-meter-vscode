@@ -24,12 +24,10 @@ class NumericExpressionParser {
 		private readonly radix: number) {
 	}
 
-	parse(s: string): number | undefined {
-		const isNegative = s.startsWith("-");
-		const us = isNegative ? s.substring(1) : s;
+	parseUnsigned(us: string): number | undefined {
 		const matches = this.regexp.exec(us);
 		return matches && matches.length >= 1
-			? parseInt(matches[1], this.radix) * (isNegative ? -1 : 1)
+			? parseInt(matches[1], this.radix)
 			: undefined;
 	}
 }
@@ -45,6 +43,8 @@ const numericParsers: NumericExpressionParser[] = [
 	new NumericExpressionParser(/^([0-9]+)$/, 10)
 ];
 
+const valid = /^0?[Xx#$&@%]?[0-9A-Fa-f]+[HhOoBb]?$/;
+
 export function parseNumericExpression(s: string, includeNegatives = true): number | undefined {
 
 	const negative = s.startsWith("-");
@@ -54,8 +54,13 @@ export function parseNumericExpression(s: string, includeNegatives = true): numb
 
 	const us = negative ? s.substring(1).trim() : s;
 
+	// (quickly discard non-numeric inputs)
+	if (!valid.test(us)) {
+		return undefined;
+	}
+
 	for (const numericParser of numericParsers) {
-		const value = numericParser.parse(us);
+		const value = numericParser.parseUnsigned(us);
 		if ((value !== undefined) && (!isNaN(value))) {
 			return negative ? -value : value;
 		}

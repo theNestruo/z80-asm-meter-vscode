@@ -19,16 +19,21 @@ export function extractOperandsOfQuotesAware(s: string): string[] {
 	return i === -1 ? [] : splitNormalizeQuotesAware(s.substring(i + 1), ",");
 }
 
+
+// (as a Set for performance reasons)
+const isVerbatimOperandSet = new Set([
+	"A", "AF", "AF'", "B", "BC", "C", "NC",
+	"D", "DE", "E", "H", "HL", "L",
+	"I", "IX", "IY", "R", "SP",
+	"Z", "NZ", "M", "P", "PE", "PO"]);
+
 /**
  * @param operand the operand of the instruction
  * @returns true if the candidate operand must match verbatim the operand of the instruction
  */
 export function isVerbatimOperand(operand: string): boolean {
 
-	return ["A", "AF", "AF'", "B", "BC", "C", "NC",
-		"D", "DE", "E", "H", "HL", "L",
-		"I", "IX", "IY", "R", "SP",
-		"Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
+	return isVerbatimOperandSet.has(operand);
 }
 
 /**
@@ -56,6 +61,7 @@ export function isIndirectionOperand(operand: string, strict: boolean): boolean 
 	}
 	return (operand.startsWith("[") && operand.endsWith("]"));
 }
+
 
 // (precompiled RegExp for performance reasons)
 const sdccIxRegisterWithOffsetRegexp = /(?:\(\s*IX\s*\)|\[\s*IX\s*\])$/; // "...(IX)" or "...[IX]"
@@ -89,14 +95,19 @@ export function extractIndirection(operand: string): string {
 	return operand.substring(1, operand.length - 1).trim();
 }
 
+
+// (as a Set for performance reasons)
+const is8bitRegisterScoreSet = new Set(["A", "B", "C", "D", "E", "H", "L"]);
+
 /**
  * @param operand the candidate operand
  * @returns 1 if the operand is one of the 8 bit general purpose registers, 0 otherwise
  */
 export function is8bitRegisterScore(operand: string): number {
 
-	return ["A", "B", "C", "D", "E", "H", "L"].includes(operand) ? 1 : 0;
+	return is8bitRegisterScoreSet.has(operand) ? 1 : 0;
 }
+
 
 // (precompiled RegExp for performance reasons)
 const ixRegisterWithOffsetRegexp = /^IX\b/; // "IX..."
@@ -122,14 +133,22 @@ export function isIYWithOffsetScore(operand: string): number {
 	return iyRegisterWithOffsetRegexp.test(operand) ? 1 : 0;
 }
 
+
+// (as a Set for performance reasons)
+const isIXhScoreSet = new Set(["IXH", "IXU", "XH", "HX"]);
+
 /**
  * @param operand the candidate operand
  * @returns 1 if the operand is the high part of the IX index register, 0 otherwise
  */
 export function isIXhScore(operand: string): number {
 
-	return ["IXH", "IXU", "XH", "HX"].includes(operand) ? 1 : 0;
+	return isIXhScoreSet.has(operand) ? 1 : 0;
 }
+
+
+// (as a Set for performance reasons)
+const isIXlScoreSet = new Set(["IXL", "XL", "LX"]);
 
 /**
  * @param operand the candidate operand
@@ -137,8 +156,12 @@ export function isIXhScore(operand: string): number {
  */
 export function isIXlScore(operand: string): number {
 
-	return ["IXL", "XL", "LX"].includes(operand) ? 1 : 0;
+	return isIXlScoreSet.has(operand) ? 1 : 0;
 }
+
+
+// (as a Set for performance reasons)
+const isIX8bitScoreSet = new Set(["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"]);
 
 /**
  * @param operand the candidate operand
@@ -146,8 +169,12 @@ export function isIXlScore(operand: string): number {
  */
 export function isIX8bitScore(operand: string): number {
 
-	return ["IXH", "IXL", "IXU", "XH", "XL", "HX", "LX"].includes(operand) ? 1 : 0;
+	return isIX8bitScoreSet.has(operand) ? 1 : 0;
 }
+
+
+// (as a Set for performance reasons)
+const isIYhScoreSet = new Set(["IYH", "IYU", "YH", "HY"]);
 
 /**
  * @param operand the candidate operand
@@ -155,8 +182,12 @@ export function isIX8bitScore(operand: string): number {
  */
 export function isIYhScore(operand: string): number {
 
-	return ["IYH", "IYU", "YH", "HY"].includes(operand) ? 1 : 0;
+	return isIYhScoreSet.has(operand) ? 1 : 0;
 }
+
+
+// (as a Set for performance reasons)
+const isIYlScoreSet = new Set(["IYL", "YL", "LY"]);
 
 /**
  * @param operand the candidate operand
@@ -164,8 +195,12 @@ export function isIYhScore(operand: string): number {
  */
 export function isIYlScore(operand: string): number {
 
-	return ["IYL", "YL", "LY"].includes(operand) ? 1 : 0;
+	return isIYlScoreSet.has(operand) ? 1 : 0;
 }
+
+
+// (as a Set for performance reasons)
+const isIY8bitScoreSet = new Set(["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"]);
 
 /**
  * @param operand the candidate operand
@@ -173,8 +208,12 @@ export function isIYlScore(operand: string): number {
  */
 export function isIY8bitScore(operand: string): number {
 
-	return ["IYH", "IYL", "IYU", "YH", "YL", "HY", "LY"].includes(operand) ? 1 : 0;
+	return isIY8bitScoreSet.has(operand) ? 1 : 0;
 }
+
+
+// (as a Set for performance reasons)
+const is8bitRegisterReplacingHLByIXOrIY8bitScoreSet = new Set(["A", "B", "C", "D", "E"]);
 
 /**
  * @param operand the candidate operand
@@ -182,7 +221,7 @@ export function isIY8bitScore(operand: string): number {
  */
 export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number {
 
-	return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIX8bitScore(operand);
+	return is8bitRegisterReplacingHLByIXOrIY8bitScoreSet.has(operand) ? 1 : isIX8bitScore(operand);
 }
 
 /**
@@ -191,11 +230,20 @@ export function is8bitRegisterReplacingHLByIX8bitScore(operand: string): number 
  */
 export function is8bitRegisterReplacingHLByIY8bitScore(operand: string): number {
 
-	return ["A", "B", "C", "D", "E"].includes(operand) ? 1 : isIY8bitScore(operand);
+	return is8bitRegisterReplacingHLByIXOrIY8bitScoreSet.has(operand) ? 1 : isIY8bitScore(operand);
 }
+
 
 // (precompiled RegExp for performance reasons)
 const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
+
+// (as a Set for performance reasons)
+const isAnyRegisterSet = new Set([
+
+	"A", "AF", "AF'", "B", "BC", "C", "D", "DE", "E", "H", "HL", "L",
+	"I", "IX", "IXU", "IXH", "IXL", "IY", "IYU", "IYH", "IYL",
+	"R", "SP"]);
+
 /**
  * @param operand the candidate operand
  * @returns true if the operand is any 8 or 16 bit register,
@@ -204,11 +252,13 @@ const ixOrIyRegisterWithOffsetRegexp = /^I[XY]\b/; // "IX..." or "IY..."
  */
 export function isAnyRegister(operand: string): boolean {
 
-	return ["A", "AF", "AF'", "B", "BC", "C", "D", "DE", "E", "H", "HL", "L",
-		"I", "IX", "IXU", "IXH", "IXL", "IY", "IYU", "IYH", "IYL",
-		"R", "SP"].includes(operand)
+	return isAnyRegisterSet.has(operand)
 		|| ixOrIyRegisterWithOffsetRegexp.test(operand);
 }
+
+
+// (as a Set for performance reasons)
+const isAnyConditionSet = new Set(["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"]);
 
 /**
  * @param operand the operand of the instruction
@@ -216,8 +266,12 @@ export function isAnyRegister(operand: string): boolean {
  */
 export function isAnyCondition(operand: string): boolean {
 
-	return ["C", "NC", "Z", "NZ", "M", "P", "PE", "PO"].includes(operand);
+	return isAnyConditionSet.has(operand);
 }
+
+
+// (as a Set for performance reasons)
+const isJrConditionSet = new Set(["C", "NC", "Z", "NZ"]);
 
 /**
  * @param operand the operand of the instruction
@@ -225,7 +279,7 @@ export function isAnyCondition(operand: string): boolean {
  */
 export function isJrCondition(operand: string): boolean {
 
-	return ["C", "NC", "Z", "NZ"].includes(operand);
+	return isJrConditionSet.has(operand);
 }
 
 /**
@@ -335,12 +389,16 @@ export function isJumpInstruction(instruction: string): boolean {
 		|| isConditionalJump(mnemonic, operands);
 }
 
+
+// (as a Set for performance reasons)
+const unconditionalJumpMnemonicSet = new Set(["JP", "JR"]);
+
 /**
  * @returns if the instruction is an unconditional jump (JP, JR)
  */
 export function isUnconditionalJump(mnemonic: string, operands: string[]): boolean {
 
-	return ["JP", "JR"].includes(mnemonic)
+	return unconditionalJumpMnemonicSet.has(mnemonic)
 		&& (operands.length === 1);
 }
 
@@ -373,12 +431,16 @@ export function isCallInstruction(instruction: string): boolean {
 		|| isConditionalCall(mnemonic, operands);
 }
 
+
+// (as a Set for performance reasons)
+const isUnconditionalCallSet = new Set(["CALL", "RST"]);
+
 /**
  * @returns if the instruction is an unconditional call (CALL or RST)
  */
 export function isUnconditionalCall(mnemonic: string, operands: string[]): boolean {
 
-	return ["CALL", "RST"].includes(mnemonic)
+	return isUnconditionalCallSet.has(mnemonic)
 		&& (operands.length === 1);
 }
 
@@ -404,12 +466,16 @@ export function isRetInstruction(instruction: string): boolean {
 		|| isConditionalRet(mnemonic, operands);
 }
 
+
+// (as a Set for performance reasons)
+const isUnconditionalRetSet = new Set(["RET", "RETI", "RETN"]);
+
 /**
  * @returns if the instruction is an unconditional return (RET, RETI, or RETN)
  */
 export function isUnconditionalRet(mnemonic: string, operands: string[]): boolean {
 
-	return ["RET", "RETI", "RETN"].includes(mnemonic)
+	return isUnconditionalRetSet.has(mnemonic)
 		&& (operands.length === 0);
 }
 

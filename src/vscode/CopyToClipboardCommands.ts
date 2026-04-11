@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import { config } from "../config";
 import { mainParser } from "../parsers/parsers";
+import { sourceCodeParser } from "../parsers/SourceCodeParser";
 import { TotalTimings } from "../totalTimings/TotalTimings";
 import type { SourceCode } from "../types/SourceCode";
 import { formatTiming, printableTimingSuffix, printFullTiming } from "../utils/TimingUtils";
-import { readSourceCodeFromActiveTextEditorSelecion } from "./SourceCodeReader";
+import { readLinesFromActiveTextEditorSelection } from "./LinesReader";
 
 /**
  * A "copy to clipboard" command
@@ -141,6 +142,8 @@ export class FromActiveTextEditorSelecionCopyToClipboardCommand
 	onExecute(): void {
 
 		// Reads and parses the source code
-		this.doCopyToClipboard(readSourceCodeFromActiveTextEditorSelecion());
+		this.doCopyToClipboard(
+			sourceCodeParser.instance.linesToSourceCode(
+				readLinesFromActiveTextEditorSelection()));
 	}
 }

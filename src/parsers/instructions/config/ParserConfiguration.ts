@@ -9,4 +9,8 @@ export class ParserConfiguration {
 	get instructionsCacheSize(): number {
 		return configurationReader.read("parser.instructionsCacheSize");
 	}
+
+	get sourceCodeCacheSize(): number {
+		return configurationReader.read("parser.sourceCodeCacheSize");
+	}
 }

@@ -3,7 +3,7 @@ import type { Meterable } from "../../../types/Meterable";
 import type { SingletonRef } from "../../../types/References";
 import { ConfigurableSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
-import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../../utils/AssemblyUtils";
+import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../../utils/NumberUtils";
 import { formatTiming, parseTiming } from "../../../utils/TimingUtils";
 import { z80InstructionSet } from "../datasets/Z80InstructionSet";
@@ -94,12 +94,19 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 		// Locates candidate instructions
 		const mnemonic = extractMnemonicOf(instruction);
 		const candidates = this.instructionByMnemonic[mnemonic];
-		if (candidates) {
-			return this.findBestCandidateIgnoreMnemonic(instruction, candidates);
+		if (!candidates?.length) {
+			// (unknown mnemonic/instruction)
+			return undefined;
 		}
 
-		// (unknown mnemonic/instruction)
-		return undefined;
+		// (moved here from Z80Instruction.operandScore for performance reasons)
+		// Quick validation of the candidate operands
+		const operands = extractOperandsOf(instruction);
+		if (operands.includes("")) {
+			return undefined; // (incomplete candidate instruction, such as "LD A,")
+		}
+
+		return this.findBestCandidateByOperands(candidates, operands);
 	}
 
 	parseOpcode(opcode: number): Z80Instruction | undefined {
@@ -107,17 +114,14 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 		return this.instructionByOpcode[formatHexadecimalByte(opcode)];
 	}
 
-	private findBestCandidateIgnoreMnemonic(instruction: string, candidates: Z80Instruction[]):
+	private findBestCandidateByOperands(candidates: Z80Instruction[], operands: string[]):
 		Z80Instruction | undefined {
-
-		// (for performance reasons)
-		const operands = extractOperandsOf(instruction);
 
 		// Locates instruction
 		let bestCandidate;
 		let bestScore = 0;
 		for (const candidate of candidates) {
-			const score = candidate.matchIgnoreMnemonic(operands);
+			const score = candidate.matchOperands(operands);
 			if (score === 1) {
 				// Exact match
 				return candidate;
@@ -377,21 +381,21 @@ export class Z80Instruction implements Meterable {
 	}
 
 	/**
-	 * @param candidateMnemonic the mnemonic of the cleaned-up line to match against the instruction
-	 * @param candidateOperands the operands of the cleaned-up line to match against the instruction
+	 * @param candidateInstruction the cleaned-up line to match against the instruction
 	 * @returns number between 0 and 1 with the score of the match,
 	 * where 0 means the line is not this instruction,
 	 * 1 means the line is this instruction,
 	 * and intermediate values mean the line may be this instruction
+	 * @deprecated for performance reasons, use matchOperands() instead
 	 */
-	match(candidateMnemonic: string, candidateOperands: string[]): number {
+	match(candidateInstruction: string): number {
 
 		// Compares mnemonic
-		if (candidateMnemonic !== this.mnemonic) {
+		if (extractMnemonicOf(candidateInstruction) !== this.mnemonic) {
 			return 0;
 		}
 
-		return this.matchIgnoreMnemonic(candidateOperands);
+		return this.matchOperands(extractOperandsOf(candidateInstruction));
 	}
 
 	/**
@@ -401,12 +405,16 @@ export class Z80Instruction implements Meterable {
 	 * 1 means the line is this instruction,
 	 * and intermediate values mean the line may be this instruction
 	 */
-	matchIgnoreMnemonic(candidateOperands: string[]): number {
+	matchOperands(candidateOperands: string[]): number {
 
+		/*
+		 * Moved up for performance reasons
+		 *
 		// Quick validation of the candidate operands
 		if (candidateOperands.includes("")) {
 			return 0; // (incomplete candidate instruction, such as "LD A,")
 		}
+		 */
 
 		const candidateOperandsLength = candidateOperands.length;
 		const expectedOperands = this.getOperands();
@@ -415,26 +423,29 @@ export class Z80Instruction implements Meterable {
 		// Compares operand count
 		let implicitAccumulatorSyntax = false;
 		let explicitAccumulatorSyntax = false;
-		if (candidateOperandsLength !== expectedOperandsLength) {
+		switch (candidateOperandsLength - expectedOperandsLength) {
+			case 0:
+				break;
 
-			if (candidateOperands.length === expectedOperands.length - 1) {
+			case -1:
 				// Checks implicit accumulator syntax
 				implicitAccumulatorSyntax = this.isImplicitAccumulatorSyntaxAllowed();
 				if (!implicitAccumulatorSyntax) {
 					return 0;
 				}
+				break;
 
-			} else if (candidateOperands.length === expectedOperands.length + 1) {
+			case 1:
 				// Checks explicit accumulator syntax
 				explicitAccumulatorSyntax = this.isExplicitAccumulatorSyntaxAllowed();
 				if (!explicitAccumulatorSyntax || (candidateOperands[0] !== "A")) {
 					return 0;
 				}
+				break;
 
-			} else {
+			default:
 				// Operand count mismatch
 				return 0;
-			}
 		}
 
 		// Compares operands
@@ -442,7 +453,7 @@ export class Z80Instruction implements Meterable {
 		for (let i = implicitAccumulatorSyntax ? 1 : 0, j = explicitAccumulatorSyntax ? 1 : 0;
 			i < expectedOperands.length;
 			i++, j++) {
-			const operandScore = this.operandScore(expectedOperands[i], candidateOperands[j], true);
+			const operandScore = this.operandScore(expectedOperands[i], candidateOperands[j]);
 			switch (operandScore) {
 				case 0:
 					return 0;
@@ -459,13 +470,12 @@ export class Z80Instruction implements Meterable {
 	/**
 	 * @param expectedOperand the operand of the instruction
 	 * @param candidateOperand the operand from the cleaned-up line
-	 * @param indirectionAllowed true to allow indirection
 	 * @returns number between 0 and 1 with the score of the match,
 	 * where 0 means the candidate operand is not valid,
 	 * 1 means the candidate operand is a perfect match,
 	 * and intermediate values mean the operand is accepted
 	 */
-	private operandScore(expectedOperand: string, candidateOperand: string, indirectionAllowed: boolean): number {
+	private operandScore(expectedOperand: string, candidateOperand: string): number {
 
 		// Must the candidate operand match verbatim the operand of the instruction?
 		if (isVerbatimOperand(expectedOperand)) {
@@ -473,7 +483,7 @@ export class Z80Instruction implements Meterable {
 		}
 
 		// Must the candidate operand be an indirection?
-		if (indirectionAllowed && isIndirectionOperand(expectedOperand, true)) {
+		if (isIndirectionOperand(expectedOperand, true)) {
 			// (checks for SDCC index register syntax first)
 			return sdccIndexRegisterIndirectionScore(expectedOperand, candidateOperand)
 				?? this.indirectOperandScore(expectedOperand, candidateOperand);
@@ -525,9 +535,33 @@ export class Z80Instruction implements Meterable {
 
 	private indirectOperandScore(expectedOperand: string, candidateOperand: string): number {
 
+		if (!isIndirectionOperand(candidateOperand, false)) {
+			return 0;
+		}
+
 		// Compares the expression inside the indirection
-		return isIndirectionOperand(candidateOperand, false)
-			? this.operandScore(extractIndirection(expectedOperand), extractIndirection(candidateOperand), false)
-			: 0;
+		const expectedIndirection = extractIndirection(expectedOperand);
+		const candidateIndirection = extractIndirection(candidateOperand);
+
+		// Depending on the expected operand...
+		switch (expectedIndirection) {
+			case "BC":
+			case "C":
+			case "DE":
+			case "HL":
+			case "IX":
+			case "IY":
+			case "SP":
+				return verbatimOperandScore(expectedIndirection, candidateIndirection);
+			case "IX+o":
+				return isIXWithOffsetScore(candidateIndirection);
+			case "IY+o":
+				return isIYWithOffsetScore(candidateIndirection);
+			// (due possibility of using constants, labels, and expressions in the source code,
+			// there is no proper way to discriminate: n, nn;
+			// but uses a "best effort" to discard registers)
+			default:
+				return isAnyRegister(candidateIndirection) ? 0 : 0.75;
+		}
 	}
 }

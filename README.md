@@ -246,7 +246,11 @@ These settings allow to fine-tune the source code parsing and metering.
 
 * [`z80-asm-meter.parser.instructionsCacheSize`](vscode://settings/z80-asm-meter.parser.instructionsCacheSize): Size of the internal cache, in instructions, to lighten the metering calculations; particularly when metering large source code blocks.
 
-    Defaults to: `200` (200 instructions).
+    Defaults to: `250` (250 instructions).
+
+* [`z80-asm-meter.parser.sourceCodeCacheSize`](vscode://settings/z80-asm-meter.parser.sourceCodeCacheSize): Size of the internal cache, in lines, to lighten the pre-processing of source code; particularly when providing inlay hints.
+
+    Defaults to: `250` (250 lines).
 
 </details>
 
@@ -455,7 +459,7 @@ This extension can provide inlay hints (additional information about source code
 * [`z80-asm-meter.inlayHints.subroutines.nested`](vscode://settings/z80-asm-meter.inlayHints.subroutines.nested): Consider that nested labels (lablels starting with a dot (`.`) or with `@@`) are subroutines.
     * `disabled`: Ignores any nested label.
     * `enabled`: Considers that any nested label is a new subroutine.
-    * `entryPoint` (default): Considers that a nested label is a subroutine if it is a separate entry points.
+    * `entryPoint` (default): Considers that a nested label is a subroutine if it is a separate entry point.
 
 * [`z80-asm-meter.inlayHints.subroutines.fallthrough`](vscode://settings/z80-asm-meter.inlayHints.subroutines.fallthrough): Consider that labels the code falls through are subroutines.
 

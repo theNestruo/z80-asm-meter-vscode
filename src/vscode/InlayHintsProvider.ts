@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import { config } from "../config";
+import { sourceCodeParser } from "../parsers/SourceCodeParser";
 import { mainParser } from "../parsers/parsers";
 import { TotalTimings } from "../totalTimings/TotalTimings";
 import type { Meterable } from "../types/Meterable";
 import type { SourceCode } from "../types/SourceCode";
 import { extractMnemonicOf, extractOperandsOf, isAnyCondition, isJrCondition, isUnconditionalJumpOrRetInstruction } from "../utils/AssemblyUtils";
 import { printRange } from "../utils/PositionRangeUtils";
-import { lineToSourceCode } from "../utils/SourceCodeUtils";
 import { hrMarkdown, positionFromEnd, positionFromEndAndSkipWhitespaceBefore, positionFromStart, positionFromStartAndSkipWhitespaceAfter, removeSuffix, validateCodicon } from "../utils/TextUtils";
 import { printableTimingSuffix, printFullTiming, printM1Timing, printZ80Timing } from "../utils/TimingUtils";
-import { isExtensionEnabledFor } from "./SourceCodeReader";
+import { isExtensionEnabledFor } from "./LinesReader";
 import type { InlayHintPositionType } from "./config/InlayHintsConfiguration";
 
 /**
@@ -100,7 +100,6 @@ class InlayHintCandidatesLocator {
 
 	// (for performance reasons)
 	private readonly conditionalExitPointMnemonics: string[] = [];
-	private readonly lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
 	private readonly unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
 	private readonly fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
 
@@ -135,7 +134,7 @@ class InlayHintCandidatesLocator {
 				break;
 			}
 
-			const sourceCodes = lineToSourceCode(line.text, this.lineSeparatorCharacter);
+			const sourceCodes = sourceCodeParser.instance.lineToSourceCode(line.text);
 			if (!sourceCodes.length || !sourceCodes[0]) {
 				continue; // (ignore empty line)
 			}
@@ -205,20 +204,19 @@ class InlayHintCandidatesLocator {
 		if (!sourceCode.label) {
 			return false; // (no label)
 		}
-		if (!sourceCode.label.startsWith(".") && !sourceCode.label.startsWith("@@")) {
-			return true; // (non-nested label)
-		}
 
 		switch (config.inlayHints.nestedSubroutines) {
 			case "disabled":
-				return false;
+				// (ignores any nested label)
+				return !sourceCode.label.startsWith(".") && !sourceCode.label.startsWith("@@");
 
 			case "enabled":
 				return true;
 
 			case "entryPoint":
-				// If there is no ongoing subroutines, it is an entry point
-				return incompleteSubroutines.length == 0;
+				// (ignores nested labels if there are ongoing subroutines: nested label is not an entry point)
+				return (!sourceCode.label.startsWith(".") && !sourceCode.label.startsWith("@@"))
+					|| incompleteSubroutines.length == 0;
 		}
 	}
 

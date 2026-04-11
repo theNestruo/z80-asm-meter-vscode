@@ -2,17 +2,17 @@ import HLRU from "hashlru";
 import * as vscode from "vscode";
 import { config } from "../config";
 import { mainParser } from "../parsers/parsers";
+import { sourceCodeParser } from "../parsers/SourceCodeParser";
 import { TotalTimings } from "../totalTimings/TotalTimings";
 import type { TotalTiming } from "../totalTimings/types/TotalTiming";
 import type { Meterable } from "../types/Meterable";
 import { printBytes } from "../utils/BytesUtils";
 import { printInstructions } from "../utils/InstructionsUtils";
 import { printSize } from "../utils/SizeUtils";
-import { linesToSourceCode } from "../utils/SourceCodeUtils";
 import { hashCode, hrMarkdown, pluralize, spaceIfNotInfix, validateCodicon } from "../utils/TextUtils";
 import { printableTimingSuffix, printFullTiming, printM1Timing, printZ80Timing } from "../utils/TimingUtils";
 import type { CopyToClipboardCommand } from "./CopyToClipboardCommands";
-import { readLinesFromActiveTextEditorSelection } from "./SourceCodeReader";
+import { readLinesFromActiveTextEditorSelection } from "./LinesReader";
 
 /**
  * A container for the data to be displayed in the StatusBarItem
@@ -79,7 +79,7 @@ class StatusBarHandler implements vscode.Disposable {
 		}
 
 		// Parses the source code
-		const metered = mainParser.instance.parse(linesToSourceCode(lines));
+		const metered = mainParser.instance.parse(sourceCodeParser.instance.linesToSourceCode(lines));
 		if (!metered) {
 			return undefined;
 		}

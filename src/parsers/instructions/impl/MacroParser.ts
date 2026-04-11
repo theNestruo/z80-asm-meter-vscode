@@ -7,9 +7,9 @@ import { OptionalSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
 import { extractMnemonicOf } from "../../../utils/AssemblyUtils";
 import { parteIntLenient } from "../../../utils/NumberUtils";
-import { linesToSourceCode } from "../../../utils/SourceCodeUtils";
 import { parseTimingsLenient } from "../../../utils/TimingUtils";
 import { mainParserForMacroParser } from "../../parsers";
+import { sourceCodeParser } from "../../SourceCodeParser";
 import type { MacroDefinitionConfiguration } from "../config/MacroDefinitionConfiguration";
 import type { InstructionParser } from "../types/InstructionParser";
 
@@ -106,7 +106,7 @@ class Macro extends MeterableCollection {
 		this.providedCpcTiming = parseTimingsLenient(source.cpc, source.ts, source.t);
 		this.providedSize = parteIntLenient(source.size);
 
-		const meterable = mainParserForMacroParser.instance.parse(linesToSourceCode(this.providedSourceCode));
+		const meterable = mainParserForMacroParser.instance.parse(sourceCodeParser.instance.linesToSourceCode(this.providedSourceCode));
 		this.add(meterable);
 	}
 
