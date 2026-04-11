@@ -2,6 +2,8 @@
  * Format
  */
 
+import { moveToFirst } from "./ArrayUtils";
+
 export function formatHexadecimalNumber(n: number): string {
 
 	return n.toString(16).toUpperCase();
@@ -59,9 +61,17 @@ export function parseNumericExpression(s: string, includeNegatives = true): numb
 		return undefined;
 	}
 
-	for (const numericParser of numericParsers) {
+	const n = numericParsers.length;
+	for (let i = 0; i < n; i++) {
+		const numericParser = numericParsers[i];
 		const value = numericParser.parseUnsigned(us);
 		if ((value !== undefined) && (!isNaN(value))) {
+
+			// (for performance reasons:
+			// moves the numeric parser first, so frequent formats will be attempted first next time
+			// and uncommon formats will be demoted to last positions of the array)
+			moveToFirst(numericParsers, i);
+
 			return negative ? -value : value;
 		}
 	}

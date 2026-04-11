@@ -3,6 +3,7 @@ import type { Meterable } from "../../../types/Meterable";
 import type { SingletonRef } from "../../../types/References";
 import { ConfigurableSingletonRefImpl } from "../../../types/References";
 import type { SourceCode } from "../../../types/SourceCode";
+import { moveToFirst } from "../../../utils/ArrayUtils";
 import { anySymbolOperandScore, extractIndirection, extractMnemonicOf, extractOperandsOf, is8bitRegisterReplacingHLByIX8bitScore, is8bitRegisterReplacingHLByIY8bitScore, is8bitRegisterScore, isAnyRegister, isIXWithOffsetScore, isIXhScore, isIXlScore, isIYWithOffsetScore, isIYhScore, isIYlScore, isIndirectionOperand, isVerbatimOperand, numericOperandScore, sdccIndexRegisterIndirectionScore, verbatimOperandScore } from "../../../utils/AssemblyUtils";
 import { formatHexadecimalByte } from "../../../utils/NumberUtils";
 import { formatTiming, parseTiming } from "../../../utils/TimingUtils";
@@ -119,19 +120,39 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 
 		// Locates instruction
 		let bestCandidate;
+		let bestCandidateIndex = 0;
 		let bestScore = 0;
-		for (const candidate of candidates) {
+		const n = candidates.length;
+		for (let i = 0; i < n; i++) {
+			const candidate = candidates[i];
 			const score = candidate.matchOperands(operands);
 			if (score === 1) {
 				// Exact match
+
+				// (for performance reasons:
+				// moves the candidate first, so frequent candidates will be attempted earlier next time
+				// and uncommon candidates will be demoted to last positions of the array)
+				moveToFirst(candidates, i); // (for performance reasons)
+
 				return candidate;
 			}
 			if (score > bestScore) {
 				bestCandidate = candidate;
+				bestCandidateIndex = i;
 				bestScore = score;
 			}
 		}
-		return (bestCandidate && (bestScore !== 0)) ? bestCandidate : undefined;
+
+		if (bestCandidate && (bestScore !== 0)) {
+			// (for performance reasons:
+			// moves the candidate first, so frequent candidates will be attempted earlier next time
+			// and uncommon candidates will be demoted to last positions of the array)
+			moveToFirst(candidates, bestCandidateIndex);
+
+			return bestCandidate;
+		}
+
+		return undefined;
 	}
 }
 
