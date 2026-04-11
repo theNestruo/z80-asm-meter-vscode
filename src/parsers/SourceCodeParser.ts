@@ -3,7 +3,8 @@ import type { SingletonRef } from "../types/References";
 import { ConfigurableSingletonRefImpl } from "../types/References";
 import { SourceCode } from "../types/SourceCode";
 import { parseNumericExpression } from "../utils/NumberUtils";
-import { isEmptyOrBlank, whitespaceCharacters } from "../utils/SourceCodeUtils";
+import { isQuote } from "../utils/SourceCodeUtils";
+import { isEmptyOrBlank, toUpperCaseCharacter, whitespaceCharacters } from "../utils/TextUtils";
 
 /**
  * The source code parser/extractor/pre-processor
@@ -139,9 +140,7 @@ class SourceCodeParserImpl implements SourceCodeParser {
 
 		const fragments: string[] = [];
 
-		// (for performance reasons)
 		const n = s.length;
-
 		for (let i = 0; i < n; i++) {
 
 			// For every part
@@ -176,7 +175,7 @@ class SourceCodeParserImpl implements SourceCodeParser {
 				}
 
 				// Whitespace?
-				if (whitespaceCharacters.includes(c)) {
+				if (whitespaceCharacters.has(c)) {
 					whitespace = whitespace < 0 ? -1 : 1;
 					continue;
 				}
@@ -188,9 +187,9 @@ class SourceCodeParserImpl implements SourceCodeParser {
 				whitespace = 0;
 
 				// Quote?
-				quoted = this.isQuote(c, currentPartBuilder);
+				quoted = isQuote(c, currentPartBuilder);
 
-				currentPartBuilder.push(c.toUpperCase());
+				currentPartBuilder.push(toUpperCaseCharacter(c));
 			}
 
 			fragments.push(currentPartBuilder.join("").trim());
@@ -204,20 +203,5 @@ class SourceCodeParserImpl implements SourceCodeParser {
 		return (c === ";") ? 1
 			: (c === "/") && (i + 1 < n) && (line[i + 1] === "/") ? 2
 				: 0;
-	}
-
-	// (precompiled RegExp for performance reasons)
-	private readonly exAfAfRegexp = /^ex af ?, ?af$/i;
-
-	private isQuote(c: string, currentPartBuilder: string[]): string | undefined {
-
-		return (c === "\"") ? c
-			// Prevents considering "'" as a quote
-			// when parsing the instruction "ex af,af'"
-			: ((c === "'")
-				&& ((currentPartBuilder.length < 8) // (too short; shortest is "ex af,af")
-					|| (currentPartBuilder.length > 10) // (too long; longest is "ex af , af")
-					|| (!this.exAfAfRegexp.test(currentPartBuilder.join(""))))) ? c
-				: undefined;
 	}
 }

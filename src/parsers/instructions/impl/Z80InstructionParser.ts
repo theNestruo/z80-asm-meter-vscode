@@ -132,7 +132,7 @@ class Z80InstructionParserImpl implements Z80InstructionParser {
 				// (for performance reasons:
 				// moves the candidate first, so frequent candidates will be attempted earlier next time
 				// and uncommon candidates will be demoted to last positions of the array)
-				moveToFirst(candidates, i); // (for performance reasons)
+				moveToFirst(candidates, i);
 
 				return candidate;
 			}

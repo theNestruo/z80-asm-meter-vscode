@@ -1,3 +1,34 @@
+// (used instead of /\s/ for performance reasons)
+export const whitespaceCharacters = new Set([
+	"\f", "\n", "\r", "\t", "\v",
+	"\u0020", "\u00a0",
+	"\u1680",
+	"\u2000", "\u2001", "\u2002", "\u2003", "\u2004", "\u2005", "\u2006", "\u2007", "\u2008", "\u2009", "\u200a",
+	"\u2028", "\u2029", "\u202f", "\u205f", "\u3000", "\ufeff"]);
+
+export function isEmptyOrBlank(s: string | undefined): boolean {
+
+	if (!s) {
+		return true;
+	}
+
+	const n = s.length;
+	for (let i = 0; i < n; i++) {
+		if (!whitespaceCharacters.has(s[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
+export function toUpperCaseCharacter(c: string): string {
+
+	// (for performance reasons)
+	return (c >= 'a' && c <= 'z')
+		? String.fromCharCode(c.charCodeAt(0) - 0x20)
+		: c;
+}
+
 export function hashCode(s: string): number {
 
 	if (!s.length) {

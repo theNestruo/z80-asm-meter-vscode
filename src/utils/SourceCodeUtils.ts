@@ -1,23 +1,4 @@
-
-// (used instead of /\s/ for performance reasons)
-export const whitespaceCharacters = "\f\n\r\t\v\u0020\u00a0\u1680"
-	+ "\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a"
-	+ "\u2028\u2029\u202f\u205f\u3000\ufeff";
-
-export function isEmptyOrBlank(s: string | undefined): boolean {
-
-	if (!s) {
-		return true;
-	}
-
-	const n = s.length;
-	for (let i = 0; i < n; i++) {
-		if (!whitespaceCharacters.includes(s[i])) {
-			return false;
-		}
-	}
-	return true;
-}
+import { toUpperCaseCharacter, whitespaceCharacters } from "./TextUtils";
 
 export function splitNormalizeQuotesAware(s: string, separator: string | undefined): string[] {
 
@@ -27,7 +8,7 @@ export function splitNormalizeQuotesAware(s: string, separator: string | undefin
 	for (let i = 0; i < n; i++) {
 
 		// For every part
-		let currentPart = "";
+		const currentPartBuilder: string[] = []; // (avoids string concatenation for performance reasons)
 		let quoted = undefined;
 		let whitespace = -1;
 		for (; i < n; i++) {
@@ -35,7 +16,7 @@ export function splitNormalizeQuotesAware(s: string, separator: string | undefin
 
 			// Inside quotes
 			if (quoted) {
-				currentPart += c;
+				currentPartBuilder.push(c);
 				if (c === quoted) {
 					quoted = undefined;
 				}
@@ -48,24 +29,24 @@ export function splitNormalizeQuotesAware(s: string, separator: string | undefin
 			}
 
 			// Whitespace?
-			if (whitespaceCharacters.includes(c)) {
+			if (whitespaceCharacters.has(c)) {
 				whitespace = whitespace < 0 ? -1 : 1;
 				continue;
 			}
 
 			// Not whitespace
 			if (whitespace > 0) {
-				currentPart += " ";
+				currentPartBuilder.push(" ");
 			}
 			whitespace = 0;
 
 			// Quote?
-			quoted = isQuote(c, currentPart);
+			quoted = isQuote(c, currentPartBuilder);
 
-			currentPart += c.toUpperCase();
+			currentPartBuilder.push(toUpperCaseCharacter(c));
 		}
 
-		fragments.push(currentPart.trim());
+		fragments.push(currentPartBuilder.join("").trim());
 	}
 
 	return fragments;
@@ -74,14 +55,14 @@ export function splitNormalizeQuotesAware(s: string, separator: string | undefin
 // (precompiled RegExp for performance reasons)
 const exAfAfRegexp = /^ex af ?, ?af$/i;
 
-export function isQuote(c: string, currentPart: string): string | undefined {
+export function isQuote(c: string, currentPartBuilder: string[]): string | undefined {
 
 	return (c === "\"") ? c
 		// Prevents considering "'" as a quote
 		// when parsing the instruction "ex af,af'"
 		: ((c === "'")
-			&& ((currentPart.length < 8) // (too short; shortest is "ex af,af")
-				|| (currentPart.length > 10) // (too long; longest is "ex af , af")
-				|| (!exAfAfRegexp.test(currentPart)))) ? c
+			&& ((currentPartBuilder.length < 8) // (too short; shortest is "ex af,af")
+				|| (currentPartBuilder.length > 10) // (too long; longest is "ex af , af")
+				|| (!exAfAfRegexp.test(currentPartBuilder.join(""))))) ? c
 			: undefined;
 }
