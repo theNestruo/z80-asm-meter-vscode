@@ -38,11 +38,15 @@ export class SyntaxConfiguration {
 					: undefined);
 	}
 
+	// (for performance reasons)
+	private readonly labelRegExpColonOptionalTrue = /(^[^\s:]+(?:[\s:]|$))/;
+	private readonly labelRegExpColonOptionalFalse = /(^\s*[^\s:]+:)/;
+
 	get labelRegExp(): RegExp {
 
 		return this.labelColonOptional
-			? /(^[^\s:]+(?:[\s:]|$))/
-			: /(^\s*[^\s:]+:)/;
+			? this.labelRegExpColonOptionalTrue
+			: this.labelRegExpColonOptionalFalse;
 	}
 
 	private get repeat(): RepeatType {
@@ -53,11 +57,15 @@ export class SyntaxConfiguration {
 					: undefined);
 	}
 
+	// (for performance reasons)
+	private readonly repeatRegExpBrackets = /^(?:\[([^\]]+)\]\s)(.+)$/;
+	private readonly repeatRegExpDot = /^(?:\.(\S+)\s)(.+)$/;
+
 	get repeatRegExp(): RegExp | undefined {
 
 		const value = this.repeat;
-		return value === "brackets" ? /^(?:\[([^\]]+)\]\s)(.+)$/
-			: value === "dot" ? /^(?:\.(\S+)\s)(.+)$/
+		return value === "brackets" ? this.repeatRegExpBrackets
+			: value === "dot" ? this.repeatRegExpDot
 				: undefined;
 	}
 
