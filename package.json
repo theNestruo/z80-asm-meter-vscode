@@ -441,7 +441,7 @@
 					"z80-asm-meter.parser.sourceCodeCacheSize": {
 						"order": 30,
 						"type": "integer",
-						"default": 1000,
+						"default": 500,
 						"description": "Size of the internal cache, in lines, to lighten the pre-processing of source code; particularly when providing inlay hints"
 					}
 				}

@@ -1,3 +1,4 @@
+import HLRU from "hashlru";
 import { config } from "../config";
 import type { SingletonRef } from "../types/References";
 import { ConfigurableSingletonRefImpl } from "../types/References";
@@ -34,6 +35,12 @@ class SourceCodeParserImpl implements SourceCodeParser {
 
 	// (for performance reasons)
 	private readonly lineSeparatorCharacter = config.syntax.lineSeparatorCharacter;
+	private readonly sourceCodeBuilderCache;
+
+	constructor() {
+		// Initializes cache
+		this.sourceCodeBuilderCache = HLRU(config.parser.sourceCodeCacheSize);
+	}
 
 	linesToSourceCode(lines: string[]): SourceCode[] {
 
@@ -53,50 +60,81 @@ class SourceCodeParserImpl implements SourceCodeParser {
 		return lines.flatMap(line => this.lineToSourceCode(line));
 	}
 
-	lineToSourceCode(originalLine: string): SourceCode[] {
+	lineToSourceCode(line: string): SourceCode[] {
 
 		// (sanity check: ignore empty line)
-		if (isEmptyOrBlank(originalLine)) {
+		if (isEmptyOrBlank(line)) {
 			return [];
 		}
+
+		// Uses the cached value
+		if (this.sourceCodeBuilderCache.has(line)) {
+			return (this.sourceCodeBuilderCache.get(line) as SourceCodeBuilder).build();
+		}
+		const builder = new SourceCodeBuilder(line, this.lineSeparatorCharacter);
+		this.sourceCodeBuilderCache.set(line, builder);
+		return builder.build();
+	}
+}
+
+class SourceCodeBuilder {
+
+	readonly label?: string;
+	readonly afterLabelPosition?: number;
+	readonly repetitions?: number;
+	readonly beforeLineCommentPosition?: number;
+	readonly afterLineCommentPosition?: number;
+	readonly lineComment?: string;
+	readonly lineFragments: string[];
+
+	constructor(originalLine: string,
+		private readonly lineSeparatorCharacter?: string) {
 
 		let line = originalLine;
 
 		// Extracts and removes label
-		const [label, afterLabelPosition, lineWithoutLabel] = this.extractLabel(line);
-		line = lineWithoutLabel;
+		[this.label, this.afterLabelPosition, line] =
+			this.extractLabel(line);
 
 		// Extracts and removes repetitions
-		const [repetitions, lineWithoutRepetitions] = this.extractRepetitions(line);
-		line = lineWithoutRepetitions;
+		[this.repetitions, line] =
+			this.extractRepetitions(line);
 
 		// Extracts and removes trailing comments, splits
 		const offset = originalLine.length - line.length;
-		const [lineComment, beforeLineCommentPosition, afterLineCommentPosition, lineFragments] =
+		[this.lineComment, this.beforeLineCommentPosition, this.afterLineCommentPosition, this.lineFragments] =
 			this.extractLineCommentAndSplitNormalizeQuotesAware(line, offset);
+	}
 
-		const n = lineFragments.length;
+	build(): SourceCode[] {
+
+		const n = this.lineFragments.length;
 		if (!n) {
 			// Attempts to preserve label, or line comment for timing hints)
-			return (label || lineComment)
-				? [new SourceCode("", label, afterLabelPosition, repetitions, beforeLineCommentPosition, afterLineCommentPosition, lineComment)]
+			return (this.label || this.lineComment)
+				? [new SourceCode("",
+					this.label, this.afterLabelPosition, this.repetitions,
+					this.beforeLineCommentPosition, this.afterLineCommentPosition, this.lineComment)]
 				: [];
 		}
 
 		// Single fragment: will contain label, repetitions and trailing comments
 		if (n === 1) {
-			return [new SourceCode(lineFragments[0],
-				label, afterLabelPosition, repetitions, beforeLineCommentPosition, afterLineCommentPosition, lineComment)];
+			return [new SourceCode(this.lineFragments[0],
+				this.label, this.afterLabelPosition, this.repetitions,
+				this.beforeLineCommentPosition, this.afterLineCommentPosition, this.lineComment)];
 		}
 
 		// Multiple fragments: first will contain label and repetitions, last will contain trailing comments
-		const sourceCodes: SourceCode[] = [new SourceCode(lineFragments[0], label, afterLabelPosition, repetitions)];
+		const sourceCodes: SourceCode[] = [new SourceCode(this.lineFragments[0], this.label, this.afterLabelPosition, this.repetitions)];
 		for (let i = 1; i < n - 1; i++) {
-			sourceCodes.push(new SourceCode(lineFragments[i]));
+			sourceCodes.push(new SourceCode(this.lineFragments[i]));
 		}
-		sourceCodes.push(new SourceCode(lineFragments[n - 1],
-			undefined, undefined, undefined, beforeLineCommentPosition, afterLineCommentPosition, lineComment));
+		sourceCodes.push(new SourceCode(this.lineFragments[n - 1],
+			undefined, undefined, undefined,
+			this.beforeLineCommentPosition, this.afterLineCommentPosition, this.lineComment));
 		return sourceCodes;
+
 	}
 
 	private extractLabel(line: string): [string | undefined, number | undefined, string] {

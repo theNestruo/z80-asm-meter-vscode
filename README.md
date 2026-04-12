@@ -250,7 +250,7 @@ These settings allow to fine-tune the source code parsing and metering.
 
 * [`z80-asm-meter.parser.sourceCodeCacheSize`](vscode://settings/z80-asm-meter.parser.sourceCodeCacheSize): Size of the internal cache, in lines, to lighten the pre-processing of source code; particularly when providing inlay hints.
 
-    Defaults to: `1000` (1000 lines).
+    Defaults to: `500` (500 lines).
 
 </details>
 
@@ -418,7 +418,7 @@ This extension can provide inlay hints (additional information about source code
 
 	The recommended value is about the size in lines of the larger subroutines.
 
-	300 by default.
+	Defaults to: `300` (300 lines).
 
 * [`z80-asm-meter.inlayHints.subroutines.position`](vscode://settings/z80-asm-meter.inlayHints.subroutines.position): The position within the line for the inlay hints of subroutines.
 
