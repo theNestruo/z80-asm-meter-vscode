@@ -410,6 +410,16 @@ This extension can provide inlay hints (additional information about source code
 
     Enabled by default.
 
+* [`z80-asm-meter.inlayHints.subroutines.startOffset`](vscode://settings/z80-asm-meter.inlayHints.subroutines.startOffset): When locating inlay hints, the number of lines before the visible range that will be inspected for subroutines and entry points.
+
+	Decreasing this value will improve performance of the inlay hint provider when viewing large assembly files, but can lead to large subroutines disappearing from exit point metering inlay hints, as their entry point is too far from the exit point.
+
+	Increasing this value will provide more complete exit point metering inlay hints, but can cause higher CPU usage of the inlay hint provider when viewing large assembly files.
+
+	The recommended value is about the size in lines of the larger subroutines.
+
+	300 by default.
+
 * [`z80-asm-meter.inlayHints.subroutines.position`](vscode://settings/z80-asm-meter.inlayHints.subroutines.position): The position within the line for the inlay hints of subroutines.
 
     * `lineStart`: at the beginning of the line.

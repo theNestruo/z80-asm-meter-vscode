@@ -780,6 +780,12 @@
 						"default": true,
 						"description": "Enables detection and metering of subroutines as inlay hints"
 					},
+					"z80-asm-meter.inlayHints.subroutines.startOffset": {
+						"order": 15,
+						"type": "number",
+						"default": 300,
+						"description": "When locating inlay hints, the number of lines before the visible range that will be inspected for subroutines and entry points"
+					},
 					"z80-asm-meter.inlayHints.subroutines.position": {
 						"order": 20,
 						"type": "string",

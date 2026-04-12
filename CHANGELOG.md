@@ -3,7 +3,7 @@
 ## 6.7.0 (pre-release)
 
 - Simplified README.md
-- Performance improvements
+- Performance improvements, particularly with inlay hints enabled when opening large assembly files
 
 ## 6.6.0
 

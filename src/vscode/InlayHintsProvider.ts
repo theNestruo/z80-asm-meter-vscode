@@ -99,23 +99,24 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider, vscode.Dis
 class InlayHintCandidatesLocator {
 
 	// (for performance reasons)
-	private readonly conditionalExitPointMnemonics: string[] = [];
+	private readonly subroutinesStartOffset = config.inlayHints.subroutinesStartOffset;
+	private readonly conditionalExitPointMnemonics: Set<string> = new Set<string>();
 	private readonly unlabelledSubroutines = config.inlayHints.unlabelledSubroutines;
 	private readonly fallthroughSubroutines = config.inlayHints.fallthroughSubroutines;
 
 	constructor() {
 
 		if (config.inlayHints.exitPointRet) {
-			this.conditionalExitPointMnemonics.push("RET");
+			this.conditionalExitPointMnemonics.add("RET");
 		}
 		if (config.inlayHints.exitPointJp) {
-			this.conditionalExitPointMnemonics.push("JP");
+			this.conditionalExitPointMnemonics.add("JP");
 		}
 		if (config.inlayHints.exitPointJr) {
-			this.conditionalExitPointMnemonics.push("JR");
+			this.conditionalExitPointMnemonics.add("JR");
 		}
 		if (config.inlayHints.exitPointDjnz) {
-			this.conditionalExitPointMnemonics.push("DJNZ");
+			this.conditionalExitPointMnemonics.add("DJNZ");
 		}
 	}
 
@@ -125,7 +126,9 @@ class InlayHintCandidatesLocator {
 
 		let ongoingCandidates: OngoingInlayHintCandidate[] = [];
 		let didContainCode = false;
-		for (let i = 0, n = document.lineCount; i < n; i++) {
+		const startLine = Math.max(0, range.start.line - this.subroutinesStartOffset);
+		let ignoreUnlabelledCode = startLine !== 0;
+		for (let i = startLine, n = document.lineCount; i < n; i++) {
 			const line = document.lineAt(i);
 
 			// Stops looking for candidates after the range
@@ -164,7 +167,7 @@ class InlayHintCandidatesLocator {
 			}
 
 			// Creates a new candidate on unlabelled code
-			if (!didContainCode && !ongoingCandidates.length && this.unlabelledSubroutines) {
+			if (!didContainCode && !ongoingCandidates.length && this.unlabelledSubroutines && !ignoreUnlabelledCode) {
 				ongoingCandidates = [new OngoingInlayHintCandidate(line, sourceCodes)];
 			}
 
@@ -182,6 +185,7 @@ class InlayHintCandidatesLocator {
 				// (restarts subroutine lookup)
 				ongoingCandidates = [];
 				didContainCode = false;
+				ignoreUnlabelledCode = false;
 
 				// Checks subroutine conditional exit point (if not before the range)
 			} else if (!isBeforeRange && this.isValidConditionalExitPoint(metered.instruction)) {
@@ -234,7 +238,7 @@ class InlayHintCandidatesLocator {
 	private isValidConditionalExitPoint(instruction: string): boolean {
 
 		const mnemonic = extractMnemonicOf(instruction);
-		if (!this.conditionalExitPointMnemonics.includes(mnemonic)) {
+		if (!this.conditionalExitPointMnemonics.has(mnemonic)) {
 			return false;
 		}
 

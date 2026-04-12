@@ -12,6 +12,10 @@ export class InlayHintsConfiguration {
 		return configurationReader.read("inlayHints.enabled");
 	}
 
+	get subroutinesStartOffset(): number {
+		return configurationReader.read("inlayHints.subroutines.startOffset");
+	}
+
 	get subroutinesPosition(): InlayHintPositionType {
 		return configurationReader.read("inlayHints.subroutines.position");
 	}
