@@ -39,7 +39,7 @@ jobs:
         preRelease: true
 
     - name: Draft a GitHub Pre-release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         draft: true
         prerelease: true
