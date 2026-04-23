@@ -43,7 +43,7 @@ class DefaultConfigurationReader implements ConfigurationReader {
 			?? info?.globalLanguageValue
 			?? info?.workspaceLanguageValue
 			?? info?.workspaceFolderLanguageValue;
-		return isSet ? config.get(section) as T : undefined;
+		return isSet ? config.get(section) : undefined;
 	}
 
 	dispose(): void {
