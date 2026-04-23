@@ -16,6 +16,9 @@ updates:
       patterns:
         - "*" # A wildcard that matches all dependencies in the package
               # ecosystem. Note: using "*" may open a large pull request
+  # Ignore @types/vscode due engines:vscode
+  ignore:
+    - dependency-name: "@types/vscode"
   # Check for updates once a week, with a cooldown period of 7 days
   schedule:
     interval: "weekly"
