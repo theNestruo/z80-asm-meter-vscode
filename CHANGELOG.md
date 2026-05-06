@@ -1,6 +1,6 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
-## 6.7.0 (pre-release)
+## 6.8.0
 
 - Simplified README.md
 - Performance improvements, particularly with inlay hints enabled when opening large assembly files
