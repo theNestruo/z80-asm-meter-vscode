@@ -29,25 +29,31 @@ class AssemblyDirectiveParser implements InstructionParser {
 		const instruction = s.instruction;
 
 		// Locates defb/defw/defs directives
-		const mnemonic = extractMnemonicOf(instruction);
-		if (["DEFB", ".DEFB", "DB", ".DB", "DEFM", ".DEFM", "DM", ".DM"].includes(mnemonic)) {
-			return this.parseDefbDirective(instruction);
-		}
-		if (["DEFW", ".DEFW", "DW", ".DW"].includes(mnemonic)) {
-			return this.parseDefwDirective(instruction);
-		}
-		if (["DEFS", ".DEFS", "DS", ".DS"].includes(mnemonic)) {
-			return this.parseDefsDirective(instruction);
-		}
-		if (["RB", ".RB"].includes(mnemonic)) {
-			return this.parseRbDirective(instruction);
-		}
-		if (["RW", ".RW"].includes(mnemonic)) {
-			return this.parseRwDirective(instruction);
-		}
+		switch (extractMnemonicOf(instruction)) {
+			case "DEFB": case ".DEFB":
+			case "DB": case ".DB":
+			case "DEFM": case ".DEFM":
+			case "DM": case ".DM":
+				return this.parseDefbDirective(instruction);
 
-		// (unknown mnemonic/directive)
-		return undefined;
+			case "DEFW": case ".DEFW":
+			case "DW": case ".DW":
+				return this.parseDefwDirective(instruction);
+
+			case "DEFS": case ".DEFS":
+			case "DS": case ".DS":
+				return this.parseDefsDirective(instruction);
+
+			case "RB": case ".RB":
+				return this.parseRbDirective(instruction);
+
+			case "RW": case ".RW":
+				return this.parseRwDirective(instruction);
+
+			default:
+				// (unknown mnemonic/directive)
+				return undefined;
+		}
 	}
 
 	private parseDefbDirective(instruction: string): AssemblyDirective | undefined {
@@ -66,7 +72,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 				&& operand.endsWith(operand[0])) {
 				// String
 				const string = operand.substring(1, operand.length - 1);
-				for (let i = 0; i < string.length; i++) {
+				for (let i = 0, n = string.length; i < n; i++) {
 					bytes.push(formatHexadecimalByte(string.charCodeAt(i)));
 				}
 			} else {
@@ -96,9 +102,9 @@ class AssemblyDirectiveParser implements InstructionParser {
 		for (const operand of operands) {
 			const value = parseNumericExpression(operand);
 			if (value !== undefined) {
-				bytes.push(formatHexadecimalByte(value & 0xff)
-					+ " "
-					+ formatHexadecimalByte((value & 0xff00) >> 8));
+				const lowByte = formatHexadecimalByte(value & 0xff);
+				const highByte = formatHexadecimalByte((value & 0xff00) >> 8);
+				bytes.push(`${lowByte} ${highByte}`);
 			} else {
 				bytes.push("n n");
 			}
@@ -112,9 +118,9 @@ class AssemblyDirectiveParser implements InstructionParser {
 		return new AssemblyDirective("DEFW", bytes, bytes.length * 2);
 	}
 
-	private parseDefsDirective(pInstruction: string): Meterable | undefined {
+	private parseDefsDirective(instruction: string): Meterable | undefined {
 
-		const operands = extractOperandsOf(pInstruction);
+		const operands = extractOperandsOf(instruction);
 		if ((operands.length < 1) || (operands.length > 2)) {
 			return undefined;
 		}
@@ -139,7 +145,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 
 		// Returns as directive
 		const byte = value !== undefined ? formatHexadecimalByte(value) : "n";
-		const bytes = Array.from<string>({ length: count }).fill(byte);
+		const bytes = this.nCopies(byte, count);
 		return new AssemblyDirective("DEFS", bytes, count);
 	}
 
@@ -157,7 +163,7 @@ class AssemblyDirectiveParser implements InstructionParser {
 		}
 
 		// Returns as directive
-		const bytes = Array.from<string>({ length: count }).fill("n");
+		const bytes = this.nCopies("n", count);
 		return new AssemblyDirective("RB", bytes, count);
 	}
 
@@ -175,8 +181,12 @@ class AssemblyDirectiveParser implements InstructionParser {
 		}
 
 		// Returns as directive
-		const words = Array.from<string>({ length: count }).fill("nn");
+		const words = this.nCopies("nn", count);
 		return new AssemblyDirective("RW", words, count * 2);
+	}
+
+	private nCopies(value: string, count: number): string[] {
+		return Array.from<string>({ length: count }).fill(value);
 	}
 }
 

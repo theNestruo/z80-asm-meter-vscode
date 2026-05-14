@@ -1,5 +1,11 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 6.8.1
+
+- Fixes repetitions being ignored
+- Performance improvements
+- `engines.vscode` reverted to `^1.80.0`. Was already set to `^1.109.0` to allow users (like me) to skip latest versions due several reasons (including lagginess, poor performance, and unwanted features), but setting this to a very old release seems a better idea.
+
 ## 6.8.0
 
 - Simplified README.md

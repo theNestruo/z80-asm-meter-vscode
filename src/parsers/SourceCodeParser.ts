@@ -48,16 +48,14 @@ class SourceCodeParserImpl implements SourceCodeParser {
 		if (!lines.length) {
 			return [];
 		}
-		if (!lines[lines.length - 1].trim().length) {
-			// (removes possible spurious empty line at the end of the selection)
-			lines.pop();
-			if (!lines.length) {
-				return [];
-			}
-		}
+
+		// (removes possible spurious empty line at the end of the selection)
+		const trimmedLines = (!lines[lines.length - 1].trim().length)
+			? lines.slice(0, -1)
+			: lines;
 
 		// Splits the lines and extracts repetition counter and trailing comments
-		return lines.flatMap(line => this.lineToSourceCode(line));
+		return trimmedLines.flatMap(line => this.lineToSourceCode(line));
 	}
 
 	lineToSourceCode(line: string): SourceCode[] {
@@ -158,7 +156,7 @@ class SourceCodeBuilder {
 
 	private extractRepetitions(line: string): [number, string] {
 
-		// (sanity check; also: perfromance reasons on empty lines)
+		// (sanity check; also: performance reasons on empty lines)
 		if (isEmptyOrBlank(line)) {
 			return [1, line];
 		}
@@ -171,20 +169,22 @@ class SourceCodeBuilder {
 
 		// Extracts and removes repetitions
 		const repetitions = parseNumericExpression(matches[1]) ?? 1;
-		return [Math.min(1, repetitions), matches[2].trimStart()];
+		return [Math.max(1, repetitions), matches[2].trimStart()];
 	}
 
 	private extractLineCommentAndSplitNormalizeQuotesAware(s: string, offset: number | undefined): [string | undefined, number | undefined, number | undefined, string[]] {
 
 		const fragments: string[] = [];
 
+		// Each outer loop iteration produces one part, advancing i just beyond the separator
 		const n = s.length;
 		for (let i = 0; i < n; i++) {
 
-			// For every part
+			// For every part, each inner loop iteration scans characters until the part is completed
+			// (i.e.: separator, line comment, or end of line)
 			const currentPartBuilder: string[] = []; // (avoids string concatenation for performance reasons)
 			let quoted = undefined;
-			let whitespace = -1;
+			let whitespace = -1; // (-1: to be trimmed, 0: already printed, 1: to be printed)
 			for (; i < n; i++) {
 				const c = s[i];
 
@@ -214,15 +214,15 @@ class SourceCodeBuilder {
 
 				// Whitespace?
 				if (whitespaceCharacters.has(c)) {
-					whitespace = whitespace < 0 ? -1 : 1;
+					whitespace = Math.sign(whitespace); // (either keeps -1 (to be trimmed) or sets 1 (to be printed))
 					continue;
 				}
 
 				// Not whitespace
 				if (whitespace > 0) {
-					currentPartBuilder.push(" ");
+					currentPartBuilder.push(" "); // (consumes whitespace to be printed)
 				}
-				whitespace = 0;
+				whitespace = 0; // (next whitespace will not be trimmed)
 
 				// Quote?
 				quoted = isQuote(c, currentPartBuilder);
