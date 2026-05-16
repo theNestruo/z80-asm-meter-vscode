@@ -214,7 +214,7 @@ class SourceCodeBuilder {
 
 				// Whitespace?
 				if (whitespaceCharacters.has(c)) {
-					whitespace = Math.sign(whitespace); // (either keeps -1 (to be trimmed) or sets 1 (to be printed))
+					whitespace = whitespace < 0 ? -1 : 1; // (either keeps -1 (to be trimmed) or sets 1 (to be printed))
 					continue;
 				}
 

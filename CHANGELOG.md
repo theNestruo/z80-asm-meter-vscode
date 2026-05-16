@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 6.8.2
+
+- Fixes parsing, broken in 6.8.1 (sorry!)
+
 ## 6.8.1
 
 - Fixes repetitions being ignored
