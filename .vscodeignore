@@ -1,17 +1,17 @@
 .vscodeignore
 .gitignore
 
-.vscode
-.github
+.vscode/**
+.github/**
 
-src
+src/**
 media/**/*.original.png
 esbuild.js
 eslint.config.mjs
 package-lock.json
 tsconfig.json
 
-node_modules
+node_modules/**
 dist/**/*.map
 *.cpuprofile
 *.vsix
