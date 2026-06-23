@@ -949,11 +949,11 @@
 	},
 	"devDependencies": {
 		"typescript": "^6.0.2",
-		"@types/node": "^25.9.2",
+		"@types/node": "^25.9.3",
 		"@types/vscode": "^1.80.0",
 		"esbuild": "^0.28.1",
 		"@eslint/js": "^10.0.0",
-		"typescript-eslint": "^8.61.0",
+		"typescript-eslint": "^8.61.1",
 		"@typescript-eslint/eslint-plugin": "^8.56.0",
 		"@typescript-eslint/parser": "^8.56.0"
 	},
