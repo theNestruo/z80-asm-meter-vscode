@@ -949,7 +949,7 @@
 	},
 	"devDependencies": {
 		"typescript": "^6.0.2",
-		"@types/node": "^25.9.3",
+		"@types/node": "^26.0.0",
 		"@types/vscode": "^1.80.0",
 		"esbuild": "^0.28.1",
 		"@eslint/js": "^10.0.0",
