@@ -37,7 +37,7 @@ jobs:
         extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
 
     - name: Draft a GitHub Release
-      uses: softprops/action-gh-release@v3.0.1
+      uses: softprops/action-gh-release@v3.0.2
       with:
         draft: true
         files: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
