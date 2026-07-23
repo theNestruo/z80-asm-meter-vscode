@@ -948,7 +948,7 @@
 		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json"
 	},
 	"devDependencies": {
-		"typescript": "^7.0.2",
+		"typescript": "^6.0.3",
 		"@types/node": "^26.1.0",
 		"@types/vscode": "^1.80.0",
 		"esbuild": "^0.28.1",
