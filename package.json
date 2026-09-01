@@ -84,7 +84,7 @@
 							"null"
 						],
 						"default": [
-							"asm-collection",
+							"asm-z80-sjasmplus",
 							"pasmo",
 							"z80",
 							"z80-asm",
