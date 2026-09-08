@@ -37,6 +37,7 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 * [MSX Z80](https://marketplace.visualstudio.com/items?itemName=sharksym.asm-msx) by Yeoungman Seo
 * [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) by BouKiChi
 * [DeZog - Z80 Debugger](https://marketplace.visualstudio.com/items?itemName=maziac.dezog) by Maziac
+* [Zeus Z80 Assembly](https://marketplace.visualstudio.com/items?itemName=jia3ep.zeus-z80-asm) by Kirill V. Lyadvinsky
 * (and probably others; please check the [`z80-asm-meter.languageIds` setting](#main-settings))
 
 
@@ -44,7 +45,15 @@ Therefore, it is recommended to install this extension alongside other Z80-relat
 
 * [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds): Additional language IDs for which the extension is enabled (such as "c", to meter in-lined assembly).
 
-    Defaults to: `["asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"]`.
+    Defaults to: `["asm-collection", "asm-z80-sjasmplus", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm"]`.
+
+	Notes:
+
+	- `"asm-collection"` (deprecated) and `"asm-z80-sjasmplus"` language IDs are provided by [DeZog - Z80 Debugger](https://marketplace.visualstudio.com/items?itemName=maziac.dezog) extension by Maziac
+	- `"pasmo"` language ID is provided by [pasmo](https://marketplace.visualstudio.com/items?itemName=boukichi.pasmo) extension by BouKiChi
+	- `"z80-macroasm"` language ID is provided by [Z80 Macro-Assembler](https://marketplace.visualstudio.com/items?itemName=mborik.z80-macroasm) extension by mborik
+	- `"z80-asm"` language ID is provided by [Z80 Assembly](https://marketplace.visualstudio.com/items?itemName=Imanolea.z80-asm) extension by Imanolea
+	- `"zeus-asm"` language ID is provided by [Zeus Z80 Assembly](https://marketplace.visualstudio.com/items?itemName=jia3ep.zeus-z80-asm) extension by Kirill V. Lyadvinsky
 
 * [`z80-asm-meter.platform`](vscode://settings/z80-asm-meter.platform): Controls the instruction set to use and the timing information to display:
 
@@ -711,7 +720,7 @@ The [`z80-asm-meter.languageIds`](vscode://settings/z80-asm-meter.languageIds) s
 
 ```json
 {
-	"z80-asm-meter.languageIds": [ "asm-collection", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
+	"z80-asm-meter.languageIds": [ "asm-collection", "asm-z80-sjasmplus", "pasmo", "z80", "z80-asm", "z80-macroasm", "zeus-asm", "c" ]
 }
 ```
 
@@ -736,7 +745,7 @@ The shortest way to disable these new features is:
 
 Coded by [**theNestruo**](https://github.com/theNestruo) (Néstor Sancho).
 * Inspired by Rafael Jannone [BiT](http://msx.jannone.org/bit/).
-* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide), [**Kris Borowinski**](https://github.com/kborowinski), [**alexanderk23**](https://github.com/alexanderk23), [**RenaudLottiaux**](https://github.com/RenaudLottiaux)
+* Contributors: [**IIIvan37**](https://github.com/IIIvan37), [**hlide**](https://github.com/hlide), [**Kris Borowinski**](https://github.com/kborowinski), [**alexanderk23**](https://github.com/alexanderk23), [**RenaudLottiaux**](https://github.com/RenaudLottiaux), [**maziac**](https://github.com/maziac)
 * "Least Recently Used" (LRU) cache implementation: [hashlru](https://www.npmjs.com/package/hashlru) by [Dominic Tarr](https://github.com/dominictarr)
 
 Data sources:
