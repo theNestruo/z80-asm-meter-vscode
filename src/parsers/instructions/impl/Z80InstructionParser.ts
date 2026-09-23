@@ -582,7 +582,9 @@ export class Z80Instruction implements Meterable {
 			// there is no proper way to discriminate: n, nn;
 			// but uses a "best effort" to discard registers)
 			default:
-				return isAnyRegister(candidateIndirection) ? 0 : 0.75;
+				// (higher score than anySymbolOperandScore
+				// to favor LD A, (nn) over LD A, nn)
+				return isAnyRegister(candidateIndirection) ? 0 : 0.85;
 		}
 	}
 }
