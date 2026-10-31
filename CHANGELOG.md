@@ -1,5 +1,9 @@
 <!-- - Switched to [recommended](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) _`major.EVEN_NUMBER.patch` for release versions and `major.ODD_NUMBER.patch` for pre-release versions_ -->
 
+## 6.11.0
+
+- Maintenance release
+
 ## 6.10.1
 
 - Fixes `LD A, (nn)` and similar instructions being misdetected as `LD A, nn`
